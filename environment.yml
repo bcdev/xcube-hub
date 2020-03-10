@@ -8,6 +8,7 @@ dependencies:
   - oauthlib
   - pip
   - click
+  - flask
 
   # Inspection
   - jupyterlab
