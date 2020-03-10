@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 # The MIT License (MIT)
-# Copyright (c) 2020 by Brockmann Consult GmbH
+# Copyright (c) 2020 by the xcube development team and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,28 +19,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import flask
+from xcube_gen.process import process
 
-from setuptools import setup, find_packages
 
-requirements = [
-    'kubernetes', 'click'  #
-    # Deps from ./environment.yml.
-    #
-]
+def new_app():
+    """Create the service app."""
+    app = flask.Flask('xcube-genserv')
 
-packages = find_packages(exclude=["test", "test.*"])
+    @app.route('/process', methods=['POST'])
+    def _process():
+        return process(flask.request.json)
 
-# Same effect as "from cate import version", but avoids importing cate:
-version = None
-with open('xcube_gen/version.py') as f:
-    exec(f.read())
+    return app
 
-setup(
-    name="xcube_gen",
-    version=version,
-    description='An xcube plug-in that implements a data cube generation service',
-    license='MIT',
-    author='xcube Development Team',
-    packages=packages,
-    install_requires=requirements,
-)
+
+def start(host: str = None,
+          port: int = None,
+          debug: bool = False):
+    """
+    Start the service.
+
+    :param host: The hostname to listen on. Set this to ``'0.0.0.0'`` to
+        have the server available externally as well. Defaults to ``'127.0.0.1'``.
+    :param port: The port to listen on. Defaults to ``5000``.
+    :param debug: If given, enable or disable debug mode.
+    """
+    new_app().run(host=host, port=port, debug=debug)

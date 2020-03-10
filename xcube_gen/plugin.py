@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 # The MIT License (MIT)
-# Copyright (c) 2020 by Brockmann Consult GmbH
+# Copyright (c) 2020 by the xcube development team and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,28 +19,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from xcube.constants import EXTENSION_POINT_CLI_COMMANDS
+from xcube.util import extension
 
-from setuptools import setup, find_packages
 
-requirements = [
-    'kubernetes', 'click'  #
-    # Deps from ./environment.yml.
-    #
-]
-
-packages = find_packages(exclude=["test", "test.*"])
-
-# Same effect as "from cate import version", but avoids importing cate:
-version = None
-with open('xcube_gen/version.py') as f:
-    exec(f.read())
-
-setup(
-    name="xcube_gen",
-    version=version,
-    description='An xcube plug-in that implements a data cube generation service',
-    license='MIT',
-    author='xcube Development Team',
-    packages=packages,
-    install_requires=requirements,
-)
+def init_plugin(ext_registry: extension.ExtensionRegistry):
+    """xcube gen Service extensions"""
+    ext_registry.add_extension(loader=extension.import_component('xcube_gen.cli:cli'),
+                               point=EXTENSION_POINT_CLI_COMMANDS,
+                               name='gen_cli')

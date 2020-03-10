@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2019 by the xcube development team and contributors
+# Copyright (c) 2020 by the xcube development team and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,13 +19,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
 import click
+from typing import Optional
+
 from kubernetes import config, client
 
 from xcube_gen.version import version
 
 
+@click.command(name="start")
+@click.option('--address', '-a',
+              help="The host address to listen on. "
+                   "Set this to '0.0.0.0' to have the server available externally as well. "
+                   "Defaults to  '127.0.0.1'.")
+@click.option('--port', '-p', type=int,
+              help="The port number to listen on. Defaults to 5000.")
+@click.option('--debug', is_flag=True, help='Output extra debugging information.')
+def start(address: Optional[str],
+          port: Optional[int],
+          debug: bool):
+    """
+    Start the service.
 def create_job_object():
     # Configureate Pod template container
     container = client.V1Container(
@@ -53,9 +67,16 @@ def create_job_object():
 @click.command(name="info")
 def info():
     """
-    An xcube plug-in that implements a data cube generation service.
+    from xcube_gen.service import start
+    start(host=address, port=port, debug=debug)
+
+
+@click.command(name="stop")
+def stop():
     """
-    print(version)
+    Stop the service.
+    """
+    print('Sorry, not implemented yet.')
 
 
 @click.command(name="launch-job")
@@ -73,14 +94,16 @@ def launch_job():
 
 
 # noinspection PyShadowingBuiltins,PyUnusedLocal
-@click.group(name="gen")
+@click.group(name="genserv")
 @click.version_option(version)
 def cli():
     """
-    Cube generation tools for xcube.
+    xcube data cube generation service.
     """
 
 
+cli.add_command(start)
+cli.add_command(stop)
 cli.add_command(info)
 cli.add_command(launch_job)
 
