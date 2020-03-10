@@ -39,7 +39,7 @@ def info():
 @click.version_option(version)
 def cli():
     """
-    SentinelHub tools for xcube.
+    Cube generation tools for xcube.
     """
 
 
