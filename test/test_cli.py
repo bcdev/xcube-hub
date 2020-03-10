@@ -10,7 +10,7 @@ class CliTestCase(unittest.TestCase):
         result = runner.invoke(info)
 
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual("0.3.0.dev0\n", result.output)
+        self.assertEqual(result.output, "0.3.0.dev0\n")
 
 
 if __name__ == '__main__':
