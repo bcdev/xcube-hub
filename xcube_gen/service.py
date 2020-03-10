@@ -19,46 +19,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import click
-from typing import Optional
-
-from xcube_gen.version import version
+import flask
+from xcube_gen.process import process
 
 
-@click.command(name="start")
-@click.option('--address', '-a',
-              help="The host address to listen on. "
-                   "Set this to '0.0.0.0' to have the server available externally as well. "
-                   "Defaults to  '127.0.0.1'.")
-@click.option('--port', '-p', type=int,
-              help="The port number to listen on. Defaults to 5000.")
-@click.option('--debug', is_flag=True, help='Output extra debugging information.')
-def start(address: Optional[str],
-          port: Optional[int],
-          debug: bool):
+def new_app():
+    """Create the service app."""
+    app = flask.Flask('xcube-genserv')
+
+    @app.route('/process', methods=['POST'])
+    def _process():
+        return process(flask.request.json)
+
+    return app
+
+
+def start(host: str = None,
+          port: int = None,
+          debug: bool = False):
     """
     Start the service.
+
+    :param host: The hostname to listen on. Set this to ``'0.0.0.0'`` to
+        have the server available externally as well. Defaults to ``'127.0.0.1'``.
+    :param port: The port to listen on. Defaults to ``5000``.
+    :param debug: If given, enable or disable debug mode.
     """
-    from xcube_gen.service import start
-    start(host=address, port=port, debug=debug)
-
-
-@click.command(name="stop")
-def stop():
-    """
-    Stop the service.
-    """
-    print('Sorry, not implemented yet.')
-
-
-# noinspection PyShadowingBuiltins,PyUnusedLocal
-@click.group(name="genserv")
-@click.version_option(version)
-def cli():
-    """
-    xcube data cube generation service.
-    """
-
-
-cli.add_command(start)
-cli.add_command(stop)
+    new_app().run(host=host, port=port, debug=debug)
