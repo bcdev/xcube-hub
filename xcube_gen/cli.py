@@ -27,9 +27,7 @@ from xcube_gen.version import version
 @click.command(name="info")
 def info():
     """
-    Print SentinelHub metadata info. If DATASETS (names of datasets) are not present,
-    the list of available dataset names are returned. Otherwise,
-    the the variables of the given datasets are returned.
+    An xcube plug-in that implements a data cube generation service.
     """
     print(version)
 
