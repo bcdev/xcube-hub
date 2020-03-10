@@ -17,9 +17,13 @@ python setup.py develop
 
 ## Tools
 
-Check available xcube CLI extensions added by `xcube_sh` plugin:
+Check xcube CLI extension added by `xcube_gen` plugin:
 
-    $ xcube gen --help
+    $ xcube --help
+    
+`genserv` should now be in the list.    
 
-### Generate a Cube: `xcube gen` 
+Start the service: 
+
+    $ xcube genserv start 
 
