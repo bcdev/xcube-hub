@@ -27,7 +27,7 @@ def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
 
-    @app.route('/process', methods=['POST'])
+    @app.route('/process', methods=['GET'])
     def _process():
         return process(flask.request.json)
 

@@ -18,11 +18,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import sys
 
 import click
 from typing import Optional
-
-from kubernetes import config, client
 
 from xcube_gen.version import version
 
@@ -79,20 +78,6 @@ def stop():
     print('Sorry, not implemented yet.')
 
 
-@click.command(name="launch-job")
-def launch_job():
-    """
-    An xcube plug-in that implements a data cube generation service.
-    """
-    config.load_kube_config()
-    batch_v1 = client.BatchV1Api()
-    job = create_job_object()
-    api_response = batch_v1.create_namespaced_job(
-        body=job,
-        namespace="default")
-    print("Job created. status='%s'" % str(api_response.status))
-
-
 # noinspection PyShadowingBuiltins,PyUnusedLocal
 @click.group(name="genserv")
 @click.version_option(version)
@@ -104,8 +89,6 @@ def cli():
 
 cli.add_command(start)
 cli.add_command(stop)
-cli.add_command(info)
-cli.add_command(launch_job)
 
 
 def main(args=None):

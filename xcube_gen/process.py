@@ -21,7 +21,21 @@
 
 from typing import Any, Dict
 
+from xcube_gen.batch import Batch
+
+JOB_CT = 9
+
 
 def process(request: Dict[str, Any]) -> Dict[str, Any]:
-    # TODO: do it
-    return request
+    global JOB_CT
+    print(request)
+    batch = Batch()
+    try:
+        job_status = batch.create_job(f"xcubegen{JOB_CT}")
+        result = {'status': str(job_status)}
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    JOB_CT += 1
+
+    return result
