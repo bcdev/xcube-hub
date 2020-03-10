@@ -25,7 +25,7 @@
 from setuptools import setup, find_packages
 
 requirements = [
-    #
+    'kubernetes', 'click'  #
     # Deps from ./environment.yml.
     #
 ]

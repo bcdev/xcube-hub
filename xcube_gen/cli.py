@@ -21,7 +21,33 @@
 
 import sys
 import click
+from kubernetes import config, client
+
 from xcube_gen.version import version
+
+
+def create_job_object():
+    # Configureate Pod template container
+    container = client.V1Container(
+        name="xcube",
+        image="quay.io/bcdev/xcube-python-deps:0.3.0",
+        command=["bash", "-c", "source activate xcube && xcube"])
+    # Create and configurate a spec section
+    template = client.V1PodTemplateSpec(
+        metadata=client.V1ObjectMeta(labels={"app": "xcube"}),
+        spec=client.V1PodSpec(restart_policy="Never", containers=[container]))
+    # Create the specification of deployment
+    spec = client.V1JobSpec(
+        template=template,
+        backoff_limit=4)
+    # Instantiate the job object
+    job = client.V1Job(
+        api_version="batch/v1",
+        kind="Job",
+        metadata=client.V1ObjectMeta(name='xcub3e'),
+        spec=spec)
+
+    return job
 
 
 @click.command(name="info")
@@ -30,6 +56,20 @@ def info():
     An xcube plug-in that implements a data cube generation service.
     """
     print(version)
+
+
+@click.command(name="launch-job")
+def launch_job():
+    """
+    An xcube plug-in that implements a data cube generation service.
+    """
+    config.load_kube_config()
+    batch_v1 = client.BatchV1Api()
+    job = create_job_object()
+    api_response = batch_v1.create_namespaced_job(
+        body=job,
+        namespace="default")
+    print("Job created. status='%s'" % str(api_response.status))
 
 
 # noinspection PyShadowingBuiltins,PyUnusedLocal
@@ -42,6 +82,7 @@ def cli():
 
 
 cli.add_command(info)
+cli.add_command(launch_job)
 
 
 def main(args=None):
