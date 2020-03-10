@@ -1,0 +1,22 @@
+name: xcube-gen
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Required
+  - xcube>=0.3.0
+  - oauthlib
+  - pip
+  - click
+
+  # Inspection
+  - jupyterlab
+
+  - pip:
+      # Required
+      - requests_oauthlib
+
+  # testing
+  - flake8
+  - pytest
+  - pytest-cov
