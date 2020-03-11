@@ -18,4 +18,10 @@ RUN source activate xcube && conda env update -n xcube
 ADD --chown=1000:1000 ./ .
 RUN source activate xcube && python setup.py install
 
+RUN git clone https://github.com/dcs4cop/xcube-sh /home/${XCUBE_USER_NAME}/xcube-sh
+WORKDIR /home/${XCUBE_USER_NAME}/xcube-sh
+RUN source activate xcube && python setup.py install
+
+WORKDIR /home/${XCUBE_USER_NAME}
+
 ENTRYPOINT ["bash", "-c"]
