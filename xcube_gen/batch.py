@@ -10,8 +10,6 @@ class Batch:
         self._namespace = namespace
         self._image = image
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube"]
-        self._api_instance = client.BatchV1Api()
-        self._jobs = dict()
 
     def create_job_object(self, job_name: str):
         # Configureate Pod template container
@@ -38,25 +36,29 @@ class Batch:
 
     def create_job(self, job_name: str):
         job = self.create_job_object(job_name)
-        api_response = self._api_instance.create_namespaced_job(
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.create_namespaced_job(
             body=job,
             namespace=self._namespace)
-        self._jobs[job_name] = job
+
         print("Job created. status='%s'" % str(api_response.status))
         return {key: getattr(api_response.status, key) for key in api_response.status.attribute_map}
 
     def delete_job(self, job_name: str):
-        api_response = self._api_instance.delete_namespaced_job(
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.delete_namespaced_job(
             name=job_name,
             namespace="default",
             body=client.V1DeleteOptions(
                 propagation_policy='Foreground',
                 grace_period_seconds=5))
+
         print("Job deleted. status='%s'" % str(api_response.status))
         return api_response.status
 
     def list_jobs(self):
-        api_response = self._api_instance.list_namespaced_job(namespace=self._namespace)
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.list_namespaced_job(namespace=self._namespace)
         pprint(api_response)
         jobs = api_response.items
         res = [{'name': job.metadata.name} for job in jobs]

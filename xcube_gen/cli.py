@@ -39,33 +39,8 @@ def start(address: Optional[str],
           debug: bool):
     """
     Start the service.
-def create_job_object():
-    # Configureate Pod template container
-    container = client.V1Container(
-        name="xcube",
-        image="quay.io/bcdev/xcube-python-deps:0.3.0",
-        command=["bash", "-c", "source activate xcube && xcube"])
-    # Create and configurate a spec section
-    template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": "xcube"}),
-        spec=client.V1PodSpec(restart_policy="Never", containers=[container]))
-    # Create the specification of deployment
-    spec = client.V1JobSpec(
-        template=template,
-        backoff_limit=4)
-    # Instantiate the job object
-    job = client.V1Job(
-        api_version="batch/v1",
-        kind="Job",
-        metadata=client.V1ObjectMeta(name='xcub3e'),
-        spec=spec)
-
-    return job
-
-
-@click.command(name="info")
-def info():
     """
+
     from xcube_gen.service import start
     start(host=address, port=port, debug=debug)
 
@@ -105,6 +80,3 @@ def main(args=None):
         print(f'Error: {e}')
     sys.exit(exit_code)
 
-
-if __name__ == '__main__':
-    main()

@@ -20,20 +20,20 @@
 # SOFTWARE.
 
 import flask
-from xcube_gen.process import process, list_jobs
+from xcube_gen.process import process, jobs
 
 
 def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
 
-    @app.route('/process', methods=['GET'])
+    @app.route('/process', methods=['POST'])
     def _process():
         return process(flask.request.json)
 
-    @app.route('/list', methods=['GET'])
+    @app.route('/jobs', methods=['GET'])
     def _list():
-        return list_jobs(flask.request.json)
+        return jobs(flask.request.json)
 
     return app
 

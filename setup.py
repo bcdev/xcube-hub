@@ -23,19 +23,14 @@
 
 
 from setuptools import setup, find_packages
+from xcube_gen.version import version
 
 requirements = [
-    'kubernetes', 'click'  #
-    # Deps from ./environment.yml.
-    #
+    # Use ./environment.yml for deps.
 ]
 
 packages = find_packages(exclude=["test", "test.*"])
 
-# Same effect as "from cate import version", but avoids importing cate:
-version = None
-with open('xcube_gen/version.py') as f:
-    exec(f.read())
 
 setup(
     name="xcube_gen",

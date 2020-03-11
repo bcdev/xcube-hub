@@ -35,7 +35,7 @@ def process(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def list_jobs(request: Dict[str, Any]) -> Dict[str, Any]:
+def jobs(request: Dict[str, Any]) -> Dict[str, Any]:
     batch = Batch()
     try:
         result = {'jobs': batch.list_jobs()}
