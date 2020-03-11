@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 import flask
-from xcube_gen.process import process
+from xcube_gen.process import process, list_jobs
 
 
 def new_app():
@@ -30,6 +30,10 @@ def new_app():
     @app.route('/process', methods=['GET'])
     def _process():
         return process(flask.request.json)
+
+    @app.route('/list', methods=['GET'])
+    def _list():
+        return list_jobs(flask.request.json)
 
     return app
 

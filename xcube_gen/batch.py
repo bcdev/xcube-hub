@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from kubernetes import client, config
 
 config.load_kube_config()
@@ -41,17 +43,7 @@ class Batch:
             namespace=self._namespace)
         self._jobs[job_name] = job
         print("Job created. status='%s'" % str(api_response.status))
-        return api_response.status
-
-    # def update_job(self, job_name: str):
-    #     # Update container image
-    #     job = self._jobs[job_name]
-    #     job.spec.template.spec.containers[0].image = "perl"
-    #     api_response = self._api_instance.patch_namespaced_job(
-    #         name=job_name,
-    #         namespace="default",
-    #         body=job)
-    #     print("Job updated. status='%s'" % str(api_response.status))
+        return {key: getattr(api_response.status, key) for key in api_response.status.attribute_map}
 
     def delete_job(self, job_name: str):
         api_response = self._api_instance.delete_namespaced_job(
@@ -62,3 +54,10 @@ class Batch:
                 grace_period_seconds=5))
         print("Job deleted. status='%s'" % str(api_response.status))
         return api_response.status
+
+    def list_jobs(self):
+        api_response = self._api_instance.list_namespaced_job(namespace=self._namespace)
+        pprint(api_response)
+        jobs = api_response.items
+        res = [{'name': job.metadata.name} for job in jobs]
+        return res
