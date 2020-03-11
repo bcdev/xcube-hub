@@ -2,6 +2,8 @@ ARG XCUBE_VERSION=0.3.0
 
 FROM quay.io/bcdev/xcube-python-deps:${XCUBE_VERSION}
 
+ARG XCUBE_USER_NAME=xcube
+
 LABEL version=0.1.0.dev0
 LABEL xcube_version=XCUBE_VERSION
 LABEL name=xcube
