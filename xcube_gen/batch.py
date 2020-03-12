@@ -2,14 +2,14 @@ from pprint import pprint
 
 from kubernetes import client, config
 
-config.load_kube_config()
-
+config.load_incluster_config()
+# config.load_kube_config()
 
 class Batch:
     def __init__(self, namespace: str = "default", image: str = "quay.io/bcdev/xcube-python-deps:0.3.0"):
         self._namespace = namespace
         self._image = image
-        self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube"]
+        self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen | cat "]
 
     def create_job_object(self, job_name: str):
         # Configureate Pod template container

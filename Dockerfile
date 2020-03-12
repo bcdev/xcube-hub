@@ -1,21 +1,38 @@
-ARG XCUBE_VERSION=0.3.0
+ARG XCUBE_VERSION=0.3.0.dev0
 
 FROM quay.io/bcdev/xcube-python-deps:${XCUBE_VERSION}
 
-LABEL version=0.1.0.dev0
-LABEL xcube_version=XCUBE_VERSION
-LABEL name=xcube
-LABEL maintainer=helge.dzierzon@brockmann-consult.de
+ARG XCUBE_VERSION=0.3.0.dev0
+ARG XCUBE_USER_NAME=xcube
+ARG XCUBE_GEN_BRANCH=dzelge_xxx_k8s
 
-SHELL ["/bin/bash", "-c"]
 
-RUN mkdir /home/xcube/xcube-gen
-WORKDIR /home/xcube/xcube-gen
+LABEL maintainer="helge.dzierzon@brockmann-consult.de"
+LABEL name="xcube python dependencies"
+LABEL xcube_version=${XCUBE_VERSION}
+LABEL xcube_gen_branch=${XCUBE_GEN_BRANCH}
+
+USER root
+RUN apt-get -y update && apt-get -y install curl unzip
+
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
+    unzip awscliv2.zip; \
+    ./aws/install; \
+    aws --version
+
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl; \
+    chmod +x ./kubectl; \
+    mv ./kubectl /usr/local/bin/kubectl; \
+    kubectl version --client
+
+USER ${XCUBE_USER_NAME}
 
 ADD --chown=1000:1000 environment.yml environment.yml
-RUN source activate xcube && conda env update -n xcube
+RUN conda env update -n xcube
 
 ADD --chown=1000:1000 ./ .
 RUN source activate xcube && python setup.py install
 
-ENTRYPOINT ["bash", "-c"]
+EXPOSE 8000
+
+CMD ["/bin/bash", "-c", "source activate xcube && xcube genserv start --debug --port 8000 --address 0.0.0.0"]
