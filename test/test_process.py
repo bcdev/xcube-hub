@@ -1,6 +1,6 @@
 import unittest
 
-from xcube_gen.process import process
+from xcube_gen.api import process
 
 
 class ProcessTest(unittest.TestCase):

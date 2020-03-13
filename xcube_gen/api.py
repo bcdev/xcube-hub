@@ -18,17 +18,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 from typing import Any, Dict
 
 from xcube_gen.batch import Batch
 import uuid
 
+from xcube_gen.version import version
+
 
 def process(request: Dict[str, Any]) -> Dict[str, Any]:
-    batch = Batch()
+    batch = Batch(namespace='xcube-gen')
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
-        result = batch.create_job(job_name=job_name)
+        result = batch.create_job(job_name=job_name, config=request)
     except Exception as e:
         result = {'xcube-gen-error': str(e)}
 
@@ -36,10 +39,47 @@ def process(request: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def jobs(request: Dict[str, Any]) -> Dict[str, Any]:
-    batch = Batch()
+    batch = Batch(namespace='xcube-gen')
+    print(request)
     try:
         result = {'jobs': batch.list_jobs()}
     except Exception as e:
         result = {'xcube-gen-error': str(e)}
 
     return result
+
+
+def job_delete(request: Dict[str, Any]) -> Dict[str, Any]:
+    batch = Batch(namespace='xcube-gen')
+    job_name = request['job_name']
+    try:
+        result = {'delete': batch.delete_job(job_name)}
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
+def jobs_delete(request: Dict[str, Any]) -> Dict[str, Any]:
+    batch = Batch(namespace='xcube-gen')
+    job_names = request['job_names']
+    try:
+        result = {'delete': batch.delete_jobs(job_names)}
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
+def jobs_purge(request: Dict[str, Any]) -> Dict[str, Any]:
+    batch = Batch(namespace='xcube-gen')
+    try:
+        result = {'purge': batch.purge_jobs()}
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
+def info(request: Dict[str, Any]) -> Dict[str, Any]:
+    return {'xcube-gen version: ': version}

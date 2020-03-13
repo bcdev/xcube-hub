@@ -1,8 +1,8 @@
-ARG XCUBE_VERSION=0.3.0.dev0
+ARG XCUBE_DOCKER_BASE_VERSION=0.3.0
 
-FROM quay.io/bcdev/xcube-python-deps:${XCUBE_VERSION}
+FROM quay.io/bcdev/xcube-python-base:${XCUBE_DOCKER_BASE_VERSION}
 
-ARG XCUBE_VERSION=0.3.0.dev0
+ARG XCUBE_VERSION=0.4.0.dev0
 ARG XCUBE_USER_NAME=xcube
 ARG XCUBE_GEN_BRANCH=dzelge_xxx_k8s
 
@@ -26,6 +26,13 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s 
     kubectl version --client
 
 USER ${XCUBE_USER_NAME}
+
+RUN git clone https://github.com/dcs4cop/xcube /home/${XCUBE_USER_NAME}/xcube
+
+WORKDIR /home/${XCUBE_USER_NAME}/xcube
+RUN conda env create
+RUN source activate xcube && python setup.py install
+
 
 ADD --chown=1000:1000 environment.yml environment.yml
 RUN conda env update -n xcube
