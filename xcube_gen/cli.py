@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import sys
 
 import click
 from typing import Optional
@@ -39,6 +40,7 @@ def start(address: Optional[str],
     """
     Start the service.
     """
+
     from xcube_gen.service import start
     start(host=address, port=port, debug=debug)
 
@@ -62,3 +64,19 @@ def cli():
 
 cli.add_command(start)
 cli.add_command(stop)
+
+
+def main(args=None):
+    # noinspection PyBroadException
+    try:
+        exit_code = cli.main(args=args, standalone_mode=False)
+    except click.ClickException as e:
+        e.show()
+        exit_code = 1
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        exit_code = 2
+        print(f'Error: {e}')
+    sys.exit(exit_code)
+

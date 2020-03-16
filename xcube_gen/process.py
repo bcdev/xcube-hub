@@ -18,10 +18,28 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 from typing import Any, Dict
+
+from xcube_gen.batch import Batch
+import uuid
 
 
 def process(request: Dict[str, Any]) -> Dict[str, Any]:
-    # TODO: do it
-    return request
+    batch = Batch()
+    try:
+        job_name = f"xcube-gen-{str(uuid.uuid4())}"
+        result = batch.create_job(job_name=job_name)
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
+def jobs(request: Dict[str, Any]) -> Dict[str, Any]:
+    batch = Batch()
+    try:
+        result = {'jobs': batch.list_jobs()}
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result

@@ -16,6 +16,7 @@ dependencies:
   - pip:
       # Required
       - requests_oauthlib
+      - kubernetes
 
   # testing
   - flake8
