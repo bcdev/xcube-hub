@@ -1,13 +1,11 @@
 from pprint import pprint
 from typing import Dict, Any, Sequence
 import json
-
 from kubernetes import client, config
+from xcube_gen.types import AnyDict
 
-AnyDict = Dict[str, Any]
-
-# config.load_incluster_config()
-config.load_kube_config()
+config.load_incluster_config()
+# config.load_kube_config()
 
 
 class Batch:
@@ -48,7 +46,7 @@ class Batch:
             namespace=self._namespace)
 
         print("Job created. status='%s'" % str(api_response.status))
-        return {key: getattr(api_response.status, key) for key in api_response.status.attribute_map}
+        return {job_name: api_response.status.to_dict()}
 
     def delete_job(self, job_name: str):
         api_instance = client.BatchV1Api()
@@ -94,15 +92,23 @@ class Batch:
             name=job_name
         )
 
-        return api_response.status.conditions[0].to_dict()
+        return api_response.status.to_dict()
 
-    def get_result(self, job_name: str):
-        api_instance = client.BatchV1Api()
-        api_response = api_instance.read_namespaced_job(
-            namespace=self._namespace,
-            name=job_name,
-            pretty=True
-        )
+    def get_result(self, job_name: str) -> AnyDict:
+        api_pod_instance = client.CoreV1Api()
 
-        return api_response.to_dict()
+        logs = []
+        for pod in self.get_pods(job_name=job_name):
+            name = pod.metadata.name
+            log = api_pod_instance.read_namespaced_pod_log(namespace=self._namespace, name=name)
+            logs = log.splitlines()
+
+        return {job_name: logs}
+
+    def get_pods(self, job_name: str):
+        api_pod_instance = client.CoreV1Api()
+
+        pods = api_pod_instance.list_namespaced_pod(namespace=self._namespace, label_selector=f"job-name={job_name}")
+
+        return pods.items
 

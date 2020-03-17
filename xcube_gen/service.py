@@ -45,15 +45,15 @@ def new_app():
 
     @app.route('/status/<job_name>', methods=['GET'])
     def _status(job_name):
-        return job_status(flask.request.json, job_name)
+        return job_status(job_name)
 
     @app.route('/result/<job_name>', methods=['GET'])
     def _result(job_name):
-        return job_result(flask.request.json, job_name)
+        return job_result(job_name)
 
     @app.route('/', methods=['GET'])
     def _info():
-        return info(flask.request.json)
+        return info()
 
     return app
 

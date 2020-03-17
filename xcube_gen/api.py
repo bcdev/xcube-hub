@@ -19,15 +19,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Any, Dict
-
 from xcube_gen.batch import Batch
 import uuid
 
+from xcube_gen.types import AnyDict
 from xcube_gen.version import version
 
 
-def process(request: Dict[str, Any]) -> Dict[str, Any]:
+def process(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
@@ -38,7 +37,7 @@ def process(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def jobs(request: Dict[str, Any]) -> Dict[str, Any]:
+def jobs(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     print(request)
     try:
@@ -49,7 +48,7 @@ def jobs(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def job_delete(request: Dict[str, Any]) -> Dict[str, Any]:
+def job_delete(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     job_name = request['job_name']
     try:
@@ -60,7 +59,7 @@ def job_delete(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def job_status(request: Dict[str, Any], job_name):
+def job_status(job_name: str) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     try:
         return batch.get_status(job_name)
@@ -70,7 +69,7 @@ def job_status(request: Dict[str, Any], job_name):
     return result
 
 
-def job_result(request: Dict[str, Any], job_name):
+def job_result(job_name: str) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     try:
         result = batch.get_result(job_name)
@@ -80,7 +79,7 @@ def job_result(request: Dict[str, Any], job_name):
     return result
 
 
-def jobs_delete(request: Dict[str, Any]) -> Dict[str, Any]:
+def jobs_delete(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     job_names = request['job_names']
     try:
@@ -91,7 +90,7 @@ def jobs_delete(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def jobs_purge(request: Dict[str, Any]) -> Dict[str, Any]:
+def jobs_purge(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     try:
         result = {'purge': batch.purge_jobs()}
@@ -101,5 +100,5 @@ def jobs_purge(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def info(request: Dict[str, Any]) -> Dict[str, Any]:
+def info() -> AnyDict:
     return {'xcube-gen version: ': version}
