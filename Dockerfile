@@ -40,6 +40,10 @@ RUN conda env update -n xcube
 ADD --chown=1000:1000 ./ .
 RUN source activate xcube && python setup.py install
 
+RUN aws sts get-caller-identity
+RUN aws eks update-kubeconfig --region eu-central-1 --name dcfs-xcube-gen-cluster
+
+
 EXPOSE 8000
 
 CMD ["/bin/bash", "-c", "source activate xcube && xcube genserv start --debug --port 8000 --address 0.0.0.0"]

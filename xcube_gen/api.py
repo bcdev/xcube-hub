@@ -60,6 +60,26 @@ def job_delete(request: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
+def job_status(request: Dict[str, Any], job_name):
+    batch = Batch(namespace='xcube-gen')
+    try:
+        return batch.get_status(job_name)
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
+def job_result(request: Dict[str, Any], job_name):
+    batch = Batch(namespace='xcube-gen')
+    try:
+        result = batch.get_result(job_name)
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
 def jobs_delete(request: Dict[str, Any]) -> Dict[str, Any]:
     batch = Batch(namespace='xcube-gen')
     job_names = request['job_names']

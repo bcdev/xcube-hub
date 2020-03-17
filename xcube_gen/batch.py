@@ -9,6 +9,7 @@ AnyDict = Dict[str, Any]
 # config.load_incluster_config()
 config.load_kube_config()
 
+
 class Batch:
     def __init__(self, namespace: str = "default", image: str = "quay.io/bcdev/xcube-sh:0.4.0.dev0"):
         self._namespace = namespace
@@ -85,3 +86,23 @@ class Batch:
         jobs = api_response.items
         res = [{'name': job.metadata.name} for job in jobs]
         return res
+
+    def get_status(self, job_name: str):
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.read_namespaced_job_status(
+            namespace=self._namespace,
+            name=job_name
+        )
+
+        return api_response.status.conditions[0].to_dict()
+
+    def get_result(self, job_name: str):
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.read_namespaced_job(
+            namespace=self._namespace,
+            name=job_name,
+            pretty=True
+        )
+
+        return api_response.to_dict()
+
