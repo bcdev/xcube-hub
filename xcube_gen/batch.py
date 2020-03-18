@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from pprint import pprint
 from typing import Sequence, Optional
@@ -14,17 +15,27 @@ class BatchError(ValueError):
 
 
 class Batch:
-    def __init__(self, namespace: str = "default", image: str = "quay.io/bcdev/xcube-sh@sha256:406b4cadbc02ffc3d1c77af71e7e891bfdb4c2fb135bee17b653203de8933fcf"):
+    def __init__(self, namespace: str = "default", image: Optional[str] = None):
         self._namespace = namespace
-        self._image = image
+        self._image = image or "quay.io/bcdev/xcube-sh" \
+                               "@sha256:406b4cadbc02ffc3d1c77af71e7e891bfdb4c2fb135bee17b653203de8933fcf"
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 
     def create_job_object(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
         # Configureate Pod template container
-        exp = "export SH_CLIENT_ID=c523d6d6-e43a-4b2c-9b3c-5fd179223d50 && export SH_CLIENT_SECRET=j5jDeDhSWCBEyikj6ooq && export SH_INSTANCE_ID=c5828fc7-aa47-4f1d-b684-ae596521ef25"
+        sh_client_id = os.environ.get("SH_CLIENT_ID")
+        sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
+        sh_instance_id = os.environ.get("SH_INSTANCE_ID")
+
+        if not sh_client_secret or not sh_client_id or not sh_instance_id:
+            raise BatchError("SentinelHub credentials invalid. Please contact Brockmann Consult")
+
+        exp = f"export SH_CLIENT_ID={sh_client_id} && export SH_CLIENT_SECRET={sh_client_secret} " \
+              f"&& export SH_INSTANCE_ID={sh_instance_id}"
 
         if cfg is not None:
-            cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} && echo \'{json.dumps(cfg)}\' | xcube sh {sh_cmd}"]
+            cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} && echo \'{json.dumps(cfg)}\' "
+                                      f"| xcube sh {sh_cmd}"]
         else:
             cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} &&  xcube sh {sh_cmd}"]
 
