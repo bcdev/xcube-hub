@@ -30,7 +30,7 @@ def process(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
-        result = batch.create_job(job_name=job_name, config=request)
+        result = batch.create_job(job_name=job_name, sh_cmd='gen', cfg=request)
     except Exception as e:
         result = {'xcube-gen-error': str(e)}
 
@@ -101,4 +101,15 @@ def jobs_purge(request: AnyDict) -> AnyDict:
 
 
 def info() -> AnyDict:
-    return {'xcube-gen version: ': version}
+    batch = Batch(namespace='xcube-gen')
+    try:
+        job_name = f"xcube-gen-{str(uuid.uuid4())}"
+        result = batch.get_info(job_name=job_name)
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
+def main() -> AnyDict:
+    return {'xcube-gen': {'version': version}}

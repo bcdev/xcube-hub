@@ -1,5 +1,5 @@
 from pprint import pprint
-from typing import Dict, Any, Sequence
+from typing import Sequence, Optional
 import json
 from kubernetes import client, config
 from xcube_gen.types import AnyDict
@@ -14,9 +14,15 @@ class Batch:
         self._image = image
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 
-    def create_job_object(self, job_name: str, config: Dict[str, Any]) -> client.V1Job:
+    def create_job_object(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
         # Configureate Pod template container
-        cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(config)}\' | xcube sh gen"]
+        exp = "export SH_CLIENT_ID=c523d6d6-e43a-4b2c-9b3c-5fd179223d50 && export SH_CLIENT_SECRET=j5jDeDhSWCBEyikj6ooq && export SH_INSTANCE_ID=c5828fc7-aa47-4f1d-b684-ae596521ef25"
+
+        if cfg is not None:
+            cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} && echo \'{json.dumps(cfg)}\' | xcube sh {sh_cmd}"]
+        else:
+            cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} &&  xcube sh {sh_cmd}"]
+
         container = client.V1Container(
             name="xcube-gen",
             image=self._image,
@@ -38,8 +44,8 @@ class Batch:
 
         return job
 
-    def create_job(self, job_name: str, config: AnyDict) -> AnyDict:
-        job = self.create_job_object(job_name, config=config)
+    def create_job(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> AnyDict:
+        job = self.create_job_object(job_name, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(
             body=job,
@@ -52,10 +58,10 @@ class Batch:
         api_instance = client.BatchV1Api()
         api_response = api_instance.delete_namespaced_job(
             name=job_name,
-            async_req=True,
+
             namespace=self._namespace,
             body=client.V1DeleteOptions(
-                propagation_policy='Foreground',
+                propagation_policy='Background',
                 grace_period_seconds=5))
 
         print("Job deleted. status='%s'" % str(api_response.status))
@@ -112,3 +118,12 @@ class Batch:
 
         return pods.items
 
+    def get_info(self, job_name: str):
+        self.create_job(job_name=job_name, sh_cmd='info')
+
+        while True:
+            status = self.get_status(job_name=job_name)
+            if status['succeeded']:
+                break
+
+        return self.get_result(job_name=job_name)

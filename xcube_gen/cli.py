@@ -83,4 +83,3 @@ def main(args=None):
         exit_code = 2
         print(f'Error: {e}')
     sys.exit(exit_code)
-

@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 import flask
-from xcube_gen.api import process, jobs, info, job_delete, jobs_purge, job_status, job_result
+from xcube_gen.api import process, jobs, info, job_delete, jobs_purge, job_status, job_result, main
 
 
 def new_app():
@@ -51,9 +51,13 @@ def new_app():
     def _result(job_name):
         return job_result(job_name)
 
-    @app.route('/', methods=['GET'])
+    @app.route('/info', methods=['GET'])
     def _info():
         return info()
+
+    @app.route('/', methods=['GET'])
+    def _main():
+        return main()
 
     return app
 
