@@ -14,7 +14,7 @@ class BatchError(ValueError):
 
 
 class Batch:
-    def __init__(self, namespace: str = "default", image: str = "quay.io/bcdev/xcube-sh:0.4.0.dev0"):
+    def __init__(self, namespace: str = "default", image: str = "quay.io/bcdev/xcube-sh@sha256:406b4cadbc02ffc3d1c77af71e7e891bfdb4c2fb135bee17b653203de8933fcf"):
         self._namespace = namespace
         self._image = image
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
