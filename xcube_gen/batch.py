@@ -1,3 +1,4 @@
+from datetime import datetime
 from pprint import pprint
 from typing import Sequence, Optional
 import json
@@ -6,6 +7,10 @@ from xcube_gen.types import AnyDict
 
 config.load_incluster_config()
 # config.load_kube_config()
+
+
+class BatchError(ValueError):
+    pass
 
 
 class Batch:
@@ -120,8 +125,12 @@ class Batch:
 
     def get_info(self, job_name: str):
         self.create_job(job_name=job_name, sh_cmd='info')
-
+        timeout = 120
+        start_time = datetime.now()
         while True:
+            now = datetime.now()
+            if (now - start_time).seconds > timeout:
+                raise BatchError(f"Timeout after {timeout}s.")
             status = self.get_status(job_name=job_name)
             if status['succeeded']:
                 break

@@ -14,22 +14,6 @@ LABEL xcube_gen_branch=${XCUBE_GEN_BRANCH}
 USER root
 RUN apt-get -y update && apt-get -y install curl unzip
 
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
-    unzip awscliv2.zip; \
-    ./aws/install; \
-    aws --version
-
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl; \
-    chmod +x ./kubectl; \
-    mv ./kubectl /usr/local/bin/kubectl; \
-    kubectl version --client
-
-RUN curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator ; \
-    chmod +x ./aws-iam-authenticator;\
-    mv ./aws-iam-authenticator /usr/local/bin
-
-RUN aws-iam-authenticator help
-
 USER ${XCUBE_USER_NAME}
 
 RUN git clone https://github.com/dcs4cop/xcube /home/${XCUBE_USER_NAME}/xcube
