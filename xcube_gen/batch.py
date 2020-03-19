@@ -7,11 +7,11 @@ from kubernetes import client, config
 from xcube_gen.types import AnyDict
 
 
-try:
-    config.load_incluster_config()
-except Exception:
-    print("Running locally")
-    config.load_kube_config()
+#try:
+#    config.load_incluster_config()
+#except Exception:
+#    print("Running locally")
+config.load_kube_config()
 
 
 class BatchError(ValueError):
@@ -22,7 +22,7 @@ class Batch:
     def __init__(self, namespace: str = "default", image: Optional[str] = None):
         self._namespace = namespace
         self._image = image or "quay.io/bcdev/xcube-sh" \
-                               "@sha256:406b4cadbc02ffc3d1c77af71e7e891bfdb4c2fb135bee17b653203de8933fcf"
+                               "@sha256:97485532fd7a65eea9f61ebb9cf52543c0ca811cf485b1885c47cb8599dc6f7d"
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 
     def create_job_object(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
@@ -33,7 +33,7 @@ class Batch:
         aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         aws_access_key_secret = os.environ.get("AWS_ACCESS_KEY_SECRET")
 
-        cfg['output_config']['path'] = 'https://s3.amazonaws.com/eodatacube-test/helge.zarr'
+        cfg['output_config']['path'] = 'https://s3.amazonaws.com/eodatacube-test/test.zarr'
         cfg['output_config']['provider_access_key_id'] = aws_access_key_id
         cfg['output_config']['provider_secret_access_key'] = aws_access_key_secret
 
