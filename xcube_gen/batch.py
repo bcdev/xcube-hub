@@ -6,8 +6,12 @@ import json
 from kubernetes import client, config
 from xcube_gen.types import AnyDict
 
-config.load_incluster_config()
-# config.load_kube_config()
+
+try:
+    config.load_incluster_config()
+except Exception:
+    print("Running locally")
+    config.load_kube_config()
 
 
 class BatchError(ValueError):
@@ -26,6 +30,12 @@ class Batch:
         sh_client_id = os.environ.get("SH_CLIENT_ID")
         sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
         sh_instance_id = os.environ.get("SH_INSTANCE_ID")
+        aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
+        aws_access_key_secret = os.environ.get("AWS_ACCESS_KEY_SECRET")
+
+        cfg['output_config']['path'] = 'https://s3.amazonaws.com/eodatacube-test/helge.zarr'
+        cfg['output_config']['provider_access_key_id'] = aws_access_key_id
+        cfg['output_config']['provider_secret_access_key'] = aws_access_key_secret
 
         if not sh_client_secret or not sh_client_id or not sh_instance_id:
             raise BatchError("SentinelHub credentials invalid. Please contact Brockmann Consult")

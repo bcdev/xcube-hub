@@ -28,6 +28,7 @@ from xcube_gen.version import version
 
 def process(request: AnyDict) -> AnyDict:
     batch = Batch(namespace='xcube-gen')
+
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
         result = batch.create_job(job_name=job_name, sh_cmd='gen', cfg=request)

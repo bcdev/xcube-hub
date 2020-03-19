@@ -20,12 +20,14 @@
 # SOFTWARE.
 
 import flask
+import flask_cors
 from xcube_gen.api import process, jobs, info, job_delete, jobs_purge, job_status, job_result, main
 
 
 def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
+    flask_cors.CORS(app)
 
     @app.route('/process', methods=['POST'])
     def _process():
