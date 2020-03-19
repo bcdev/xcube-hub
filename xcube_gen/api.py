@@ -27,7 +27,7 @@ from xcube_gen.version import version
 
 
 def process(request: AnyDict) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch(namespace='xcube-gen', image="quay.io/bcdev/xcube-sh@sha256:b097b0ba96043cb5973402625f8bff3f3f2d0354656a6369e5c71eb1858eb237")
 
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"

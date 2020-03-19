@@ -7,11 +7,11 @@ from kubernetes import client, config
 from xcube_gen.types import AnyDict
 
 
-#try:
-#    config.load_incluster_config()
-#except Exception:
-#    print("Running locally")
-config.load_kube_config()
+try:
+    config.load_incluster_config()
+except Exception:
+    print("Running locally")
+    config.load_kube_config()
 
 
 class BatchError(ValueError):
@@ -21,8 +21,14 @@ class BatchError(ValueError):
 class Batch:
     def __init__(self, namespace: str = "default", image: Optional[str] = None):
         self._namespace = namespace
-        self._image = image or "quay.io/bcdev/xcube-sh" \
-                               "@sha256:97485532fd7a65eea9f61ebb9cf52543c0ca811cf485b1885c47cb8599dc6f7d"
+
+        if image is not None:
+            self._image = image
+        else:
+            self._image = os.environ.get("XCUBE_SH_DOCKER_IMG")
+            if not self._image:
+                raise BatchError("xcube-sh docker image is not configured.")
+
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 
     def create_job_object(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
@@ -30,12 +36,6 @@ class Batch:
         sh_client_id = os.environ.get("SH_CLIENT_ID")
         sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
         sh_instance_id = os.environ.get("SH_INSTANCE_ID")
-        aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-        aws_access_key_secret = os.environ.get("AWS_ACCESS_KEY_SECRET")
-
-        cfg['output_config']['path'] = 'https://s3.amazonaws.com/eodatacube-test/test.zarr'
-        cfg['output_config']['provider_access_key_id'] = aws_access_key_id
-        cfg['output_config']['provider_secret_access_key'] = aws_access_key_secret
 
         if not sh_client_secret or not sh_client_id or not sh_instance_id:
             raise BatchError("SentinelHub credentials invalid. Please contact Brockmann Consult")
@@ -60,7 +60,7 @@ class Batch:
         # Create the specification of deployment
         spec = client.V1JobSpec(
             template=template,
-            backoff_limit=4)
+            backoff_limit=1)
         # Instantiate the job object
         job = client.V1Job(
             api_version="batch/v1",

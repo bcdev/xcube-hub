@@ -20,7 +20,7 @@ RUN git clone https://github.com/dcs4cop/xcube /home/${XCUBE_USER_NAME}/xcube
 
 WORKDIR /home/${XCUBE_USER_NAME}/xcube
 RUN conda env create
-RUN source activate xcube && python setup.py develop
+RUN source activate xcube && python setup.py install
 
 
 WORKDIR /home/${XCUBE_USER_NAME}
@@ -29,7 +29,7 @@ RUN conda env update -n xcube
 RUN source activate xcube && pip install pydevd-pycharm
 
 ADD --chown=1000:1000 ./ .
-RUN source activate xcube && python setup.py develop
+RUN source activate xcube && python setup.py install
 
 #RUN aws sts get-caller-identity
 #RUN aws eks update-kubeconfig --region eu-central-1 --name dcfs-xcube-gen-cluster
