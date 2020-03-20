@@ -19,15 +19,14 @@ class BatchError(ValueError):
 
 
 class Batch:
-    def __init__(self, namespace: str = "default", image: Optional[str] = None):
-        self._namespace = namespace
+    def __init__(self, namespace: Optional[str] = None, image: Optional[str] = None):
 
-        if image is not None:
-            self._image = image
-        else:
-            self._image = os.environ.get("XCUBE_SH_DOCKER_IMG")
-            if not self._image:
-                raise BatchError("xcube-sh docker image is not configured.")
+        self._namespace = namespace or os.environ.get('K8S_NAMESPACE') or 'default'
+
+        self._image = image or os.environ.get("XCUBE_SH_DOCKER_IMG")
+
+        if not self._image:
+            raise BatchError("xcube-sh docker image is not configured.")
 
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 

@@ -27,7 +27,7 @@ from xcube_gen.version import version
 
 
 def process(request: AnyDict) -> AnyDict:
-    batch = Batch(namespace='xcube-gen', image="quay.io/bcdev/xcube-sh@sha256:b097b0ba96043cb5973402625f8bff3f3f2d0354656a6369e5c71eb1858eb237")
+    batch = Batch()
 
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
@@ -39,7 +39,7 @@ def process(request: AnyDict) -> AnyDict:
 
 
 def jobs(request: AnyDict) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     print(request)
     try:
         result = {'jobs': batch.list_jobs()}
@@ -50,7 +50,7 @@ def jobs(request: AnyDict) -> AnyDict:
 
 
 def job_delete(request: AnyDict) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     job_name = request['job_name']
     try:
         result = {'delete': batch.delete_job(job_name)}
@@ -61,7 +61,7 @@ def job_delete(request: AnyDict) -> AnyDict:
 
 
 def job_status(job_name: str) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     try:
         return batch.get_status(job_name)
     except Exception as e:
@@ -71,7 +71,7 @@ def job_status(job_name: str) -> AnyDict:
 
 
 def job_result(job_name: str) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     try:
         result = batch.get_result(job_name)
     except Exception as e:
@@ -81,7 +81,7 @@ def job_result(job_name: str) -> AnyDict:
 
 
 def jobs_delete(request: AnyDict) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     job_names = request['job_names']
     try:
         result = {'delete': batch.delete_jobs(job_names)}
@@ -92,7 +92,7 @@ def jobs_delete(request: AnyDict) -> AnyDict:
 
 
 def jobs_purge(request: AnyDict) -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     try:
         result = {'purge': batch.purge_jobs()}
     except Exception as e:
@@ -102,7 +102,7 @@ def jobs_purge(request: AnyDict) -> AnyDict:
 
 
 def info() -> AnyDict:
-    batch = Batch(namespace='xcube-gen')
+    batch = Batch()
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
         result = batch.get_info(job_name=job_name)
