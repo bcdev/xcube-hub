@@ -39,8 +39,8 @@ class Batch:
         if not sh_client_secret or not sh_client_id or not sh_instance_id:
             raise BatchError("SentinelHub credentials invalid. Please contact Brockmann Consult")
 
-        exp = f"export SH_CLIENT_ID={sh_client_id} && export SH_CLIENT_SECRET={sh_client_secret} " \
-              f"&& export SH_INSTANCE_ID={sh_instance_id}"
+        exp = f"export SH_CLIENT_ID='{sh_client_id}' && export SH_CLIENT_SECRET='{sh_client_secret}' " \
+              f"&& export SH_INSTANCE_ID='{sh_instance_id}'"
 
         if cfg is not None:
             cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} && echo \'{json.dumps(cfg)}\' "
@@ -77,7 +77,7 @@ class Batch:
             namespace=self._namespace)
 
         print("Job created. status='%s'" % str(api_response.status))
-        return {job_name: api_response.status.to_dict()}
+        return {'job_name': job_name, 'status': api_response.status.to_dict()}
 
     def delete_job(self, job_name: str):
         api_instance = client.BatchV1Api()
@@ -134,7 +134,7 @@ class Batch:
             log = api_pod_instance.read_namespaced_pod_log(namespace=self._namespace, name=name)
             logs = log.splitlines()
 
-        return {job_name: logs}
+        return {'job_name': job_name, 'logs': logs}
 
     def get_pods(self, job_name: str):
         api_pod_instance = client.CoreV1Api()
