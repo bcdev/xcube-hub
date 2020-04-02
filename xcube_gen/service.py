@@ -34,8 +34,8 @@ def new_app():
         return process(flask.request.json)
 
     @app.route('/jobs', methods=['GET'])
-    def _list():
-        return jobs(flask.request.json)
+    def _jobs():
+        return jobs()
 
     @app.route('/delete', methods=['DELETE'])
     def _delete():

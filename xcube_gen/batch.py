@@ -7,11 +7,11 @@ from kubernetes import client, config
 from xcube_gen.types import AnyDict
 
 
-try:
-    config.load_incluster_config()
-except Exception:
+if os.environ.get('RUN_LOCAL'):
     print("Running locally")
     config.load_kube_config()
+else:
+    config.load_incluster_config()
 
 
 class BatchError(ValueError):
@@ -113,7 +113,12 @@ class Batch:
         api_response = api_instance.list_namespaced_job(namespace=self._namespace)
         pprint(api_response)
         jobs = api_response.items
-        res = [{'name': job.metadata.name} for job in jobs]
+        res = [{'name': job.metadata.name,
+                'start_time': job.status.start_time,
+                'failed': job.status.failed,
+                'succeeded': job.status.succeeded,
+                'completion_time': job.status.completion_time,
+                } for job in jobs]
         return res
 
     def get_status(self, job_name: str):

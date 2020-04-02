@@ -38,9 +38,9 @@ def process(request: AnyDict) -> AnyDict:
     return result
 
 
-def jobs(request: AnyDict) -> AnyDict:
+def jobs() -> AnyDict:
     batch = Batch()
-    print(request)
+
     try:
         result = {'jobs': batch.list_jobs()}
     except Exception as e:
