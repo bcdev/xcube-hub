@@ -21,7 +21,7 @@
 
 import flask
 import flask_cors
-from xcube_gen.api import process, jobs, info, job_delete, jobs_purge, job_status, job_result, main
+from xcube_gen.api import job, jobs, info, job_delete, jobs_purge, job_status, job_result, main
 
 
 def new_app():
@@ -29,8 +29,8 @@ def new_app():
     app = flask.Flask('xcube-genserv')
     flask_cors.CORS(app)
 
-    @app.route('/process', methods=['POST'])
-    def _process():
+    @app.route('/job', methods=['POST'])
+    def _job():
         return process(flask.request.json)
 
     @app.route('/jobs', methods=['GET'])

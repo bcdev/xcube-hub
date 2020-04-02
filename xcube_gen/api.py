@@ -26,7 +26,7 @@ from xcube_gen.types import AnyDict
 from xcube_gen.version import version
 
 
-def process(request: AnyDict) -> AnyDict:
+def job(request: AnyDict) -> AnyDict:
     batch = Batch()
 
     try:
