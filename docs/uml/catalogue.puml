@@ -16,6 +16,7 @@ data service.
 - https://www.sentinel-hub.com/
 - https://scihub.copernicus.eu/
 - http://cci.esa.int/data
+- geoDB instance
 - xcube Server instance
 - Bucket in object storage + metadata
 - Directory in network filesystem + metadata
@@ -72,6 +73,7 @@ interface DataStore {
 
     {abstract} find_datasets(query): List[DatasetDescriptor]
 
+    {abstract} get_dataset_schema(descriptor: DatasetDescriptor, **params): DatasetSchema
     {abstract} open_dataset(descriptor: DatasetDescriptor, **params): xr.Dataset
 
     {abstract} add_dataset(descriptor: DatasetDescriptor, dataset: xr.Dataset)
