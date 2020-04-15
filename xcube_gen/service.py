@@ -31,7 +31,7 @@ def new_app():
 
     @app.route('/job', methods=['POST'])
     def _job():
-        return process(flask.request.json)
+        return job(flask.request.json)
 
     @app.route('/jobs', methods=['GET'])
     def _jobs():
