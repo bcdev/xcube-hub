@@ -17,6 +17,7 @@ dependencies:
       # Required
       - requests_oauthlib
       - kubernetes
+      - flask-cors
 
   # testing
   - flake8

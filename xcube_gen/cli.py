@@ -20,10 +20,14 @@
 # SOFTWARE.
 import sys
 
+
 import click
 from typing import Optional
 
 from xcube_gen.version import version
+
+#import pydevd_pycharm
+#pydevd_pycharm.settrace('10.3.13.80', port=8003, stdoutToServer=True, stderrToServer=True)
 
 
 @click.command(name="start")
@@ -79,4 +83,3 @@ def main(args=None):
         exit_code = 2
         print(f'Error: {e}')
     sys.exit(exit_code)
-

@@ -20,20 +20,46 @@
 # SOFTWARE.
 
 import flask
-from xcube_gen.process import process, jobs
+import flask_cors
+from xcube_gen.api import job, jobs, info, job_delete, jobs_purge, job_status, job_result, main
 
 
 def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
+    flask_cors.CORS(app)
 
     @app.route('/process', methods=['POST'])
-    def _process():
-        return process(flask.request.json)
+    def _job():
+        return job(flask.request.json)
+
+    @app.route('/delete', methods=['DELETE'])
+    def _job_delete():
+        return job_delete(flask.request.json)
+
+    @app.route('/status/<job_name>', methods=['GET'])
+    def _job_status(job_name):
+        return job_status(job_name)
+
+    @app.route('/result/<job_name>', methods=['GET'])
+    def _result(job_name):
+        return job_result(job_name)
 
     @app.route('/jobs', methods=['GET'])
-    def _list():
-        return jobs(flask.request.json)
+    def _jobs():
+        return jobs()
+
+    @app.route('/purge', methods=['DELETE'])
+    def _jobs_purge():
+        return jobs_purge(flask.request.json)
+
+    @app.route('/info', methods=['GET'])
+    def _info():
+        return info()
+
+    @app.route('/', methods=['GET'])
+    def _main():
+        return main()
 
     return app
 
