@@ -6,7 +6,6 @@ import json
 from kubernetes import client, config
 from xcube_gen.types import AnyDict
 
-
 if os.environ.get('RUN_LOCAL'):
     print("Running locally")
     config.load_kube_config()
@@ -30,7 +29,7 @@ class Batch:
 
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 
-    def create_job_object(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
+    def create_sh_job_object(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
         # Configureate Pod template container
         sh_client_id = os.environ.get("SH_CLIENT_ID")
         sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
@@ -39,19 +38,23 @@ class Batch:
         if not sh_client_secret or not sh_client_id or not sh_instance_id:
             raise BatchError("SentinelHub credentials invalid. Please contact Brockmann Consult")
 
-        exp = f"export SH_CLIENT_ID='{sh_client_id}' && export SH_CLIENT_SECRET='{sh_client_secret}' " \
-              f"&& export SH_INSTANCE_ID='{sh_instance_id}'"
-
         if cfg is not None:
-            cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} && echo \'{json.dumps(cfg)}\' "
+            cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
                                       f"| xcube sh {sh_cmd}"]
         else:
-            cmd = ["/bin/bash", "-c", f"source activate xcube && {exp} &&  xcube sh {sh_cmd}"]
+            cmd = ["/bin/bash", "-c", f"source activate xcube &&  xcube sh {sh_cmd}"]
+
+        sh_envs = [
+            client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
+            client.V1EnvVar(name="SH_CLIENT_SECRET", value=sh_client_secret),
+            client.V1EnvVar(name="SH_INSTANCE_ID", value=sh_instance_id),
+        ]
 
         container = client.V1Container(
             name="xcube-gen",
             image=self._image,
-            command=cmd)
+            command=cmd,
+            env=sh_envs)
         # Create and configurate a spec section
         template = client.V1PodTemplateSpec(
             metadata=client.V1ObjectMeta(labels={"app": "xcube-gen"}),
@@ -70,7 +73,7 @@ class Batch:
         return job
 
     def create_job(self, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> AnyDict:
-        job = self.create_job_object(job_name, sh_cmd=sh_cmd, cfg=cfg)
+        job = self.create_sh_job_object(job_name, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(
             body=job,

@@ -29,29 +29,29 @@ def new_app():
     app = flask.Flask('xcube-genserv')
     flask_cors.CORS(app)
 
-    @app.route('/job', methods=['POST'])
+    @app.route('/process', methods=['POST'])
     def _job():
         return job(flask.request.json)
 
-    @app.route('/jobs', methods=['GET'])
-    def _jobs():
-        return jobs()
-
     @app.route('/delete', methods=['DELETE'])
-    def _delete():
+    def _job_delete():
         return job_delete(flask.request.json)
 
-    @app.route('/purge', methods=['DELETE'])
-    def _purge():
-        return jobs_purge(flask.request.json)
-
     @app.route('/status/<job_name>', methods=['GET'])
-    def _status(job_name):
+    def _job_status(job_name):
         return job_status(job_name)
 
     @app.route('/result/<job_name>', methods=['GET'])
     def _result(job_name):
         return job_result(job_name)
+
+    @app.route('/jobs', methods=['GET'])
+    def _jobs():
+        return jobs()
+
+    @app.route('/purge', methods=['DELETE'])
+    def _jobs_purge():
+        return jobs_purge(flask.request.json)
 
     @app.route('/info', methods=['GET'])
     def _info():
