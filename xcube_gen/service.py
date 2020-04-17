@@ -21,13 +21,21 @@
 
 import flask
 import flask_cors
-
+from flask import jsonify
 import xcube_gen.api as api
+from xcube_gen.auth0 import AuthError
 
 
 def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
+
+    @app.errorhandler(AuthError)
+    def handle_auth_error(ex):
+        response = jsonify(ex.error)
+        response.status_code = ex.status_code
+        return response
+
     flask_cors.CORS(app)
 
     @app.route('/process', methods=['POST'])
@@ -61,6 +69,10 @@ def new_app():
     @app.route('/datastores', methods=['GET'])
     def _datastores():
         return api.datastores()
+
+    @app.route('/namespace', methods=['POST'])
+    def _namespace():
+        return api.namespace()
 
     @app.route('/', methods=['GET'])
     def _main():

@@ -120,5 +120,16 @@ def datastores() -> AnyDict:
         return json.load(fp)
 
 
+def namespace() -> AnyDict:
+    batch = Batch()
+
+    try:
+        result = {'namespace': batch.create_namespace()}
+    except Exception as e:
+        result = {'xcube-gen-error': str(e)}
+
+    return result
+
+
 def main() -> AnyDict:
     return {'xcube-gen': {'version': version}}

@@ -25,8 +25,8 @@ class Batch:
 
         self._image = image or os.environ.get("XCUBE_SH_DOCKER_IMG")
 
-        if not self._image:
-            raise BatchError("xcube-sh docker image is not configured.")
+        #if not self._image:
+        #    raise BatchError("xcube-sh docker image is not configured.")
 
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 
@@ -151,6 +151,15 @@ class Batch:
         pods = api_pod_instance.list_namespaced_pod(namespace=self._namespace, label_selector=f"job-name={job_name}")
 
         return pods.items
+
+    def create_namespace(self, namespace_name: Optional[str] = None):
+        namespace = namespace_name or self._namespace
+        api_pod_instance = client.CoreV1Api()
+
+        body = client.V1Namespace(metadata=client.V1ObjectMeta(name=namespace))
+        namespace = api_pod_instance.create_namespace(body=body)
+
+        return namespace
 
     def get_info(self, job_name: str):
         self.create_job(job_name=job_name, sh_cmd='info')
