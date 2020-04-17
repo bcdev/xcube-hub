@@ -21,7 +21,8 @@
 
 import flask
 import flask_cors
-from xcube_gen.api import job, jobs, info, job_delete, jobs_purge, job_status, job_result, main
+
+import xcube_gen.api as api
 
 
 def new_app():
@@ -31,35 +32,39 @@ def new_app():
 
     @app.route('/process', methods=['POST'])
     def _job():
-        return job(flask.request.json)
+        return api.job(flask.request.json)
 
     @app.route('/delete', methods=['DELETE'])
     def _job_delete():
-        return job_delete(flask.request.json)
+        return api.job_delete(flask.request.json)
 
     @app.route('/status/<job_name>', methods=['GET'])
     def _job_status(job_name):
-        return job_status(job_name)
+        return api.job_status(job_name)
 
     @app.route('/result/<job_name>', methods=['GET'])
     def _result(job_name):
-        return job_result(job_name)
+        return api.job_result(job_name)
 
     @app.route('/jobs', methods=['GET'])
     def _jobs():
-        return jobs()
+        return api.jobs()
 
     @app.route('/purge', methods=['DELETE'])
     def _jobs_purge():
-        return jobs_purge(flask.request.json)
+        return api.jobs_purge(flask.request.json)
 
     @app.route('/info', methods=['GET'])
-    def _info():
-        return info()
+    def _job_info():
+        return api.job_info()
+
+    @app.route('/datastores', methods=['GET'])
+    def _datastores():
+        return api.datastores()
 
     @app.route('/', methods=['GET'])
     def _main():
-        return main()
+        return api.main()
 
     return app
 

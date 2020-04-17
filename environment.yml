@@ -9,6 +9,8 @@ dependencies:
   - pip
   - click
   - flask
+  - flask-cors
+  - kubernetes
 
   # Inspection
   - jupyterlab
@@ -16,8 +18,6 @@ dependencies:
   - pip:
       # Required
       - requests_oauthlib
-      - kubernetes
-      - flask-cors
 
   # testing
   - flake8
