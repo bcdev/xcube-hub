@@ -19,9 +19,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from xcube_gen.batch import Batch
+import json
+import os.path
 import uuid
 
+from xcube_gen.batch import Batch
 from xcube_gen.types import AnyDict
 from xcube_gen.version import version
 
@@ -101,7 +103,7 @@ def jobs_purge(request: AnyDict) -> AnyDict:
     return result
 
 
-def info() -> AnyDict:
+def job_info() -> AnyDict:
     batch = Batch()
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
@@ -110,6 +112,12 @@ def info() -> AnyDict:
         result = {'xcube-gen-error': str(e)}
 
     return result
+
+
+def datastores() -> AnyDict:
+    datastores_path = os.path.join(os.path.dirname(__file__), 'resources', 'datastores.json')
+    with open(datastores_path) as fp:
+        return json.load(fp)
 
 
 def main() -> AnyDict:
