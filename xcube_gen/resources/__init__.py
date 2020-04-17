@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 # The MIT License (MIT)
-# Copyright (c) 2020 by Brockmann Consult GmbH
+# Copyright (c) 2020 by the xcube development team and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -20,27 +18,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-
-from setuptools import setup, find_packages
-from xcube_gen.version import version
-
-requirements = [
-    # Use ./environment.yml for deps.
-]
-
-packages = find_packages(exclude=["test", "test.*"])
-
-
-setup(
-    name="xcube_gen",
-    version=version,
-    description='An xcube plug-in that implements a data cube generation service',
-    license='MIT',
-    author='xcube Development Team',
-    packages=packages,
-    package_data={
-        'xcube_gen.resources': ['datastores.json'],
-    },
-    install_requires=requirements,
-)
