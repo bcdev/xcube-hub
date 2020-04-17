@@ -1,16 +1,13 @@
+import json
 import os
+import threading
 from datetime import datetime
 from pprint import pprint
 from typing import Sequence, Optional
-import json
-from kubernetes import client, config
-from xcube_gen.types import AnyDict
 
-if os.environ.get('RUN_LOCAL'):
-    print("Running locally")
-    config.load_kube_config()
-else:
-    config.load_incluster_config()
+from kubernetes import client
+
+from xcube_gen.types import AnyDict
 
 
 class BatchError(ValueError):
@@ -18,7 +15,11 @@ class BatchError(ValueError):
 
 
 class Batch:
+    _config_lock = threading.Lock()
+    _config_loaded = False
+
     def __init__(self, namespace: Optional[str] = None, image: Optional[str] = None):
+        self._load_config_once()
 
         self._namespace = namespace or os.environ.get('K8S_NAMESPACE') or 'default'
 
@@ -164,3 +165,21 @@ class Batch:
                 break
 
         return self.get_result(job_name=job_name)
+
+    @classmethod
+    def _load_config_once(cls):
+        if not cls._config_loaded:
+            cls._config_lock.acquire()
+            if not cls._config_loaded:
+                cls._load_config()
+                cls._config_loaded = True
+            cls._config_lock.release()
+
+    @classmethod
+    def _load_config(cls):
+        from kubernetes import config
+        if os.environ.get('RUN_LOCAL'):
+            print("Kubernetes configured to run locally.")
+            config.load_kube_config()
+        else:
+            config.load_incluster_config()
