@@ -23,6 +23,7 @@ import flask
 import flask_cors
 
 import xcube_gen.api as api
+from xcube_gen.database import Database
 
 
 def new_app():
@@ -63,8 +64,13 @@ def new_app():
         return api.datastores()
 
     @app.route('/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
-    def _user_data():
-        return api.datastores()
+    def _user_data(user_name: str):
+        if flask.request.method == 'GET':
+            return Database.instance().get_user_data(user_name)
+        elif flask.request.method == 'PUT':
+            return Database.instance().put_user_data(user_name, flask.request.json)
+        elif flask.request.method == 'DELETE':
+            return Database.instance().delete_user_data(user_name)
 
     @app.route('/', methods=['GET'])
     def _main():

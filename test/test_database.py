@@ -3,15 +3,23 @@ import unittest
 import boto3
 import moto
 
-from xcube_gen.database import DEFAULT_DB_BUCKET
+from xcube_gen.database import DEFAULT_DB_BUCKET_NAME
+from xcube_gen.database import DEFAULT_DB_USER_DATA_KEY
 from xcube_gen.database import Database
 
 
 class DatabaseTest(unittest.TestCase):
+    def test_instance(self):
+        database = Database.instance(profile_name='dev')
+        self.assertIsNotNone(database)
+        self.assertEqual('dev', database.profile_name)
+        self.assertEqual(DEFAULT_DB_BUCKET_NAME, database.bucket_name)
+        self.assertEqual(DEFAULT_DB_USER_DATA_KEY, database.user_data_key)
+
     def test_user_data_crud(self):
         with moto.mock_s3():
             s3 = boto3.client('s3')
-            s3.create_bucket(Bucket=DEFAULT_DB_BUCKET)
+            s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME)
 
             database = Database()
 
