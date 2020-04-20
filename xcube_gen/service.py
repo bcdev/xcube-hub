@@ -81,12 +81,10 @@ def new_app():
 
     @app.route('/users/<user_name>/units/<op>/<int:units>', methods=['PUT'])
     def _user_data(user_name: str, op: str, units: int):
-        if op == 'add':
-            return users.add_processing_units(user_name, units)
-        elif op == 'sub':
-            return users.add_processing_units(user_name, -units)
-        else:
-            return dict(message=f'illegal operation: {op}'), 400
+        try:
+            return users.update_processing_units(user_name, op, units)
+        except api.ApiError as e:
+            return e.response
 
     @app.route('/', methods=['GET'])
     def _main():

@@ -23,7 +23,7 @@ import uuid
 from typing import Any, Tuple, Union
 
 from xcube_gen.batch import Batch
-from xcube_gen.types import AnyDict
+from xcube_gen.types import AnyDict, UNDEFINED
 from xcube_gen.version import version
 
 
@@ -122,7 +122,7 @@ def get_request_entry(request: AnyDict,
                       value_type: Union[type, Tuple[type, ...]] = str,
                       item_type: Union[type, Tuple[type, ...]] = None,
                       item_count: int = None,
-                      default_value=UNDEFINED,
+                      default_value: Any = UNDEFINED,
                       path: str = None) -> Any:
     path = path + '/' + key if path else key
     if key in request:
