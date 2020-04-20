@@ -62,6 +62,10 @@ def new_app():
     def _datastores():
         return api.datastores()
 
+    @app.route('/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
+    def _user_data():
+        return api.datastores()
+
     @app.route('/', methods=['GET'])
     def _main():
         return api.main()
