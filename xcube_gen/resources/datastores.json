@@ -41,6 +41,10 @@
               "name": "B08"
             },
             {
+              "id": "B8A",
+              "name": "B8A"
+            },
+            {
               "id": "B09",
               "name": "B09"
             },
@@ -57,16 +61,28 @@
               "name": "B12"
             },
             {
-              "id": "B13",
-              "name": "B13"
+              "id": "viewZenithMean",
+              "name": "viewZenithMean"
             },
             {
-              "id": "B14",
-              "name": "B14"
+              "id": "viewAzimuthMean",
+              "name": "viewAzimuthMean"
             },
             {
-              "id": "B15",
-              "name": "B15"
+              "id": "sunZenithAngles",
+              "name": "sunZenithAngles"
+            },
+            {
+              "id": "sunAzimuthAngles",
+              "name": "sunAzimuthAngles"
+            },
+            {
+              "id": "CLM",
+              "name": "CLM"
+            },
+            {
+              "id": "CLP",
+              "name": "CLP"
             }
           ]
         },
@@ -107,12 +123,12 @@
               "name": "B08"
             },
             {
-              "id": "B09",
-              "name": "B09"
+              "id": "B8A",
+              "name": "B8A"
             },
             {
-              "id": "B10",
-              "name": "B10"
+              "id": "B09",
+              "name": "B09"
             },
             {
               "id": "B11",
@@ -123,16 +139,80 @@
               "name": "B12"
             },
             {
-              "id": "B13",
-              "name": "B13"
+              "id": "SCL",
+              "name": "SCL"
             },
             {
-              "id": "B14",
-              "name": "B14"
+              "id": "SNW",
+              "name": "SNW"
             },
             {
-              "id": "B15",
-              "name": "B15"
+              "id": "CLD",
+              "name": "CLD"
+            },
+            {
+              "id": "viewZenithMean",
+              "name": "viewZenithMean"
+            },
+            {
+              "id": "viewAzimuthMean",
+              "name": "viewAzimuthMean"
+            },
+            {
+              "id": "sunZenithAngles",
+              "name": "sunZenithAngles"
+            },
+            {
+              "id": "sunAzimuthAngles",
+              "name": "sunAzimuthAngles"
+            },
+            {
+              "id": "AOT",
+              "name": "AOT"
+            },
+            {
+              "id": "CLM",
+              "name": "CLM"
+            },
+            {
+              "id": "CLP",
+              "name": "CLP"
+            }
+          ]
+        },
+        {
+          "id": "S1GRD",
+          "name": "S1GRD",
+          "variables": [
+            {
+              "id": "VV",
+              "name": "VV"
+            },
+            {
+              "id": "VH",
+              "name": "VH"
+            },
+            {
+              "id": "HV",
+              "name": "HV"
+            },
+            {
+              "id": "HH",
+              "name": "HH"
+            },
+            {
+              "id": "dataMask",
+              "name": "dataMask"
+            }
+          ]
+        },
+        {
+          "id": "DEM",
+          "name": "DEM",
+          "variables": [
+            {
+              "id": "DEM",
+              "name": "DEM"
             }
           ]
         }
