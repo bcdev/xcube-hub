@@ -97,18 +97,13 @@ def new_app():
             return users.delete_user_data(user_name)
 
     @app.route('/users/<user_name>/units/<op>/<int:units>', methods=['PUT'])
-    def _user_data(user_name: str, op: str, units: int):
+    def _user_data_units(user_name: str, op: str, units: int):
         if op == 'add':
             return users.add_processing_units(user_name, units)
         elif op == 'sub':
             return users.add_processing_units(user_name, -units)
         else:
             return dict(message=f'illegal operation: {op}'), 400
-
-    @app.route('/namespace', methods=['POST'])
-    @requires_auth
-    def _namespace():
-        return api.namespace()
 
     @app.route('/', methods=['GET'])
     @requires_auth

@@ -10,6 +10,9 @@ dependencies:
   - flask
   - flask-cors
   - matplotlib-base
+  - boto3
+  - python-jose
+  - kubernetes
 
   # Inspection
   - jupyterlab
@@ -17,10 +20,9 @@ dependencies:
   - pip:
       # Required
       - requests_oauthlib
-      - python-jose
-      - kubernetes
 
   # testing
+  - moto
   - flake8
   - pytest
   - pytest-cov
