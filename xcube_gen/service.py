@@ -23,12 +23,20 @@ import flask
 import flask_cors
 
 import xcube_gen.api as api
+from xcube_gen.controllers import datastores
+from xcube_gen.controllers import users
 
 
 def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
     flask_cors.CORS(app)
+
+    # '/jobs/<user_name>' [GET]  --> List
+    # '/jobs/<user_name>' [POST]  --> Start job, returns Job ID
+    # '/jobs/<user_name>/<job_id>' [DELETE]  --> Cancel/remove job
+    # '/jobs/<user_name>/<job_id>/status' [GET]  --> Job status
+    # '/jobs/<user_name>/<job_id>/result' [GET]  --> Job result
 
     @app.route('/process', methods=['POST'])
     def _job():
@@ -60,7 +68,25 @@ def new_app():
 
     @app.route('/datastores', methods=['GET'])
     def _datastores():
-        return api.datastores()
+        return datastores.get_datastores()
+
+    @app.route('/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
+    def _user_data(user_name: str):
+        if flask.request.method == 'GET':
+            return users.get_user_data(user_name)
+        elif flask.request.method == 'PUT':
+            return users.put_user_data(user_name, flask.request.json)
+        elif flask.request.method == 'DELETE':
+            return users.delete_user_data(user_name)
+
+    @app.route('/users/<user_name>/units/<op>/<int:units>', methods=['PUT'])
+    def _user_data(user_name: str, op: str, units: int):
+        if op == 'add':
+            return users.add_processing_units(user_name, units)
+        elif op == 'sub':
+            return users.add_processing_units(user_name, -units)
+        else:
+            return dict(message=f'illegal operation: {op}'), 400
 
     @app.route('/', methods=['GET'])
     def _main():
