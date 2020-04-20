@@ -19,9 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import json
-import os.path
 import uuid
+from typing import Any, Tuple, Union
 
 from xcube_gen.batch import Batch
 from xcube_gen.types import AnyDict
@@ -133,3 +132,39 @@ def namespace() -> AnyDict:
 
 def main() -> AnyDict:
     return {'xcube-gen': {'version': version}}
+
+
+def get_request_entry(request: AnyDict,
+                      key: str,
+                      value_type: Union[type, Tuple[type, ...]] = str,
+                      item_type: Union[type, Tuple[type, ...]] = None,
+                      item_count: int = None,
+                      default_value=UNDEFINED,
+                      path: str = None) -> Any:
+    path = path + '/' + key if path else key
+    if key in request:
+        value = request[key]
+    else:
+        if default_value is UNDEFINED:
+            raise ApiError(400, f'missing request entry "{path}"')
+        value = default_value
+    if not isinstance(value, value_type):
+        raise ApiError(400, f'request entry "{path}" is of wrong type, expected {value_type}')
+    if isinstance(value, list):
+        if item_count is not None and len(value) != item_count:
+            raise ApiError(400, f'request entry "{path}" must be a list of length {item_count}')
+        if item_type is not None:
+            for v in value:
+                if not isinstance(v, item_type):
+                    raise ApiError(400, f'request entry "{path}" has an item of wrong type, expected {item_type}')
+    return value
+
+
+class ApiError(BaseException):
+    def __init__(self, status_code: int, message: str):
+        self.status_code = status_code
+        self.message = message
+
+    @property
+    def response(self):
+        return dict(message=self.message), self.status_code
