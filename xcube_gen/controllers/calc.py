@@ -2,7 +2,7 @@ from xcube_gen.api import get_request_entry
 from xcube_gen.types import AnyDict
 
 
-def calc_cube_sizes_and_cost(processing_request: AnyDict):
+def calc_processing_units(processing_request: AnyDict) -> AnyDict:
     cube_config = get_request_entry(processing_request, 'cube_config',
                                     value_type=dict)
     x1, y1, x2, y2 = get_request_entry(cube_config, 'geometry',
@@ -14,7 +14,7 @@ def calc_cube_sizes_and_cost(processing_request: AnyDict):
                                     value_type=(int, float),
                                     path='cube_config')
     tile_width, tile_height = get_request_entry(cube_config, 'tile_size',
-                                                value_type=str,
+                                                value_type=list,
                                                 item_count=2,
                                                 item_type=int)
     start_date, end_date = get_request_entry(cube_config, 'time_range',
@@ -46,11 +46,19 @@ def calc_cube_sizes_and_cost(processing_request: AnyDict):
         height = num_tiles_y * tile_height
 
     import pandas as pd
-    date_range = pd.date_range(start=start_date, end=end_date, periods=time_period)
+    date_range = pd.date_range(start=start_date, end=end_date, freq=time_period)
     num_times = len(date_range)
 
-    return dict(size=[width, height],
-                tile_size=[tile_width, tile_height],
-                num_tiles=[num_tiles_x, num_tiles_y],
-                num_times=num_times,
-                num_variables=len(band_names))
+    # TODO
+    processing_units_input_count = 0
+    processing_units_output_count = 0
+    processing_units_total_count = processing_units_input_count + processing_units_output_count
+
+    return dict(sizeEstimation=dict(dims=dict(time=num_times, y=height, x=width),
+                                    size=[width, height],
+                                    tileSize=[tile_width, tile_height],
+                                    tileCount=[num_tiles_x, num_tiles_y],
+                                    variableCount=len(band_names)),
+                processingUnits=dict(inputCount=processing_units_input_count,
+                                     outputCount=processing_units_output_count,
+                                     totalCount=processing_units_total_count))
