@@ -1,5 +1,6 @@
 import unittest
 
+
 class TestBatch(unittest.TestCase):
     def test_status(self):
         from xcube_gen.batch import Batch

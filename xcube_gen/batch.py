@@ -25,8 +25,8 @@ class Batch:
 
         self._image = image or os.environ.get("XCUBE_SH_DOCKER_IMG")
 
-        #if not self._image:
-        #    raise BatchError("xcube-sh docker image is not configured.")
+        if not self._image:
+            raise BatchError("xcube-sh docker image is not configured.")
 
         self._cmd = ["/bin/bash", "-c", "source activate xcube && xcube sh gen"]
 

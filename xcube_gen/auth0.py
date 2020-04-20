@@ -8,7 +8,7 @@ from jose import jwt
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
 ALGORITHMS = ["RS256"]
-API_IDENTIFIER = 'https://geodb.brockmann-consult.de'
+API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v1/'
 
 
 class AuthError(Exception):

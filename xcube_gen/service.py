@@ -23,7 +23,7 @@ import flask
 import flask_cors
 from flask import jsonify
 import xcube_gen.api as api
-from xcube_gen.auth0 import AuthError
+from xcube_gen.auth0 import AuthError, requires_auth
 
 
 def new_app():
@@ -31,6 +31,7 @@ def new_app():
     app = flask.Flask('xcube-genserv')
 
     @app.errorhandler(AuthError)
+    @requires_auth
     def handle_auth_error(ex):
         response = jsonify(ex.error)
         response.status_code = ex.status_code
@@ -39,42 +40,52 @@ def new_app():
     flask_cors.CORS(app)
 
     @app.route('/process', methods=['POST'])
+    @requires_auth
     def _job():
         return api.job(flask.request.json)
 
     @app.route('/delete', methods=['DELETE'])
+    @requires_auth
     def _job_delete():
         return api.job_delete(flask.request.json)
 
     @app.route('/status/<job_name>', methods=['GET'])
+    @requires_auth
     def _job_status(job_name):
         return api.job_status(job_name)
 
     @app.route('/result/<job_name>', methods=['GET'])
+    @requires_auth
     def _result(job_name):
         return api.job_result(job_name)
 
     @app.route('/jobs', methods=['GET'])
+    @requires_auth
     def _jobs():
         return api.jobs()
 
     @app.route('/purge', methods=['DELETE'])
+    @requires_auth
     def _jobs_purge():
         return api.jobs_purge(flask.request.json)
 
     @app.route('/info', methods=['GET'])
+    @requires_auth
     def _job_info():
         return api.job_info()
 
     @app.route('/datastores', methods=['GET'])
+    @requires_auth
     def _datastores():
         return api.datastores()
 
     @app.route('/namespace', methods=['POST'])
+    @requires_auth
     def _namespace():
         return api.namespace()
 
     @app.route('/', methods=['GET'])
+    @requires_auth
     def _main():
         return api.main()
 
