@@ -42,5 +42,11 @@ setup(
     package_data={
         'xcube_gen.resources': ['datastores.json'],
     },
+    entry_points={
+        'console_scripts': [
+            # xcube's CLI
+            'xcube-gen = xcube_gen.cli:main',
+        ],
+    },
     install_requires=requirements,
 )

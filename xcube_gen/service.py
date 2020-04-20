@@ -67,7 +67,7 @@ def new_app():
     @app.route('/purge', methods=['DELETE'])
     @requires_auth
     def _jobs_purge():
-        return api.jobs_purge(flask.request.json)
+        return api.jobs_purge()
 
     @app.route('/info', methods=['GET'])
     @requires_auth

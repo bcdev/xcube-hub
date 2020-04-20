@@ -4,13 +4,12 @@ channels:
   - defaults
 dependencies:
   # Required
-  - xcube>=0.3.0
   - oauthlib
   - pip
   - click
   - flask
   - flask-cors
-  - kubernetes
+  - matplotlib-base
 
   # Inspection
   - jupyterlab
@@ -18,6 +17,8 @@ dependencies:
   - pip:
       # Required
       - requests_oauthlib
+      - python-jose
+      - kubernetes
 
   # testing
   - flake8

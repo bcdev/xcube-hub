@@ -93,7 +93,7 @@ def jobs_delete(request: AnyDict) -> AnyDict:
     return result
 
 
-def jobs_purge(request: AnyDict) -> AnyDict:
+def jobs_purge() -> AnyDict:
     batch = Batch()
     try:
         result = {'purge': batch.purge_jobs()}
