@@ -30,21 +30,6 @@ DEFAULT_DB_PROFILE_NAME = 'default'
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
 DEFAULT_DB_USER_DATA_KEY = 'users/{user_name}/data.json'
 
-DATABASE_DOC = f"""
-An object database that uses S3 as backend.
-
-Credentials are read from ``~/.aws/credentials, section [<profile_name>]``.
-Use ``aws configure [--profile <profile_name>]`` CLI command to configure a profile.
-See https://docs.aws.amazon.com/cli/latest/reference/configure/.
-
-:param profile_name: The AWS credentials profile. 
-    Defaults to "{DEFAULT_DB_PROFILE_NAME}".
-:param bucket: The S3 bucket that stores database objects. 
-    Defaults to "{DEFAULT_DB_BUCKET_NAME}".
-:param user_data_key: A key used to store user data. Must contain the string "{{user_name}}".
-    Defaults to "{DEFAULT_DB_USER_DATA_KEY}".
-"""
-
 
 class Database:
     __doc__ = \
