@@ -24,7 +24,7 @@ import os.path
 import uuid
 from typing import Any, Tuple, Union, Optional
 
-from xcube_gen.batch import Batch
+from xcube_gen.controllers.jobs import create_job, JobError, list_jobs, delete_job, get_job_status
 from xcube_gen.types import AnyDict, UNDEFINED, JsonObject, JsonValue
 from xcube_gen.version import version
 
@@ -57,43 +57,38 @@ class ApiError(BaseException):
 
 
 def job(request: AnyDict) -> AnyDict:
-    batch = Batch()
-
     try:
         job_name = f"xcube-gen-{str(uuid.uuid4())}"
-        result = batch.create_job(job_name=job_name, sh_cmd='gen', cfg=request)
-    except Exception as e:
-        result = {'xcube-gen-error': str(e)}
+        namespace = request['namespace']
 
-    return result
+        return create_job(namespace=namespace, job_name=job_name, sh_cmd='gen', cfg=request)
+    except JobError as e:
+        raise ApiError(400, str(e))
 
 
-def jobs() -> AnyDict:
-    batch = Batch()
-
+def jobs(request: AnyDict) -> AnyDict:
     try:
-        result = {'jobs': batch.list_jobs()}
-    except Exception as e:
-        result = {'xcube-gen-error': str(e)}
+        namespace = request['namespace']
+        result = {'jobs': list_jobs(namespace=namespace)}
+    except JobError as e:
+        raise ApiError(400, str(e))
 
     return result
 
 
 def job_delete(request: AnyDict) -> AnyDict:
-    batch = Batch()
     job_name = request['job_name']
+    namespace = request['namespace']
     try:
-        result = {'delete': batch.delete_job(job_name)}
-    except Exception as e:
-        result = {'xcube-gen-error': str(e)}
-
-    return result
+        return delete_job(namespace=namespace, job_name=job_name)
+    except JobError as e:
+        raise ApiError(str(e))
 
 
 def job_status(job_name: str) -> AnyDict:
-    batch = Batch()
     try:
-        return batch.get_status(job_name)
+        namespace = request['namespace']
+        return get_job_status(job_name)
     except Exception as e:
         result = {'xcube-gen-error': str(e)}
 

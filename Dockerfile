@@ -16,25 +16,14 @@ RUN apt-get -y update && apt-get -y install curl unzip
 
 USER ${XCUBE_USER_NAME}
 
-RUN git clone https://github.com/dcs4cop/xcube /home/${XCUBE_USER_NAME}/xcube
-
-WORKDIR /home/${XCUBE_USER_NAME}/xcube
-RUN conda env create
-RUN source activate xcube && python setup.py install
-
-
 WORKDIR /home/${XCUBE_USER_NAME}
 ADD --chown=1000:1000 environment.yml environment.yml
-RUN conda env update -n xcube
-RUN source activate xcube && pip install pydevd-pycharm
+RUN conda env create
+RUN source activate xcube-gen && pip install pydevd-pycharm
 
 ADD --chown=1000:1000 ./ .
-RUN source activate xcube && python setup.py install
-
-#RUN aws sts get-caller-identity
-#RUN aws eks update-kubeconfig --region eu-central-1 --name dcfs-xcube-gen-cluster
-
+RUN source activate xcube-gen && python setup.py install
 
 EXPOSE 8000
 
-CMD ["/bin/bash", "-c", "source activate xcube && xcube genserv start --debug --port 8000 --address 0.0.0.0"]
+CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-gen start --debug --port 8000 --address 0.0.0.0"]

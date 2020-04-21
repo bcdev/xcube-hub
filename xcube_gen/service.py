@@ -26,6 +26,7 @@ import xcube_gen.api as api
 from xcube_gen.auth0 import AuthError, requires_auth
 from xcube_gen.controllers import datastores
 from xcube_gen.controllers import users
+from xcube_gen.controllers.jobs import list_jobs, purge_jobs, create_job
 
 
 def new_app():
@@ -47,15 +48,21 @@ def new_app():
     # '/jobs/<user_name>/<job_id>/status' [GET]  --> Job status
     # '/jobs/<user_name>/<job_id>/result' [GET]  --> Job result
 
-    @app.route('/process', methods=['POST'])
+    @app.route('/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
-    def _job():
-        return api.job(flask.request.json)
+    def _jobs(user_name: str):
+        if flask.request.method == 'GET':
+            api.list_jobs(user=user_name)
+        elif flask.request.method == 'POST':
+            api.create_job(user=user_name)
+        elif flask.request.method == 'DELETE':
+            api.purge_jobs(user=user_name)
 
-    @app.route('/delete', methods=['DELETE'])
+    @app.route('/jobs/<user_name>/<job_id>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
-    def _job_delete():
-        return api.job_delete(flask.request.json)
+    def _job_delete(user_name: str, user_id: str):
+        if flask.request.method == "GET":
+            return api.job_delete(flask.request.json)
 
     @app.route('/status/<job_name>', methods=['GET'])
     @requires_auth
