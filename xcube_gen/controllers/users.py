@@ -1,13 +1,13 @@
 import datetime
 from typing import Optional
 
-from xcube_gen.api import ApiError, get_json_request_entry
+from xcube_gen.api import ApiError, get_json_request_value
 from xcube_gen.database import Database
-from xcube_gen.types import AnyDict
+from xcube_gen.types import JsonObject
 
 
-def update_processing_units(user_name: str, processing_units: AnyDict, factor: int = 1):
-    update_count = get_json_request_entry(processing_units, 'count', value_type=int)
+def update_processing_units(user_name: str, processing_units: JsonObject, factor: int = 1):
+    update_count = get_json_request_value(processing_units, 'count', value_type=int)
     if update_count <= 0:
         raise ApiError(400, 'Processing unit counts must be greater than zero')
     update_count *= factor
@@ -22,11 +22,11 @@ def update_processing_units(user_name: str, processing_units: AnyDict, factor: i
     put_user_data(user_name, user_data)
 
 
-def get_user_data(user_name: str) -> Optional[AnyDict]:
+def get_user_data(user_name: str) -> Optional[JsonObject]:
     return Database.instance().get_user_data(user_name)
 
 
-def put_user_data(user_name: str, user_data: AnyDict):
+def put_user_data(user_name: str, user_data: JsonObject):
     Database.instance().put_user_data(user_name, user_data)
 
 

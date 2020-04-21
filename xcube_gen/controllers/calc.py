@@ -1,31 +1,31 @@
-from xcube_gen.api import get_json_request_entry
-from xcube_gen.types import AnyDict
+from xcube_gen.api import get_json_request_value
+from xcube_gen.types import JsonObject
 
 
-def calc_processing_units(processing_request: AnyDict) -> AnyDict:
-    cube_config = get_json_request_entry(processing_request, 'cube_config',
+def calc_processing_units(processing_request: JsonObject) -> JsonObject:
+    cube_config = get_json_request_value(processing_request, 'cube_config',
                                          value_type=dict)
-    x1, y1, x2, y2 = get_json_request_entry(cube_config, 'geometry',
+    x1, y1, x2, y2 = get_json_request_value(cube_config, 'geometry',
                                             value_type=list,
                                             item_count=4,
                                             item_type=(int, float),
-                                            path='cube_config')
-    spatial_res = get_json_request_entry(cube_config, 'spatial_res',
+                                            key_path='cube_config')
+    spatial_res = get_json_request_value(cube_config, 'spatial_res',
                                          value_type=(int, float),
-                                         path='cube_config')
-    tile_width, tile_height = get_json_request_entry(cube_config, 'tile_size',
+                                         key_path='cube_config')
+    tile_width, tile_height = get_json_request_value(cube_config, 'tile_size',
                                                      value_type=list,
                                                      item_count=2,
                                                      item_type=int)
-    start_date, end_date = get_json_request_entry(cube_config, 'time_range',
+    start_date, end_date = get_json_request_value(cube_config, 'time_range',
                                                   value_type=list,
                                                   item_count=2,
                                                   item_type=str,
-                                                  path='cube_config')
-    time_period = get_json_request_entry(cube_config, 'time_period',
+                                                  key_path='cube_config')
+    time_period = get_json_request_value(cube_config, 'time_period',
                                          value_type=str,
                                          default_value='1D')
-    band_names = get_json_request_entry(cube_config, 'band_names',
+    band_names = get_json_request_value(cube_config, 'band_names',
                                         value_type=list,
                                         item_type=str,
                                         default_value=[])
