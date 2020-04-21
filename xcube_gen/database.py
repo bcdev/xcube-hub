@@ -28,7 +28,9 @@ from xcube_gen.types import JsonObject
 
 DEFAULT_DB_PROFILE_NAME = 'default'
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
-DEFAULT_DB_USER_DATA_KEY = 'users/{user_name}/data.json'
+
+
+_DB_USER_DATASET_KEY = 'users/{user_name}/{dataset_name}.json'
 
 
 class Database:
@@ -44,8 +46,6 @@ class Database:
             Defaults to "{DEFAULT_DB_PROFILE_NAME}".
         :param bucket: The S3 bucket that stores database objects. 
             Defaults to "{DEFAULT_DB_BUCKET_NAME}".
-        :param user_data_key: A key used to store user data. Must contain the string "{{user_name}}".
-            Defaults to "{DEFAULT_DB_USER_DATA_KEY}".
         """
 
     _instance_lock = threading.Lock()
@@ -53,12 +53,10 @@ class Database:
 
     def __init__(self,
                  profile_name: str = DEFAULT_DB_PROFILE_NAME,
-                 bucket_name: str = DEFAULT_DB_BUCKET_NAME,
-                 user_data_key: str = DEFAULT_DB_USER_DATA_KEY):
+                 bucket_name: str = DEFAULT_DB_BUCKET_NAME):
 
         self._profile_name = profile_name
         self._bucket_name = bucket_name
-        self._user_data_key = user_data_key
 
         self._session = boto3.Session(profile_name=profile_name)
         self._client = self._session.client('s3')
@@ -85,13 +83,9 @@ class Database:
     def bucket_name(self) -> str:
         return self._bucket_name
 
-    @property
-    def user_data_key(self) -> str:
-        return self._user_data_key
-
-    def get_user_data(self, user_name: str) -> Optional[JsonObject]:
+    def get_user_data(self, user_name: str, dataset_name: str) -> Optional[JsonObject]:
         try:
-            response = self._client.get_object(**self._user_data_kwargs(user_name))
+            response = self._client.get_object(**self._user_data_kwargs(user_name, dataset_name))
         except self._client.exceptions.NoSuchKey:
             return None
         # print('get_user_data:', response)
@@ -101,22 +95,24 @@ class Database:
         else:
             raise DatabaseError('No data found')
 
-    def put_user_data(self, user_name: str, user_data: JsonObject):
+    def put_user_data(self, user_name: str, dataset_name: str, user_data: JsonObject, ):
         object_data = json.dumps(user_data).encode('utf-8')
-        response = self._client.put_object(**self._user_data_kwargs(user_name), Body=object_data)
+        response = self._client.put_object(**self._user_data_kwargs(user_name, dataset_name),
+                                           Body=object_data)
         # print('put_user_data:', response)
         self._check_response(response)
 
-    def delete_user_data(self, user_name: str):
+    def delete_user_data(self, user_name: str, dataset_name: str):
         try:
-            response = self._client.delete_object(**self._user_data_kwargs(user_name))
+            response = self._client.delete_object(**self._user_data_kwargs(user_name, dataset_name))
         except self._client.exceptions.NoSuchKey:
             return
         # print('delete_user_data:', response)
         self._check_response(response)
 
-    def _user_data_kwargs(self, user_name: str):
-        return dict(Bucket=self._bucket_name, Key=self._user_data_key.format(user_name=user_name))
+    def _user_data_kwargs(self, user_name: str, dataset_name: str):
+        return dict(Bucket=self._bucket_name,
+                    Key=_DB_USER_DATASET_KEY.format(user_name=user_name, dataset_name=dataset_name))
 
     @classmethod
     def _check_response(cls, response: JsonObject):

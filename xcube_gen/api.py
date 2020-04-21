@@ -146,7 +146,7 @@ def main() -> AnyDict:
 
 def get_json_request_value(request: JsonObject,
                            key: str,
-                           value_type: Union[type, Tuple[type, ...]] = str,
+                           value_type: Union[type, Tuple[type, ...]] = None,
                            item_type: Union[type, Tuple[type, ...]] = None,
                            item_count: int = None,
                            default_value: JsonValue = UNDEFINED,
@@ -159,23 +159,30 @@ def get_json_request_value(request: JsonObject,
         if default_value is UNDEFINED:
             raise ApiError(400, f'missing request key "{_join_key_path(key_path, key)}"')
         value = default_value
-    if not isinstance(value, value_type):
+    if value_type is not None and not isinstance(value, value_type):
         raise ApiError(400,
                        f'value for request key "{_join_key_path(key_path, key)}" is of wrong type: '
-                       f'expected type {value_type}, got type {type(value)}')
+                       f'expected type {_type_name(value_type)}, got type {_type_name(type(value))}')
     if isinstance(value, (list, tuple)):
         if item_count is not None and len(value) != item_count:
             raise ApiError(400,
                            f'value for request key "{_join_key_path(key_path, key)}" must be a '
-                           f'list of length {item_count}, got length {len(value)}')
+                           f'{_type_name(type(value))} of length {item_count}, got length {len(value)}')
         if item_type is not None:
             for v in value:
                 if not isinstance(v, item_type):
                     raise ApiError(400,
                                    f'value for request key "{_join_key_path(key_path, key)}" has an item of wrong type: '
-                                   f'expected type {item_type}, got type {type(v)}')
+                                   f'expected type {_type_name(item_type)}, got type {_type_name(type(v))}')
     return value
 
 
 def _join_key_path(key_path: Optional[str], key: str) -> str:
     return (key_path + '/' + key) if key_path else key
+
+
+def _type_name(value_type: Union[type, Tuple[type, ...]]):
+    if isinstance(value_type, type):
+        return value_type.__name__
+    else:
+        return ' or '.join(_type_name(t) for t in value_type)
