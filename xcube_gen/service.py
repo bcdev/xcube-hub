@@ -85,25 +85,28 @@ def new_app():
     @app.route('/datastores', methods=['GET'])
     @requires_auth
     def _datastores():
-        return datastores.get_datastores()
+        return api.ApiResponse.success(result=datastores.get_datastores())
 
     @app.route('/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     def _user_data(user_name: str):
         if flask.request.method == 'GET':
-            return users.get_user_data(user_name)
+            users.get_user_data(user_name)
         elif flask.request.method == 'PUT':
-            return users.put_user_data(user_name, flask.request.json)
+            users.put_user_data(user_name, flask.request.json)
         elif flask.request.method == 'DELETE':
-            return users.delete_user_data(user_name)
+            users.delete_user_data(user_name)
+        return api.ApiResponse.success()
 
-    @app.route('/users/<user_name>/units/<op>/<int:units>', methods=['PUT'])
-    def _user_data_units(user_name: str, op: str, units: int):
-        if op == 'add':
-            return users.add_processing_units(user_name, units)
-        elif op == 'sub':
-            return users.add_processing_units(user_name, -units)
-        else:
-            return dict(message=f'illegal operation: {op}'), 400
+    @app.route('/users/<user_name>/punits', methods=['PUT', 'DELETE'])
+    def _update_processing_units(user_name: str):
+        try:
+            if flask.request.method == 'PUT':
+                users.update_processing_units(user_name, flask.request.json, factor=1)
+            elif flask.request.method == 'DELETE':
+                users.update_processing_units(user_name, flask.request.json, factor=-1)
+        except api.ApiError as e:
+            return e.response
+        return api.ApiResponse.success()
 
     @app.route('/', methods=['GET'])
     @requires_auth

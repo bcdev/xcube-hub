@@ -24,7 +24,7 @@ from typing import Optional
 
 import boto3
 
-from xcube_gen.types import AnyDict
+from xcube_gen.types import JsonObject
 
 DEFAULT_DB_PROFILE_NAME = 'default'
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
@@ -89,7 +89,7 @@ class Database:
     def user_data_key(self) -> str:
         return self._user_data_key
 
-    def get_user_data(self, user_name: str) -> Optional[AnyDict]:
+    def get_user_data(self, user_name: str) -> Optional[JsonObject]:
         try:
             response = self._client.get_object(**self._user_data_kwargs(user_name))
         except self._client.exceptions.NoSuchKey:
@@ -101,7 +101,7 @@ class Database:
         else:
             raise DatabaseError('No data found')
 
-    def put_user_data(self, user_name: str, user_data: AnyDict):
+    def put_user_data(self, user_name: str, user_data: JsonObject):
         object_data = json.dumps(user_data).encode('utf-8')
         response = self._client.put_object(**self._user_data_kwargs(user_name), Body=object_data)
         # print('put_user_data:', response)
@@ -119,7 +119,7 @@ class Database:
         return dict(Bucket=self._bucket_name, Key=self._user_data_key.format(user_name=user_name))
 
     @classmethod
-    def _check_response(cls, response: AnyDict):
+    def _check_response(cls, response: JsonObject):
         status_code = response.get('ResponseMetadata', {}).get('HTTPStatusCode', 0)
         if not (200 <= status_code < 300):
             raise DatabaseError(f'AWS S3 responded with HTTP status code {status_code}')
