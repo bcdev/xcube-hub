@@ -150,57 +150,74 @@
             {
               "id": "surface_pressure",
               "units": "hPa",
-              "name": "Pressure at the bottom of the atmosphere."
-            },
-            {
-              "id": "air_pressure",
-              "units": "hPa",
-              "name": "air pressure at layer boundaries"
+              "name": "Pressure at the bottom of the atmosphere.",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3e_ndens",
               "units": "6.02214E-17 mol m-3",
-              "name": "error in the weighted average of the number density (#molecules/cm3)"
+              "name": "error in the weighted average of the number density (#molecules/cm3)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3e_du",
               "units": "446.15E-6 mol m-2",
-              "name": "error in the weighted average of the partial ozone columns (DU/layer)"
+              "name": "error in the weighted average of the partial ozone columns (DU/layer)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3e_vmr",
               "units": "1e-6",
-              "name": "error in the weighted average of the volume mixing ratio (ppmv)"
-            },
-            {
-              "id": "layers",
-              "units": "1",
-              "name": "model_level_number == layer number, starting at 1"
+              "name": "error in the weighted average of the volume mixing ratio (ppmv)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3e_du_tot",
               "units": "446.15E-6 mol m-2",
-              "name": "total column error: quadratically added o3e_du (DU)"
+              "name": "total column error: quadratically added o3e_du (DU)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3_du_tot",
               "units": "446.15E-6 mol m-2",
-              "name": "total column: vertically integrated O3_du dataset (DU)"
+              "name": "total column: vertically integrated O3_du dataset (DU)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3_ndens",
               "units": "6.02214E-17 mol m-3",
-              "name": "weighted average of the number density (#molecules/cm3)"
+              "name": "weighted average of the number density (#molecules/cm3)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3_du",
               "units": "446.15E-6 mol m-2",
-              "name": "weighted average of the partial ozone columns (DU/layer)"
+              "name": "weighted average of the partial ozone columns (DU/layer)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             },
             {
               "id": "O3_vmr",
               "units": "1e-6",
-              "name": "weighted average of the volume mixing ratio (ppmv)"
+              "name": "weighted average of the volume mixing ratio (ppmv)",
+              "dtype": "float32",
+              "spatialRes": 1.0,
+              "temporalRes": "1M"
             }
           ]
         },
