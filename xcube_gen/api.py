@@ -27,6 +27,33 @@ from xcube_gen.types import AnyDict, UNDEFINED
 from xcube_gen.version import version
 
 
+class ApiResponse:
+
+    @classmethod
+    def success(cls, result: Any = None) -> AnyDict:
+        response = dict(status='ok')
+        if result is not None:
+            response['result'] = result
+        return response
+
+    @classmethod
+    def error(cls, error: Union[str, BaseException] = None, status_code: int = 500) -> Tuple[AnyDict, int]:
+        response = dict(status='error')
+        if error is not None:
+            response['message'] = f'{error}'
+        return response, status_code
+
+
+class ApiError(BaseException):
+    def __init__(self, status_code: int, message: str):
+        super().__init__(message)
+        self.status_code = status_code
+
+    @property
+    def response(self):
+        return ApiResponse.error(error=self, status_code=self.status_code)
+
+
 def job(request: AnyDict) -> AnyDict:
     batch = Batch()
 
@@ -117,37 +144,32 @@ def main() -> AnyDict:
     return {'xcube-gen': {'version': version}}
 
 
-def get_request_entry(request: AnyDict,
-                      key: str,
-                      value_type: Union[type, Tuple[type, ...]] = str,
-                      item_type: Union[type, Tuple[type, ...]] = None,
-                      item_count: int = None,
-                      default_value: Any = UNDEFINED,
-                      path: str = None) -> Any:
+def get_json_request_entry(request: AnyDict,
+                           key: str,
+                           value_type: Union[type, Tuple[type, ...]] = str,
+                           item_type: Union[type, Tuple[type, ...]] = None,
+                           item_count: int = None,
+                           default_value: Any = UNDEFINED,
+                           path: str = None) -> Any:
+    if not isinstance(request, dict):
+        raise ApiError(400, f'request must be a JSON object')
     path = path + '/' + key if path else key
     if key in request:
         value = request[key]
     else:
         if default_value is UNDEFINED:
-            raise ApiError(400, f'missing request entry "{path}"')
+            raise ApiError(400, f'missing request key "{path}"')
         value = default_value
     if not isinstance(value, value_type):
-        raise ApiError(400, f'request entry "{path}" is of wrong type, expected {value_type}')
+        raise ApiError(400, f'value for request key "{path}" is of wrong type: '
+                            f'expected {value_type}, got {type(value)}')
     if isinstance(value, list):
         if item_count is not None and len(value) != item_count:
-            raise ApiError(400, f'request entry "{path}" must be a list of length {item_count}')
+            raise ApiError(400, f'value for request entry "{path}" must be a '
+                                f'list of length {item_count}, got {len(value)}')
         if item_type is not None:
             for v in value:
                 if not isinstance(v, item_type):
-                    raise ApiError(400, f'request entry "{path}" has an item of wrong type, expected {item_type}')
+                    raise ApiError(400, f'value request entry "{path}" has an item of wrong type: '
+                                        f'expected {item_type}, got {type(v)}')
     return value
-
-
-class ApiError(BaseException):
-    def __init__(self, status_code: int, message: str):
-        self.status_code = status_code
-        self.message = message
-
-    @property
-    def response(self):
-        return dict(message=self.message), self.status_code

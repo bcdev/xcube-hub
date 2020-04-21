@@ -1,25 +1,23 @@
 import datetime
 from typing import Optional
 
-from xcube_gen.api import ApiError
+from xcube_gen.api import ApiError, get_json_request_entry
 from xcube_gen.database import Database
 from xcube_gen.types import AnyDict
 
 
-def update_processing_units(user_name: str, op: str, delta_count: int):
-    if op not in ('charge', 'consume'):
-        raise ApiError(400, 'Processing unit operation must be either "charge" or "consume"')
-    if delta_count < 0:
+def update_processing_units(user_name: str, processing_units: AnyDict, factor: int = 1):
+    update_count = get_json_request_entry(processing_units, 'count', value_type=int)
+    if update_count <= 0:
         raise ApiError(400, 'Processing unit counts must be greater than zero')
-    if op == 'consume':
-        delta_count *= -1
+    update_count *= factor
     user_data = get_user_data(user_name) or dict()
     now = datetime.datetime.now()
     processing_units = user_data.get('processingUnits', dict())
     count = processing_units.get('count', 0)
     history = processing_units.get('history', [])
-    processing_units['count'] = count + delta_count
-    processing_units['history'] = [[now.strftime("%Y-%m-%d %H:%M:%S"), delta_count]] + history
+    processing_units['count'] = count + update_count
+    processing_units['history'] = [[now.strftime("%Y-%m-%d %H:%M:%S"), update_count]] + history
     user_data['processingUnits'] = processing_units
     put_user_data(user_name, user_data)
 

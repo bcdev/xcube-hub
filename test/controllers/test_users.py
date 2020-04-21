@@ -15,15 +15,15 @@ class UsersTest(unittest.TestCase):
             s3 = boto3.client('s3')
             s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME)
 
-            update_processing_units('heinrich', 'charge', 5000)
+            update_processing_units('heinrich', dict(count=5000), factor=1)
             user_data = get_user_data('heinrich')
             processing_units = user_data.get('processingUnits')
             self.assertEqual(5000, processing_units.get('count'))
             self.assertIsInstance(processing_units.get('history'), list)
             self.assertEqual(1, len(processing_units.get('history')))
 
-            update_processing_units('heinrich', 'charge', 2000)
-            update_processing_units('heinrich', 'consume', 3000)
+            update_processing_units('heinrich', dict(count=2000), factor=1)
+            update_processing_units('heinrich', dict(count=3000), factor=-1)
             user_data = get_user_data('heinrich')
             processing_units = user_data.get('processingUnits')
             self.assertEqual(4000, processing_units.get('count'))
