@@ -27,7 +27,7 @@ import xcube_gen.api as api
 from xcube_gen.auth0 import AuthError, requires_auth
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import datastores, jobs
-from xcube_gen.controllers import users
+from xcube_gen.controllers import users, user_namespaces
 
 
 def new_app():
@@ -72,6 +72,21 @@ def new_app():
     def _result(user_name: str, job_id: str):
         return jobs.result(user_name=user_name, job_id=job_id)
 
+    @app.route('/user_namespaces/<user_name>', methods=['GET', 'POST', 'DELETE'])
+    @requires_auth
+    def _user_namespace(user_name: str):
+        if flask.request.method == 'GET':
+            return user_namespaces.list()
+        elif flask.request.method == 'POST':
+            return user_namespaces.create(user_name=user_name)
+        elif flask.request.method == 'DELETE':
+            return user_namespaces.delete(user_name=user_name)
+
+    @app.route('/user_namespaces', methods=['GET'])
+    @requires_auth
+    def _user_namespaces():
+        return user_namespaces.list()
+
     @app.route('/datastores', methods=['GET'])
     @requires_auth
     def _datastores():
@@ -97,6 +112,10 @@ def new_app():
         except api.ApiError as e:
             return e.response
         return api.ApiResponse.success()
+
+    @app.route('/docs/<name>', methods=['GET'])
+    def _docs(name: str):
+        return api.main()
 
     @app.route('/', methods=['GET'])
     def _main():
