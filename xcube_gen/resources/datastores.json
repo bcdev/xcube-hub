@@ -230,74 +230,83 @@
             {
               "id": "surface_pressure",
               "units": "hPa",
-              "name": "Pressure at the bottom of the atmosphere.",
+              "name": "surface_pressure",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "Pressure at the bottom of the atmosphere."
             },
             {
               "id": "O3e_ndens",
               "units": "6.02214E-17 mol m-3",
-              "name": "error in the weighted average of the number density (#molecules/cm3)",
+              "name": "O3e_ndens",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "error in the weighted average of the number density (#molecules/cm3)"
             },
             {
               "id": "O3e_du",
               "units": "446.15E-6 mol m-2",
-              "name": "error in the weighted average of the partial ozone columns (DU/layer)",
+              "name": "O3e_du",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "error in the weighted average of the partial ozone columns (DU/layer)"
             },
             {
               "id": "O3e_vmr",
               "units": "1e-6",
-              "name": "error in the weighted average of the volume mixing ratio (ppmv)",
+              "name": "O3e_vmr",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "error in the weighted average of the volume mixing ratio (ppmv)"
             },
             {
               "id": "O3e_du_tot",
               "units": "446.15E-6 mol m-2",
-              "name": "total column error: quadratically added o3e_du (DU)",
+              "name": "O3e_du_tot",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "total column error: quadratically added o3e_du (DU)"
             },
             {
               "id": "O3_du_tot",
               "units": "446.15E-6 mol m-2",
-              "name": "total column: vertically integrated O3_du dataset (DU)",
+              "name": "O3_du_tot",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "total column: vertically integrated O3_du dataset (DU)"
             },
             {
               "id": "O3_ndens",
               "units": "6.02214E-17 mol m-3",
-              "name": "weighted average of the number density (#molecules/cm3)",
+              "name": "O3_ndens",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "weighted average of the number density (#molecules/cm3)"
             },
             {
               "id": "O3_du",
               "units": "446.15E-6 mol m-2",
-              "name": "weighted average of the partial ozone columns (DU/layer)",
+              "name": "O3_du",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "weighted average of the partial ozone columns (DU/layer)"
             },
             {
               "id": "O3_vmr",
               "units": "1e-6",
-              "name": "weighted average of the volume mixing ratio (ppmv)",
+              "name": "O3_vmr",
               "dtype": "float32",
               "spatialRes": 1.0,
-              "temporalRes": "1M"
+              "temporalRes": "1M",
+              "description": "weighted average of the volume mixing ratio (ppmv)"
             }
           ]
         },
@@ -309,22 +318,26 @@
             {
               "id": "atmosphere_mole_content_of_ozone",
               "units": "DU",
-              "name": "Mean Total Ozone Column in Dobson Units"
+              "name": "atmosphere_mole_content_of_ozone",
+              "description": "Mean Total Ozone Column in Dobson Units"
             },
             {
               "id": "atmosphere_mole_content_of_ozone_standard_deviation",
               "units": "DU",
-              "name": "Standard Deviation of the Mean Total Ozone Column in Dobson Units"
+              "name": "atmosphere_mole_content_of_ozone_standard_deviation",
+              "description": "Standard Deviation of the Mean Total Ozone Column in Dobson Units"
             },
             {
               "id": "atmosphere_mole_content_of_ozone_standard_error",
               "units": "DU",
-              "name": "Standard Error of the Mean Total Ozone Column in Dobson Units"
+              "name": "atmosphere_mole_content_of_ozone_standard_error",
+              "description": "Standard Error of the Mean Total Ozone Column in Dobson Units"
             },
             {
               "id": "atmosphere_mole_content_of_ozone_number_of_observations",
               "units": "1",
-              "name": "The number of measurements use to derive the Mean Total Ozone Column in Dobson Units"
+              "name": "atmosphere_mole_content_of_ozone_number_of_observations",
+              "description": "The number of measurements use to derive the Mean Total Ozone Column in Dobson Units"
             }
           ]
         },
@@ -336,52 +349,62 @@
             {
               "id": "sample_standard_deviation",
               "units": "%",
-              "name": "Sample standard deviation in 1 month x10 deg bins"
+              "name": "sample_standard_deviation",
+              "description": "Sample standard deviation in 1 month x10 deg bins"
             },
             {
               "id": "approximate_altitude",
               "units": "km",
-              "name": "approximate altitude corresponding to pressure levels"
+              "name": "approximate_altitude",
+              "description": "approximate altitude corresponding to pressure levels"
             },
             {
               "id": "latitude_centers",
               "units": "degrees_north",
-              "name": "centers of latitude bins"
+              "name": "latitude_centers",
+              "description": "centers of latitude bins"
             },
             {
               "id": "inhomogeneity_in_latitude",
               "units": "1",
-              "name": "inhomogeneity measure in latitude"
+              "name": "inhomogeneity_in_latitude",
+              "description": "inhomogeneity measure in latitude"
             },
             {
               "id": "inhomogeneity_in_time",
               "units": "1",
-              "name": "inhomogeneity measure in time"
+              "name": "inhomogeneity_in_time",
+              "description": "inhomogeneity measure in time"
             },
             {
               "id": "mean_uncertainty_estimate",
               "units": "%",
-              "name": "mean of error estimates"
+              "name": "mean_uncertainty_estimate",
+              "description": "mean of error estimates"
             },
             {
               "id": "standard_error_of_the_mean",
               "units": "%",
-              "name": "uncertainty of the monthly zonal mean data"
+              "name": "standard_error_of_the_mean",
+              "description": "uncertainty of the monthly zonal mean data"
             },
             {
               "id": "air_pressure",
               "units": "hPa",
-              "name": "air_pressure"
+              "name": "air_pressure",
+              "description": "air_pressure"
             },
             {
               "id": "ozone_mole_concentation",
               "units": "mol cm-3",
-              "name": "ozone_mole_concentation"
+              "name": "ozone_mole_concentation",
+              "description": "ozone_mole_concentation"
             },
             {
               "id": "ozone_mixing_ratio",
               "units": "1",
-              "name": "ozone_mixing_ratio"
+              "name": "ozone_mixing_ratio",
+              "description": "ozone_mixing_ratio"
             }
           ]
         },
@@ -393,842 +416,1010 @@
             {
               "id": "hist1d_cer_bin_border",
               "units": "um",
-              "name": "cer histogram bin border values"
+              "name": "hist1d_cer_bin_border",
+              "description": "cer histogram bin border values"
             },
             {
               "id": "hist1d_cer_bin_centre",
               "units": "um",
-              "name": "cer histogram bin centres"
+              "name": "hist1d_cer_bin_centre",
+              "description": "cer histogram bin centres"
             },
             {
               "id": "hist1d_cla_vis006_bin_centre",
               "units": "1",
-              "name": "cloud abedo1 histogram bin centres"
+              "name": "hist1d_cla_vis006_bin_centre",
+              "description": "cloud abedo1 histogram bin centres"
             },
             {
               "id": "cla_vis006_corr_unc",
               "units": "1",
-              "name": "cloud albedo at 0.6 um correlated uncertainty"
+              "name": "cla_vis006_corr_unc",
+              "description": "cloud albedo at 0.6 um correlated uncertainty"
             },
             {
               "id": "cla_vis006_prop_unc",
               "units": "1",
-              "name": "cloud albedo at 0.6 um propagated uncertainty"
+              "name": "cla_vis006_prop_unc",
+              "description": "cloud albedo at 0.6 um propagated uncertainty"
             },
             {
               "id": "cla_vis006_std",
               "units": "1",
-              "name": "cloud albedo at 0.6 um standard deviation"
+              "name": "cla_vis006_std",
+              "description": "cloud albedo at 0.6 um standard deviation"
             },
             {
               "id": "cla_vis006_unc",
               "units": "1",
-              "name": "cloud albedo at 0.6 um uncertainty"
+              "name": "cla_vis006_unc",
+              "description": "cloud albedo at 0.6 um uncertainty"
             },
             {
               "id": "cla_vis006",
               "units": "1",
-              "name": "cloud albedo at 0.6 um"
+              "name": "cla_vis006",
+              "description": "cloud albedo at 0.6 um"
             },
             {
               "id": "cla_vis008_corr_unc",
               "units": "1",
-              "name": "cloud albedo at 0.8 um correlated uncertainty"
+              "name": "cla_vis008_corr_unc",
+              "description": "cloud albedo at 0.8 um correlated uncertainty"
             },
             {
               "id": "cla_vis008_prop_unc",
               "units": "1",
-              "name": "cloud albedo at 0.8 um propagated uncertainty"
+              "name": "cla_vis008_prop_unc",
+              "description": "cloud albedo at 0.8 um propagated uncertainty"
             },
             {
               "id": "cla_vis008_std",
               "units": "1",
-              "name": "cloud albedo at 0.8 um standard deviation"
+              "name": "cla_vis008_std",
+              "description": "cloud albedo at 0.8 um standard deviation"
             },
             {
               "id": "cla_vis008_unc",
               "units": "1",
-              "name": "cloud albedo at 0.8 um uncertainty"
+              "name": "cla_vis008_unc",
+              "description": "cloud albedo at 0.8 um uncertainty"
             },
             {
               "id": "cla_vis008",
               "units": "1",
-              "name": "cloud albedo at 0.8 um"
+              "name": "cla_vis008",
+              "description": "cloud albedo at 0.8 um"
             },
             {
               "id": "hist1d_cla_vis006_bin_border",
               "units": "1",
-              "name": "cloud albedo1 histogram bin border values"
+              "name": "hist1d_cla_vis006_bin_border",
+              "description": "cloud albedo1 histogram bin border values"
             },
             {
               "id": "hist1d_cla_vis008_bin_border",
               "units": "1",
-              "name": "cloud albedo2 histogram bin border values"
+              "name": "hist1d_cla_vis008_bin_border",
+              "description": "cloud albedo2 histogram bin border values"
             },
             {
               "id": "hist1d_cla_vis008_bin_centre",
               "units": "1",
-              "name": "cloud albedo2 histogram bin centres"
+              "name": "hist1d_cla_vis008_bin_centre",
+              "description": "cloud albedo2 histogram bin centres"
             },
             {
               "id": "cee_corr_unc",
               "units": "1",
-              "name": "cloud effective emissivity at 10.8 um correlated uncertainty"
+              "name": "cee_corr_unc",
+              "description": "cloud effective emissivity at 10.8 um correlated uncertainty"
             },
             {
               "id": "cee_prop_unc",
               "units": "1",
-              "name": "cloud effective emissivity at 10.8 um propagated uncertainty"
+              "name": "cee_prop_unc",
+              "description": "cloud effective emissivity at 10.8 um propagated uncertainty"
             },
             {
               "id": "cee_std",
               "units": "1",
-              "name": "cloud effective emissivity at 10.8 um standard deviation"
+              "name": "cee_std",
+              "description": "cloud effective emissivity at 10.8 um standard deviation"
             },
             {
               "id": "cee_unc",
               "units": "1",
-              "name": "cloud effective emissivity at 10.8 um uncertainty"
+              "name": "cee_unc",
+              "description": "cloud effective emissivity at 10.8 um uncertainty"
             },
             {
               "id": "cee",
               "units": "1",
-              "name": "cloud effective emissivity at 10.8 um"
+              "name": "cee",
+              "description": "cloud effective emissivity at 10.8 um"
             },
             {
               "id": "cer_corr_unc",
               "units": "um",
-              "name": "cloud effective radius correlated uncertainty"
+              "name": "cer_corr_unc",
+              "description": "cloud effective radius correlated uncertainty"
             },
             {
               "id": "cer_prop_unc",
               "units": "um",
-              "name": "cloud effective radius propagated uncertainty"
+              "name": "cer_prop_unc",
+              "description": "cloud effective radius propagated uncertainty"
             },
             {
               "id": "cer_std",
               "units": "um",
-              "name": "cloud effective radius standard deviation"
+              "name": "cer_std",
+              "description": "cloud effective radius standard deviation"
             },
             {
               "id": "cer_unc",
               "units": "um",
-              "name": "cloud effective radius uncertainty"
+              "name": "cer_unc",
+              "description": "cloud effective radius uncertainty"
             },
             {
               "id": "cer",
               "units": "um",
-              "name": "cloud effective radius"
+              "name": "cer",
+              "description": "cloud effective radius"
             },
             {
               "id": "cfc_corr_unc",
               "units": "%",
-              "name": "cloud fraction correlated uncertainty"
+              "name": "cfc_corr_unc",
+              "description": "cloud fraction correlated uncertainty"
             },
             {
               "id": "cfc_day",
               "units": "1",
-              "name": "cloud fraction day"
+              "name": "cfc_day",
+              "description": "cloud fraction day"
             },
             {
               "id": "cfc_night",
               "units": "1",
-              "name": "cloud fraction night"
+              "name": "cfc_night",
+              "description": "cloud fraction night"
             },
             {
               "id": "cfc_prop_unc",
               "units": "%",
-              "name": "cloud fraction propagated uncertainty"
+              "name": "cfc_prop_unc",
+              "description": "cloud fraction propagated uncertainty"
             },
             {
               "id": "cfc_std",
               "units": "1",
-              "name": "cloud fraction standard deviation"
+              "name": "cfc_std",
+              "description": "cloud fraction standard deviation"
             },
             {
               "id": "cfc_twl",
               "units": "1",
-              "name": "cloud fraction twilight"
+              "name": "cfc_twl",
+              "description": "cloud fraction twilight"
             },
             {
               "id": "cfc_unc",
               "units": "%",
-              "name": "cloud fraction uncertainty"
+              "name": "cfc_unc",
+              "description": "cloud fraction uncertainty"
             },
             {
               "id": "cfc",
               "units": "1",
-              "name": "cloud fraction"
+              "name": "cfc",
+              "description": "cloud fraction"
             },
             {
               "id": "iwp_corr_unc",
               "units": "g/m2",
-              "name": "cloud ice water path correlated uncertainty"
+              "name": "iwp_corr_unc",
+              "description": "cloud ice water path correlated uncertainty"
             },
             {
               "id": "iwp_prop_unc",
               "units": "g/m2",
-              "name": "cloud ice water path propagated uncertainty"
+              "name": "iwp_prop_unc",
+              "description": "cloud ice water path propagated uncertainty"
             },
             {
               "id": "iwp_std",
               "units": "g/m2",
-              "name": "cloud ice water path standard deviation"
+              "name": "iwp_std",
+              "description": "cloud ice water path standard deviation"
             },
             {
               "id": "iwp_unc",
               "units": "g/m2",
-              "name": "cloud ice water path uncertainty"
+              "name": "iwp_unc",
+              "description": "cloud ice water path uncertainty"
             },
             {
               "id": "iwp",
               "units": "g/m2",
-              "name": "cloud ice water path"
+              "name": "iwp",
+              "description": "cloud ice water path"
             },
             {
               "id": "lwp_corr_unc",
               "units": "g/m2",
-              "name": "cloud liquid water path correlated uncertainty"
+              "name": "lwp_corr_unc",
+              "description": "cloud liquid water path correlated uncertainty"
             },
             {
               "id": "lwp_prop_unc",
               "units": "g/m2",
-              "name": "cloud liquid water path propagated uncertainty"
+              "name": "lwp_prop_unc",
+              "description": "cloud liquid water path propagated uncertainty"
             },
             {
               "id": "lwp_std",
               "units": "g/m2",
-              "name": "cloud liquid water path standard deviation"
+              "name": "lwp_std",
+              "description": "cloud liquid water path standard deviation"
             },
             {
               "id": "lwp_unc",
               "units": "g/m2",
-              "name": "cloud liquid water path uncertainty"
+              "name": "lwp_unc",
+              "description": "cloud liquid water path uncertainty"
             },
             {
               "id": "lwp",
               "units": "g/m2",
-              "name": "cloud liquid water path"
+              "name": "lwp",
+              "description": "cloud liquid water path"
             },
             {
               "id": "cot_corr_unc",
               "units": "1",
-              "name": "cloud optical thickness correlated uncertainty"
+              "name": "cot_corr_unc",
+              "description": "cloud optical thickness correlated uncertainty"
             },
             {
               "id": "cot_log",
               "units": "1",
-              "name": "cloud optical thickness logarithmically averaged"
+              "name": "cot_log",
+              "description": "cloud optical thickness logarithmically averaged"
             },
             {
               "id": "cot_prop_unc",
               "units": "1",
-              "name": "cloud optical thickness propagated uncertainty"
+              "name": "cot_prop_unc",
+              "description": "cloud optical thickness propagated uncertainty"
             },
             {
               "id": "cot_std",
               "units": "1",
-              "name": "cloud optical thickness standard deviation"
+              "name": "cot_std",
+              "description": "cloud optical thickness standard deviation"
             },
             {
               "id": "cot_unc",
               "units": "1",
-              "name": "cloud optical thickness uncertainty"
+              "name": "cot_unc",
+              "description": "cloud optical thickness uncertainty"
             },
             {
               "id": "cot",
               "units": "1",
-              "name": "cloud optical thickness"
+              "name": "cot",
+              "description": "cloud optical thickness"
             },
             {
               "id": "cth_corr_unc",
               "units": "km",
-              "name": "cloud top height correlated uncertainty"
+              "name": "cth_corr_unc",
+              "description": "cloud top height correlated uncertainty"
             },
             {
               "id": "cth_corrected_corr_unc",
               "units": "km",
-              "name": "cloud top height correlated uncertainty"
+              "name": "cth_corrected_corr_unc",
+              "description": "cloud top height correlated uncertainty"
             },
             {
               "id": "cth_corrected_prop_unc",
               "units": "km",
-              "name": "cloud top height propagated uncertainty"
+              "name": "cth_corrected_prop_unc",
+              "description": "cloud top height propagated uncertainty"
             },
             {
               "id": "cth_prop_unc",
               "units": "km",
-              "name": "cloud top height propagated uncertainty"
+              "name": "cth_prop_unc",
+              "description": "cloud top height propagated uncertainty"
             },
             {
               "id": "cth_corrected_std",
               "units": "km",
-              "name": "cloud top height standard deviation"
+              "name": "cth_corrected_std",
+              "description": "cloud top height standard deviation"
             },
             {
               "id": "cth_std",
               "units": "km",
-              "name": "cloud top height standard deviation"
+              "name": "cth_std",
+              "description": "cloud top height standard deviation"
             },
             {
               "id": "cth_corrected_unc",
               "units": "km",
-              "name": "cloud top height uncertainty"
+              "name": "cth_corrected_unc",
+              "description": "cloud top height uncertainty"
             },
             {
               "id": "cth_unc",
               "units": "km",
-              "name": "cloud top height uncertainty"
+              "name": "cth_unc",
+              "description": "cloud top height uncertainty"
             },
             {
               "id": "cth",
               "units": "km",
-              "name": "cloud top height"
+              "name": "cth",
+              "description": "cloud top height"
             },
             {
               "id": "cth_corrected",
               "units": "km",
-              "name": "cloud top height"
+              "name": "cth_corrected",
+              "description": "cloud top height"
             },
             {
               "id": "ctp_corr_unc",
               "units": "hPa",
-              "name": "cloud top pressure correlated uncertainty"
+              "name": "ctp_corr_unc",
+              "description": "cloud top pressure correlated uncertainty"
             },
             {
               "id": "ctp_corrected_corr_unc",
               "units": "hPa",
-              "name": "cloud top pressure correlated uncertainty"
+              "name": "ctp_corrected_corr_unc",
+              "description": "cloud top pressure correlated uncertainty"
             },
             {
               "id": "ctp_log",
               "units": "hPa",
-              "name": "cloud top pressure logarithmically averaged"
+              "name": "ctp_log",
+              "description": "cloud top pressure logarithmically averaged"
             },
             {
               "id": "ctp_corrected_prop_unc",
               "units": "hPa",
-              "name": "cloud top pressure propagated uncertainty"
+              "name": "ctp_corrected_prop_unc",
+              "description": "cloud top pressure propagated uncertainty"
             },
             {
               "id": "ctp_prop_unc",
               "units": "hPa",
-              "name": "cloud top pressure propagated uncertainty"
+              "name": "ctp_prop_unc",
+              "description": "cloud top pressure propagated uncertainty"
             },
             {
               "id": "ctp_corrected_std",
               "units": "hPa",
-              "name": "cloud top pressure standard deviation"
+              "name": "ctp_corrected_std",
+              "description": "cloud top pressure standard deviation"
             },
             {
               "id": "ctp_std",
               "units": "hPa",
-              "name": "cloud top pressure standard deviation"
+              "name": "ctp_std",
+              "description": "cloud top pressure standard deviation"
             },
             {
               "id": "ctp_corrected_unc",
               "units": "hPa",
-              "name": "cloud top pressure uncertainty"
+              "name": "ctp_corrected_unc",
+              "description": "cloud top pressure uncertainty"
             },
             {
               "id": "ctp_unc",
               "units": "hPa",
-              "name": "cloud top pressure uncertainty"
+              "name": "ctp_unc",
+              "description": "cloud top pressure uncertainty"
             },
             {
               "id": "ctp",
               "units": "hPa",
-              "name": "cloud top pressure"
+              "name": "ctp",
+              "description": "cloud top pressure"
             },
             {
               "id": "ctp_corrected",
               "units": "hPa",
-              "name": "cloud top pressure"
+              "name": "ctp_corrected",
+              "description": "cloud top pressure"
             },
             {
               "id": "ctt_corr_unc",
               "units": "K",
-              "name": "cloud top temperature correlated uncertainty"
+              "name": "ctt_corr_unc",
+              "description": "cloud top temperature correlated uncertainty"
             },
             {
               "id": "ctt_corrected_corr_unc",
               "units": "K",
-              "name": "cloud top temperature correlated uncertainty"
+              "name": "ctt_corrected_corr_unc",
+              "description": "cloud top temperature correlated uncertainty"
             },
             {
               "id": "ctt_corrected_prop_unc",
               "units": "K",
-              "name": "cloud top temperature propagated uncertainty"
+              "name": "ctt_corrected_prop_unc",
+              "description": "cloud top temperature propagated uncertainty"
             },
             {
               "id": "ctt_prop_unc",
               "units": "K",
-              "name": "cloud top temperature propagated uncertainty"
+              "name": "ctt_prop_unc",
+              "description": "cloud top temperature propagated uncertainty"
             },
             {
               "id": "ctt_corrected_std",
               "units": "K",
-              "name": "cloud top temperature standard deviation"
+              "name": "ctt_corrected_std",
+              "description": "cloud top temperature standard deviation"
             },
             {
               "id": "ctt_std",
               "units": "K",
-              "name": "cloud top temperature standard deviation"
+              "name": "ctt_std",
+              "description": "cloud top temperature standard deviation"
             },
             {
               "id": "ctt_corrected_unc",
               "units": "K",
-              "name": "cloud top temperature uncertainty"
+              "name": "ctt_corrected_unc",
+              "description": "cloud top temperature uncertainty"
             },
             {
               "id": "ctt_unc",
               "units": "K",
-              "name": "cloud top temperature uncertainty"
+              "name": "ctt_unc",
+              "description": "cloud top temperature uncertainty"
             },
             {
               "id": "ctt",
               "units": "K",
-              "name": "cloud top temperature"
+              "name": "ctt",
+              "description": "cloud top temperature"
             },
             {
               "id": "ctt_corrected",
               "units": "K",
-              "name": "cloud top temperature"
+              "name": "ctt_corrected",
+              "description": "cloud top temperature"
             },
             {
               "id": "hist1d_cot_bin_border",
               "units": "1",
-              "name": "cot histogram bin border values"
+              "name": "hist1d_cot_bin_border",
+              "description": "cot histogram bin border values"
             },
             {
               "id": "hist2d_cot_bin_border",
               "units": "1",
-              "name": "cot histogram bin border values"
+              "name": "hist2d_cot_bin_border",
+              "description": "cot histogram bin border values"
             },
             {
               "id": "hist1d_cot_bin_centre",
               "units": "1",
-              "name": "cot histogram bin centres"
+              "name": "hist1d_cot_bin_centre",
+              "description": "cot histogram bin centres"
             },
             {
               "id": "hist2d_cot_bin_centre",
               "units": "1",
-              "name": "cot histogram bin centres"
+              "name": "hist2d_cot_bin_centre",
+              "description": "cot histogram bin centres"
             },
             {
               "id": "hist1d_ctp_bin_border",
               "units": "hPa",
-              "name": "ctp histogram bin border values"
+              "name": "hist1d_ctp_bin_border",
+              "description": "ctp histogram bin border values"
             },
             {
               "id": "hist2d_ctp_bin_border",
               "units": "hPa",
-              "name": "ctp histogram bin border values"
+              "name": "hist2d_ctp_bin_border",
+              "description": "ctp histogram bin border values"
             },
             {
               "id": "hist1d_ctp_bin_centre",
               "units": "hPa",
-              "name": "ctp histogram bin centres"
+              "name": "hist1d_ctp_bin_centre",
+              "description": "ctp histogram bin centres"
             },
             {
               "id": "hist2d_ctp_bin_centre",
               "units": "hPa",
-              "name": "ctp histogram bin centres"
+              "name": "hist2d_ctp_bin_centre",
+              "description": "ctp histogram bin centres"
             },
             {
               "id": "hist1d_ctt_bin_border",
               "units": "K",
-              "name": "ctt histogram bin border values"
+              "name": "hist1d_ctt_bin_border",
+              "description": "ctt histogram bin border values"
             },
             {
               "id": "hist1d_ctt_bin_centre",
               "units": "K",
-              "name": "ctt histogram bin centres"
+              "name": "hist1d_ctt_bin_centre",
+              "description": "ctt histogram bin centres"
             },
             {
               "id": "hist1d_cwp_bin_border",
               "units": "g/m2",
-              "name": "cwp histogram bin border values"
+              "name": "hist1d_cwp_bin_border",
+              "description": "cwp histogram bin border values"
             },
             {
               "id": "hist1d_cwp_bin_centre",
               "units": "g/m2",
-              "name": "cwp histogram bin centres"
+              "name": "hist1d_cwp_bin_centre",
+              "description": "cwp histogram bin centres"
             },
             {
               "id": "cph_day_std",
               "units": "1",
-              "name": "daytime fraction of liquid water clouds standard deviation"
+              "name": "cph_day_std",
+              "description": "daytime fraction of liquid water clouds standard deviation"
             },
             {
               "id": "cph_day",
               "units": "1",
-              "name": "daytime fraction of liquid water clouds"
+              "name": "cph_day",
+              "description": "daytime fraction of liquid water clouds"
             },
             {
               "id": "cph_std",
               "units": "1",
-              "name": "fraction of liquid water clouds standard deviation"
+              "name": "cph_std",
+              "description": "fraction of liquid water clouds standard deviation"
             },
             {
               "id": "cph",
               "units": "1",
-              "name": "fraction of liquid water clouds"
+              "name": "cph",
+              "description": "fraction of liquid water clouds"
             },
             {
               "id": "iwp_allsky",
               "units": "g/m2",
-              "name": "grid box mean of cloud ice water path"
+              "name": "iwp_allsky",
+              "description": "grid box mean of cloud ice water path"
             },
             {
               "id": "lwp_allsky",
               "units": "g/m2",
-              "name": "grid box mean of cloud liquid water path"
+              "name": "lwp_allsky",
+              "description": "grid box mean of cloud liquid water path"
             },
             {
               "id": "cfc_high",
               "units": "1",
-              "name": "high level cloud fraction"
+              "name": "cfc_high",
+              "description": "high level cloud fraction"
             },
             {
               "id": "hist1d_cla_vis006",
               "units": "1",
-              "name": "histogram of cloud albedo at 0.6 um"
+              "name": "hist1d_cla_vis006",
+              "description": "histogram of cloud albedo at 0.6 um"
             },
             {
               "id": "hist1d_cla_vis008",
               "units": "1",
-              "name": "histogram of cloud albedo at 0.8 um"
+              "name": "hist1d_cla_vis008",
+              "description": "histogram of cloud albedo at 0.8 um"
             },
             {
               "id": "hist1d_cer",
               "units": "1",
-              "name": "histogram of cloud effective radius"
+              "name": "hist1d_cer",
+              "description": "histogram of cloud effective radius"
             },
             {
               "id": "hist1d_cot",
               "units": "1",
-              "name": "histogram of cloud optical thickness"
+              "name": "hist1d_cot",
+              "description": "histogram of cloud optical thickness"
             },
             {
               "id": "hist1d_ctp",
               "units": "1",
-              "name": "histogram of cloud top pressure"
+              "name": "hist1d_ctp",
+              "description": "histogram of cloud top pressure"
             },
             {
               "id": "hist1d_ctt",
               "units": "1",
-              "name": "histogram of cloud top temperature"
+              "name": "hist1d_ctt",
+              "description": "histogram of cloud top temperature"
             },
             {
               "id": "hist1d_cwp",
               "units": "1",
-              "name": "histogram of cloud water path"
+              "name": "hist1d_cwp",
+              "description": "histogram of cloud water path"
             },
             {
               "id": "cla_vis006_ice_std",
               "units": "1",
-              "name": "ice water cloud albedo at 0.6 um standard deviation"
+              "name": "cla_vis006_ice_std",
+              "description": "ice water cloud albedo at 0.6 um standard deviation"
             },
             {
               "id": "cla_vis006_ice_unc",
               "units": "1",
-              "name": "ice water cloud albedo at 0.6 um uncertainty"
+              "name": "cla_vis006_ice_unc",
+              "description": "ice water cloud albedo at 0.6 um uncertainty"
             },
             {
               "id": "cla_vis006_ice",
               "units": "1",
-              "name": "ice water cloud albedo at 0.6 um"
+              "name": "cla_vis006_ice",
+              "description": "ice water cloud albedo at 0.6 um"
             },
             {
               "id": "cla_vis008_ice_std",
               "units": "1",
-              "name": "ice water cloud albedo at 0.8 um standard deviation"
+              "name": "cla_vis008_ice_std",
+              "description": "ice water cloud albedo at 0.8 um standard deviation"
             },
             {
               "id": "cla_vis008_ice_unc",
               "units": "1",
-              "name": "ice water cloud albedo at 0.8 um uncertainty"
+              "name": "cla_vis008_ice_unc",
+              "description": "ice water cloud albedo at 0.8 um uncertainty"
             },
             {
               "id": "cla_vis008_ice",
               "units": "1",
-              "name": "ice water cloud albedo at 0.8 um"
+              "name": "cla_vis008_ice",
+              "description": "ice water cloud albedo at 0.8 um"
             },
             {
               "id": "cer_ice_corr_unc",
               "units": "um",
-              "name": "ice water cloud effective radius correlated uncertainty"
+              "name": "cer_ice_corr_unc",
+              "description": "ice water cloud effective radius correlated uncertainty"
             },
             {
               "id": "cer_ice_prop_unc",
               "units": "um",
-              "name": "ice water cloud effective radius propagated uncertainty"
+              "name": "cer_ice_prop_unc",
+              "description": "ice water cloud effective radius propagated uncertainty"
             },
             {
               "id": "cer_ice_std",
               "units": "um",
-              "name": "ice water cloud effective radius standard deviation"
+              "name": "cer_ice_std",
+              "description": "ice water cloud effective radius standard deviation"
             },
             {
               "id": "cer_ice_unc",
               "units": "um",
-              "name": "ice water cloud effective radius uncertainty"
+              "name": "cer_ice_unc",
+              "description": "ice water cloud effective radius uncertainty"
             },
             {
               "id": "cer_ice",
               "units": "um",
-              "name": "ice water cloud effective radius"
+              "name": "cer_ice",
+              "description": "ice water cloud effective radius"
             },
             {
               "id": "cot_ice_corr_unc",
               "units": "1",
-              "name": "ice water cloud optical thickness correlated uncertainty"
+              "name": "cot_ice_corr_unc",
+              "description": "ice water cloud optical thickness correlated uncertainty"
             },
             {
               "id": "cot_ice_prop_unc",
               "units": "1",
-              "name": "ice water cloud optical thickness propagated uncertainty"
+              "name": "cot_ice_prop_unc",
+              "description": "ice water cloud optical thickness propagated uncertainty"
             },
             {
               "id": "cot_ice_std",
               "units": "1",
-              "name": "ice water cloud optical thickness standard deviation"
+              "name": "cot_ice_std",
+              "description": "ice water cloud optical thickness standard deviation"
             },
             {
               "id": "cot_ice_unc",
               "units": "1",
-              "name": "ice water cloud optical thickness uncertainty"
+              "name": "cot_ice_unc",
+              "description": "ice water cloud optical thickness uncertainty"
             },
             {
               "id": "cot_ice",
               "units": "1",
-              "name": "ice water cloud optical thickness"
+              "name": "cot_ice",
+              "description": "ice water cloud optical thickness"
             },
             {
               "id": "hist2d_cot_ctp",
               "units": "1",
-              "name": "joint histogram of cloud optical thickness and cloud top pressure"
+              "name": "hist2d_cot_ctp",
+              "description": "joint histogram of cloud optical thickness and cloud top pressure"
             },
             {
               "id": "lat",
               "units": "degrees_north",
-              "name": "latitude"
+              "name": "lat",
+              "description": "latitude"
             },
             {
               "id": "cla_vis006_liq_std",
               "units": "1",
-              "name": "liquid water cloud albedo at 0.6 um standard deviation"
+              "name": "cla_vis006_liq_std",
+              "description": "liquid water cloud albedo at 0.6 um standard deviation"
             },
             {
               "id": "cla_vis006_liq_unc",
               "units": "1",
-              "name": "liquid water cloud albedo at 0.6 um uncertainty"
+              "name": "cla_vis006_liq_unc",
+              "description": "liquid water cloud albedo at 0.6 um uncertainty"
             },
             {
               "id": "cla_vis006_liq",
               "units": "1",
-              "name": "liquid water cloud albedo at 0.6 um"
+              "name": "cla_vis006_liq",
+              "description": "liquid water cloud albedo at 0.6 um"
             },
             {
               "id": "cla_vis008_liq_std",
               "units": "1",
-              "name": "liquid water cloud albedo at 0.8 um standard deviation"
+              "name": "cla_vis008_liq_std",
+              "description": "liquid water cloud albedo at 0.8 um standard deviation"
             },
             {
               "id": "cla_vis008_liq_unc",
               "units": "1",
-              "name": "liquid water cloud albedo at 0.8 um uncertainty"
+              "name": "cla_vis008_liq_unc",
+              "description": "liquid water cloud albedo at 0.8 um uncertainty"
             },
             {
               "id": "cla_vis008_liq",
               "units": "1",
-              "name": "liquid water cloud albedo at 0.8 um"
+              "name": "cla_vis008_liq",
+              "description": "liquid water cloud albedo at 0.8 um"
             },
             {
               "id": "cer_liq_corr_unc",
               "units": "um",
-              "name": "liquid water cloud effective radius correlated uncertainty"
+              "name": "cer_liq_corr_unc",
+              "description": "liquid water cloud effective radius correlated uncertainty"
             },
             {
               "id": "cer_liq_prop_unc",
               "units": "um",
-              "name": "liquid water cloud effective radius propagated uncertainty"
+              "name": "cer_liq_prop_unc",
+              "description": "liquid water cloud effective radius propagated uncertainty"
             },
             {
               "id": "cer_liq_std",
               "units": "um",
-              "name": "liquid water cloud effective radius standard deviation"
+              "name": "cer_liq_std",
+              "description": "liquid water cloud effective radius standard deviation"
             },
             {
               "id": "cer_liq_unc",
               "units": "um",
-              "name": "liquid water cloud effective radius uncertainty"
+              "name": "cer_liq_unc",
+              "description": "liquid water cloud effective radius uncertainty"
             },
             {
               "id": "cer_liq",
               "units": "um",
-              "name": "liquid water cloud effective radius"
+              "name": "cer_liq",
+              "description": "liquid water cloud effective radius"
             },
             {
               "id": "cot_liq_corr_unc",
               "units": "1",
-              "name": "liquid water cloud optical thickness correlated uncertainty"
+              "name": "cot_liq_corr_unc",
+              "description": "liquid water cloud optical thickness correlated uncertainty"
             },
             {
               "id": "cot_liq_prop_unc",
               "units": "1",
-              "name": "liquid water cloud optical thickness propagated uncertainty"
+              "name": "cot_liq_prop_unc",
+              "description": "liquid water cloud optical thickness propagated uncertainty"
             },
             {
               "id": "cot_liq_std",
               "units": "1",
-              "name": "liquid water cloud optical thickness standard deviation"
+              "name": "cot_liq_std",
+              "description": "liquid water cloud optical thickness standard deviation"
             },
             {
               "id": "cot_liq_unc",
               "units": "1",
-              "name": "liquid water cloud optical thickness uncertainty"
+              "name": "cot_liq_unc",
+              "description": "liquid water cloud optical thickness uncertainty"
             },
             {
               "id": "cot_liq",
               "units": "1",
-              "name": "liquid water cloud optical thickness"
+              "name": "cot_liq",
+              "description": "liquid water cloud optical thickness"
             },
             {
               "id": "lon",
               "units": "degrees_east",
-              "name": "longitude"
+              "name": "lon",
+              "description": "longitude"
             },
             {
               "id": "cfc_low",
               "units": "1",
-              "name": "low level cloud fraction"
+              "name": "cfc_low",
+              "description": "low level cloud fraction"
             },
             {
               "id": "cfc_mid",
               "units": "1",
-              "name": "mid level cloud fraction"
+              "name": "cfc_mid",
+              "description": "mid level cloud fraction"
             },
             {
               "id": "nobs_clear_day",
               "units": "1",
-              "name": "number of clear daytime observations"
+              "name": "nobs_clear_day",
+              "description": "number of clear daytime observations"
             },
             {
               "id": "nobs_clear_night",
               "units": "1",
-              "name": "number of clear nighttime observations"
+              "name": "nobs_clear_night",
+              "description": "number of clear nighttime observations"
             },
             {
               "id": "nobs_clear_twl",
               "units": "1",
-              "name": "number of clear twilight observations"
+              "name": "nobs_clear_twl",
+              "description": "number of clear twilight observations"
             },
             {
               "id": "nobs_cloudy_day",
               "units": "1",
-              "name": "number of cloudy daytime observations"
+              "name": "nobs_cloudy_day",
+              "description": "number of cloudy daytime observations"
             },
             {
               "id": "nobs_cloudy_night",
               "units": "1",
-              "name": "number of cloudy nighttime observations"
+              "name": "nobs_cloudy_night",
+              "description": "number of cloudy nighttime observations"
             },
             {
               "id": "nobs_cloudy",
               "units": "1",
-              "name": "number of cloudy observations"
+              "name": "nobs_cloudy",
+              "description": "number of cloudy observations"
             },
             {
               "id": "nobs_cloudy_twl",
               "units": "1",
-              "name": "number of cloudy twilight observations"
+              "name": "nobs_cloudy_twl",
+              "description": "number of cloudy twilight observations"
             },
             {
               "id": "nobs_day",
               "units": "1",
-              "name": "number of daytime observations"
+              "name": "nobs_day",
+              "description": "number of daytime observations"
             },
             {
               "id": "nobs",
               "units": "1",
-              "name": "number of observations"
+              "name": "nobs",
+              "description": "number of observations"
             },
             {
               "id": "nretr_cloudy",
               "units": "1",
-              "name": "number of valid cloudy retrievals"
+              "name": "nretr_cloudy",
+              "description": "number of valid cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_day",
               "units": "1",
-              "name": "number of valid daytime cloudy retrievals"
+              "name": "nretr_cloudy_day",
+              "description": "number of valid daytime cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_high",
               "units": "1",
-              "name": "number of valid high level cloudy retrievals"
+              "name": "nretr_cloudy_high",
+              "description": "number of valid high level cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_ice",
               "units": "1",
-              "name": "number of valid ice phase cloudy retrievals"
+              "name": "nretr_cloudy_ice",
+              "description": "number of valid ice phase cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_day_ice",
               "units": "1",
-              "name": "number of valid ice phase daytime cloudy retrievals"
+              "name": "nretr_cloudy_day_ice",
+              "description": "number of valid ice phase daytime cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_liq",
               "units": "1",
-              "name": "number of valid liquid phase cloudy retrievals"
+              "name": "nretr_cloudy_liq",
+              "description": "number of valid liquid phase cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_day_liq",
               "units": "1",
-              "name": "number of valid liquid phase daytime cloudy retrievals"
+              "name": "nretr_cloudy_day_liq",
+              "description": "number of valid liquid phase daytime cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_low",
               "units": "1",
-              "name": "number of valid low level cloudy retrievals"
+              "name": "nretr_cloudy_low",
+              "description": "number of valid low level cloudy retrievals"
             },
             {
               "id": "nretr_cloudy_mid",
               "units": "1",
-              "name": "number of valid mid level cloudy retrievals"
+              "name": "nretr_cloudy_mid",
+              "description": "number of valid mid level cloudy retrievals"
             },
             {
               "id": "hist_phase",
               "units": "1",
-              "name": "phase histogram bins"
+              "name": "hist_phase",
+              "description": "phase histogram bins"
             },
             {
               "id": "stemp_corr_unc",
               "units": "K",
-              "name": "surface temperature correlated uncertainty"
+              "name": "stemp_corr_unc",
+              "description": "surface temperature correlated uncertainty"
             },
             {
               "id": "stemp_prop_unc",
               "units": "K",
-              "name": "surface temperature propagated uncertainty"
+              "name": "stemp_prop_unc",
+              "description": "surface temperature propagated uncertainty"
             },
             {
               "id": "stemp_std",
               "units": "K",
-              "name": "surface temperature standard deviation"
+              "name": "stemp_std",
+              "description": "surface temperature standard deviation"
             },
             {
               "id": "stemp_unc",
               "units": "K",
-              "name": "surface temperature uncertainty"
+              "name": "stemp_unc",
+              "description": "surface temperature uncertainty"
             },
             {
               "id": "stemp",
               "units": "K",
-              "name": "surface temperature"
+              "name": "stemp",
+              "description": "surface temperature"
             }
           ]
         },
@@ -1240,157 +1431,188 @@
             {
               "id": "aerosol_type",
               "units": "1",
-              "name": "Best-guess aerosol type"
+              "name": "aerosol_type",
+              "description": "Best-guess aerosol type"
             },
             {
               "id": "cloud_fraction",
               "units": "1",
-              "name": "Cloud fraction"
+              "name": "cloud_fraction",
+              "description": "Cloud fraction"
             },
             {
               "id": "fit_error",
               "units": "1",
-              "name": "Cost function at solution"
+              "name": "fit_error",
+              "description": "Cost function at solution"
             },
             {
               "id": "instrument_view",
               "units": "1",
-              "name": "Instrument view"
+              "name": "instrument_view",
+              "description": "Instrument view"
             },
             {
               "id": "surface_type_number",
               "units": "1",
-              "name": "Land / sea flag"
+              "name": "surface_type_number",
+              "description": "Land / sea flag"
             },
             {
               "id": "quality_flag",
               "units": "1",
-              "name": "Quality check results"
+              "name": "quality_flag",
+              "description": "Quality check results"
             },
             {
               "id": "relative_azimuth_at_center",
               "units": "degrees",
-              "name": "Relative azimuth angle"
+              "name": "relative_azimuth_at_center",
+              "description": "Relative azimuth angle"
             },
             {
               "id": "iterations",
               "units": "1",
-              "name": "Retrieval iterations"
+              "name": "iterations",
+              "description": "Retrieval iterations"
             },
             {
               "id": "satellite_zenith_at_center",
               "units": "degrees",
-              "name": "Satellite zenith angle"
+              "name": "satellite_zenith_at_center",
+              "description": "Satellite zenith angle"
             },
             {
               "id": "pixel_number",
               "units": "1",
-              "name": "Sinusoidal pixel index"
+              "name": "pixel_number",
+              "description": "Sinusoidal pixel index"
             },
             {
               "id": "sun_zenith_at_center",
               "units": "degrees",
-              "name": "Solar zenith angle"
+              "name": "sun_zenith_at_center",
+              "description": "Solar zenith angle"
             },
             {
               "id": "surface_reflectance1600",
               "units": "1",
-              "name": "Surface bihemispherical reflectance at 1600 nm"
+              "name": "surface_reflectance1600",
+              "description": "Surface bihemispherical reflectance at 1600 nm"
             },
             {
               "id": "surface_reflectance550",
               "units": "1",
-              "name": "Surface bihemispherical reflectance at 550 nm"
+              "name": "surface_reflectance550",
+              "description": "Surface bihemispherical reflectance at 550 nm"
             },
             {
               "id": "surface_reflectance670",
               "units": "1",
-              "name": "Surface bihemispherical reflectance at 670 nm"
+              "name": "surface_reflectance670",
+              "description": "Surface bihemispherical reflectance at 670 nm"
             },
             {
               "id": "surface_reflectance870",
               "units": "1",
-              "name": "Surface bihemispherical reflectance at 870 nm"
+              "name": "surface_reflectance870",
+              "description": "Surface bihemispherical reflectance at 870 nm"
             },
             {
               "id": "AOD550_uncertainty",
               "units": "1",
-              "name": "Uncertainty on AOT at 550 nm"
+              "name": "AOD550_uncertainty",
+              "description": "Uncertainty on AOT at 550 nm"
             },
             {
               "id": "AOD870_uncertainty",
               "units": "1",
-              "name": "Uncertainty on AOT at 870 nm"
+              "name": "AOD870_uncertainty",
+              "description": "Uncertainty on AOT at 870 nm"
             },
             {
               "id": "REFF_uncertainty",
               "units": "microns",
-              "name": "Uncertainty on aerosol effective radius"
+              "name": "REFF_uncertainty",
+              "description": "Uncertainty on aerosol effective radius"
             },
             {
               "id": "surface_reflectance1600_uncertainty",
               "units": "1",
-              "name": "Uncertainty on surface reflectance at 1600 nm"
+              "name": "surface_reflectance1600_uncertainty",
+              "description": "Uncertainty on surface reflectance at 1600 nm"
             },
             {
               "id": "surface_reflectance550_uncertainty",
               "units": "1",
-              "name": "Uncertainty on surface reflectance at 550 nm"
+              "name": "surface_reflectance550_uncertainty",
+              "description": "Uncertainty on surface reflectance at 550 nm"
             },
             {
               "id": "surface_reflectance670_uncertainty",
               "units": "1",
-              "name": "Uncertainty on surface reflectance at 670nm"
+              "name": "surface_reflectance670_uncertainty",
+              "description": "Uncertainty on surface reflectance at 670nm"
             },
             {
               "id": "surface_reflectance870_uncertainty",
               "units": "1",
-              "name": "Uncertainty on surface reflectance at 870 nm"
+              "name": "surface_reflectance870_uncertainty",
+              "description": "Uncertainty on surface reflectance at 870 nm"
             },
             {
               "id": "ANG550_870",
               "units": "1",
-              "name": "aerosol Angstrom exponent between 550 and 870 nm"
+              "name": "ANG550_870",
+              "description": "aerosol Angstrom exponent between 550 and 870 nm"
             },
             {
               "id": "AAOD550",
               "units": "1",
-              "name": "aerosol absorption optical thickness at 550 nm"
+              "name": "AAOD550",
+              "description": "aerosol absorption optical thickness at 550 nm"
             },
             {
               "id": "REFF",
               "units": "microns",
-              "name": "aerosol effective radius"
+              "name": "REFF",
+              "description": "aerosol effective radius"
             },
             {
               "id": "AOD1600",
               "units": "1",
-              "name": "aerosol optical thickness at 1600 nm"
+              "name": "AOD1600",
+              "description": "aerosol optical thickness at 1600 nm"
             },
             {
               "id": "AOD550",
               "units": "1",
-              "name": "aerosol optical thickness at 550 nm"
+              "name": "AOD550",
+              "description": "aerosol optical thickness at 550 nm"
             },
             {
               "id": "AOD670",
               "units": "1",
-              "name": "aerosol optical thickness at 670 nm"
+              "name": "AOD670",
+              "description": "aerosol optical thickness at 670 nm"
             },
             {
               "id": "AOD870",
               "units": "1",
-              "name": "aerosol optical thickness at 870 nm"
+              "name": "AOD870",
+              "description": "aerosol optical thickness at 870 nm"
             },
             {
               "id": "D_AOD550",
               "units": "1",
-              "name": "dust aerosol optical thickness at 550 nm"
+              "name": "D_AOD550",
+              "description": "dust aerosol optical thickness at 550 nm"
             },
             {
               "id": "FM_AOD550",
               "units": "1",
-              "name": "fine-mode aerosol optical thickness at 550 nm"
+              "name": "FM_AOD550",
+              "description": "fine-mode aerosol optical thickness at 550 nm"
             }
           ]
         }
