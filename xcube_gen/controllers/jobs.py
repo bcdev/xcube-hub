@@ -3,6 +3,7 @@ import os
 from typing import Optional, Sequence, Union
 
 from kubernetes import client
+from kubernetes.client.rest import ApiException
 
 from xcube_gen import api
 from xcube_gen.types import AnyDict, Error
@@ -79,8 +80,8 @@ def delete_one(user_name: str, job_id: str) -> Union[AnyDict, Error]:
             name=job_id,
             namespace=user_name,
             body=client.V1DeleteOptions(propagation_policy='Background', grace_period_seconds=5))
-    except BaseException as e:
-        return api.ApiResponse.error(e, 400)
+    except ApiException as e:
+        return api.ApiResponse.error(e, e.status)
 
     return api_response.status
 
@@ -129,8 +130,8 @@ def status(user_name: str, job_id: str) -> AnyDict:
 
     try:
         api_response = api_instance.read_namespaced_job_status(namespace=user_name, name=job_id)
-    except BaseException as e:
-        raise api.ApiError(400, str(e))
+    except ApiException as e:
+        raise api.ApiError(e.status, e.reason)
 
     return api_response.status.to_dict()
 
@@ -141,12 +142,12 @@ def result(user_name: str, job_id: str) -> AnyDict:
     try:
         pods = api_pod_instance.list_namespaced_pod(namespace=user_name, label_selector=f"job-name={job_id}")
         logs = []
-        for pod in pods:
+        for pod in pods.items:
             name = pod.metadata.name
             log = api_pod_instance.read_namespaced_pod_log(namespace=user_name, name=name)
             logs = log.splitlines()
-    except BaseException as e:
-        raise api.ApiError(400, str(e))
+    except ApiException as e:
+        raise api.ApiError(e.status, e.reason)
 
     return api.ApiResponse.success({'job_id': job_id, 'logs': logs})
 
@@ -155,6 +156,8 @@ def get(user_name: str, job_id: str) -> Union[AnyDict, Error]:
     try:
         output = result(user_name=user_name, job_id=job_id)
         stat = status(user_name=user_name, job_id=job_id)
+    except api.ApiError as e:
+        return e.response
     except BaseException as e:
         return api.ApiResponse.error(e, 400)
     return {'job_id': job_id, 'status': stat, 'output': output}

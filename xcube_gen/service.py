@@ -36,7 +36,6 @@ def new_app():
     Cfg.load_config_once()
 
     @app.errorhandler(AuthError)
-    @requires_auth
     def handle_auth_error(ex):
         response = jsonify(ex.error)
         response.status_code = ex.status_code
@@ -45,7 +44,7 @@ def new_app():
     flask_cors.CORS(app)
 
     @app.route('/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
-    # @requires_auth
+    @requires_auth
     def _jobs(user_name: str):
         if flask.request.method == 'GET':
             return jobs.list(user_name=user_name)
@@ -56,7 +55,6 @@ def new_app():
             return jobs.delete_all(user_name=user_name)
 
     @app.route('/jobs/<user_name>/<job_id>', methods=['GET', 'DELETE'])
-    @app.errorhandler(AuthError)
     @requires_auth
     def _job(user_name: str, job_id: str):
         if flask.request.method == "GET":
@@ -101,8 +99,6 @@ def new_app():
         return api.ApiResponse.success()
 
     @app.route('/', methods=['GET'])
-    @app.errorhandler(AuthError)
-    @requires_auth
     def _main():
         return api.main()
 
