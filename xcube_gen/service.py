@@ -33,7 +33,6 @@ def new_app():
     app = flask.Flask('xcube-genserv')
 
     @app.errorhandler(AuthError)
-    @requires_auth
     def handle_auth_error(ex):
         response = jsonify(ex.error)
         response.status_code = ex.status_code
