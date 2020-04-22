@@ -18,20 +18,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import uuid
 
 import flask
 import flask_cors
 from flask import jsonify
 import xcube_gen.api as api
 from xcube_gen.auth0 import AuthError, requires_auth
-from xcube_gen.controllers import datastores
+from xcube_gen.cfg import Cfg
+from xcube_gen.controllers import datastores, jobs
 from xcube_gen.controllers import users
-from xcube_gen.controllers.jobs import list_jobs, purge_jobs, create_job
 
 
 def new_app():
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
+    Cfg.load_config_once()
 
     @app.errorhandler(AuthError)
     @requires_auth
@@ -42,52 +44,35 @@ def new_app():
 
     flask_cors.CORS(app)
 
-    # '/jobs/<user_name>' [GET]  --> List
-    # '/jobs/<user_name>' [POST]  --> Start job, returns Job ID
-    # '/jobs/<user_name>/<job_id>' [DELETE]  --> Cancel/remove job
-    # '/jobs/<user_name>/<job_id>/status' [GET]  --> Job status
-    # '/jobs/<user_name>/<job_id>/result' [GET]  --> Job result
-
     @app.route('/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
-    @requires_auth
+    # @requires_auth
     def _jobs(user_name: str):
         if flask.request.method == 'GET':
-            api.list_jobs(user=user_name)
-        elif flask.request.method == 'POST':
-            api.create_job(user=user_name)
-        elif flask.request.method == 'DELETE':
-            api.purge_jobs(user=user_name)
+            return jobs.list(user_name=user_name)
+        if flask.request.method == 'POST':
+            job_id = f"xcube-gen-{str(uuid.uuid4())}"
+            return jobs.create(user_name=user_name, job_id=job_id, sh_cmd='gen', cfg=flask.request.json)
+        if flask.request.method == 'DELETE':
+            return jobs.delete_all(user_name=user_name)
 
-    @app.route('/jobs/<user_name>/<job_id>', methods=['GET', 'POST', 'DELETE'])
+    @app.route('/jobs/<user_name>/<job_id>', methods=['GET', 'DELETE'])
+    @app.errorhandler(AuthError)
     @requires_auth
-    def _job_delete(user_name: str, user_id: str):
+    def _job(user_name: str, job_id: str):
         if flask.request.method == "GET":
-            return api.job_delete(flask.request.json)
+            return jobs.get(user_name=user_name, job_id=job_id)
+        if flask.request.method == "DELETE":
+            return jobs.delete_one(user_name=user_name, job_id=job_id)
 
-    @app.route('/status/<job_name>', methods=['GET'])
+    @app.route('/jobs/<user_name>/<job_id>/status', methods=['GET'])
     @requires_auth
-    def _job_status(job_name):
-        return api.job_status(job_name)
+    def _job_status(user_name: str, job_id: str):
+        return jobs.status(user_name=user_name, job_id=job_id)
 
-    @app.route('/result/<job_name>', methods=['GET'])
+    @app.route('/jobs/<user_name>/<job_id>/result', methods=['GET'])
     @requires_auth
-    def _result(job_name):
-        return api.job_result(job_name)
-
-    @app.route('/jobs', methods=['GET'])
-    @requires_auth
-    def _jobs():
-        return api.jobs()
-
-    @app.route('/purge', methods=['DELETE'])
-    @requires_auth
-    def _jobs_purge():
-        return api.jobs_purge()
-
-    @app.route('/info', methods=['GET'])
-    @requires_auth
-    def _job_info():
-        return api.job_info()
+    def _result(user_name: str, job_id: str):
+        return jobs.result(user_name=user_name, job_id=job_id)
 
     @app.route('/datastores', methods=['GET'])
     @requires_auth
@@ -116,6 +101,7 @@ def new_app():
         return api.ApiResponse.success()
 
     @app.route('/', methods=['GET'])
+    @app.errorhandler(AuthError)
     @requires_auth
     def _main():
         return api.main()

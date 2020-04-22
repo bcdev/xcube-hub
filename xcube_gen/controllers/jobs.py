@@ -1,17 +1,18 @@
 import json
 import os
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 
 from kubernetes import client
-from xcube_gen.controllers.pods import get_pods
-from xcube_gen.types import AnyDict
+
+from xcube_gen import api
+from xcube_gen.types import AnyDict, Error
 
 
 class JobError(ValueError):
     pass
 
 
-def create_sh_job_object(job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
+def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
     # Configureate Pod template container
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
@@ -53,58 +54,65 @@ def create_sh_job_object(job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = No
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        metadata=client.V1ObjectMeta(name=job_name),
+        metadata=client.V1ObjectMeta(name=job_id),
         spec=spec)
 
     return job
 
 
-def create_job(user: str, job_name: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> AnyDict:
-    job = create_sh_job_object(job_name, sh_cmd=sh_cmd, cfg=cfg)
+def create(user_name: str, job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[AnyDict, Error]:
+    try:
+        job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.create_namespaced_job(body=job, namespace=user_name)
+    except BaseException as e:
+        return api.ApiResponse.error(e, 400)
+
+    return {'job': job_id, 'status': api_response.status.to_dict()}
+
+
+def delete_one(user_name: str, job_id: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-    api_response = api_instance.create_namespaced_job(
-        body=job,
-        namespace=user)
 
-    print("Job created. status='%s'" % str(api_response.status))
-    return {'job': job_name, 'status': api_response.status.to_dict()}
+    try:
+        api_response = api_instance.delete_namespaced_job(
+            name=job_id,
+            namespace=user_name,
+            body=client.V1DeleteOptions(propagation_policy='Background', grace_period_seconds=5))
+    except BaseException as e:
+        return api.ApiResponse.error(e, 400)
 
-
-def delete_job(user: str, job_name: str):
-    api_instance = client.BatchV1Api()
-    api_response = api_instance.delete_namespaced_job(
-        name=job_name,
-
-        namespace=user,
-        body=client.V1DeleteOptions(
-            propagation_policy='Background',
-            grace_period_seconds=5))
-
-    print("Job deleted. status='%s'" % str(api_response.status))
     return api_response.status
 
 
-def delete_jobs(user: str, job_names: Sequence[str]) -> Sequence[AnyDict]:
+def delete(user_name: str, job_ids: Sequence[str]) -> Sequence[AnyDict]:
     stati = []
-    for job_name in job_names:
-        status = delete_job(user, job_name)
-        stati.append({job_name: status})
+    for job_id in job_ids:
+        stat = delete_one(user_name, job_id)
+        stati.append({job_id: stat})
 
     return stati
 
 
-def purge_jobs(user: str):
+def delete_all(user_name: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-    api_response = api_instance.delete_collection_namespaced_job(namespace=user)
 
-    print(f"All Jobs in {user} deleted.")
+    try:
+        api_response = api_instance.delete_collection_namespaced_job(namespace=user_name)
+    except BaseException as e:
+        return api.ApiResponse.error(e, 400)
 
-    return api_response.status
+    return api.ApiResponse.success(api_response.status)
 
 
-def list_jobs(user: str) -> Sequence[AnyDict]:
+# noinspection PyShadowingBuiltins
+def list(user_name: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-    api_response = api_instance.list_namespaced_job(namespace=user)
+
+    try:
+        api_response = api_instance.list_namespaced_job(namespace=user_name)
+    except BaseException as e:
+        return api.ApiResponse.error(e, 400)
 
     jobs = api_response.items
     res = [{'name': job.metadata.name,
@@ -113,26 +121,40 @@ def list_jobs(user: str) -> Sequence[AnyDict]:
             'succeeded': job.status.succeeded,
             'completion_time': job.status.completion_time,
             } for job in jobs]
-    return res
+    return api.ApiResponse.success(res)
 
 
-def get_job_status(user: str, job_name: str):
+def status(user_name: str, job_id: str) -> AnyDict:
     api_instance = client.BatchV1Api()
-    api_response = api_instance.read_namespaced_job_status(
-        namespace=user,
-        name=job_name
-    )
+
+    try:
+        api_response = api_instance.read_namespaced_job_status(namespace=user_name, name=job_id)
+    except BaseException as e:
+        raise api.ApiError(400, str(e))
 
     return api_response.status.to_dict()
 
 
-def get_result(user: str, job_name: str) -> AnyDict:
+def result(user_name: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
 
-    logs = []
-    for pod in get_pods(user=user, job_name=job_name):
-        name = pod.metadata.name
-        log = api_pod_instance.read_namespaced_pod_log(namespace=user, name=name)
-        logs = log.splitlines()
+    try:
+        pods = api_pod_instance.list_namespaced_pod(namespace=user_name, label_selector=f"job-name={job_id}")
+        logs = []
+        for pod in pods:
+            name = pod.metadata.name
+            log = api_pod_instance.read_namespaced_pod_log(namespace=user_name, name=name)
+            logs = log.splitlines()
+    except BaseException as e:
+        raise api.ApiError(400, str(e))
 
-    return {'job_name': job_name, 'logs': logs}
+    return api.ApiResponse.success({'job_id': job_id, 'logs': logs})
+
+
+def get(user_name: str, job_id: str) -> Union[AnyDict, Error]:
+    try:
+        output = result(user_name=user_name, job_id=job_id)
+        stat = status(user_name=user_name, job_id=job_id)
+    except BaseException as e:
+        return api.ApiResponse.error(e, 400)
+    return {'job_id': job_id, 'status': stat, 'output': output}

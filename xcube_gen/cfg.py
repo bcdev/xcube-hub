@@ -1,13 +1,5 @@
-import json
 import os
 import threading
-from datetime import datetime
-from pprint import pprint
-from typing import Sequence, Optional
-
-from kubernetes import client
-
-from xcube_gen.types import AnyDict
 
 
 class CfgError(ValueError):
@@ -18,11 +10,8 @@ class Cfg:
     _config_lock = threading.Lock()
     _config_loaded = False
 
-    def __init__(self):
-        self._load_config_once()
-
     @classmethod
-    def _load_config_once(cls):
+    def load_config_once(cls):
         if not cls._config_loaded:
             cls._config_lock.acquire()
             if not cls._config_loaded:
@@ -39,5 +28,3 @@ class Cfg:
         else:
             config.load_incluster_config()
 
-
-CFG = Cfg()

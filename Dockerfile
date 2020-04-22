@@ -4,7 +4,6 @@ FROM quay.io/bcdev/xcube-python-base:${XCUBE_DOCKER_BASE_VERSION}
 
 ARG XCUBE_VERSION=0.4.0.dev0
 ARG XCUBE_USER_NAME=xcube
-ARG XCUBE_GEN_BRANCH=dzelge_xxx_k8s
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
 LABEL name="xcube python dependencies"

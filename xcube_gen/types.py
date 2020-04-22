@@ -1,6 +1,8 @@
-from typing import Dict, Any, Mapping, Sequence, Union
+from typing import Dict, Any, Mapping, Sequence, Union, Tuple
 
 AnyDict = Dict[str, Any]
+
+Error = Tuple[AnyDict, int]
 
 JsonValue = Union[str, int, float, bool, type(None), Sequence, Mapping]
 JsonObject = Mapping[str, JsonValue]
