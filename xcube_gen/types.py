@@ -1,9 +1,9 @@
-from typing import Dict, Any, Mapping, Sequence, Union
+from typing import Dict, Any, List, Tuple, Union
 
 AnyDict = Dict[str, Any]
 
-JsonValue = Union[str, int, float, bool, type(None), Sequence, Mapping]
-JsonObject = Mapping[str, JsonValue]
+JsonValue = Union[str, int, float, bool, type(None), Tuple, List, Dict]
+JsonObject = Dict[str, JsonValue]
 
 
 class Undefined:

@@ -15,7 +15,7 @@ CCI_INPUT_PUNITS_WEIGHT = 1.0
 OUTPUT_PUNITS_WEIGHT = 1.0
 
 
-def calc_processing_units(processing_request: JsonObject) -> JsonObject:
+def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     cube_config = get_json_request_value(processing_request, 'cube_config',
                                          value_type=dict)
     x1, y1, x2, y2 = get_json_request_value(cube_config, 'geometry',
@@ -66,11 +66,12 @@ def calc_processing_units(processing_request: JsonObject) -> JsonObject:
 
     import pandas as pd
     date_range = pd.date_range(start=start_date, end=end_date, freq=time_period)
+
     num_times = len(date_range)
-
-    num_bands = len(band_names)
-
-    num_requests = num_bands * num_times * num_tiles_x * num_tiles_y
+    num_variables = len(band_names)
+    num_requests = num_variables * num_times * num_tiles_x * num_tiles_y
+    num_bytes_per_pixel = 4   # float32 for all variables for time being
+    num_bytes = num_variables * num_times * (height * width * num_bytes_per_pixel)
 
     input_pixels_per_punit = SH_INPUT_PIXELS_PER_PUNIT
     input_punits_weight = SH_INPUT_PUNITS_WEIGHT
@@ -78,18 +79,20 @@ def calc_processing_units(processing_request: JsonObject) -> JsonObject:
     output_pixels_per_punit = OUTPUT_PIXELS_PER_PUNIT
     output_punits_weight = OUTPUT_PUNITS_WEIGHT
 
-    input_punits_count = _punits(width, height, num_times, num_bands, input_pixels_per_punit)
-    output_punits_count = _punits(width, height, num_times, num_bands, output_pixels_per_punit)
+    input_punits_count = _punits(width, height, num_times, num_variables, input_pixels_per_punit)
+    output_punits_count = _punits(width, height, num_times, num_variables, output_pixels_per_punit)
     total_punits_count = round(max(input_punits_weight * input_punits_count,
                                    output_punits_weight * output_punits_count))
 
     x_name, y_name = ('lon', 'lat') if is_geo_crs else ('x', 'y')
 
     return dict(schema=dict(dims={'time': num_times, y_name: height, x_name: width},
+                            image_size=[width, height],
                             tile_size=[tile_width, tile_height],
+                            num_variables=num_variables,
                             num_tiles=[num_tiles_x, num_tiles_y],
                             num_requests=num_requests,
-                            num_bands=num_bands),
+                            num_bytes=num_bytes),
                 punits=dict(input_count=input_punits_count,
                             input_weight=input_punits_weight,
                             output_count=output_punits_count,

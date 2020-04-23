@@ -1,11 +1,11 @@
 import unittest
 
-from xcube_gen.controllers.calc import calc_processing_units
+from xcube_gen.controllers.sizeandcost import get_size_and_cost
 
 
 class CalcTest(unittest.TestCase):
-    def test_calc_processing_units(self):
-        result = calc_processing_units({
+    def test_get_size_and_cost(self):
+        result = get_size_and_cost({
             "cube_config": {
                 "dataset_name": "S2L2A",
                 "band_names": [
@@ -43,8 +43,10 @@ class CalcTest(unittest.TestCase):
                                      'output_weight': 1.0,
                                      'total_count': 17520},
                           'schema': {'dims': {'lat': 2000, 'lon': 2000, 'time': 365},
-                                     'num_bands': 3,
+                                     'num_variables': 3,
                                      'num_requests': 4380,
+                                     'num_bytes': 17520000000,
                                      'num_tiles': [2, 2],
+                                     'image_size': [2000, 2000],
                                      'tile_size': [1000, 1000]}},
                          result)

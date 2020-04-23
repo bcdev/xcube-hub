@@ -6,6 +6,13 @@ from xcube_gen.database import Database
 from xcube_gen.types import JsonObject
 
 
+def get_processing_units(user_name: str, include_history: bool = False) -> JsonObject:
+    processing_units = Database.instance().get_user_data(user_name, dataset_name='punits')
+    if processing_units is not None and not include_history and 'history' in processing_units:
+        processing_units.pop('history')
+    return processing_units
+
+
 def update_processing_units(user_name: str, processing_units: JsonObject, factor: int = 1):
     update_count = get_json_request_value(processing_units, 'count', value_type=int)
     if update_count <= 0:
