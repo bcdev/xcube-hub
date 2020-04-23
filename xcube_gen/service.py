@@ -94,7 +94,8 @@ def new_app():
     def _update_processing_units(user_name: str):
         try:
             if flask.request.method == 'GET':
-                processing_units = users.get_processing_units(user_name, flask.request.json)
+                processing_units = users.get_processing_units(user_name,
+                                                              include_history=flask.request.args.get('history', False))
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
                 users.update_processing_units(user_name, flask.request.json, factor=1)
