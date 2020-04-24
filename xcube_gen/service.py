@@ -108,14 +108,13 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
+    @app.route(prefix + '/datastores', methods=['GET'])
+    def _datastores():
+        return api.ApiResponse.success(result=datastores.get_datastores())
+
     @app.route(prefix + '/sizeandcost', methods=['POST'])
     def _size_and_cost():
         return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
-
-    @app.route(prefix + '/datastores', methods=['GET'])
-    @requires_auth
-    def _datastores():
-        return api.ApiResponse.success(result=datastores.get_datastores())
 
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
@@ -133,8 +132,8 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @requires_auth
     @app.route(prefix + '/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
     def _update_processing_units(user_id: str):
         try:
             if flask.request.method == 'GET':
