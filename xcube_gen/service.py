@@ -120,15 +120,17 @@ def new_app(prefix: str = ""):
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
     def _user_data(user_name: str):
+    @app.route('/users/<user_id>/data', methods=['GET', 'PUT', 'DELETE'])
+    def _user_data(user_id: str):
         try:
             if flask.request.method == 'GET':
-                user_data = users.get_user_data(user_name)
+                user_data = users.get_user_data(user_id)
                 return api.ApiResponse.success(result=user_data)
             elif flask.request.method == 'PUT':
-                users.put_user_data(user_name, flask.request.json)
+                users.put_user_data(user_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                users.delete_user_data(user_name)
+                users.delete_user_data(user_id)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
@@ -137,16 +139,18 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _update_processing_units(user_name: str):
         requires_scope('user:write')
+    @app.route('/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
+    def _update_processing_units(user_id: str):
         try:
             if flask.request.method == 'GET':
-                processing_units = users.get_processing_units(user_name,
-                                                              include_history=flask.request.args.get('history', False))
+                include_history = flask.request.args.get('history', False)
+                processing_units = users.get_processing_units(user_id, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
-                users.update_processing_units(user_name, flask.request.json, factor=1)
+                users.add_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                users.update_processing_units(user_name, flask.request.json, factor=-1)
+                users.subtract_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
