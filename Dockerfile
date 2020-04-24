@@ -25,4 +25,4 @@ RUN source activate xcube-gen && python setup.py install
 
 EXPOSE 8000
 
-CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-gen start --debug --port 8000 --address 0.0.0.0"]
+CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-genserv start --debug --port 8000 --address 0.0.0.0"]

@@ -116,6 +116,7 @@ def requires_auth(f):
                                      "Unable to parse authentication"
                                      " token."}, 401)
 
+            # noinspection PyProtectedMember
             flask._request_ctx_stack.top.current_user = payload
 
             return f(*args, **kwargs)

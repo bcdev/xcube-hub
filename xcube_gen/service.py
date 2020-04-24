@@ -21,9 +21,10 @@
 import uuid
 import flask
 import flask_cors
+import werkzeug
 from flask import jsonify
 import xcube_gen.api as api
-from xcube_gen.auth import AuthError, requires_auth
+from xcube_gen.auth import AuthError, requires_auth, requires_scope
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import user_namespaces
@@ -117,6 +118,7 @@ def new_app(prefix: str = ""):
         return api.ApiResponse.success(result=datastores.get_datastores())
 
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
     def _user_data(user_name: str):
         try:
             if flask.request.method == 'GET':
@@ -131,9 +133,10 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/users/<user_name>/punits', methods=['PUT', 'DELETE'])
-    @app.route('/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
     def _update_processing_units(user_name: str):
+        requires_scope('user:write')
         try:
             if flask.request.method == 'GET':
                 processing_units = users.get_processing_units(user_name,
@@ -155,6 +158,11 @@ def new_app(prefix: str = ""):
     @app.route(prefix + '/', methods=['GET'])
     def _main():
         return api.main()
+
+    # Flask Error Handler
+    @app.errorhandler(werkzeug.exceptions.HTTPException)
+    def handle_http_exception(e):
+        return api.ApiError(e.code, e.response)
 
     return app
 
