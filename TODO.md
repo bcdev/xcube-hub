@@ -24,7 +24,7 @@
   or catch and then return `({status='error', error=error}, status_code)`. 
   Controllers should just return `result` if any, otherwise raise `api.ApiError`on error.
 * add logging
-* use WSDL server instead of flask
+* use production WSGI server instead of flask dev server
 
 
 ### Norman's questions
