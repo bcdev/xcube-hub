@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Optional, Sequence, Union
+from typing import Optional, Union
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
@@ -66,10 +66,9 @@ def create(user_name: str, job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = No
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_name)
-    except BaseException as e:
-        return api.ApiResponse.error(e, 400)
-
-    return {'job': job_id, 'status': api_response.status.to_dict()}
+        return api.ApiResponse.success({'job': job_id, 'status': api_response.status.to_dict()})
+    except ApiException as e:
+        raise api.ApiError(e.status, str(e))
 
 
 def delete_one(user_name: str, job_id: str) -> Union[AnyDict, Error]:
@@ -80,19 +79,9 @@ def delete_one(user_name: str, job_id: str) -> Union[AnyDict, Error]:
             name=job_id,
             namespace=user_name,
             body=client.V1DeleteOptions(propagation_policy='Background', grace_period_seconds=5))
+        return api.ApiResponse.success(api_response.status)
     except ApiException as e:
-        return api.ApiResponse.error(e, e.status)
-
-    return api_response.status
-
-
-def delete(user_name: str, job_ids: Sequence[str]) -> Sequence[AnyDict]:
-    stati = []
-    for job_id in job_ids:
-        stat = delete_one(user_name, job_id)
-        stati.append({job_id: stat})
-
-    return stati
+        raise api.ApiError(e.status, str(e))
 
 
 def delete_all(user_name: str) -> Union[AnyDict, Error]:
@@ -100,10 +89,9 @@ def delete_all(user_name: str) -> Union[AnyDict, Error]:
 
     try:
         api_response = api_instance.delete_collection_namespaced_job(namespace=user_name)
-    except BaseException as e:
-        return api.ApiResponse.error(e, 400)
-
-    return api.ApiResponse.success(api_response.status)
+        return api.ApiResponse.success(api_response.status)
+    except ApiException as e:
+        raise api.ApiError(e.status, str(e))
 
 
 # noinspection PyShadowingBuiltins
@@ -112,26 +100,21 @@ def list(user_name: str) -> Union[AnyDict, Error]:
 
     try:
         api_response = api_instance.list_namespaced_job(namespace=user_name)
-    except BaseException as e:
-        return api.ApiResponse.error(e, 400)
-
-    jobs = api_response.items
-    res = [{'name': job.metadata.name,
-            'start_time': job.status.start_time,
-            'failed': job.status.failed,
-            'succeeded': job.status.succeeded,
-            'completion_time': job.status.completion_time,
-            } for job in jobs]
-    return api.ApiResponse.success(res)
+        jobs = api_response.items
+        res = [{'name': job.metadata.name,
+                'start_time': job.status.start_time,
+                'failed': job.status.failed,
+                'succeeded': job.status.succeeded,
+                'completion_time': job.status.completion_time,
+                } for job in jobs]
+        return api.ApiResponse.success(res)
+    except ApiException as e:
+        raise api.ApiError(e.status, str(e))
 
 
 def status(user_name: str, job_id: str) -> AnyDict:
     api_instance = client.BatchV1Api()
-
-    try:
-        api_response = api_instance.read_namespaced_job_status(namespace=user_name, name=job_id)
-    except ApiException as e:
-        raise api.ApiError(e.status, e.reason)
+    api_response = api_instance.read_namespaced_job_status(namespace=user_name, name=job_id)
 
     return api_response.status.to_dict()
 
@@ -139,25 +122,21 @@ def status(user_name: str, job_id: str) -> AnyDict:
 def result(user_name: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
 
-    try:
-        pods = api_pod_instance.list_namespaced_pod(namespace=user_name, label_selector=f"job-name={job_id}")
-        logs = []
-        for pod in pods.items:
-            name = pod.metadata.name
-            log = api_pod_instance.read_namespaced_pod_log(namespace=user_name, name=name)
-            logs = log.splitlines()
-    except ApiException as e:
-        raise api.ApiError(e.status, e.reason)
+    pods = api_pod_instance.list_namespaced_pod(namespace=user_name, label_selector=f"job-name={job_id}")
+    logs = []
+    for pod in pods.items:
+        name = pod.metadata.name
+        log = api_pod_instance.read_namespaced_pod_log(namespace=user_name, name=name)
+        logs = log.splitlines()
 
-    return api.ApiResponse.success({'job_id': job_id, 'logs': logs})
+    return logs
 
 
 def get(user_name: str, job_id: str) -> Union[AnyDict, Error]:
     try:
         output = result(user_name=user_name, job_id=job_id)
         stat = status(user_name=user_name, job_id=job_id)
-    except api.ApiError as e:
-        return e.response
-    except BaseException as e:
-        return api.ApiResponse.error(e, 400)
-    return {'job_id': job_id, 'status': stat, 'output': output}
+        return {'job_id': job_id, 'status': stat, 'output': output}
+    except ApiException as e:
+        raise api.ApiError(e.status, str(e))
+
