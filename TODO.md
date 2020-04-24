@@ -13,6 +13,7 @@
 
 ### Less important tasks
 
+* `service.py` and others: rename `user_name` into `user_id`
 * add logging
 * use WSDL server instead of flask
 
