@@ -30,6 +30,9 @@ from xcube_gen.controllers import datastores, jobs
 from xcube_gen.controllers import users, user_namespaces
 
 APP_ROOT = ""
+from xcube_gen.controllers import datastores
+from xcube_gen.controllers import sizeandcost
+from xcube_gen.controllers import users
 
 
 def new_app():
@@ -109,29 +112,49 @@ def new_app():
 
     @app.route(APP_ROOT + '/datastores', methods=['GET'])
     @requires_auth
+    @app.route('/info', methods=['GET'])
+    def _job_info():
+        return api.job_info()
+
+    @app.route('/sizeandcost', methods=['POST'])
+    def _size_and_cost():
+        return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
+
+    @app.route('/datastores', methods=['GET'])
     def _datastores():
         return api.ApiResponse.success(result=datastores.get_datastores())
 
     @app.route(APP_ROOT + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     def _user_data(user_name: str):
-        if flask.request.method == 'GET':
-            users.get_user_data(user_name)
-        elif flask.request.method == 'PUT':
-            users.put_user_data(user_name, flask.request.json)
-        elif flask.request.method == 'DELETE':
-            users.delete_user_data(user_name)
-        return api.ApiResponse.success()
-
-    @app.route(APP_ROOT + '/users/<user_name>/punits', methods=['PUT', 'DELETE'])
-    def _update_processing_units(user_name: str):
         try:
-            if flask.request.method == 'PUT':
-                users.update_processing_units(user_name, flask.request.json, factor=1)
+            if flask.request.method == 'GET':
+                user_data = users.get_user_data(user_name)
+                return api.ApiResponse.success(result=user_data)
+            elif flask.request.method == 'PUT':
+                users.put_user_data(user_name, flask.request.json)
+                return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                users.update_processing_units(user_name, flask.request.json, factor=-1)
+                users.delete_user_data(user_name)
+                return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
-        return api.ApiResponse.success()
+
+    @app.route(APP_ROOT + '/users/<user_name>/punits', methods=['PUT', 'DELETE'])
+    @app.route('/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
+    def _update_processing_units(user_name: str):
+        try:
+            if flask.request.method == 'GET':
+                processing_units = users.get_processing_units(user_name,
+                                                              include_history=flask.request.args.get('history', False))
+                return api.ApiResponse.success(result=processing_units)
+            elif flask.request.method == 'PUT':
+                users.update_processing_units(user_name, flask.request.json, factor=1)
+                return api.ApiResponse.success()
+            elif flask.request.method == 'DELETE':
+                users.update_processing_units(user_name, flask.request.json, factor=-1)
+                return api.ApiResponse.success()
+        except api.ApiError as e:
+            return e.response
 
     @app.route(APP_ROOT + '/', methods=['GET'])
     def _main2():
