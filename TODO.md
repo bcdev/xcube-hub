@@ -14,8 +14,12 @@
 ### Less important tasks
 
 * `service.py` and others: rename `user_name` into `user_id`
+* let all handlers in `service.py` format the results according to `{status='ok', result=result}`
+  or catch and then return `({status='error', error=error}, status_code)`. 
+  Controllers should just return `result` if any, otherwise raise `api.ApiError`on error.
 * add logging
 * use WSDL server instead of flask
+
 
 ### Norman's questions
 
