@@ -5,9 +5,9 @@ from kubernetes.client.rest import ApiException
 from xcube_gen import api
 
 
-def create(user_name: Optional[str] = None):
+def create(user_id: Optional[str] = None):
     api_pod_instance = client.CoreV1Api()
-    body = client.V1Namespace(metadata=client.V1ObjectMeta(name=user_name))
+    body = client.V1Namespace(metadata=client.V1ObjectMeta(name=user_id))
 
     try:
         namespace = api_pod_instance.create_namespace(body=body)
@@ -16,13 +16,13 @@ def create(user_name: Optional[str] = None):
         raise api.ApiError(e.status, str(e))
 
 
-def exists(user_name: str):
+def exists(user_id: str):
     api_pod_instance = client.CoreV1Api()
 
     try:
         namespaces = api_pod_instance.list_namespace()
         user_namespace_names = [namespace.metadata.name for namespace in namespaces]
-        return api.ApiResponse.success(user_name in user_namespace_names)
+        return api.ApiResponse.success(user_id in user_namespace_names)
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
@@ -37,12 +37,12 @@ def list():
         raise api.ApiError(e.status, str(e))
 
 
-def delete(user_name: str):
+def delete(user_id: str):
     api_pod_instance = client.CoreV1Api()
 
     try:
-        api_pod_instance.delete_namespace(name=user_name)
-        return api.ApiResponse.success(user_name)
+        api_pod_instance.delete_namespace(name=user_id)
+        return api.ApiResponse.success(user_id)
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 

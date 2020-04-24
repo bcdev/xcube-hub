@@ -52,58 +52,58 @@ def new_app(prefix: str = ""):
 
     flask_cors.CORS(app)
 
-    @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
-    def _jobs(user_name: str):
+    def _jobs(user_id: str):
         try:
             raise_for_invalid_json()
             if flask.request.method == 'GET':
-                return jobs.list(user_name=user_name)
+                return jobs.list(user_id=user_id)
             if flask.request.method == 'POST':
                 job_id = f"xcube-gen-{str(uuid.uuid4())}"
-                return jobs.create(user_name=user_name, job_id=job_id, sh_cmd='gen', cfg=flask.request.json)
+                return jobs.create(user_id=user_id, job_id=job_id, sh_cmd='gen', cfg=flask.request.json)
             if flask.request.method == 'DELETE':
-                return jobs.delete_all(user_name=user_name)
+                return jobs.delete_all(user_id=user_id)
         except api.ApiError as e:
             return e.response
 
     @app.route(prefix + '/jobs/<user_name>/<job_id>', methods=['GET', 'DELETE'])
     @requires_auth
-    def _job(user_name: str, job_id: str):
+    def _job(user_id: str, job_id: str):
         try:
             if flask.request.method == "GET":
-                return jobs.get(user_name=user_name, job_id=job_id)
+                return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
-                return jobs.delete_one(user_name=user_name, job_id=job_id)
+                return jobs.delete_one(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/jobs/<user_name>/<job_id>/status', methods=['GET'])
+    @app.route(prefix + '/jobs/<user_id>/<job_id>/status', methods=['GET'])
     @requires_auth
-    def _job_status(user_name: str, job_id: str):
+    def _job_status(user_id: str, job_id: str):
         try:
-            return jobs.status(user_name=user_name, job_id=job_id)
+            return jobs.status(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/jobs/<user_name>/<job_id>/result', methods=['GET'])
+    @app.route(prefix + '/jobs/<user_id>/<job_id>/result', methods=['GET'])
     @requires_auth
-    def _result(user_name: str, job_id: str):
+    def _result(user_id: str, job_id: str):
         try:
-            return jobs.result(user_name=user_name, job_id=job_id)
+            return jobs.result(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/user_namespaces/<user_name>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/user_namespaces/<user_id>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
-    def _user_namespace(user_name: str):
+    def _user_namespace(user_id: str):
         try:
             if flask.request.method == 'GET':
                 return user_namespaces.list()
             elif flask.request.method == 'POST':
-                return user_namespaces.create(user_name=user_name)
+                return user_namespaces.create(user_id=user_id)
             elif flask.request.method == 'DELETE':
-                return user_namespaces.delete(user_name=user_name)
+                return user_namespaces.delete(user_id=user_id)
         except api.ApiError as e:
             return e.response
 
@@ -123,7 +123,7 @@ def new_app(prefix: str = ""):
     def _size_and_cost():
         return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
 
-    @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_id>/data', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
     def _user_data(user_id: str):
         try:
