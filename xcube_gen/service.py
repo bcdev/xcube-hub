@@ -23,7 +23,7 @@ import flask
 import flask_cors
 from flask import jsonify
 import xcube_gen.api as api
-from xcube_gen.auth0 import AuthError, requires_auth
+from xcube_gen.auth import AuthError, requires_auth
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import user_namespaces

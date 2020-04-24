@@ -45,7 +45,7 @@ setup(
     entry_points={
         'console_scripts': [
             # xcube's CLI
-            'xcube-gen = xcube_gen.cli:main',
+            'xcube-genserv = xcube_gen.cli:main',
         ],
     },
     install_requires=requirements,
