@@ -67,7 +67,7 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/jobs/<user_name>/<job_id>', methods=['GET', 'DELETE'])
+    @app.route(prefix + '/jobs/<user_id>/<job_id>', methods=['GET', 'DELETE'])
     @requires_auth
     def _job(user_id: str, job_id: str):
         try:
@@ -121,7 +121,11 @@ def new_app(prefix: str = ""):
 
     @app.route(prefix + '/sizeandcost', methods=['POST'])
     def _size_and_cost():
-        return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
+        try:
+            raise_for_invalid_json()
+            return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
+        except api.ApiError as e:
+            return e.response
 
     @app.route(prefix + '/users/<user_id>/data', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
