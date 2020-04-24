@@ -3,10 +3,6 @@ import base64
 import unittest
 
 from test.setup_utils import setup_auth
-from xcube_gen.controllers.users import update_processing_units
-from xcube_gen.controllers.users import get_user_data
-
-import moto
 import boto3
 import moto
 
