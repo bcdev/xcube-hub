@@ -161,7 +161,7 @@ def new_app(prefix: str = ""):
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
     def handle_http_exception(e):
-        return api.ApiError(e.code, e.description)
+        return api.ApiResponse.error(e.description, e.code)
 
     return app
 
