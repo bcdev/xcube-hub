@@ -44,12 +44,19 @@ def new_app(prefix: str = ""):
         response.status_code = ex.status_code
         return response
 
+    def raise_for_invalid_json():
+        try:
+            flask.request.json
+        except werkzeug.exceptions.HTTPException:
+            raise api.ApiError(400, "Invalid JSON in request body")
+
     flask_cors.CORS(app)
 
     @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
     def _jobs(user_name: str):
         try:
+            raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_name=user_name)
             if flask.request.method == 'POST':
@@ -120,6 +127,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _user_data(user_id: str):
         try:
+            raise_for_invalid_json()
             if flask.request.method == 'GET':
                 user_data = users.get_user_data(user_id)
                 return api.ApiResponse.success(result=user_data)
@@ -136,6 +144,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _update_processing_units(user_id: str):
         try:
+            raise_for_invalid_json()
             if flask.request.method == 'GET':
                 include_history = flask.request.args.get('history', False)
                 processing_units = users.get_processing_units(user_id, include_history=include_history)
