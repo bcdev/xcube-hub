@@ -116,7 +116,7 @@ def new_app(prefix: str = ""):
     def _size_and_cost():
         return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
 
-    @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_id>/data', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
     def _user_data(user_id: str):
         try:
