@@ -1,5 +1,4 @@
 import unittest
-
 from xcube_gen.controllers.datastores import get_datastores
 
 

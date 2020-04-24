@@ -11,9 +11,9 @@ def create(user_name: Optional[str] = None):
 
     try:
         namespace = api_pod_instance.create_namespace(body=body)
-        return api.ApiResponse.success(namespace)
+        return api.ApiResponse.success(str(namespace))
     except ApiException as e:
-        return api.ApiResponse.error(e, e.status)
+        raise api.ApiError(e.status, str(e))
 
 
 def exists(user_name: str):
@@ -24,7 +24,7 @@ def exists(user_name: str):
         user_namespace_names = [namespace.metadata.name for namespace in namespaces]
         return api.ApiResponse.success(user_name in user_namespace_names)
     except ApiException as e:
-        return api.ApiResponse.error(e, e.status)
+        raise api.ApiError(e.status, str(e))
 
 
 def list():
@@ -34,7 +34,7 @@ def list():
         namespaces = api_pod_instance.list_namespace()
         return api.ApiResponse.success([namespace.metadata.name for namespace in namespaces.items])
     except ApiException as e:
-        return api.ApiResponse.error(e, e.status)
+        raise api.ApiError(e.status, str(e))
 
 
 def delete(user_name: str):
@@ -42,7 +42,7 @@ def delete(user_name: str):
 
     try:
         api_pod_instance.delete_namespace(name=user_name)
+        return api.ApiResponse.success(user_name)
     except ApiException as e:
-        return api.ApiResponse.error(e, e.status)
+        raise api.ApiError(e.status, str(e))
 
-    return api.ApiResponse.success(user_name)

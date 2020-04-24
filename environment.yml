@@ -12,6 +12,7 @@ dependencies:
   - matplotlib-base
   - boto3
   - python-jose
+  - pandas
 
   # Inspection
   - jupyterlab

@@ -1,16 +1,15 @@
-from typing import Union
-
 from kubernetes import client
+from kubernetes.client.rest import ApiException
 
 from xcube_gen import api
-from xcube_gen.types import AnyDict, Error
+from xcube_gen.types import AnyDict
 
 
-def get_pods(user_name: str, job_id: str) -> Union[AnyDict, Error]:
+def get_pods(user_name: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
     try:
         pods = api_pod_instance.list_namespaced_pod(namespace=user_name, label_selector=f"job-name={job_id}")
-    except BaseException as e:
-        return api.ApiResponse.error(e, 400)
+        return api.ApiResponse.success(pods.items)
+    except ApiException as e:
+        raise api.ApiError(e.status, str(e))
 
-    return api.ApiResponse.success(pods.items)

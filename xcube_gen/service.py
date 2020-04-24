@@ -19,23 +19,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import uuid
-
 import flask
 import flask_cors
 from flask import jsonify
 import xcube_gen.api as api
 from xcube_gen.auth0 import AuthError, requires_auth
 from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import datastores, jobs
-from xcube_gen.controllers import users, user_namespaces
-
-APP_ROOT = ""
+from xcube_gen.controllers import jobs
+from xcube_gen.controllers import user_namespaces
 from xcube_gen.controllers import datastores
 from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
 
 
-def new_app():
+def new_app(prefix: str = ""):
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
     Cfg.load_config_once()
@@ -48,7 +45,7 @@ def new_app():
 
     flask_cors.CORS(app)
 
-    @app.route(APP_ROOT + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
     def _jobs(user_name: str):
         try:
@@ -62,7 +59,7 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/jobs/<user_name>/<job_id>', methods=['GET', 'DELETE'])
+    @app.route(prefix + '/jobs/<user_name>/<job_id>', methods=['GET', 'DELETE'])
     @requires_auth
     def _job(user_name: str, job_id: str):
         try:
@@ -73,7 +70,7 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/jobs/<user_name>/<job_id>/status', methods=['GET'])
+    @app.route(prefix + '/jobs/<user_name>/<job_id>/status', methods=['GET'])
     @requires_auth
     def _job_status(user_name: str, job_id: str):
         try:
@@ -81,7 +78,7 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/jobs/<user_name>/<job_id>/result', methods=['GET'])
+    @app.route(prefix + '/jobs/<user_name>/<job_id>/result', methods=['GET'])
     @requires_auth
     def _result(user_name: str, job_id: str):
         try:
@@ -89,7 +86,7 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/user_namespaces/<user_name>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/user_namespaces/<user_name>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
     def _user_namespace(user_name: str):
         try:
@@ -102,7 +99,7 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/user_namespaces', methods=['GET'])
+    @app.route(prefix + '/user_namespaces', methods=['GET'])
     @requires_auth
     def _user_namespaces():
         try:
@@ -110,21 +107,16 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/datastores', methods=['GET'])
-    @requires_auth
-    @app.route('/info', methods=['GET'])
-    def _job_info():
-        return api.job_info()
-
-    @app.route('/sizeandcost', methods=['POST'])
+    @app.route(prefix + '/sizeandcost', methods=['POST'])
     def _size_and_cost():
         return api.ApiResponse.success(result=sizeandcost.get_size_and_cost(flask.request.json))
 
-    @app.route('/datastores', methods=['GET'])
+    @app.route(prefix + '/datastores', methods=['GET'])
+    @requires_auth
     def _datastores():
         return api.ApiResponse.success(result=datastores.get_datastores())
 
-    @app.route(APP_ROOT + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     def _user_data(user_name: str):
         try:
             if flask.request.method == 'GET':
@@ -139,7 +131,7 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/users/<user_name>/punits', methods=['PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_name>/punits', methods=['PUT', 'DELETE'])
     @app.route('/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
     def _update_processing_units(user_name: str):
         try:
@@ -156,11 +148,11 @@ def new_app():
         except api.ApiError as e:
             return e.response
 
-    @app.route(APP_ROOT + '/', methods=['GET'])
-    def _main2():
+    @app.route('/', methods=['GET'])
+    def _main_assure_health_test():
         return api.main()
 
-    @app.route('/', methods=['GET'])
+    @app.route(prefix + '/', methods=['GET'])
     def _main():
         return api.main()
 

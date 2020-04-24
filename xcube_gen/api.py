@@ -61,7 +61,8 @@ def datastores() -> AnyDict:
 
 
 def main() -> AnyDict:
-    return ApiResponse.success({'xcube-gen': {'version': version}})
+    chart_version = os.getenv("XCUBE_GEN_CHART_VERSION")
+    return ApiResponse.success({'xcube-gen': {'version': version, 'chart_version': chart_version}})
 
 
 def get_json_request_value(request: JsonObject,

@@ -1,9 +1,19 @@
+import os
 import unittest
 
+from test.setup_utils import setup_auth
 from xcube_gen.controllers.sizeandcost import get_size_and_cost
+from xcube_gen.service import new_app
 
 
 class CalcTest(unittest.TestCase):
+    def setUp(self) -> None:
+        os.environ["RUN_LOCAL"] = '1'
+        self._access_token = setup_auth()
+        self._app = new_app()
+        self._client = self._app.test_client()
+        self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
+
     def test_get_size_and_cost(self):
         result = get_size_and_cost({
             "cube_config": {

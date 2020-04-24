@@ -9,10 +9,6 @@ from xcube_gen import api
 from xcube_gen.types import AnyDict, Error
 
 
-class JobError(ValueError):
-    pass
-
-
 def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
     # Configureate Pod template container
     sh_client_id = os.environ.get("SH_CLIENT_ID")
@@ -21,10 +17,10 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
     sh_image = os.environ.get("XCUBE_SH_DOCKER_IMG")
 
     if not sh_image:
-        raise JobError("Could not find any xcube-sh docker image.")
+        raise api.ApiError(400, "Could not find any xcube-sh docker image.")
 
     if not sh_client_secret or not sh_client_id or not sh_instance_id:
-        raise JobError("SentinelHub credentials invalid. Please contact Brockmann Consult")
+        raise api.ApiError(400, "SentinelHub credentials invalid. Please contact Brockmann Consult")
 
     if cfg is not None:
         cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
@@ -139,4 +135,3 @@ def get(user_name: str, job_id: str) -> Union[AnyDict, Error]:
         return {'job_id': job_id, 'status': stat, 'output': output}
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
-
