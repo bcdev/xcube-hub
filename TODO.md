@@ -1,6 +1,6 @@
 ### Very important Tasks
 
-* use special scope for DELETE /users/<user_id>/punits
+* use special scope for `DELETE /users/<user_id>/punits`
 * fix: if we send invalid JSON requests we get error 400
 
 ```
