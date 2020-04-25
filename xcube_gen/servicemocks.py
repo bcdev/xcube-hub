@@ -19,29 +19,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import uuid
-import flask
-import xcube_gen.api as api
 import concurrent.futures
-import time
 import datetime
+import time
+import uuid
+
+import flask
+
+import xcube_gen.api as api
+
+JOB_ID_KEY = 'job_id'
 
 
-def extend_app(app, prefix: str, job_duration: float = 6):
+def extend_app(app, prefix: str):
     @app.route(prefix + '/mock/jobs/<user_id>', methods=['GET', 'POST', 'DELETE'])
-    def _jobs(user_id: str):
+    def _mock_jobs(user_id: str):
         if flask.request.method == 'GET':
             jobs = get_jobs(user_id)
             return api.ApiResponse.success(jobs)
         if flask.request.method == 'POST':
-            job = new_job(user_id, flask.request.json, job_duration)
+            job = new_job(user_id, flask.request.json)
+            print(job)
             return api.ApiResponse.success(job)
         if flask.request.method == 'DELETE':
             delete_jobs(user_id)
             return api.ApiResponse.success()
 
     @app.route(prefix + '/mock/jobs/<user_id>/<job_id>', methods=['GET', 'DELETE'])
-    def _job(user_id: str, job_id: str):
+    def _mock_job(user_id: str, job_id: str):
         if flask.request.method == "GET":
             job = get_job(user_id, job_id)
             return api.ApiResponse.success(job)
@@ -53,8 +58,6 @@ def extend_app(app, prefix: str, job_duration: float = 6):
 _USER_JOBS = dict()
 
 _EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-
-JOB_ID_KEY = 'job'
 
 
 def new_job(user_id: str, request: dict):
@@ -73,7 +76,7 @@ def new_job(user_id: str, request: dict):
     jobs = _USER_JOBS.get(user_id, {})
     jobs[job_id] = job
     _USER_JOBS[user_id] = jobs
-    _EXECUTOR.submit(_run_job, user_id, job_id, request.get('duration', 6))
+    _EXECUTOR.submit(_run_job, user_id, job_id, request.get('duration', 10))
     return job
 
 

@@ -18,6 +18,7 @@
 
 ### Less important tasks
 
+* rename env var `RUN_LOCAL` into `XCUBE_GENSERV_RUN_LOCAL`
 * indicate job progress
 * `service.py` and others: rename `user_name` into `user_id`
 * let all handlers in `service.py` format the results according to `{status='ok', result=result}`
