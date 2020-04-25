@@ -11,8 +11,14 @@
 ```
   
 
+* job output/logs should be separate from job status as this quickly becomes much data 
+  (e.g. xcube-sh may print warnings on every SH request).
+  Therefore: `GET /jobs/<user_id>/<job_id>/logs` 
+* job result dicts are still not consistent, key `job_id` vs. `job` or not matching `{status, result}` pattern. 
+
 ### Less important tasks
 
+* indicate job progress
 * `service.py` and others: rename `user_name` into `user_id`
 * let all handlers in `service.py` format the results according to `{status='ok', result=result}`
   or catch and then return `({status='error', error=error}, status_code)`. 

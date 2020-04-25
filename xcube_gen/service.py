@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import uuid
 import flask
 import flask_cors
@@ -161,6 +162,11 @@ def new_app(prefix: str = ""):
     @app.errorhandler(werkzeug.exceptions.HTTPException)
     def handle_http_exception(e):
         return api.ApiResponse.error(e.description, e.code)
+
+    import os
+    if os.environ.get('XCUBE_GENSERV_MOCK_SERVICES') == '1':
+        from .servicemocks import extend_app
+        extend_app(app, prefix)
 
     return app
 
