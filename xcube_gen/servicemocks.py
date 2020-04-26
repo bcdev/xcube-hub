@@ -57,7 +57,7 @@ def extend_app(app, prefix: str):
 
 _USER_JOBS = dict()
 
-_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 
 def new_job(user_id: str, request: dict):
@@ -89,11 +89,7 @@ def get_jobs(user_id: str):
 
 
 def delete_job(user_id: str, job_id: str):
-    if user_id in _USER_JOBS:
-        jobs = _USER_JOBS[user_id]
-        if job_id in jobs:
-            jobs[job_id]['active'] = False
-            del jobs[job_id]
+    _EXECUTOR.submit(_delete_job, user_id, job_id, 3)
 
 
 def delete_jobs(user_id: str):
@@ -140,3 +136,11 @@ def _run_job(user_id: str, job_id: str, job_duration: float):
     status['succeeded'] = True
     status['failed'] = 0
     status['completion_time'] = str(datetime.datetime.now())
+
+
+def _delete_job(user_id: str, job_id: str, delete_duration: float):
+    time.sleep(delete_duration)
+    if user_id in _USER_JOBS:
+        jobs = _USER_JOBS[user_id]
+        if job_id in jobs:
+            del jobs[job_id]
