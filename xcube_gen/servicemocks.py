@@ -23,6 +23,7 @@ import concurrent.futures
 import datetime
 import time
 import uuid
+from typing import List, Dict
 
 import flask
 
@@ -60,7 +61,7 @@ _USER_JOBS = dict()
 _EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 
-def new_job(user_id: str, request: dict):
+def new_job(user_id: str, request: dict) -> Dict:
     job_id = f"xcube-gen-{str(uuid.uuid4())}"
     job = {
         JOB_ID_KEY: job_id,
@@ -80,22 +81,24 @@ def new_job(user_id: str, request: dict):
     return job
 
 
-def get_job(user_id: str, job_id: str):
+def get_job(user_id: str, job_id: str) -> Dict:
     return _USER_JOBS.get(user_id, {}).get(job_id)
 
 
-def get_jobs(user_id: str):
+def get_jobs(user_id: str) -> List[Dict]:
     return [v for v in _USER_JOBS.get(user_id, {}).values()]
 
 
-def delete_job(user_id: str, job_id: str):
-    _EXECUTOR.submit(_delete_job, user_id, job_id, 3)
+def delete_job(user_id: str, job_id: str, delete_duration: float = 3):
+    _EXECUTOR.submit(_delete_job, user_id, job_id, delete_duration)
 
 
-def delete_jobs(user_id: str):
+def delete_jobs(user_id: str, delete_duration: float = 3):
     jobs = get_jobs(user_id)
+    num_jobs = len(jobs)
     for job in jobs:
-        delete_job(user_id, job[JOB_ID_KEY])
+        delete_job(user_id, job[JOB_ID_KEY],
+                   delete_duration=delete_duration / num_jobs)
 
 
 def _run_job(user_id: str, job_id: str, job_duration: float):

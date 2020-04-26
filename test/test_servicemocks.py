@@ -57,8 +57,14 @@ class ServiceMocksTest(unittest.TestCase):
 
         self.assertEqual({job1_id, job2_id, job3_id}, set(job[JOB_ID_KEY] for job in get_jobs(user_id)))
 
-        delete_job(user_id, job2_id)
+        delete_job(user_id, job2_id, 0.01)
+
+        time.sleep(0.1)
+
         self.assertEqual({job1_id, job3_id}, set(job[JOB_ID_KEY] for job in get_jobs(user_id)))
 
-        delete_jobs(user_id)
+        delete_jobs(user_id, 0.01)
+
+        time.sleep(0.1)
+
         self.assertEqual([], get_jobs(user_id))
