@@ -36,12 +36,24 @@ class ServiceMocksTest(unittest.TestCase):
 
         job = get_job(user_id, job1_id)
         self.assertIs(job, job1)
+        self.assertIn(JOB_ID_KEY, job)
+        self.assertIn('status', job)
+        self.assertIn('start_time', job['status'])
+        self.assertIsNotNone(job['status']['start_time'])
 
         job = get_job(user_id, job2_id)
         self.assertIs(job, job2)
+        self.assertIn(JOB_ID_KEY, job)
+        self.assertIn('status', job)
+        self.assertIn('start_time', job['status'])
+        self.assertIsNotNone(job['status']['start_time'])
 
         job = get_job(user_id, job3_id)
         self.assertIs(job, job3)
+        self.assertIn(JOB_ID_KEY, job)
+        self.assertIn('status', job)
+        self.assertIn('start_time', job['status'])
+        self.assertIsNotNone(job['status']['start_time'])
 
         self.assertEqual({job1_id, job2_id, job3_id}, set(job[JOB_ID_KEY] for job in get_jobs(user_id)))
 

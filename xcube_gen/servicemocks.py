@@ -106,8 +106,10 @@ def _run_job(user_id: str, job_id: str, job_duration: float):
     job = get_job(user_id, job_id)
     if not job:
         return
-    job['active'] = True
-    job['start_time'] = str(datetime.datetime.now())
+
+    status = job['status']
+    status['active'] = True
+    status['start_time'] = str(datetime.datetime.now())
 
     num_steps = 100
     for i in range(num_steps):
@@ -115,8 +117,9 @@ def _run_job(user_id: str, job_id: str, job_duration: float):
         if not job:
             return
 
-        # conditions = job.get("conditions") or []
-        # conditions.appemd({
+        # status = job['status']
+        # conditions = status.get("conditions") or []
+        # conditions.append({
         #     "last_probe_time": str(datetime.datetime.now()),
         #     "last_transition_time": str(datetime.datetime.now()),
         #     "message": f"Job in progress: {i}% done",
@@ -124,7 +127,7 @@ def _run_job(user_id: str, job_id: str, job_duration: float):
         #     "status": "True",
         #     "type": "Success"
         # })
-        # job["conditions"] = conditions
+        # status["conditions"] = conditions
 
         time.sleep(job_duration / num_steps)
 
@@ -132,7 +135,8 @@ def _run_job(user_id: str, job_id: str, job_duration: float):
     if not job:
         return
 
-    job['active'] = False
-    job['succeeded'] = True
-    job['failed'] = 0
-    job['completion_time'] = str(datetime.datetime.now())
+    status = job['status']
+    status['active'] = False
+    status['succeeded'] = True
+    status['failed'] = 0
+    status['completion_time'] = str(datetime.datetime.now())
