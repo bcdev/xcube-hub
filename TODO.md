@@ -1,6 +1,7 @@
 ### Very important Tasks
 
-* use special scope for `DELETE /users/<user_id>/punits`
+* use `datastore_id` to decide whether to invoke `xcube sh gen`  or `xcube cci gen`
+* use special scopes for `PUT /users/<user_id>/punits`
 * fix: if we send invalid JSON requests we get error 400
 
 ```
@@ -10,7 +11,6 @@
     <p>The browser (or proxy) sent a request that this server could not understand.</p> 
 ```
   
-
 * job output/logs should be separate from job status as this quickly becomes much data 
   (e.g. xcube-sh may print warnings on every SH request).
   Therefore: `GET /jobs/<user_id>/<job_id>/logs` 
