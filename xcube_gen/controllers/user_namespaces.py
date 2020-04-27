@@ -5,7 +5,7 @@ from kubernetes.client.rest import ApiException
 from xcube_gen import api
 
 
-def create(user_id: Optional[str] = None):
+def create_if_not_exists(user_id: Optional[str] = None):
     api_pod_instance = client.CoreV1Api()
     body = client.V1Namespace(metadata=client.V1ObjectMeta(name=user_id))
 

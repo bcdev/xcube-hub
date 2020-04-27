@@ -15,7 +15,7 @@ def get_processing_units(user_id: str, include_history: bool = False) -> JsonObj
 
 
 def add_processing_units(user_id: str, punits_request: JsonObject):
-    user_namespaces.create(user_id=user_id)
+    user_namespaces.create_if_not_exists(user_id=user_id)
     _update_processing_units(user_id, punits_request, 'add')
 
 
