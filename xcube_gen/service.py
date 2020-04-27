@@ -18,18 +18,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import uuid
+
 import flask
 import flask_cors
 import werkzeug
 from flask import jsonify
+
 import xcube_gen.api as api
 from xcube_gen.auth import AuthError, requires_auth
 from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import jobs
-from xcube_gen.controllers import user_namespaces
 from xcube_gen.controllers import datastores
+from xcube_gen.controllers import info
+from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
+from xcube_gen.controllers import user_namespaces
 from xcube_gen.controllers import users
 
 
@@ -52,7 +56,11 @@ def new_app(prefix: str = ""):
 
     flask_cors.CORS(app)
 
-    @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/', methods=['GET'])
+    def _service_info():
+        return api.ApiResponse.success(info.service_info())
+
+    @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
     def _jobs(user_id: str):
         try:
@@ -162,18 +170,15 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route('/', methods=['GET'])
-    def _main_assure_health_test():
-        return api.main()
-
-    @app.route(prefix + '/', methods=['GET'])
-    def _main():
-        return api.main()
-
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
     def handle_http_exception(e):
         return api.ApiResponse.error(e.description, e.code)
+
+    import os
+    if os.environ.get('XCUBE_GENSERV_MOCK_SERVICES') == '1':
+        from .servicemocks import extend_app
+        extend_app(app, prefix)
 
     return app
 
