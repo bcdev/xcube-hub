@@ -85,19 +85,11 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/jobs/<user_id>/<job_id>/status', methods=['GET'])
-    @requires_auth
-    def _job_status(user_id: str, job_id: str):
-        try:
-            return jobs.status(user_id=user_id, job_id=job_id)
-        except api.ApiError as e:
-            return e.response
-
-    @app.route(prefix + '/jobs/<user_id>/<job_id>/result', methods=['GET'])
+    @app.route(prefix + '/jobs/<user_id>/<job_id>/logs', methods=['GET'])
     @requires_auth
     def _result(user_id: str, job_id: str):
         try:
-            return jobs.result(user_id=user_id, job_id=job_id)
+            return jobs.logs(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
 

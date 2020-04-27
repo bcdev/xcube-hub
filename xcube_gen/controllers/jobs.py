@@ -115,7 +115,7 @@ def status(user_id: str, job_id: str) -> AnyDict:
     return api_response.status.to_dict()
 
 
-def result(user_id: str, job_id: str) -> AnyDict:
+def logs(user_id: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
 
     pods = api_pod_instance.list_namespaced_pod(namespace=user_id, label_selector=f"job-name={job_id}")
@@ -130,8 +130,8 @@ def result(user_id: str, job_id: str) -> AnyDict:
 
 def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
     try:
-        output = result(user_id=user_id, job_id=job_id)
+        output = logs(user_id=user_id, job_id=job_id)
         stat = status(user_id=user_id, job_id=job_id)
-        return {'job_id': job_id, 'status': stat, 'output': output}
+        return {'job_id': job_id, 'status': stat, 'result': output}
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
