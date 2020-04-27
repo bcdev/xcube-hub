@@ -57,7 +57,7 @@ def requires_scope(required_scope: Sequence):
         token_scopes = unverified_claims["scope"].split()
         res = set(required_scope) & set(token_scopes)
         if len(res) == 0:
-            raise AuthError({"code": "access denied", "description": "Not enough privileges for this opearation."}, 401)
+            raise AuthError({"code": "access denied", "description": "Insufficient privileges for this operation."}, 401)
 
 
 def requires_auth(f):
@@ -124,4 +124,3 @@ def requires_auth(f):
                          "description": "Unable to find appropriate key"}, 401)
 
     return decorated
-
