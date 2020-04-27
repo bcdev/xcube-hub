@@ -35,7 +35,7 @@ def list():
 
     try:
         namespaces = api_pod_instance.list_namespace()
-        return api.ApiResponse.success([namespace.metadata.name for namespace in namespaces.items])
+        return [namespace.metadata.name for namespace in namespaces.items]
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
@@ -45,7 +45,7 @@ def delete(user_id: str):
 
     try:
         api_pod_instance.delete_namespace(name=user_id)
-        return api.ApiResponse.success(user_id)
+        return True
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
