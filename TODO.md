@@ -32,6 +32,8 @@
 ### Norman's questions
 
 * what is the use of the `/user_namespace` ops?
-* `service.py` has two root `/` ops, why?
+We need to create a K8s namespace for each user. These ops do that.
 * `service.py` has two error handlers, why?
+One is for ApiErrors and the other for flask errors that kick through as html.
 * why have large `matplotlib-base` and `jupyterlab` packages in environment?
+Not suer about matplotlib. But Jupyterlab can go away.
