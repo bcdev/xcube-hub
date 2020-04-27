@@ -10,8 +10,11 @@ def create(user_id: Optional[str] = None):
     body = client.V1Namespace(metadata=client.V1ObjectMeta(name=user_id))
 
     try:
-        namespace = api_pod_instance.create_namespace(body=body)
-        return api.ApiResponse.success(str(namespace))
+        if not exists(user_id):
+            api_pod_instance.create_namespace(body=body)
+            return True
+        else:
+            return False
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
@@ -21,8 +24,8 @@ def exists(user_id: str):
 
     try:
         namespaces = api_pod_instance.list_namespace()
-        user_namespace_names = [namespace.metadata.name for namespace in namespaces]
-        return api.ApiResponse.success(user_id in user_namespace_names)
+        user_namespace_names = [namespace.metadata.name for namespace in namespaces.items]
+        return user_id in user_namespace_names
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 

@@ -2,6 +2,7 @@ import datetime
 from typing import Optional
 
 from xcube_gen.api import ApiError, get_json_request_value
+from xcube_gen.controllers import user_namespaces
 from xcube_gen.database import Database
 from xcube_gen.types import JsonObject
 
@@ -14,6 +15,7 @@ def get_processing_units(user_id: str, include_history: bool = False) -> JsonObj
 
 
 def add_processing_units(user_id: str, punits_request: JsonObject):
+    user_namespaces.create(user_id=user_id)
     _update_processing_units(user_id, punits_request, 'add')
 
 

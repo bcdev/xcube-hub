@@ -1,8 +1,8 @@
 # Format error response and append status code.
 import json
 from functools import wraps
+from typing import Sequence
 from urllib.request import urlopen
-
 import flask
 from jose import jwt
 
@@ -46,7 +46,7 @@ def get_token_auth_header():
     return token
 
 
-def requires_scope(required_scope):
+def requires_scope(required_scope: Sequence):
     """Determines if the required scope is present in the access token
     Args:
         required_scope (str): The scope required to access the resource
@@ -55,10 +55,9 @@ def requires_scope(required_scope):
     unverified_claims = jwt.get_unverified_claims(token)
     if unverified_claims.get("scope"):
         token_scopes = unverified_claims["scope"].split()
-        for token_scope in token_scopes:
-            if token_scope == required_scope:
-                return True
-    return False
+        res = set(required_scope) & set(token_scopes)
+        if len(res) == 0:
+            raise AuthError({"code": "access denied", "description": "Not enough privileges for this opearation."}, 401)
 
 
 def requires_auth(f):
@@ -125,3 +124,4 @@ def requires_auth(f):
                          "description": "Unable to find appropriate key"}, 401)
 
     return decorated
+

@@ -27,13 +27,12 @@ import werkzeug
 from flask import jsonify
 
 import xcube_gen.api as api
-from xcube_gen.auth import AuthError, requires_auth
+from xcube_gen.auth import AuthError, requires_auth, requires_scope
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import datastores
 from xcube_gen.controllers import info
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
-from xcube_gen.controllers import user_namespaces
 from xcube_gen.controllers import users
 
 
@@ -102,27 +101,6 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/user_namespaces/<user_id>', methods=['GET', 'POST', 'DELETE'])
-    @requires_auth
-    def _user_namespace(user_id: str):
-        try:
-            if flask.request.method == 'GET':
-                return user_namespaces.list()
-            elif flask.request.method == 'POST':
-                return user_namespaces.create(user_id=user_id)
-            elif flask.request.method == 'DELETE':
-                return user_namespaces.delete(user_id=user_id)
-        except api.ApiError as e:
-            return e.response
-
-    @app.route(prefix + '/user_namespaces', methods=['GET'])
-    @requires_auth
-    def _user_namespaces():
-        try:
-            return user_namespaces.list()
-        except api.ApiError as e:
-            return e.response
-
     @app.route(prefix + '/datastores', methods=['GET'])
     def _datastores():
         return api.ApiResponse.success(result=datastores.get_datastores())
@@ -153,9 +131,9 @@ def new_app(prefix: str = ""):
             return e.response
 
     @app.route(prefix + '/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
-    @requires_auth
     def _update_processing_units(user_id: str):
         try:
+            requires_scope(['put:punits'])
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 include_history = flask.request.args.get('history', False)
