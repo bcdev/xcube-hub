@@ -20,17 +20,20 @@
 # SOFTWARE.
 
 import uuid
+
 import flask
 import flask_cors
 import werkzeug
 from flask import jsonify
+
 import xcube_gen.api as api
 from xcube_gen.auth import AuthError, requires_auth
 from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import jobs
-from xcube_gen.controllers import user_namespaces
 from xcube_gen.controllers import datastores
+from xcube_gen.controllers import info
+from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
+from xcube_gen.controllers import user_namespaces
 from xcube_gen.controllers import users
 
 
@@ -46,6 +49,10 @@ def new_app(prefix: str = ""):
         return response
 
     flask_cors.CORS(app)
+
+    @app.route(prefix + '/', methods=['GET'])
+    def _service_info():
+        return api.ApiResponse.success(info.service_info())
 
     @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
     @requires_auth
@@ -149,14 +156,6 @@ def new_app(prefix: str = ""):
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
-
-    @app.route('/', methods=['GET'])
-    def _main_assure_health_test():
-        return api.main()
-
-    @app.route(prefix + '/', methods=['GET'])
-    def _main():
-        return api.main()
 
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)

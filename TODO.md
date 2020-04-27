@@ -2,6 +2,15 @@
 
 * use `datastore_id` to decide whether to invoke `xcube sh gen`  or `xcube cci gen`
 * use special scopes for `PUT /users/<user_id>/punits`
+* job output/logs should be separate from job status as this quickly becomes much data 
+  (e.g. xcube-sh may print warnings on every SH request).
+  Therefore: `GET /jobs/<user_id>/<job_id>/logs` 
+* job result dicts are still not consistent, key `job_id` vs. `job` 
+  or not matching `{status:'ok', result: any}` pattern. 
+
+### Less important tasks
+
+* rename env var `RUN_LOCAL` into `XCUBE_GENSERV_RUN_LOCAL`
 * fix: if we send invalid JSON requests we get error 400
 
 ```
@@ -11,14 +20,6 @@
     <p>The browser (or proxy) sent a request that this server could not understand.</p> 
 ```
   
-* job output/logs should be separate from job status as this quickly becomes much data 
-  (e.g. xcube-sh may print warnings on every SH request).
-  Therefore: `GET /jobs/<user_id>/<job_id>/logs` 
-* job result dicts are still not consistent, key `job_id` vs. `job` or not matching `{status, result}` pattern. 
-
-### Less important tasks
-
-* rename env var `RUN_LOCAL` into `XCUBE_GENSERV_RUN_LOCAL`
 * indicate job progress
 * `service.py` and others: rename `user_name` into `user_id`
 * let all handlers in `service.py` format the results according to `{status='ok', result=result}`
