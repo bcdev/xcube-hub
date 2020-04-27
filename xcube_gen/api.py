@@ -19,12 +19,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import json
-import os.path
+import datetime
 from typing import Any, Tuple, Union, Optional
 
 from xcube_gen.types import AnyDict, UNDEFINED, JsonObject, JsonValue
-from xcube_gen.version import version
+
+SERVER_NAME = 'xcube-genserv'
+SERVER_DESCRIPTION = 'xcube Generation Service'
+SERVER_START_TIME = datetime.datetime.now().isoformat()
 
 
 class ApiResponse:
@@ -52,17 +54,6 @@ class ApiError(BaseException):
     @property
     def response(self):
         return ApiResponse.error(error=self, status_code=self.status_code)
-
-
-def datastores() -> AnyDict:
-    datastores_path = os.path.join(os.path.dirname(__file__), 'resources', 'datastores.json')
-    with open(datastores_path) as fp:
-        return json.load(fp)
-
-
-def main() -> AnyDict:
-    chart_version = os.getenv("XCUBE_GEN_CHART_VERSION")
-    return ApiResponse.success({'xcube-gen': {'app_version': version, 'chart_version': chart_version}})
 
 
 def get_json_request_value(request: JsonObject,
