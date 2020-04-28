@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import uuid
+import os
 
 import flask
 import flask_cors
@@ -59,16 +59,15 @@ def new_app(prefix: str = ""):
     def _service_info():
         return api.ApiResponse.success(info.service_info())
 
-    @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
     def _jobs(user_id: str):
         try:
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
-            if flask.request.method == 'POST':
-                job_id = f"xcube-gen-{str(uuid.uuid4())}"
-                return jobs.create(user_id=user_id, job_id=job_id, sh_cmd='gen', cfg=flask.request.json)
+            if flask.request.method == 'PUT':
+                return jobs.create(user_id=user_id, sh_cmd='gen', cfg=flask.request.json)
             if flask.request.method == 'DELETE':
                 return jobs.delete_all(user_id=user_id)
         except api.ApiError as e:
@@ -146,8 +145,7 @@ def new_app(prefix: str = ""):
     def handle_http_exception(e):
         return api.ApiResponse.error(e.description, e.code)
 
-    import os
-    if os.environ.get('XCUBE_GENSERV_MOCK_SERVICES') == '1':
+    if os.environ.get('XCUBE_GEN_MOCK_SERVICES') == '1':
         from .servicemocks import extend_app
         extend_app(app, prefix)
 
