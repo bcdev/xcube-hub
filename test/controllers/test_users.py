@@ -1,5 +1,5 @@
 import os
-import base64
+import hashlib
 import unittest
 
 from test.setup_utils import setup_auth
@@ -27,7 +27,7 @@ class UsersTest(unittest.TestCase):
             s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME)
 
             user_name = 'heinrich'
-            user_id = base64.b64encode(user_name.encode('utf-8'))
+            user_id = hashlib.md5(user_name.encode('utf-8'))
 
             punits_request_1 = dict(count=5000,
                                     user_name=user_name,
