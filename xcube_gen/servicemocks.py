@@ -111,7 +111,8 @@ def delete_jobs(user_id: str, delete_duration: float = 3):
 def launch_viewer(user_id: str, output_config: JsonObject, launch_duration: float = 4) -> JsonObject:
     print(f'Launching viewer for {user_id} and {output_config}')
     time.sleep(launch_duration)
-    return dict(viewerURL='http://viewer.demo.dcs4cop.eu/')
+    return dict(viewerUri='http://viewer.demo.dcs4cop.eu',
+                serverUri='http://localhost:8080')
 
 
 def _run_job(user_id: str, job_id: str, job_duration: float):
