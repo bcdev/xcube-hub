@@ -19,4 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-version = '1.0.2'
+
+from xcube_gen.types import JsonObject
+
+
+def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
+    import time
+    # TODO (dzelge): Launch "xcube serve" with output_config
+    print(f'Launching viewer for {user_id} and {output_config}')
+    time.sleep(3)
+    return dict(viewerURL='http://viewer.demo.dcs4cop.eu/')

@@ -23,11 +23,12 @@ import concurrent.futures
 import datetime
 import time
 import uuid
-from typing import List, Dict
+from typing import List
 
 import flask
 
 import xcube_gen.api as api
+from xcube_gen.types import JsonObject
 
 JOB_ID_KEY = 'job_id'
 
@@ -55,13 +56,19 @@ def extend_app(app, prefix: str):
             delete_job(user_id, job_id)
             return api.ApiResponse.success()
 
+    @app.route(prefix + '/mock/cubes/<user_id>/viewer', methods=['POST'])
+    def _mock_cubes_viewer(user_id: str):
+        if flask.request.method == "POST":
+            result = launch_viewer(user_id, flask.request.json)
+            return api.ApiResponse.success(result)
+
 
 _USER_JOBS = dict()
 
 _EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 
-def new_job(user_id: str, request: dict) -> Dict:
+def new_job(user_id: str, request: JsonObject) -> JsonObject:
     job_id = f"xcube-gen-{str(uuid.uuid4())}"
     job = {
         JOB_ID_KEY: job_id,
@@ -81,11 +88,11 @@ def new_job(user_id: str, request: dict) -> Dict:
     return job
 
 
-def get_job(user_id: str, job_id: str) -> Dict:
+def get_job(user_id: str, job_id: str) -> JsonObject:
     return _USER_JOBS.get(user_id, {}).get(job_id)
 
 
-def get_jobs(user_id: str) -> List[Dict]:
+def get_jobs(user_id: str) -> List[JsonObject]:
     return [v for v in _USER_JOBS.get(user_id, {}).values()]
 
 
@@ -99,6 +106,12 @@ def delete_jobs(user_id: str, delete_duration: float = 3):
     for job in jobs:
         delete_job(user_id, job[JOB_ID_KEY],
                    delete_duration=delete_duration / num_jobs)
+
+
+def launch_viewer(user_id: str, output_config: JsonObject, launch_duration: float = 4) -> JsonObject:
+    print(f'Launching viewer for {user_id} and {output_config}')
+    time.sleep(launch_duration)
+    return dict(viewerURL='http://viewer.demo.dcs4cop.eu/')
 
 
 def _run_job(user_id: str, job_id: str, job_duration: float):
