@@ -1,5 +1,7 @@
 ### Very important Tasks
 
+* create user namespace if doesn't exist
+* use dedicated AWS user credentials to manage bucket `eurodatacube` 
 * use `datastore_id` to decide whether to invoke `xcube sh gen`  or `xcube cci gen`
 * use special scopes for `PUT /users/<user_id>/punits`
 * job output/logs should be separate from job status as this quickly becomes much data 
