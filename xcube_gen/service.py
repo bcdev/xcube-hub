@@ -60,7 +60,7 @@ def new_app(prefix: str = ""):
     def _service_info():
         return api.ApiResponse.success(info.service_info())
 
-    @app.route(prefix + '/jobs/<user_name>', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
     def _jobs(user_id: str):
         try:
@@ -96,9 +96,12 @@ def new_app(prefix: str = ""):
     @app.route(prefix + '/cubes/<user_id>/viewer', methods=['POST'])
     @requires_auth
     def _cubes_viewer(user_id: str):
-        if flask.request.method == "POST":
-            result = viewer.launch_viewer(user_id, flask.request.json)
-            return api.ApiResponse.success(result)
+        try:
+            if flask.request.method == "POST":
+                result = viewer.launch_viewer(user_id, flask.request.json)
+                return api.ApiResponse.success(result)
+        except api.ApiError as e:
+            return e.response
 
     @app.route(prefix + '/datastores', methods=['GET'])
     def _datastores():
