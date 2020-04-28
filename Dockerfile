@@ -19,10 +19,11 @@ USER ${XCUBE_USER_NAME}
 WORKDIR /home/${XCUBE_USER_NAME}
 ADD --chown=1000:1000 environment.yml environment.yml
 RUN conda env create
-RUN source activate xcube-gen && pip install pydevd-pycharm
 
 ADD --chown=1000:1000 ./ .
 RUN source activate xcube-gen && python setup.py install
+
+ADD --chown=1000:1000 ./docker/.aws /home/${XCUBE_USER_NAME}/.aws
 
 EXPOSE 8000
 
