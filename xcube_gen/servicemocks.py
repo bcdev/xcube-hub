@@ -33,12 +33,12 @@ JOB_ID_KEY = 'job_id'
 
 
 def extend_app(app, prefix: str):
-    @app.route(prefix + '/mock/jobs/<user_id>', methods=['GET', 'POST', 'DELETE'])
+    @app.route(prefix + '/mock/jobs/<user_id>', methods=['GET', 'PUT', 'DELETE'])
     def _mock_jobs(user_id: str):
         if flask.request.method == 'GET':
             jobs = get_jobs(user_id)
             return api.ApiResponse.success(jobs)
-        if flask.request.method == 'POST':
+        if flask.request.method == 'PUT':
             job = new_job(user_id, flask.request.json)
             print(job)
             return api.ApiResponse.success(job)
