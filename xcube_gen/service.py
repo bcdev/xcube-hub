@@ -34,6 +34,7 @@ from xcube_gen.controllers import info
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
+from xcube_gen.controllers import viewer
 
 
 def new_app(prefix: str = ""):
@@ -91,6 +92,13 @@ def new_app(prefix: str = ""):
             return jobs.logs(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
+
+    @app.route(prefix + '/cubes/<user_id>/viewer', methods=['POST'])
+    @requires_auth
+    def _cubes_viewer(user_id: str):
+        if flask.request.method == "POST":
+            result = viewer.launch_viewer(user_id, flask.request.json)
+            return api.ApiResponse.success(result)
 
     @app.route(prefix + '/datastores', methods=['GET'])
     def _datastores():

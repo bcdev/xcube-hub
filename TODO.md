@@ -1,7 +1,6 @@
 ### Very important Tasks
 
 * Helge: fully implement `POST /cubes/<user_id>/viewer`
-* Norman: implement dummy viewer operations, so the UI works
 * Norman: allow `xcube serve` to use AWS credentials
 * Helge: use `datastore_id` to decide whether to invoke `xcube sh gen`  or `xcube cci gen`
 * Norman: subtract user processing units after successful cube generation
@@ -15,6 +14,12 @@
 * let all handlers in `service.py` format the results according to `{status='ok', result=result}`
   or catch and then return `({status='error', error=error}, status_code)`. 
   Controllers should just return `result` if any, otherwise raise `api.ApiError`on error.
+
+### Done v1.0.2
+
+* Implemented dummy viewer operations
+  * `POST /cubes/<user_id>/viewer`
+  * `POST /mock/cubes/<user_id>/viewer`
 
 ### Done v1.0.1
 
@@ -35,4 +40,3 @@
     <h1>Bad Request</h1>
     <p>The browser (or proxy) sent a request that this server could not understand.</p> 
 ```
-
