@@ -6,6 +6,7 @@ from xcube_gen.service import new_app
 import subprocess
 
 
+@unittest.skip("Please only use to test against real SH services.")
 class TestJobs(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["RUN_LOCAL"] = '1'
@@ -28,9 +29,9 @@ class TestJobs(unittest.TestCase):
         self.assertEqual('400 BAD REQUEST', res.status)
         self.assertEqual('SentinelHub credentials invalid. Please contact Brockmann Consult', res.json['message'])
 
-        os.environ["SH_CLIENT_ID"] = 'b3da42b1-eef1-4e8d-bf29-dd391ef04518'
-        os.environ["SH_CLIENT_SECRET"] = 'ba%k,jsQn:Y<ph:m,j+C/jiG_k$KFlpZ}yAz*E]{'
-        os.environ["SH_INSTANCE_ID"] = 'c5828fc7-aa47-4f1d-b684-ae596521ef25'
+        os.environ["SH_CLIENT_ID"] = ''
+        os.environ["SH_CLIENT_SECRET"] = ''
+        os.environ["SH_INSTANCE_ID"] = ''
         res = self._client.post('/jobs/daffy-duck')
         self.assertEqual('200 OK', res.status)
         self.assertGreater(len(res.json['result']['job']), 0)
