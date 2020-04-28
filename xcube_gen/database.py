@@ -18,7 +18,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import json
+import os
 import threading
 from typing import Optional
 
@@ -26,9 +28,7 @@ import boto3
 
 from xcube_gen.types import JsonObject
 
-DEFAULT_DB_PROFILE_NAME = 'default'
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
-
 
 _DB_USER_DATASET_KEY = 'users/{user_name}/{dataset_name}.json'
 
@@ -42,21 +42,28 @@ class Database:
         Use ``aws configure [--profile <profile_name>]`` CLI command to configure a profile.
         See https://docs.aws.amazon.com/cli/latest/reference/configure/.
         
-        :param profile_name: The AWS credentials profile. 
-            Defaults to "{DEFAULT_DB_PROFILE_NAME}".
-        :param bucket: The S3 bucket that stores database objects. 
+        :param bucket_name: The S3 bucket that stores database objects. 
             Defaults to "{DEFAULT_DB_BUCKET_NAME}".
+        :param profile_name: The AWS credentials profile. 
+            If not given, credentials are expected to be given by environment variables
+            AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
         """
 
     _instance_lock = threading.Lock()
     _instance = None
 
     def __init__(self,
-                 profile_name: str = DEFAULT_DB_PROFILE_NAME,
-                 bucket_name: str = DEFAULT_DB_BUCKET_NAME):
+                 bucket_name: str = None,
+                 profile_name: str = None):
 
+        self._bucket_name = bucket_name or DEFAULT_DB_BUCKET_NAME
         self._profile_name = profile_name
-        self._bucket_name = bucket_name
+
+        if profile_name is not None:
+            self._session = boto3.Session(profile_name=profile_name)
+        else:
+            self._session = boto3.Session(aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+                                          aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
         self._session = boto3.Session(profile_name=profile_name)
         self._client = self._session.client('s3')
