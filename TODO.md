@@ -40,4 +40,3 @@
     <h1>Bad Request</h1>
     <p>The browser (or proxy) sent a request that this server could not understand.</p> 
 ```
-
