@@ -97,12 +97,14 @@ def list(user_id: str) -> Union[AnyDict, Error]:
     try:
         api_response = api_instance.list_namespaced_job(namespace=user_id)
         jobs = api_response.items
-        res = [{'name': job.metadata.name,
-                'start_time': job.status.start_time,
-                'failed': job.status.failed,
-                'succeeded': job.status.succeeded,
-                'completion_time': job.status.completion_time,
-                } for job in jobs]
+        res = [{'job_id': job.metadata.name,
+                'status': {
+                    'active': job.status.active,
+                    'start_time': job.status.start_time,
+                    'failed': job.status.failed,
+                    'succeeded': job.status.succeeded,
+                    'completion_time': job.status.completion_time,
+                }} for job in jobs]
         return api.ApiResponse.success(res)
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
@@ -115,7 +117,7 @@ def status(user_id: str, job_id: str) -> AnyDict:
     return api_response.status.to_dict()
 
 
-def result(user_id: str, job_id: str) -> AnyDict:
+def logs(user_id: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
 
     pods = api_pod_instance.list_namespaced_pod(namespace=user_id, label_selector=f"job-name={job_id}")
@@ -130,7 +132,7 @@ def result(user_id: str, job_id: str) -> AnyDict:
 
 def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
     try:
-        output = result(user_id=user_id, job_id=job_id)
+        output = logs(user_id=user_id, job_id=job_id)
         stat = status(user_id=user_id, job_id=job_id)
         return {'job_id': job_id, 'status': stat, 'output': output}
     except ApiException as e:

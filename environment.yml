@@ -9,13 +9,9 @@ dependencies:
   - click
   - flask
   - flask-cors
-  - matplotlib-base
   - boto3
   - python-jose
   - pandas
-
-  # Inspection
-  - jupyterlab
 
   - pip:
       # Required

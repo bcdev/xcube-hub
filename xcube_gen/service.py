@@ -85,19 +85,11 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/jobs/<user_id>/<job_id>/status', methods=['GET'])
-    @requires_auth
-    def _job_status(user_id: str, job_id: str):
-        try:
-            return jobs.status(user_id=user_id, job_id=job_id)
-        except api.ApiError as e:
-            return e.response
-
-    @app.route(prefix + '/jobs/<user_id>/<job_id>/result', methods=['GET'])
+    @app.route(prefix + '/jobs/<user_id>/<job_id>/logs', methods=['GET'])
     @requires_auth
     def _result(user_id: str, job_id: str):
         try:
-            return jobs.result(user_id=user_id, job_id=job_id)
+            return jobs.logs(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
 
@@ -133,16 +125,17 @@ def new_app(prefix: str = ""):
     @app.route(prefix + '/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
     def _update_processing_units(user_id: str):
         try:
-            requires_scope(['put:punits'])
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 include_history = flask.request.args.get('history', False)
                 processing_units = users.get_processing_units(user_id, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
+                requires_scope(['put:punits'])
                 users.add_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
+                requires_scope(['put:punits'])
                 users.subtract_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
