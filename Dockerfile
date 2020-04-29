@@ -23,8 +23,6 @@ RUN conda env create
 ADD --chown=1000:1000 ./ .
 RUN source activate xcube-gen && python setup.py install
 
-ADD --chown=1000:1000 ./docker/.aws /home/${XCUBE_USER_NAME}/.aws
-
 EXPOSE 8000
 
 CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-genserv start --debug --port 8000 --address 0.0.0.0"]

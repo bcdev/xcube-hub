@@ -157,6 +157,6 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
     try:
         output = logs(user_id=user_id, job_id=job_id)
         stat = status(user_id=user_id, job_id=job_id)
-        return {'job_id': job_id, 'status': stat, 'output': output}
+        return api.ApiResponse.success({'job_id': job_id, 'status': stat, 'output': output})
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
