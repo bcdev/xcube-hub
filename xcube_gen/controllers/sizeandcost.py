@@ -1,5 +1,5 @@
 from xcube_gen.api import get_json_request_value, ApiError
-from xcube_gen.types import JsonObject
+from xcube_gen.xg_types import JsonObject
 
 
 def _square(x: int) -> int:

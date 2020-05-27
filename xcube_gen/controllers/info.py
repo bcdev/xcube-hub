@@ -4,7 +4,7 @@ import os
 from xcube_gen.api import SERVER_DESCRIPTION
 from xcube_gen.api import SERVER_NAME
 from xcube_gen.api import SERVER_START_TIME
-from xcube_gen.types import JsonObject
+from xcube_gen.xg_types import JsonObject
 from xcube_gen.version import version
 
 

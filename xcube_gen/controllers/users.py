@@ -4,7 +4,7 @@ from typing import Optional
 from xcube_gen.api import ApiError, get_json_request_value
 from xcube_gen.controllers import user_namespaces
 from xcube_gen.database import Database
-from xcube_gen.types import JsonObject
+from xcube_gen.xg_types import JsonObject
 
 
 def get_processing_units(user_id: str, include_history: bool = False) -> JsonObject:

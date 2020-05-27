@@ -1,9 +1,11 @@
 # Format error response and append status code.
+import hashlib
 import json
 from functools import wraps
 from typing import Sequence
 from urllib.request import urlopen
 import flask
+import requests
 from jose import jwt
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
@@ -46,18 +48,49 @@ def get_token_auth_header():
     return token
 
 
-def requires_scope(required_scope: Sequence):
+def requires_permissions(required_scope: Sequence):
     """Determines if the required scope is present in the access token
     Args:
         required_scope (str): The scope required to access the resource
     """
     token = get_token_auth_header()
     unverified_claims = jwt.get_unverified_claims(token)
-    if unverified_claims.get("scope"):
-        token_scopes = unverified_claims["scope"].split()
+    if unverified_claims.get("permissions"):
+        token_scopes = unverified_claims["permissions"]
         res = set(required_scope) & set(token_scopes)
         if len(res) == 0:
-            raise AuthError({"code": "access denied", "description": "Insufficient privileges for this operation."}, 401)
+            raise AuthError({"code": "access denied", "description": "Insufficient privileges for this operation."},
+                            403)
+
+
+def _get_userinfo_from_auth0(token):
+
+    endpoint = "https://edc.eu.auth0.com/userinfo"
+    headers = {'Authorization': 'Bearer %s' % token}
+
+    req = requests.get(endpoint, headers=headers)
+    if req.status_code >= 400:
+        raise AuthError({"code": "access denied",
+                         "description": req.reason},
+                        req.status_code)
+
+    return req.json()
+
+
+def raise_for_invalid_user(user_id: str):
+    token = get_token_auth_header()
+    unverified_claims = jwt.get_unverified_claims(token)
+    if 'qty' in unverified_claims and unverified_claims['qty'] == 'client-credentials':
+        return True
+    user_info = _get_userinfo_from_auth0(token)
+    name = user_info['name']
+    # noinspection InsecureHash
+    res = hashlib.md5(name.encode())
+    name = 'a' + res.hexdigest()
+    if user_id != name:
+        raise AuthError({"code": "access denied", "description": "Insufficient privileges for this operation."}, 403)
+
+    return True
 
 
 def requires_auth(f):

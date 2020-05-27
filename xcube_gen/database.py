@@ -26,7 +26,7 @@ from typing import Optional
 
 import boto3
 
-from xcube_gen.types import JsonObject
+from xcube_gen.xg_types import JsonObject
 
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
 
@@ -34,6 +34,7 @@ _DB_USER_DATASET_KEY = 'users/{user_name}/{dataset_name}.json'
 
 
 class Database:
+    # noinspection PyUnusedName
     __doc__ = \
         f"""
         An object database that uses S3 as backend.

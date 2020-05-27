@@ -25,7 +25,7 @@ from xcube_gen import api
 from xcube_gen.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
     create_xcube_serve_ingress_object, create_xcube_genserv_ingress, delete_deployment, delete_service, delete_ingress, \
     list_ingress, list_service
-from xcube_gen.types import JsonObject
+from xcube_gen.xg_types import JsonObject
 
 
 def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:

@@ -27,7 +27,7 @@ import werkzeug
 from flask import jsonify
 
 import xcube_gen.api as api
-from xcube_gen.auth import AuthError, requires_auth, requires_scope
+from xcube_gen.auth import AuthError, requires_auth, requires_permissions, raise_for_invalid_user
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import datastores
 from xcube_gen.controllers import info
@@ -64,6 +64,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _jobs(user_id: str):
         try:
+            raise_for_invalid_user(user_id)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -78,6 +79,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _job(user_id: str, job_id: str):
         try:
+            raise_for_invalid_user(user_id)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -89,6 +91,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _result(user_id: str, job_id: str):
         try:
+            raise_for_invalid_user(user_id)
             return jobs.logs(user_id=user_id, job_id=job_id)
         except api.ApiError as e:
             return e.response
@@ -97,6 +100,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _cubes_viewer(user_id: str):
         try:
+            raise_for_invalid_user(user_id)
             if flask.request.method == "POST":
                 result = viewer.launch_viewer(user_id, flask.request.json)
                 return api.ApiResponse.success(result)
@@ -119,7 +123,9 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _user_data(user_id: str):
         try:
+            raise_for_invalid_user(user_id)
             raise_for_invalid_json()
+
             if flask.request.method == 'GET':
                 user_data = users.get_user_data(user_id)
                 return api.ApiResponse.success(result=user_data)
@@ -133,19 +139,22 @@ def new_app(prefix: str = ""):
             return e.response
 
     @app.route(prefix + '/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
     def _update_processing_units(user_id: str):
         try:
             raise_for_invalid_json()
+            raise_for_invalid_user(user_id)
             if flask.request.method == 'GET':
+                requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
                 processing_units = users.get_processing_units(user_id, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
-                requires_scope(['put:punits'])
+                requires_permissions(['put:punits'])
                 users.add_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                requires_scope(['put:punits'])
+                requires_permissions(['put:punits'])
                 users.subtract_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
