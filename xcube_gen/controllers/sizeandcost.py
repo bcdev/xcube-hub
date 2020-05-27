@@ -1,4 +1,4 @@
-from xcube_gen.api import get_json_request_value
+from xcube_gen.api import get_json_request_value, ApiError
 from xcube_gen.types import JsonObject
 
 
@@ -7,7 +7,7 @@ def _square(x: int) -> int:
 
 
 SH_INPUT_PIXELS_PER_PUNIT = _square(512)
-CCI_INPUT_PIXELS_PER_PUNIT = _square(16384)
+CCI_INPUT_PIXELS_PER_PUNIT = _square(768)
 OUTPUT_PIXELS_PER_PUNIT = _square(512)
 
 SH_INPUT_PUNITS_WEIGHT = 1.0
@@ -16,6 +16,11 @@ OUTPUT_PUNITS_WEIGHT = 1.0
 
 
 def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
+    input_config = get_json_request_value(processing_request, 'input_config',
+                                          value_type=dict)
+    datastore_id = get_json_request_value(input_config, 'datastore_id',
+                                          value_type=str,
+                                          key_path='input_config')
     cube_config = get_json_request_value(processing_request, 'cube_config',
                                          value_type=dict)
     x1, y1, x2, y2 = get_json_request_value(cube_config, 'geometry',
@@ -70,11 +75,17 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     num_times = len(date_range)
     num_variables = len(band_names)
     num_requests = num_variables * num_times * num_tiles_x * num_tiles_y
-    num_bytes_per_pixel = 4   # float32 for all variables for time being
+    num_bytes_per_pixel = 4  # float32 for all variables for time being
     num_bytes = num_variables * num_times * (height * width * num_bytes_per_pixel)
 
-    input_pixels_per_punit = SH_INPUT_PIXELS_PER_PUNIT
-    input_punits_weight = SH_INPUT_PUNITS_WEIGHT
+    if datastore_id == 'sentinelhub':
+        input_pixels_per_punit = SH_INPUT_PIXELS_PER_PUNIT
+        input_punits_weight = SH_INPUT_PUNITS_WEIGHT
+    elif datastore_id == 'cciodp':
+        input_pixels_per_punit = CCI_INPUT_PIXELS_PER_PUNIT
+        input_punits_weight = CCI_INPUT_PUNITS_WEIGHT
+    else:
+        raise ApiError(400, f'unsupported "input_config/datastore_id" entry: "{datastore_id}"')
 
     output_pixels_per_punit = OUTPUT_PIXELS_PER_PUNIT
     output_punits_weight = OUTPUT_PUNITS_WEIGHT

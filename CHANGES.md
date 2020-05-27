@@ -1,3 +1,11 @@
+### Changes in v1.0.5
+
+* Updated computation of processing units. Now also "cciodp" datastore is supported.
+
+### Changes in v1.0.4
+
+* Demo version for ESA SRR-F meeting. 
+
 ### Changes in v1.0.3
 
 * Using environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
