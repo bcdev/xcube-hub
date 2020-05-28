@@ -26,6 +26,7 @@ from typing import Optional, Union
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
+# from rq import Queue, Connection
 
 from xcube_gen import api
 from xcube_gen.poller import poll_job_status
@@ -86,7 +87,14 @@ def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[An
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
-        poll_job_status(user_id=user_id, job_id=job_id, punits_request=cfg)
+        # with Connection():
+        #     q = Queue()
+        #     q.enqueue(poll_job_status, kwargs={'poller': status,
+        #                                        'user_id': user_id,
+        #                                        'job_id': job_id,
+        #                                        'processing_request': cfg}
+        #               )
+        poll_job_status(poller=status, user_id=user_id, job_id=job_id, processing_request=cfg)
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
@@ -146,13 +154,13 @@ def logs(user_id: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
 
     pods = api_pod_instance.list_namespaced_pod(namespace=user_id, label_selector=f"job-name={job_id}")
-    logs = []
+    lgs = []
     for pod in pods.items:
         name = pod.metadata.name
-        log = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
-        logs = log.splitlines()
+        lg = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
+        lgs = lg.splitlines()
 
-    return logs
+    return lgs
 
 
 def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:

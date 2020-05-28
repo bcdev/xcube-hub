@@ -24,7 +24,8 @@ def subtract_processing_units(user_id: str, punits_request: JsonObject):
 
 
 def _update_processing_units(user_id: str, punits_request: JsonObject, op: str):
-    update_count = get_json_request_value(punits_request, 'count', value_type=int)
+    update_punits = get_json_request_value(punits_request, 'punits', value_type=dict)
+    update_count = get_json_request_value(update_punits, 'total_count', value_type=int)
     if update_count <= 0:
         raise ApiError(400, 'Processing unit counts must be greater than zero.')
     punits_data_old = get_user_data(user_id, dataset_name='punits') or dict()
