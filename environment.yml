@@ -17,6 +17,7 @@ dependencies:
       # Required
       - requests_oauthlib
       - kubernetes
+      - polling2
 
   # testing
   - moto

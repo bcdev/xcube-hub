@@ -29,7 +29,7 @@ class TestAuth(unittest.TestCase):
         mock_headers = mock_headers_patcher.start()
         mock_headers.return_value = {}
 
-        mock_get_patch = patch('xcube_gen.auth._get_userinfo_from_auth0')
+        mock_get_patch = patch('xcube_gen.auth._get_user_info_from_auth0')
         mock_get = mock_get_patch.start()
         mock_get.return_value = {'name': 'Tom.Jones@brockmann-consult.de'}
 
@@ -42,6 +42,13 @@ class TestAuth(unittest.TestCase):
 
         self.assertEqual("({'code': 'access denied', "
                          "'description': 'Insufficient privileges for this operation.'}, 403)",
+                         str(e.exception))
+
+        mock_get.return_value = {'nam': 'Tom.Jones@brockmann-consult.de'}
+        with self.assertRaises(AuthError) as e:
+            raise_for_invalid_user(user_id)
+
+        self.assertEqual("({'code': 'system error', 'description': 'Could not read name from user info.'}, 401)",
                          str(e.exception))
 
         mock_token_auth_patch.stop()

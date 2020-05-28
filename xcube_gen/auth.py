@@ -63,8 +63,7 @@ def requires_permissions(required_scope: Sequence):
                             403)
 
 
-def _get_userinfo_from_auth0(token):
-
+def _get_user_info_from_auth0(token):
     endpoint = "https://edc.eu.auth0.com/userinfo"
     headers = {'Authorization': 'Bearer %s' % token}
 
@@ -80,9 +79,13 @@ def _get_userinfo_from_auth0(token):
 def raise_for_invalid_user(user_id: str):
     token = get_token_auth_header()
     unverified_claims = jwt.get_unverified_claims(token)
-    if 'qty' in unverified_claims and unverified_claims['qty'] == 'client-credentials':
+    if 'gty' in unverified_claims and unverified_claims['gty'] == 'client-credentials':
         return True
-    user_info = _get_userinfo_from_auth0(token)
+    user_info = _get_user_info_from_auth0(token)
+
+    if 'name' not in user_info:
+        raise AuthError({"code": "system error", "description": "Could not read name from user info."}, 401)
+
     name = user_info['name']
     # noinspection InsecureHash
     res = hashlib.md5(name.encode())
