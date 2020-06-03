@@ -159,7 +159,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb"):
             raise_for_invalid_user(user_id=user_id)
             if flask.request.method == 'GET':
                 requires_permissions(['read:callback'])
-                res = callback.get_callback(user_id, job_id)
+                res = callback.get_callback(user_id, job_id, kv_provider)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
                 requires_permissions(['put:callback'])
@@ -167,7 +167,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb"):
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
                 requires_permissions(['delete:callback'])
-                callback.delete_callback(user_id, job_id)
+                callback.delete_callback(user_id, job_id, kv_provider)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response

@@ -1,28 +1,29 @@
 import json
-
-import redis
-
 from xcube_gen import api
-from xcube_gen.events import PUT_EVENTS
+from xcube_gen.events import CALLBACK_PUT_EVENTS, CALLBACK_DELETE_EVENTS, CALLBACK_GET_EVENTS
 from xcube_gen.kv import Kv, KvError
 from xcube_gen.xg_types import JsonObject, AnyDict
 
 
-def get_callback(user_id: str, job_id: str) -> JsonObject:
-    r = redis.Redis()
+def get_callback(user_id: str, job_id: str, kv_provider: str) -> JsonObject:
     try:
-        res = r.get(user_id + '__' + job_id)
+        _db = Kv.instance(kv_provider=kv_provider)
+    except KvError as e:
+        raise api.ApiError(401, str(e))
+
+    try:
+        res = _db.get(user_id + '__' + job_id)
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 
     if res:
-        return json.loads(res)
+        res = json.loads(res)
     else:
-        raise api.ApiError(404, 'Could not find any callbacks')
+        raise api.ApiError(404, 'Could not find any callback entries for that key.')
 
+    CALLBACK_GET_EVENTS.finished(user_id=user_id, job_id=job_id)
 
-def _put_finished(**kwargs):
-    PUT_EVENTS.finished(**kwargs)
+    return res
 
 
 def put_callback(user_id: str, job_id: str, value: AnyDict, kv_provider: str):
@@ -36,18 +37,21 @@ def put_callback(user_id: str, job_id: str, value: AnyDict, kv_provider: str):
 
     try:
         res = _db.set(user_id + '__' + job_id, json.dumps(value))
-        _put_finished(user_id=user_id, job_id=job_id, value=value)
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)
 
+    CALLBACK_PUT_EVENTS.finished(user_id=user_id, job_id=job_id, value=value)
     return res
 
 
-def delete_callback(user_id: str, job_id: str):
-    r = redis.Redis()
+def delete_callback(user_id: str, job_id: str, kv_provider: str):
+    try:
+        _db = Kv.instance(kv_provider=kv_provider)
+    except KvError as e:
+        raise api.ApiError(401, str(e))
 
     try:
-        res = r.delete(user_id + '__' + job_id)
+        res = _db.delete(user_id + '__' + job_id)
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 
@@ -55,5 +59,7 @@ def delete_callback(user_id: str, job_id: str):
         raise api.ApiError(404, 'Callback not found')
     elif res is None:
         raise api.ApiError(401, 'Deletion error')
+
+    CALLBACK_DELETE_EVENTS.finished(user_id=user_id, job_id=job_id)
 
     return res

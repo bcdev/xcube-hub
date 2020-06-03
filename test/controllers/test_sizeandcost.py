@@ -22,7 +22,7 @@ class CalcTest(unittest.TestCase):
             },
             "cube_config": {
                 "dataset_name": "S2L2A",
-                "band_names": ["B01", "B02", "B03"],
+                "variable_names": ["B01", "B02", "B03"],
                 "tile_size": [1000, 1000],
                 "geometry": [7.0, 53.0, 9.0, 55.0],
                 "spatial_res": 0.001,
@@ -55,7 +55,7 @@ class CalcTest(unittest.TestCase):
             },
             "cube_config": {
                 "dataset_name": "esacci.OZONE.month.L3.NP.multi-sensor.multi-platform.MERGED.fv0002.r1",
-                "band_names": ["O3e_du_tot", "surface_pressure"],
+                "variable_names": ["O3e_du_tot", "surface_pressure"],
                 "geometry": [-180, -90, 180, 90],
                 "spatial_res": 0.5,
                 "tile_size": [720, 360],

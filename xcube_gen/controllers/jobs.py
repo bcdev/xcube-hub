@@ -29,7 +29,6 @@ from kubernetes.client.rest import ApiException
 # from rq import Queue, Connection
 
 from xcube_gen import api
-from xcube_gen.poller import poll_job_status
 from xcube_gen.xg_types import AnyDict, Error
 
 
@@ -94,7 +93,7 @@ def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[An
         #                                        'job_id': job_id,
         #                                        'processing_request': cfg}
         #               )
-        poll_job_status(poller=status, user_id=user_id, job_id=job_id, processing_request=cfg)
+        # poll_job_status(poller=status, user_id=user_id, job_id=job_id, processing_request=cfg)
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:
         raise api.ApiError(e.status, str(e))

@@ -32,7 +32,7 @@ from xcube_gen.version import version
 @click.option('--port', '-p', type=int,
               help="The port number to listen on. Defaults to 5000.")
 @click.option('--debug', is_flag=True, help='Output extra debugging information.')
-@click.option('--kv-provider', type=click.Choice(['redis', 'leveldb'], case_sensitive=False),
+@click.option('--kv-provider', type=click.Choice(['redis', 'leveldb', 'json'], case_sensitive=False),
               help='Output extra debugging information.')
 def start(address: Optional[str],
           port: Optional[int],

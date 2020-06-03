@@ -27,18 +27,18 @@ class UsersTest(unittest.TestCase):
             s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME)
 
             user_name = 'heinrich'
-            user_id = hashlib.md5(user_name.encode('utf-8'))
+            user_id = hashlib.md5(user_name.encode('utf-8')).hexdigest()
 
-            punits_request_1 = dict(count=5000,
+            punits_request_1 = dict(punits=dict(total_count=5000,
                                     user_name=user_name,
                                     price_amount=200,
-                                    price_currency='€')
-            punits_request_2 = dict(count=10000,
+                                    price_currency='€'))
+            punits_request_2 = dict(punits=dict(total_count=10000,
                                     user_name=user_name,
                                     price_amount=350,
-                                    price_currency='€')
-            punits_request_3 = dict(count=280,
-                                    user_name=user_name)
+                                    price_currency='€'))
+            punits_request_3 = dict(punits=dict(total_count=280,
+                                    user_name=user_name))
 
             add_processing_units(user_id, punits_request_1)
 

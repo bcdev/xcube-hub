@@ -699,6 +699,8 @@ components:
           type: string
         message:
           type: string
+        values:
+          type: object
         total_work:
           type: number
         worked:

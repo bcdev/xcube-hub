@@ -19,12 +19,16 @@ class TestJobs(unittest.TestCase):
         subprocess.call(["kubectl", "delete", "namespace", "daffy-duck"])
 
     def test_create(self):
-        res = self._client.post('/jobs/daffy-duck')
+        os.environ["XCUBE_SH_DOCKER_IMG"] = ''
+        os.environ["SH_CLIENT_ID"] = ''
+        os.environ["SH_CLIENT_SECRET"] = ''
+        os.environ["SH_INSTANCE_ID"] = ''
+        res = self._client.put('/jobs/daffy-duck')
         self.assertEqual('400 BAD REQUEST', res.status)
         self.assertEqual('Could not find any xcube-sh docker image.', res.json['message'])
 
         os.environ["XCUBE_SH_DOCKER_IMG"] = 'quay.io/bcdev/xcube-sh'
-        res = self._client.post('/jobs/daffy-duck')
+        res = self._client.put('/jobs/daffy-duck')
         self.assertEqual('400 BAD REQUEST', res.status)
         self.assertEqual('SentinelHub credentials invalid. Please contact Brockmann Consult', res.json['message'])
 
