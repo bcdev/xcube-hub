@@ -29,7 +29,7 @@ from flask import jsonify
 import xcube_gen.api as api
 from xcube_gen.auth import AuthError, requires_auth, requires_permissions, raise_for_invalid_user
 from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import datastores
+from xcube_gen.controllers import datastores, callback
 from xcube_gen.controllers import info
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
@@ -37,7 +37,7 @@ from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
 
 
-def new_app(prefix: str = ""):
+def new_app(prefix: str = "", kv_provider: str = "leveldb"):
     """Create the service app."""
     app = flask.Flask('xcube-genserv')
     Cfg.load_config_once()
@@ -151,6 +151,27 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
+    @app.route(prefix + '/jobs/<user_id>/<job_id>/callback', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
+    def _callback(user_id: str, job_id: str):
+        try:
+            raise_for_invalid_json()
+            raise_for_invalid_user(user_id=user_id)
+            if flask.request.method == 'GET':
+                requires_permissions(['read:callback'])
+                res = callback.get_callback(user_id, job_id)
+                return api.ApiResponse.success(result=res)
+            elif flask.request.method == 'PUT':
+                requires_permissions(['put:callback'])
+                callback.put_callback(user_id, job_id, flask.request.json, kv_provider)
+                return api.ApiResponse.success()
+            elif flask.request.method == "DELETE":
+                requires_permissions(['delete:callback'])
+                callback.delete_callback(user_id, job_id)
+                return api.ApiResponse.success()
+        except api.ApiError as e:
+            return e.response
+
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
     def handle_http_exception(e):
@@ -165,7 +186,8 @@ def new_app(prefix: str = ""):
 
 def start(host: str = None,
           port: int = None,
-          debug: bool = False):
+          debug: bool = False,
+          kv_provider: str = "leveldb"):
     """
     Start the service.
 
@@ -174,4 +196,4 @@ def start(host: str = None,
     :param port: The port to listen on. Defaults to ``5000``.
     :param debug: If given, enable or disable debug mode.
     """
-    new_app().run(host=host, port=port, debug=debug)
+    new_app(kv_provider=kv_provider).run(host=host, port=port, debug=debug)

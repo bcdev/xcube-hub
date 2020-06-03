@@ -688,7 +688,7 @@ components:
         job_id:
           type: string
         status:
-          $ref: '#/components/schemas/Job_status'
+          $ref: '#/components/schemas/JobStatus'
     Callback:
       required:
         - message
@@ -699,6 +699,10 @@ components:
           type: string
         message:
           type: string
+        total_work:
+          type: number
+        worked:
+          type: number
     ViewerInformation:
       required:
         - server_uri
@@ -780,7 +784,7 @@ components:
       properties:
         punits:
           $ref: '#/components/schemas/PunitConfig_punits'
-    Job_status:
+    JobStatus:
       required:
         - active
         - completion_time
