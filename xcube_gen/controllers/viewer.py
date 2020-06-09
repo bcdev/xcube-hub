@@ -18,6 +18,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import os
+
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
@@ -30,6 +32,11 @@ from xcube_gen.xg_types import JsonObject
 
 def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
     try:
+        xcube_image = os.environ.get("XCUBE_DOCKER_IMG")
+
+        if not xcube_image:
+            raise api.ApiError(400, "Could not find the xcube docker image.")
+
         apps_v1_api = client.AppsV1Api()
         deployments = apps_v1_api.list_namespaced_deployment(namespace=user_id)
         deployments = [deployment.metadata.name for deployment in deployments.items]
@@ -49,8 +56,9 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         import time
         time.sleep(20)
 
-        deployment = create_deployment_object(name=user_id, container_name=user_id,
-                                              image='quay.io/bcdev/xcube-webapi:0.5.0.dev2',
+        deployment = create_deployment_object(name=user_id,
+                                              container_name=user_id,
+                                              image=xcube_image,
                                               container_port=4000,
                                               config=output_config)
 

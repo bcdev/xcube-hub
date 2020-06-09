@@ -37,9 +37,9 @@ from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
 
 
-def new_app(prefix: str = "", kv_provider: str = "leveldb"):
+def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', static_folder=''):
     """Create the service app."""
-    app = flask.Flask('xcube-genserv')
+    app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     Cfg.load_config_once()
 
     @app.errorhandler(AuthError)
@@ -172,6 +172,10 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb"):
         except api.ApiError as e:
             return e.response
 
+    @app.route('/viewer')
+    def _viewer():
+        return app.send_static_file('index.html')
+
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
     def handle_http_exception(e):
@@ -197,3 +201,4 @@ def start(host: str = None,
     :param debug: If given, enable or disable debug mode.
     """
     new_app(kv_provider=kv_provider).run(host=host, port=port, debug=debug)
+
