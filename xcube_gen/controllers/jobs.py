@@ -30,6 +30,7 @@ from kubernetes.client.rest import ApiException
 # from rq import Queue, Connection
 
 from xcube_gen import api
+from xcube_gen.controllers import user_namespaces
 from xcube_gen.xg_types import AnyDict, Error
 
 
@@ -83,6 +84,7 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
 
 def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[AnyDict, Error]:
     try:
+        user_namespaces.create_if_not_exists(user_id=user_id)
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()

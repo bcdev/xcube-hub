@@ -405,6 +405,43 @@ paths:
         - oAuthorization:
             - put_callbacks
   /cubes/{user_id}/viewer:
+    get:
+      tags:
+        - users
+      summary: Get cube viewer status
+      description: Get cube viewer status
+      operationId: getCubeViewerStatusByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Viewer information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiViewerInformationResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - submit_job
     post:
       tags:
         - users

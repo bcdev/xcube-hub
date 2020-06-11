@@ -82,14 +82,15 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/cubes/<user_id>/viewer', methods=['POST'])
+    @app.route(prefix + '/cubes/<user_id>/viewer', methods=['GET', 'POST'])
     @requires_auth
     def _cubes_viewer(user_id: str):
         try:
             raise_for_invalid_user(user_id, kv=kv)
+            if flask.request.method == "GET":
+                return api.ApiResponse.success(viewer.get_status(user_id=user_id))
             if flask.request.method == "POST":
-                result = viewer.launch_viewer(user_id, flask.request.json)
-                return api.ApiResponse.success(result)
+                return api.ApiResponse.success(viewer.launch_viewer(user_id, flask.request.json))
         except api.ApiError as e:
             return e.response
 
