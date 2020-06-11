@@ -22,6 +22,7 @@
 import json
 import os
 import uuid
+from pprint import pprint
 from typing import Optional, Union
 
 from kubernetes import client
@@ -168,4 +169,5 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
         stat = status(user_id=user_id, job_id=job_id)
         return api.ApiResponse.success({'job_id': job_id, 'status': stat, 'output': output})
     except ApiException as e:
+        pprint(str(e))
         raise api.ApiError(e.status, str(e))

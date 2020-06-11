@@ -24,10 +24,9 @@ import os
 import flask
 import flask_cors
 import werkzeug
-from flask import jsonify
 
 import xcube_gen.api as api
-from xcube_gen.auth import AuthError, requires_auth, requires_permissions, raise_for_invalid_user
+from xcube_gen.auth import requires_auth, requires_permissions, raise_for_invalid_user
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import datastores, callback
 from xcube_gen.controllers import info
@@ -35,26 +34,22 @@ from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
+from xcube_gen.cache import Cache
 
 
-def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', static_folder=''):
+def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder=''):
     """Create the service app."""
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
+    flask_cors.CORS(app)
     Cfg.load_config_once()
 
-    @app.errorhandler(AuthError)
-    def handle_auth_error(ex):
-        response = jsonify(ex.error)
-        response.status_code = ex.status_code
-        return response
+    kv = Cache.instance(cache_provider=cache_provider)
 
     def raise_for_invalid_json():
         try:
             flask.request.json
         except werkzeug.exceptions.HTTPException:
             raise api.ApiError(400, "Invalid JSON in request body")
-
-    flask_cors.CORS(app)
 
     @app.route(prefix + '/', methods=['GET'])
     def _service_info():
@@ -64,7 +59,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
     @requires_auth
     def _jobs(user_id: str):
         try:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user(user_id=user_id, kv=kv)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -79,7 +74,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
     @requires_auth
     def _job(user_id: str, job_id: str):
         try:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user(user_id, kv=kv)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -91,7 +86,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
     @requires_auth
     def _cubes_viewer(user_id: str):
         try:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user(user_id, kv=kv)
             if flask.request.method == "POST":
                 result = viewer.launch_viewer(user_id, flask.request.json)
                 return api.ApiResponse.success(result)
@@ -114,7 +109,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
     @requires_auth
     def _user_data(user_id: str):
         try:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user(user_id, kv=kv)
             raise_for_invalid_json()
 
             if flask.request.method == 'GET':
@@ -134,7 +129,7 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
     def _update_processing_units(user_id: str):
         try:
             raise_for_invalid_json()
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user(user_id, kv=kv)
             if flask.request.method == 'GET':
                 requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
@@ -156,23 +151,23 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
     def _callback(user_id: str, job_id: str):
         try:
             raise_for_invalid_json()
-            raise_for_invalid_user(user_id=user_id)
+            raise_for_invalid_user(user_id=user_id, kv=kv)
             if flask.request.method == 'GET':
                 requires_permissions(['read:callback'])
-                res = callback.get_callback(user_id, job_id, kv_provider)
+                res = callback.get_callback(user_id, job_id, kv)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
                 requires_permissions(['put:callback'])
-                callback.put_callback(user_id, job_id, flask.request.json, kv_provider)
+                callback.put_callback(user_id, job_id, flask.request.json, kv)
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
                 requires_permissions(['delete:callback'])
-                callback.delete_callback(user_id, job_id, kv_provider)
+                callback.delete_callback(user_id, job_id, kv)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
 
-    @app.route('/viewer')
+    @app.route(prefix + '/viewer')
     def _viewer():
         return app.send_static_file('index.html')
 
@@ -191,14 +186,14 @@ def new_app(prefix: str = "", kv_provider: str = "leveldb", static_url_path='', 
 def start(host: str = None,
           port: int = None,
           debug: bool = False,
-          kv_provider: str = "leveldb"):
+          cache_provider: str = "leveldb"):
     """
     Start the service.
 
+    :param cache_provider:
     :param host: The hostname to listen on. Set this to ``'0.0.0.0'`` to
         have the server available externally as well. Defaults to ``'127.0.0.1'``.
     :param port: The port to listen on. Defaults to ``5000``.
     :param debug: If given, enable or disable debug mode.
     """
-    new_app(kv_provider=kv_provider).run(host=host, port=port, debug=debug)
-
+    new_app(cache_provider=cache_provider).run(host=host, port=port, debug=debug)

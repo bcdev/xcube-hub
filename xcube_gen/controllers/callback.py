@@ -1,18 +1,13 @@
 import json
 from xcube_gen import api
 from xcube_gen.events import CALLBACK_PUT_EVENTS, CALLBACK_DELETE_EVENTS, CALLBACK_GET_EVENTS
-from xcube_gen.kv import Kv, KvError
+from xcube_gen.cache import Cache
 from xcube_gen.xg_types import JsonObject, AnyDict
 
 
-def get_callback(user_id: str, job_id: str, kv_provider: str) -> JsonObject:
+def get_callback(user_id: str, job_id: str, kv: Cache) -> JsonObject:
     try:
-        _db = Kv.instance(kv_provider=kv_provider)
-    except KvError as e:
-        raise api.ApiError(401, str(e))
-
-    try:
-        res = _db.get(user_id + '__' + job_id)
+        res = kv.get(user_id + '__' + job_id)
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 
@@ -26,17 +21,12 @@ def get_callback(user_id: str, job_id: str, kv_provider: str) -> JsonObject:
     return res
 
 
-def put_callback(user_id: str, job_id: str, value: AnyDict, kv_provider: str):
+def put_callback(user_id: str, job_id: str, value: AnyDict, kv: Cache):
     if 'message' not in value or 'status' not in value:
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
-        _db = Kv.instance(kv_provider=kv_provider)
-    except KvError as e:
-        raise api.ApiError(401, str(e))
-
-    try:
-        res = _db.set(user_id + '__' + job_id, json.dumps(value))
+        res = kv.set(user_id + '__' + job_id, json.dumps(value))
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)
 
@@ -44,14 +34,9 @@ def put_callback(user_id: str, job_id: str, value: AnyDict, kv_provider: str):
     return res
 
 
-def delete_callback(user_id: str, job_id: str, kv_provider: str):
+def delete_callback(user_id: str, job_id: str, kv: Cache):
     try:
-        _db = Kv.instance(kv_provider=kv_provider)
-    except KvError as e:
-        raise api.ApiError(401, str(e))
-
-    try:
-        res = _db.delete(user_id + '__' + job_id)
+        res = kv.delete(user_id + '__' + job_id)
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 

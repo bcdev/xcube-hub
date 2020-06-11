@@ -3,22 +3,24 @@ import unittest
 
 import os
 from unittest.mock import patch
-from xcube_gen.kv import Kv, KvError
+
+from xcube_gen import api
+from xcube_gen.cache import Cache
 
 
 class TestKv(unittest.TestCase):
     def test_instance(self):
-        inst = Kv.instance('json')
+        inst = Cache.instance('json')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.JsonKv'>")
 
-        inst = Kv.instance('leveldb', name='/tmp/testinstance')
+        inst = Cache.instance('leveldb', name='/tmp/testinstance')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.LevelDBKv'>")
 
-        inst = Kv.instance('redis')
+        inst = Cache.instance('redis')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.RedisKv'>")
 
-        with self.assertRaises(KvError) as e:
-            Kv.instance('jso')
+        with self.assertRaises(api.ApiError) as e:
+            Cache.instance('jso')
 
         self.assertEqual("Provider jso not known.", str(e.exception))
 
@@ -44,7 +46,7 @@ class TestRedisKv(unittest.TestCase):
     def test_get(self):
         self._mock_get.return_value = None
 
-        db = Kv.instance('redis')
+        db = Cache.instance('redis')
         res = db.get('äpasokväp')
         self.assertFalse(res)
 
@@ -55,7 +57,7 @@ class TestRedisKv(unittest.TestCase):
     def test_set(self):
         self._mock_set.return_value = True
 
-        db = Kv.instance('redis')
+        db = Cache.instance('redis')
         res = db.set('testSet', 'testValue')
         self.assertTrue(res)
 
@@ -65,7 +67,7 @@ class TestRedisKv(unittest.TestCase):
 
     def test_delete(self):
         self._mock_delete.return_value = True
-        db = Kv.instance('redis')
+        db = Cache.instance('redis')
         res = db.delete('key')
         self.assertTrue(res)
 
@@ -76,7 +78,7 @@ class TestRedisKv(unittest.TestCase):
 
 class TestLevelDbKv(unittest.TestCase):
     def setUp(self) -> None:
-        self._db = Kv.instance(kv_provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
+        self._db = Cache.instance(cache_provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
         self._db.set('key', 'value')
 
     def test_get(self):
@@ -108,7 +110,7 @@ class TestJsonKv(unittest.TestCase):
             json.dump({'key': 'value', 'key2': 'value2'}, js)
             js.close()
 
-        self._db = Kv.instance('json', file_name=self._json_file)
+        self._db = Cache.instance('json', file_name=self._json_file)
 
     def tearDown(self) -> None:
         os.unlink(self._json_file)

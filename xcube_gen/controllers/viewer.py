@@ -27,6 +27,7 @@ from xcube_gen import api
 from xcube_gen.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
     create_xcube_serve_ingress_object, create_xcube_genserv_ingress, delete_deployment, delete_service, delete_ingress, \
     list_ingress, list_service
+from xcube_gen.poller import poll_viewer_status
 from xcube_gen.xg_types import JsonObject
 
 
@@ -53,8 +54,8 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         ingresses = [ingress.metadata.name for ingress in ingresses.items]
         if len(ingresses) > 0:
             delete_ingress(name=user_id, namespace=user_id)
-        import time
-        time.sleep(20)
+
+        poll_viewer_status(apps_v1_api.list_namespaced_deployment, status='empty', namespace=user_id)
 
         deployment = create_deployment_object(name=user_id,
                                               container_name=user_id,
@@ -70,10 +71,12 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         ingress = create_xcube_serve_ingress_object(name=user_id, service_name=user_id, service_port=4000,
                                                     user_id=user_id)
         create_xcube_genserv_ingress(ingress, namespace=user_id)
-        time.sleep(20)
+
+        poll_viewer_status(apps_v1_api.read_namespaced_deployment, status='ready', namespace=user_id, name=user_id)
 
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
-    return dict(viewerUri='https://xcube-gen.brockmann-consult.de/viewer',
+    return dict(viewerUri='https://xcube-gen.brockmann-consult.de/api/v1/viewer',
                 serverUri=f'https://xcube-gen.brockmann-consult.de/{user_id}')
+

@@ -3,8 +3,10 @@ from abc import abstractmethod
 
 import os
 
+from xcube_gen import api
 
-class Kv:
+
+class Cache:
     __doc__ = \
         f"""
         A key-value pair database interface connector class (e.g. to redis)
@@ -46,32 +48,32 @@ class Kv:
         """
 
     @classmethod
-    def instance(cls, kv_provider: str, **kwargs) -> "Kv":
+    def instance(cls, cache_provider: str, **kwargs) -> "Cache":
         """
         Return a database singleton.
 
-        :param kv_provider: KV Provider ('redis', 'leveldb')
+        :param cache_provider: KV Provider ('redis', 'leveldb')
         :param kwargs: Keyword-arguments passed to ``Database`` constructor.
         """
-        if cls._instance_type and cls._instance_type != kv_provider:
+        if cls._instance_type and cls._instance_type != cache_provider:
             cls._instance = None
-        cls._instance_type = kv_provider
+        cls._instance_type = cache_provider
         if cls._instance is None:
             cls._instance_lock.acquire()
             if cls._instance is None:
-                if kv_provider == 'redis':
-                    cls._instance = RedisKv(**kwargs)
-                elif kv_provider == 'leveldb':
-                    cls._instance = LevelDBKv(**kwargs)
-                elif kv_provider == 'json':
-                    cls._instance = JsonKv(**kwargs)
+                if cache_provider == 'redis':
+                    cls._instance = RedisCache(**kwargs)
+                elif cache_provider == 'leveldb':
+                    cls._instance = LevelDBCache(**kwargs)
+                elif cache_provider == 'json':
+                    cls._instance = JsonCache(**kwargs)
                 else:
-                    raise KvError(f"Provider {kv_provider} not known.")
+                    raise api.ApiError(500, f"Provider {cache_provider} not known.")
             cls._instance_lock.release()
         return cls._instance
 
 
-class RedisKv(Kv):
+class RedisCache(Cache):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -85,9 +87,18 @@ class RedisKv(Kv):
         ```
         """
 
+    # noinspection PyUnresolvedReferences
     def __init__(self, host='localhost', port=6379, db=0, **kwargs):
         super().__init__()
-        from redis import Redis
+        try:
+            from redis import Redis
+        except ImportError:
+            raise api.ApiError(500, "Error: Cannot import redis. Please install first.")
+
+        host = os.getenv('XCUBE_GEN_REDIS_HOST') or host
+        port = os.getenv('XCUBE_GEN_REDIS_POST') or port
+        db = os.getenv('XCUBE_GEN_REDIS_DB') or db
+
         self._db = Redis(host=host, port=port, db=db, **kwargs)
 
     def get(self, key):
@@ -121,7 +132,7 @@ class RedisKv(Kv):
         return self._db.delete(key)
 
 
-class LevelDBKv(Kv):
+class LevelDBCache(Cache):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -140,9 +151,12 @@ class LevelDBKv(Kv):
         try:
             import plyvel
         except ImportError:
-            raise KvError("Error: Cannot import plyvel. Please install first.")
+            raise api.ApiError(500, "Error: Cannot import plyvel. Please install first.")
 
-        self._db = plyvel.DB(name=name, create_if_missing=True)
+        name = os.getenv('XCUBE_GEN_LEVELDB_NAME') or name
+        create_if_missing = os.getenv('XCUBE_GEN_LEVELDB_CREATE_IF_MISSING') or create_if_missing
+
+        self._db = plyvel.DB(name=name, create_if_missing=create_if_missing, *args, **kwargs)
 
     def get(self, key):
         """
@@ -182,7 +196,7 @@ class LevelDBKv(Kv):
         return True
 
 
-class JsonKv(Kv):
+class JsonCache(Cache):
     __doc__ = \
         f"""
         Json key-value pair database implementation of Kv
@@ -199,14 +213,16 @@ class JsonKv(Kv):
     def __init__(self, file_name: str = 'callback.json'):
         super().__init__()
 
-        print("Warning: You are using the json adaptor. This adaptor is for development only. For better performance"
-              " use either redis or leveldb. Both need to be installed.")
+        print("Warning: You are using the xcube-gen json cache adaptor. This adaptor is for development purposes only. "
+              "For better performance use either 'redis' or 'leveldb'.")
+
+        file_name = os.getenv('XCUBE_GEN_JSON_FILE_NAME') or file_name
         self._file_name = file_name
 
         try:
             import json
         except ImportError:
-            raise KvError("Error: Cannot import json. Please install first.")
+            raise api.ApiError(500, "Error: Cannot import json. Please install first.")
 
         if not os.path.isfile(self._file_name):
             with open(self._file_name, 'w') as js:
@@ -258,10 +274,3 @@ class JsonKv(Kv):
         del self._db[key]
 
         return True
-
-
-class KvError(BaseException):
-    """
-    Raised by methods of :class:`Kv`.
-    """
-    pass

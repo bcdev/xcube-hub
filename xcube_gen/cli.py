@@ -32,18 +32,18 @@ from xcube_gen.version import version
 @click.option('--port', '-p', type=int,
               help="The port number to listen on. Defaults to 5000.")
 @click.option('--debug', is_flag=True, help='Output extra debugging information.')
-@click.option('--kv-provider', type=click.Choice(['redis', 'leveldb', 'json'], case_sensitive=False),
+@click.option('--cache-provider', type=click.Choice(['redis', 'leveldb', 'json'], case_sensitive=False),
               help='Output extra debugging information.')
 def start(address: Optional[str],
           port: Optional[int],
           debug: bool,
-          kv_provider: str):
+          cache_provider: str):
     """
     Start the service.
     """
 
     from xcube_gen.service import start
-    start(host=address, port=port, debug=debug, kv_provider=kv_provider)
+    start(host=address, port=port, debug=debug, cache_provider=cache_provider)
 
 
 @click.command(name="stop")

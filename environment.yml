@@ -20,6 +20,7 @@ dependencies:
       - kubernetes
       - polling2
       - plyvel
+      - Flask-Limiter
 
   # testing
   - moto
