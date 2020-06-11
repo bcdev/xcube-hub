@@ -5,7 +5,7 @@ FROM quay.io/bcdev/xcube-python-base:${XCUBE_VERSION}
 ARG XCUBE_VERSION=0.4.2
 ARG XCUBE_GEN_VERSION=1.0.5
 ARG XCUBE_USER_NAME=xcube
-ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.ini"
+ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
 LABEL name="xcube python dependencies"
@@ -34,4 +34,4 @@ COPY --from=quay.io/bcdev/xcube-viewer:latest /usr/src/app/build ./viewer
 EXPOSE 5000
 EXPOSE 5050
 
-CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --ini ${XCUBE_API_UWSGI_INI_PATH}"]
+CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]

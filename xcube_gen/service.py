@@ -43,7 +43,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     flask_cors.CORS(app)
     Cfg.load_config_once()
 
-    kv = Cache.instance(cache_provider=cache_provider)
+    kv = Cache.instance(cache_provider=cache_provider, host="xcube-gen-redis")
 
     def raise_for_invalid_json():
         try:
