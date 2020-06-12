@@ -42,8 +42,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     flask_cors.CORS(app)
     Cfg.load_config_once()
-
-    kv = Cache.instance(cache_provider=cache_provider, host="xcube-gen-redis")
+    Cache.configure(provider=cache_provider)
 
     def raise_for_invalid_json():
         try:
@@ -59,7 +58,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _jobs(user_id: str):
         try:
-            raise_for_invalid_user(user_id=user_id, kv=kv)
+            raise_for_invalid_user(user_id=user_id)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -74,7 +73,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _job(user_id: str, job_id: str):
         try:
-            raise_for_invalid_user(user_id, kv=kv)
+            raise_for_invalid_user(user_id)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -86,7 +85,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _cubes_viewer(user_id: str):
         try:
-            raise_for_invalid_user(user_id, kv=kv)
+            raise_for_invalid_user(user_id)
             if flask.request.method == "GET":
                 return api.ApiResponse.success(viewer.get_status(user_id=user_id))
             if flask.request.method == "POST":
@@ -110,7 +109,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _user_data(user_id: str):
         try:
-            raise_for_invalid_user(user_id, kv=kv)
+            raise_for_invalid_user(user_id)
             raise_for_invalid_json()
 
             if flask.request.method == 'GET':
@@ -130,7 +129,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     def _update_processing_units(user_id: str):
         try:
             raise_for_invalid_json()
-            raise_for_invalid_user(user_id, kv=kv)
+            raise_for_invalid_user(user_id)
             if flask.request.method == 'GET':
                 requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
@@ -152,18 +151,18 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     def _callback(user_id: str, job_id: str):
         try:
             raise_for_invalid_json()
-            raise_for_invalid_user(user_id=user_id, kv=kv)
+            raise_for_invalid_user(user_id=user_id)
             if flask.request.method == 'GET':
                 requires_permissions(['read:callback'])
-                res = callback.get_callback(user_id, job_id, kv)
+                res = callback.get_callback(user_id, job_id)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
                 requires_permissions(['put:callback'])
-                callback.put_callback(user_id, job_id, flask.request.json, kv)
+                callback.put_callback(user_id, job_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
                 requires_permissions(['delete:callback'])
-                callback.delete_callback(user_id, job_id, kv)
+                callback.delete_callback(user_id, job_id)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response

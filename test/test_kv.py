@@ -10,17 +10,17 @@ from xcube_gen.cache import Cache
 
 class TestKv(unittest.TestCase):
     def test_instance(self):
-        inst = Cache.instance('json')
+        inst = Cache.configure('json')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.JsonKv'>")
 
-        inst = Cache.instance('leveldb', name='/tmp/testinstance')
+        inst = Cache.configure('leveldb', name='/tmp/testinstance')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.LevelDBKv'>")
 
-        inst = Cache.instance('redis')
+        inst = Cache.configure('redis')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.RedisKv'>")
 
         with self.assertRaises(api.ApiError) as e:
-            Cache.instance('jso')
+            Cache.configure('jso')
 
         self.assertEqual("Provider jso not known.", str(e.exception))
 
@@ -46,7 +46,7 @@ class TestRedisKv(unittest.TestCase):
     def test_get(self):
         self._mock_get.return_value = None
 
-        db = Cache.instance('redis')
+        db = Cache.configure('redis')
         res = db.get('äpasokväp')
         self.assertFalse(res)
 
@@ -57,7 +57,7 @@ class TestRedisKv(unittest.TestCase):
     def test_set(self):
         self._mock_set.return_value = True
 
-        db = Cache.instance('redis')
+        db = Cache.configure('redis')
         res = db.set('testSet', 'testValue')
         self.assertTrue(res)
 
@@ -67,7 +67,7 @@ class TestRedisKv(unittest.TestCase):
 
     def test_delete(self):
         self._mock_delete.return_value = True
-        db = Cache.instance('redis')
+        db = Cache.configure('redis')
         res = db.delete('key')
         self.assertTrue(res)
 
@@ -78,7 +78,7 @@ class TestRedisKv(unittest.TestCase):
 
 class TestLevelDbKv(unittest.TestCase):
     def setUp(self) -> None:
-        self._db = Cache.instance(cache_provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
+        self._db = Cache.configure(provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
         self._db.set('key', 'value')
 
     def test_get(self):
@@ -110,7 +110,7 @@ class TestJsonKv(unittest.TestCase):
             json.dump({'key': 'value', 'key2': 'value2'}, js)
             js.close()
 
-        self._db = Cache.instance('json', file_name=self._json_file)
+        self._db = Cache.configure('json', file_name=self._json_file)
 
     def tearDown(self) -> None:
         os.unlink(self._json_file)

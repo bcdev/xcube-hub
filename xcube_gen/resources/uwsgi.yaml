@@ -3,7 +3,7 @@ uwsgi:
     wsgi-file: xcube_gen/wsgi.py
     callable: app
     master: true
-    processes: 16
-    threads: 8
+    #processes: 16
+    #threads: 8
     #http-stats: true
     #stats: 0.0.0.0:5050

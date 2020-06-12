@@ -5,9 +5,10 @@ from xcube_gen.cache import Cache
 from xcube_gen.xg_types import JsonObject, AnyDict
 
 
-def get_callback(user_id: str, job_id: str, kv: Cache) -> JsonObject:
+def get_callback(user_id: str, job_id: str) -> JsonObject:
     try:
-        res = kv.get(user_id + '__' + job_id)
+        cache = Cache()
+        res = cache.get(user_id + '__' + job_id)
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 
@@ -21,12 +22,13 @@ def get_callback(user_id: str, job_id: str, kv: Cache) -> JsonObject:
     return res
 
 
-def put_callback(user_id: str, job_id: str, value: AnyDict, kv: Cache):
+def put_callback(user_id: str, job_id: str, value: AnyDict):
     if 'message' not in value or 'status' not in value:
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
-        res = kv.set(user_id + '__' + job_id, json.dumps(value))
+        cache = Cache()
+        res = cache.set(user_id + '__' + job_id, json.dumps(value))
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)
 
@@ -34,9 +36,10 @@ def put_callback(user_id: str, job_id: str, value: AnyDict, kv: Cache):
     return res
 
 
-def delete_callback(user_id: str, job_id: str, kv: Cache):
+def delete_callback(user_id: str, job_id: str):
     try:
-        res = kv.delete(user_id + '__' + job_id)
+        cache = Cache()
+        res = cache.delete(user_id + '__' + job_id)
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 

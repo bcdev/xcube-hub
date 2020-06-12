@@ -16,7 +16,6 @@ ALGORITHMS = ["RS256"]
 API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v1/'
 
 
-
 def get_token_auth_header():
     """Obtains the access token from the Authorization Header
     """
@@ -51,7 +50,8 @@ def requires_permissions(required_scope: Sequence):
             raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
 
 
-def _get_user_info_from_auth0(token, user_id: str, kv: Cache):
+def _get_user_info_from_auth0(token, user_id: str):
+    kv = Cache()
     user_info = kv.get(user_id + '_user_info')
     if user_info and isinstance(user_info, str):
         return json.loads(user_info)
@@ -70,13 +70,13 @@ def _get_user_info_from_auth0(token, user_id: str, kv: Cache):
     return user_info
 
 
-def raise_for_invalid_user(user_id: str, kv: Cache):
+def raise_for_invalid_user(user_id: str):
     token = get_token_auth_header()
     unverified_claims = jwt.get_unverified_claims(token)
     if 'gty' in unverified_claims and unverified_claims['gty'] == 'client-credentials':
         return True
 
-    user_info = _get_user_info_from_auth0(token, user_id, kv)
+    user_info = _get_user_info_from_auth0(token, user_id)
 
     if 'name' not in user_info:
         raise api.ApiError(403, "access denied: Could not read name from user info.")

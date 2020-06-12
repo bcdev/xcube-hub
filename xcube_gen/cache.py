@@ -2,6 +2,7 @@ import threading
 from abc import abstractmethod
 
 import os
+from typing import Optional
 
 from xcube_gen import api
 
@@ -15,20 +16,22 @@ class Cache:
         
         """
 
+    provider = 'leveldb'
+
     _instance_lock = threading.Lock()
-    _instance_type = None
     _instance = None
 
-    def __init__(self):
-        self._db = None
+    def __init__(self, **kwargs):
+        pass
 
-    @abstractmethod
     def get(self, key):
         """
         Get a key value
         :param key:
         :return:
         """
+
+        return self._instance.get(key)
 
     @abstractmethod
     def set(self, key, value):
@@ -39,6 +42,8 @@ class Cache:
         :return:
         """
 
+        return self._instance.set(key, value)
+
     @abstractmethod
     def delete(self, key):
         """
@@ -47,28 +52,38 @@ class Cache:
         :return:
         """
 
+        return self._instance.delete(key)
+
     @classmethod
-    def instance(cls, cache_provider: str, **kwargs) -> "Cache":
+    def get_instance(cls):
+        return cls._instance
+
+    @classmethod
+    def configure(cls, provider: Optional[str] = None, **kwargs) -> "Cache":
         """
         Return a database singleton.
 
-        :param cache_provider: KV Provider ('redis', 'leveldb')
+        :param provider: Cache provider (redis, leveldb, json, default leveldb)
         :param kwargs: Keyword-arguments passed to ``Database`` constructor.
         """
-        if cls._instance_type and cls._instance_type != cache_provider:
+
+        cls.provider = provider or cls.provider
+        cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
+
+        if cls.provider and cls.provider != cls.provider:
             cls._instance = None
-        cls._instance_type = cache_provider
+        cls.provider = cls.provider
         if cls._instance is None:
             cls._instance_lock.acquire()
             if cls._instance is None:
-                if cache_provider == 'redis':
+                if cls.provider == 'redis':
                     cls._instance = RedisCache(**kwargs)
-                elif cache_provider == 'leveldb':
+                elif cls.provider == 'leveldb':
                     cls._instance = LevelDBCache(**kwargs)
-                elif cache_provider == 'json':
+                elif cls.provider == 'json':
                     cls._instance = JsonCache(**kwargs)
                 else:
-                    raise api.ApiError(500, f"Provider {cache_provider} not known.")
+                    raise api.ApiError(500, f"Provider {cls.provider} unknown.")
             cls._instance_lock.release()
         return cls._instance
 
@@ -110,7 +125,6 @@ class RedisCache(Cache):
 
         return self._db.get(key)
 
-    @abstractmethod
     def set(self, key, value):
         """
         Set a key value
@@ -121,7 +135,6 @@ class RedisCache(Cache):
 
         return self._db.set(key, value)
 
-    @abstractmethod
     def delete(self, key):
         """
         Delete a key
@@ -170,7 +183,6 @@ class LevelDBCache(Cache):
 
         return self._db.get(str.encode(key)).decode()
 
-    @abstractmethod
     def set(self, key, value):
         """
         Set a key value
@@ -183,7 +195,6 @@ class LevelDBCache(Cache):
 
         return True
 
-    @abstractmethod
     def delete(self, key):
         """
         Delete a key
@@ -245,7 +256,6 @@ class JsonCache(Cache):
 
         return self._db[key]
 
-    @abstractmethod
     def set(self, key, value):
         """
         Set a key value
@@ -263,7 +273,6 @@ class JsonCache(Cache):
 
         return True
 
-    @abstractmethod
     def delete(self, key):
         """
         Delete a key

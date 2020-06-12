@@ -37,9 +37,13 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         user_namespaces.create_if_not_exists(user_id=user_id)
 
         xcube_image = os.environ.get("XCUBE_DOCKER_IMG")
+        xcube_webapi_uri = os.environ.get("XCUBE_WEBAPI_URI")
 
         if not xcube_image:
             raise api.ApiError(400, "Could not find the xcube docker image.")
+
+        if not xcube_webapi_uri:
+            raise api.ApiError(400, "Could not find the xcube webapi uri.")
 
         apps_v1_api = client.AppsV1Api()
         deployments = apps_v1_api.list_namespaced_deployment(namespace=user_id)
@@ -80,8 +84,8 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
-    return dict(viewerUri='https://xcube-gen.brockmann-consult.de/api/v1/viewer',
-                serverUri=f'https://xcube-gen.brockmann-consult.de/{user_id}')
+    return dict(viewerUri=xcube_webapi_uri + '/viewer',
+                serverUri=f'{xcube_webapi_uri}/{user_id}')
 
 
 def get_status(user_id: str):
