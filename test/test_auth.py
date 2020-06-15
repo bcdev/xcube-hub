@@ -3,7 +3,8 @@ import unittest
 from unittest.mock import patch
 
 from test.setup_utils import setup_auth
-from xcube_gen.auth import raise_for_invalid_user, AuthError
+from xcube_gen import api
+from xcube_gen.auth import raise_for_invalid_user
 from xcube_gen.service import new_app
 
 
@@ -37,18 +38,17 @@ class TestAuth(unittest.TestCase):
         self.assertTrue(res)
 
         user_id = 'hacking'
-        with self.assertRaises(AuthError) as e:
+        with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_user(user_id)
 
-        self.assertEqual("({'code': 'access denied', "
-                         "'description': 'Insufficient privileges for this operation.'}, 403)",
+        self.assertEqual("access denied: Insufficient privileges for this operation.",
                          str(e.exception))
 
         mock_get.return_value = {'nam': 'Tom.Jones@brockmann-consult.de'}
-        with self.assertRaises(AuthError) as e:
+        with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_user(user_id)
 
-        self.assertEqual("({'code': 'system error', 'description': 'Could not read name from user info.'}, 401)",
+        self.assertEqual("access denied: Could not read name from user info.",
                          str(e.exception))
 
         mock_token_auth_patch.stop()
@@ -69,10 +69,10 @@ class TestAuth(unittest.TestCase):
         self.assertTrue(res)
 
         mock_headers.return_value = {'qty': 'client-credential'}
-        with self.assertRaises(AuthError) as e:
+        with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_user(user_id)
 
-        self.assertEqual("({'code': 'access denied', 'description': 'Unauthorized'}, 401)",
+        self.assertEqual("Unauthorized",
                          str(e.exception))
 
         mock_token_auth_patch.stop()

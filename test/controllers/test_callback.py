@@ -23,16 +23,16 @@ class TestCallback(unittest.TestCase):
             'status': 'ERROR'
         }
 
-        mock_get_patch = patch('redis.Redis.get')
+        mock_get_patch = patch('xcube_gen.cache.Cache.get')
         mock_get = mock_get_patch.start()
         mock_get.return_value = json.dumps(expected)
 
-        res = get_callback('user2', 'job3', kv_provider='redis')
+        res = get_callback('user2', 'job3')
         self.assertTrue(res)
 
         mock_get.return_value = None
         with self.assertRaises(api.ApiError) as e:
-            get_callback('user2', 'job3', kv_provider='redis')
+            get_callback('user2', 'job3')
 
         self.assertEqual('Could not find any callback entries for that key.', str(e.exception))
         self.assertEqual(404, e.exception.status_code)
@@ -50,27 +50,32 @@ class TestCallback(unittest.TestCase):
             }
         }
 
-        res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected, kv_provider='json')
+        mock_put_patch = patch('xcube_gen.cache.Cache.get')
+        mock_put = mock_put_patch.start()
+        mock_put.return_value = True
+        mock_put_patch.stop()
+
+        res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected)
         self.assertTrue(res)
 
     def test_delete_callback(self):
-        mock_delete_patch = patch('redis.Redis.delete')
+        mock_delete_patch = patch('xcube_gen.cache.Cache.delete')
         mock_delete = mock_delete_patch.start()
         mock_delete.return_value = 1
 
-        res = delete_callback('user2', 'job3', kv_provider='redis')
+        res = delete_callback('user2', 'job3')
         self.assertEqual(1, res)
 
         mock_delete.return_value = 0
         with self.assertRaises(api.ApiError) as e:
-            delete_callback('user2', 'job3', kv_provider='redis')
+            delete_callback('user2', 'job3')
 
         self.assertEqual('Callback not found', str(e.exception))
         self.assertEqual(404, e.exception.status_code)
 
         mock_delete.return_value = None
         with self.assertRaises(api.ApiError) as e:
-            delete_callback('user2', 'job3', kv_provider='redis')
+            delete_callback('user2', 'job3')
 
         self.assertEqual('Deletion error', str(e.exception))
         self.assertEqual(401, e.exception.status_code)

@@ -1,31 +1,32 @@
-import json
 import unittest
-
-import os
+from unittest import mock
 from unittest.mock import patch
-
 from xcube_gen import api
 from xcube_gen.cache import Cache
 
 
-class TestKv(unittest.TestCase):
+class TestCache(unittest.TestCase):
     def test_instance(self):
-        inst = Cache.configure('json')
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.JsonKv'>")
+        Cache._instance = None
+        inst = Cache.configure(provider='json')
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.JsonCache'>")
 
-        inst = Cache.configure('leveldb', name='/tmp/testinstance')
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.LevelDBKv'>")
+        Cache._instance = None
+        inst = Cache.configure(provider='leveldb', name='/tmp/testinstance')
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.LevelDBCache'>")
 
-        inst = Cache.configure('redis')
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.kv.RedisKv'>")
+        Cache._instance = None
+        inst = Cache.configure(provider='redis')
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.RedisCache'>")
 
+        Cache._instance = None
         with self.assertRaises(api.ApiError) as e:
             Cache.configure('jso')
 
-        self.assertEqual("Provider jso not known.", str(e.exception))
+        self.assertEqual("Provider jso unknown.", str(e.exception))
 
 
-class TestRedisKv(unittest.TestCase):
+class TestRedisCache(unittest.TestCase):
     def setUp(self) -> None:
         self._mock_set_patch = patch('redis.Redis.set')
         self._mock_set = self._mock_set_patch.start()
@@ -38,6 +39,9 @@ class TestRedisKv(unittest.TestCase):
         self._mock_delete = self._mock_delete_patch.start()
         self._mock_delete.return_value = True
 
+        Cache.configure(provider='redis')
+        self._db = Cache()
+
     def tearDown(self) -> None:
         self._mock_set_patch.stop()
         self._mock_get_patch.stop()
@@ -46,77 +50,82 @@ class TestRedisKv(unittest.TestCase):
     def test_get(self):
         self._mock_get.return_value = None
 
-        db = Cache.configure('redis')
-        res = db.get('äpasokväp')
+        res = self._db.get('äpasoCacheäp')
         self.assertFalse(res)
 
         self._mock_get.return_value = 'value'
-        res = db.get('key')
+        res = self._db.get('key')
         self.assertEqual('value', res)
 
     def test_set(self):
         self._mock_set.return_value = True
 
-        db = Cache.configure('redis')
-        res = db.set('testSet', 'testValue')
+        res = self._db.set('testSet', 'testValue')
         self.assertTrue(res)
 
         self._mock_get.return_value = 'testValue'
-        res = db.get('testSet')
+        res = self._db.get('testSet')
         self.assertEqual('testValue', res)
 
     def test_delete(self):
         self._mock_delete.return_value = True
-        db = Cache.configure('redis')
-        res = db.delete('key')
+
+        res = self._db.delete('key')
         self.assertTrue(res)
 
         self._mock_get.return_value = None
-        res = db.get('key')
+        res = self._db.get('key')
         self.assertFalse(res)
 
 
-class TestLevelDbKv(unittest.TestCase):
+class TestLevelDbCache(unittest.TestCase):
     def setUp(self) -> None:
-        self._db = Cache.configure(provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
+        Cache.configure(provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
+
+        self._db = Cache()
+
         self._db.set('key', 'value')
 
-    def test_get(self):
-        res = self._db.get('äpasokväp')
+    @mock.patch('plyvel.DB')
+    def test_get(self, mock_db):
+        mock_db.get.return_value = True
+        res = self._db.get('äpasoCacheäp')
         self.assertFalse(res)
 
         res = self._db.get('key')
         self.assertEqual('value', res)
 
-    def test_set(self):
+    @mock.patch('plyvel.DB')
+    def test_set(self, mock_db):
+        mock_db.set.return_value = True
         res = self._db.set('testSet', 'testValue')
         self.assertTrue(res)
 
+        mock_db.get.return_value = 'testValue'
         res = self._db.get('testSet')
         self.assertEqual('testValue', res)
 
-    def test_delete(self):
+    @mock.patch('plyvel.DB')
+    def test_delete(self, mock_db):
+        mock_db.delete.return_value = True
+
         res = self._db.delete('key')
         self.assertTrue(res)
 
         res = self._db.get('key')
+        mock_db.get.return_value = False
         self.assertFalse(res)
 
 
-class TestJsonKv(unittest.TestCase):
+class TestJsonCache(unittest.TestCase):
     def setUp(self) -> None:
-        self._json_file = 'callbacks_test.json'
-        with open(self._json_file, 'w+') as js:
-            json.dump({'key': 'value', 'key2': 'value2'}, js)
-            js.close()
-
-        self._db = Cache.configure('json', file_name=self._json_file)
-
-    def tearDown(self) -> None:
-        os.unlink(self._json_file)
+        Cache._instance = None
+        Cache.configure(provider='json')
+        self._db = Cache()
+        self._db._instance._db = {'key': 'value', 'key2': 'value2'}
 
     def test_get(self):
-        res = self._db.get('äpasokväp')
+        res = self._db.get('äpasoCacheäp')
         self.assertFalse(res)
 
         res = self._db.get('key')

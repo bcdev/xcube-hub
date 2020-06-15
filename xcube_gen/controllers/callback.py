@@ -1,7 +1,7 @@
 import json
 from xcube_gen import api
-from xcube_gen.events import CALLBACK_PUT_EVENTS, CALLBACK_DELETE_EVENTS, CALLBACK_GET_EVENTS
 from xcube_gen.cache import Cache
+from xcube_gen.events import PutEvents, GetEvents, DeleteEvents
 from xcube_gen.xg_types import JsonObject, AnyDict
 
 
@@ -9,17 +9,17 @@ def get_callback(user_id: str, job_id: str) -> JsonObject:
     try:
         cache = Cache()
         res = cache.get(user_id + '__' + job_id)
+
+        if res:
+            res = json.loads(res)
+        else:
+            raise api.ApiError(404, 'Could not find any callback entries for that key.')
+
+        GetEvents.finished(user_id=user_id, job_id=job_id)
+
+        return res
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
-
-    if res:
-        res = json.loads(res)
-    else:
-        raise api.ApiError(404, 'Could not find any callback entries for that key.')
-
-    CALLBACK_GET_EVENTS.finished(user_id=user_id, job_id=job_id)
-
-    return res
 
 
 def put_callback(user_id: str, job_id: str, value: AnyDict):
@@ -29,25 +29,26 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
     try:
         cache = Cache()
         res = cache.set(user_id + '__' + job_id, json.dumps(value))
+        PutEvents.finished(user_id=user_id, job_id=job_id, value=value)
+        return res
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)
-
-    CALLBACK_PUT_EVENTS.finished(user_id=user_id, job_id=job_id, value=value)
-    return res
 
 
 def delete_callback(user_id: str, job_id: str):
     try:
         cache = Cache()
         res = cache.delete(user_id + '__' + job_id)
+
+        if res == 0:
+            raise api.ApiError(404, 'Callback not found')
+        elif res is None:
+            raise api.ApiError(401, 'Deletion error')
+
+        DeleteEvents.finished(user_id=user_id, job_id=job_id)
+
+        return res
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
 
-    if res == 0:
-        raise api.ApiError(404, 'Callback not found')
-    elif res is None:
-        raise api.ApiError(401, 'Deletion error')
 
-    CALLBACK_DELETE_EVENTS.finished(user_id=user_id, job_id=job_id)
-
-    return res

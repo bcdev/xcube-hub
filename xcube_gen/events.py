@@ -4,22 +4,22 @@ from xcube_gen.controllers.users import subtract_processing_units
 from xcube_gen.utilities import EventHandler
 
 
-class CallbackPut:
-    def __init__(self):
-        self.finished = EventHandler(self)
+class PutEvents:
+    finished = EventHandler("PutEvents")
+    started = EventHandler("PutEvents")
 
 
-class CallbackGet:
-    def __init__(self):
-        self.finished = EventHandler(self)
+class GetEvents:
+    finished = EventHandler("GetEvents")
+    started = EventHandler("GetEvents")
 
 
-class CallbackDelete:
-    def __init__(self):
-        self.finished = EventHandler(self)
+class DeleteEvents:
+    finished = EventHandler("DeleteEvents")
+    started = EventHandler("DeleteEvents")
 
 
-def trigger_punit_substract(sender, *args, **kwargs):
+def trigger_punit_substract(*args, **kwargs) -> None:
     if 'value' not in kwargs:
         raise api.ApiError(401, 'trigger_punit_substract could not be executed. Callback dict is missing')
 
@@ -31,9 +31,4 @@ def trigger_punit_substract(sender, *args, **kwargs):
         subtract_processing_units(user_id=user_id, punits_request=punits_requests)
 
 
-CALLBACK_PUT_EVENTS = CallbackPut()
-CALLBACK_PUT_EVENTS.finished += trigger_punit_substract
-
-CALLBACK_GET_EVENTS = CallbackGet()
-
-CALLBACK_DELETE_EVENTS = CallbackDelete()
+PutEvents.finished += trigger_punit_substract

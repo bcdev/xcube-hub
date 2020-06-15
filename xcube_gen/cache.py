@@ -1,4 +1,3 @@
-import threading
 from abc import abstractmethod
 
 import os
@@ -18,7 +17,6 @@ class Cache:
 
     provider = 'leveldb'
 
-    _instance_lock = threading.Lock()
     _instance = None
 
     def __init__(self, **kwargs):
@@ -70,11 +68,11 @@ class Cache:
         cls.provider = provider or cls.provider
         cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
 
-        if cls.provider and cls.provider != cls.provider:
+        if cls.provider and cls.provider != provider:
             cls._instance = None
-        cls.provider = cls.provider
+
+        cls.provider = provider
         if cls._instance is None:
-            cls._instance_lock.acquire()
             if cls._instance is None:
                 if cls.provider == 'redis':
                     cls._instance = RedisCache(**kwargs)
@@ -84,7 +82,6 @@ class Cache:
                     cls._instance = JsonCache(**kwargs)
                 else:
                     raise api.ApiError(500, f"Provider {cls.provider} unknown.")
-            cls._instance_lock.release()
         return cls._instance
 
 
