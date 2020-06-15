@@ -16,6 +16,7 @@ class TestAuth(unittest.TestCase):
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
 
+    @unittest.skip("auth0 not tested by default")
     def test_auth0(self):
         res = self._client.get('/')
         self.assertEqual(200, res.status_code, False)
