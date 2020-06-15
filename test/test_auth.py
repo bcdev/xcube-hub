@@ -62,7 +62,7 @@ class TestAuth(unittest.TestCase):
 
         mock_headers_patcher = patch('jose.jwt.get_unverified_claims')
         mock_headers = mock_headers_patcher.start()
-        mock_headers.return_value = {'qty': 'client-credentials'}
+        mock_headers.return_value = {'gty': 'client-credentials'}
 
         user_id = 'hacking'
         res = raise_for_invalid_user(user_id)
@@ -72,8 +72,7 @@ class TestAuth(unittest.TestCase):
         with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_user(user_id)
 
-        self.assertEqual("Unauthorized",
-                         str(e.exception))
+        self.assertEqual("Unauthorized", str(e.exception))
 
         mock_token_auth_patch.stop()
         mock_headers_patcher.stop()

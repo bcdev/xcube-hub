@@ -57,29 +57,28 @@ class Cache:
         return cls._instance
 
     @classmethod
-    def configure(cls, provider: Optional[str] = None, **kwargs) -> "Cache":
+    def configure(cls, provider: Optional[str] = None, **kwargs) -> Optional["Cache"]:
         """
         Return a database singleton.
 
-        :param provider: Cache provider (redis, leveldb, json, default leveldb)
+        :param provider: Cache provider (redis, leveldb, default leveldb)
         :param kwargs: Keyword-arguments passed to ``Database`` constructor.
         """
-
-        cls.provider = provider or cls.provider
-        cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
 
         if cls.provider and cls.provider != provider:
             cls._instance = None
 
-        cls.provider = provider
+        cls.provider = provider or cls.provider
+        cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
+
         if cls._instance is None:
             if cls._instance is None:
                 if cls.provider == 'redis':
                     cls._instance = RedisCache(**kwargs)
                 elif cls.provider == 'leveldb':
                     cls._instance = LevelDBCache(**kwargs)
-                elif cls.provider == 'json':
-                    cls._instance = JsonCache(**kwargs)
+                elif cls.provider == 'inmemory':
+                    cls._instance = InMemoryCache(**kwargs)
                 else:
                     raise api.ApiError(500, f"Provider {cls.provider} unknown.")
         return cls._instance
@@ -176,7 +175,7 @@ class LevelDBCache(Cache):
         """
 
         if not self._db.get(str.encode(key)):
-            return False
+            return None
 
         return self._db.get(str.encode(key)).decode()
 
@@ -204,42 +203,15 @@ class LevelDBCache(Cache):
         return True
 
 
-class JsonCache(Cache):
+class InMemoryCache(Cache):
     __doc__ = \
         f"""
-        Json key-value pair database implementation of Kv
-        
-        Defines methods for getting, deleting and putting key value pairs using a json file
-        
-        :param file
-        Example:
-        ```
-            db = Kv.instance(kv_provider='json', '/tmp/testdb/callback.json')
-        ```
+        None Cache if no Provider is given
         """
 
-    def __init__(self, file_name: str = 'callback.json'):
+    def __init__(self, db_init: Optional[dict] = None):
         super().__init__()
-
-        print("Warning: You are using the xcube-gen json cache adaptor. This adaptor is for development purposes only. "
-              "For better performance use either 'redis' or 'leveldb'.")
-
-        file_name = os.getenv('XCUBE_GEN_JSON_FILE_NAME') or file_name
-        self._file_name = file_name
-
-        try:
-            import json
-        except ImportError:
-            raise api.ApiError(500, "Error: Cannot import json. Please install first.")
-
-        if not os.path.isfile(self._file_name):
-            with open(self._file_name, 'w') as js:
-                json.dump({}, js)
-                js.close()
-
-        with open(self._file_name, 'r') as js:
-            self._db = json.load(js)
-            js.close()
+        self._db = db_init or dict()
 
     def get(self, key):
         """
@@ -248,10 +220,7 @@ class JsonCache(Cache):
         :return:
         """
 
-        if key not in self._db:
-            return False
-
-        return self._db[key]
+        return self._db.get(key)
 
     def set(self, key, value):
         """
@@ -260,13 +229,7 @@ class JsonCache(Cache):
         :param key:
         :return:
         """
-
         self._db[key] = value
-
-        with open(self._file_name, 'w') as js:
-            import json
-            json.dump(self._db, js)
-            js.close()
 
         return True
 
@@ -277,6 +240,8 @@ class JsonCache(Cache):
         :return:
         """
 
-        del self._db[key]
+        if key in self._db:
+            del self._db[key]
+            return True
 
-        return True
+        return False

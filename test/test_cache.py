@@ -7,9 +7,9 @@ from xcube_gen.cache import Cache
 
 class TestCache(unittest.TestCase):
     def test_instance(self):
-        Cache._instance = None
-        inst = Cache.configure(provider='json')
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.JsonCache'>")
+        # Cache._instance = None
+        # inst = Cache.configure(provider='inmemory')
+        # self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.InMemoryCache'>")
 
         Cache._instance = None
         inst = Cache.configure(provider='leveldb', name='/tmp/testinstance')
@@ -51,7 +51,7 @@ class TestRedisCache(unittest.TestCase):
         self._mock_get.return_value = None
 
         res = self._db.get('äpasoCacheäp')
-        self.assertFalse(res)
+        self.assertIsNone(res)
 
         self._mock_get.return_value = 'value'
         res = self._db.get('key')
@@ -90,7 +90,7 @@ class TestLevelDbCache(unittest.TestCase):
     def test_get(self, mock_db):
         mock_db.get.return_value = True
         res = self._db.get('äpasoCacheäp')
-        self.assertFalse(res)
+        self.assertIsNone(res)
 
         res = self._db.get('key')
         self.assertEqual('value', res)
@@ -117,32 +117,31 @@ class TestLevelDbCache(unittest.TestCase):
         self.assertFalse(res)
 
 
-class TestJsonCache(unittest.TestCase):
+class TestInMemoryCache(unittest.TestCase):
     def setUp(self) -> None:
         Cache._instance = None
-        Cache.configure(provider='json')
-        self._db = Cache()
-        self._db._instance._db = {'key': 'value', 'key2': 'value2'}
+        Cache.configure(provider='inmemory', db_init={'key': 'value', 'key2': 'value2'})
+        self._cache = Cache()
 
     def test_get(self):
-        res = self._db.get('äpasoCacheäp')
-        self.assertFalse(res)
+        res = self._cache.get('äpasoCacheäp')
+        self.assertIsNone(res)
 
-        res = self._db.get('key')
+        res = self._cache.get('key')
         self.assertEqual('value', res)
 
     def test_put(self):
-        res = self._db.set('testSet', 'testValue')
+        res = self._cache.set('testSet', 'testValue')
         self.assertTrue(res)
 
-        res = self._db.get('testSet')
+        res = self._cache.get('testSet')
         self.assertEqual('testValue', res)
 
     def test_delete(self):
-        res = self._db.delete('key2')
+        res = self._cache.delete('key2')
         self.assertTrue(res)
 
-        res = self._db.get('key2')
+        res = self._cache.get('key2')
         self.assertFalse(res)
 
 
