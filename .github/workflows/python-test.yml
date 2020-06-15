@@ -3,10 +3,8 @@
 
 name: test-xcube-gen-api
 
-on:
-  release:
-    types: [created]
-
+on: [push, pull_request]
+    
 jobs:
   deploy:
 
