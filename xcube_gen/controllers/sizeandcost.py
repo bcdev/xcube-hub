@@ -10,6 +10,7 @@ SH_INPUT_PIXELS_PER_PUNIT = _square(512)
 CCI_INPUT_PIXELS_PER_PUNIT = _square(768)
 OUTPUT_PIXELS_PER_PUNIT = _square(512)
 
+MIN_PUNITS_PER_CHUNK = 0.01
 SH_INPUT_PUNITS_WEIGHT = 1.0
 CCI_INPUT_PUNITS_WEIGHT = 1.0
 OUTPUT_PUNITS_WEIGHT = 1.0
@@ -112,8 +113,7 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
 
 
 def _punits(width: int, height: int, num_times: int, num_bands: int, pixels_per_punit: int) -> int:
-    return num_bands * num_times * _idiv(width * height, pixels_per_punit)
+    return num_bands * num_times *  max(MIN_PUNITS_PER_CHUNK, width * height/pixels_per_punit)
 
 
-def _idiv(x: int, y: int) -> int:
-    return (x + y - 1) // y
+
