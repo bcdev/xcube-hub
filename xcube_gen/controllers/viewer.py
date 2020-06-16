@@ -38,6 +38,7 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
 
         xcube_image = os.environ.get("XCUBE_DOCKER_IMG")
         xcube_webapi_uri = os.environ.get("XCUBE_WEBAPI_URI")
+        xcube_viewer_path = os.environ.get("XCUBE_VIEWER_PATH") or '/viewer'
 
         if not xcube_image:
             raise api.ApiError(400, "Could not find the xcube docker image.")
@@ -81,11 +82,10 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
 
         poll_viewer_status(apps_v1_api.read_namespaced_deployment, status='ready', namespace=user_id, name=user_id)
 
+        return dict(viewerUri=f'{xcube_webapi_uri}{xcube_viewer_path}',
+                    serverUri=f'{xcube_webapi_uri}/{user_id}')
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
-
-    return dict(viewerUri=xcube_webapi_uri + '/viewer',
-                serverUri=f'{xcube_webapi_uri}/{user_id}')
 
 
 def get_status(user_id: str):

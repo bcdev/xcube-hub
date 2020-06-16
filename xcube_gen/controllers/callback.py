@@ -23,7 +23,7 @@ def get_callback(user_id: str, job_id: str) -> JsonObject:
 
 
 def put_callback(user_id: str, job_id: str, value: AnyDict):
-    if 'message' not in value or 'status' not in value:
+    if not value or 'message' not in value or 'status' not in value:
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
