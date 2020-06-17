@@ -35,14 +35,17 @@ from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
 from xcube_gen.cache import Cache
+from dotenv import load_dotenv
 
 
-def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder=''):
+def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
+            dotenv_path: str = '.env'):
     """Create the service app."""
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     flask_cors.CORS(app)
     Cfg.load_config_once()
     Cache.configure(provider=cache_provider)
+    load_dotenv(dotenv_path=dotenv_path)
 
     def raise_for_invalid_json():
         try:

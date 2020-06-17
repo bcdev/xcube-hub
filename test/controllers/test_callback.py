@@ -2,8 +2,11 @@ import json
 import unittest
 from unittest.mock import patch
 import os
+
+from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
 from xcube_gen import api
+from xcube_gen.cache import Cache
 from xcube_gen.controllers.callback import get_callback, put_callback, delete_callback
 from xcube_gen.service import new_app
 
@@ -16,6 +19,9 @@ class TestCallback(unittest.TestCase):
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
         set_env()
+
+        Cache.configure("inmemory")
+        self._sh_config = SH_CFG
 
     def test_get_callback(self):
         expected = {
@@ -54,6 +60,9 @@ class TestCallback(unittest.TestCase):
         mock_put = mock_put_patch.start()
         mock_put.return_value = True
         mock_put_patch.stop()
+
+        cache = Cache()
+        cache.set('job3', self._sh_config)
 
         res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected)
         self.assertTrue(res)

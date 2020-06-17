@@ -30,6 +30,7 @@ from kubernetes.client.rest import ApiException
 # from rq import Queue, Connection
 
 from xcube_gen import api
+from xcube_gen.cache import Cache
 from xcube_gen.controllers import user_namespaces
 from xcube_gen.xg_types import AnyDict, Error
 
@@ -89,14 +90,10 @@ def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[An
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
-        # with Connection():
-        #     q = Queue()
-        #     q.enqueue(poll_job_status, kwargs={'poller': status,
-        #                                        'user_id': user_id,
-        #                                        'job_id': job_id,
-        #                                        'processing_request': cfg}
-        #               )
-        # poll_job_status(poller=status, user_id=user_id, job_id=job_id, processing_request=cfg)
+
+        cache = Cache()
+        cache.set(job_id, json.dumps(cfg))
+
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:
         raise api.ApiError(e.status, str(e))

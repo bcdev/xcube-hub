@@ -25,4 +25,6 @@ def setup_auth():
 
 
 def set_env():
-    os.environ["XCUBE_SH_DOCKER_IMG"] = 'quay.io/bcdev/xcube-sh'
+    from dotenv import load_dotenv
+
+    load_dotenv()

@@ -64,7 +64,7 @@ def _get_user_info_from_auth0(token, user_id: str):
         raise api.ApiError(req.status_code, req.reason)
 
     user_info = req.json()
-    if not kv.set(user_id + '_user_info', json.dumps(user_info)):
+    if not kv.set(user_id + '_user_info', user_info):
         raise api.ApiError(401, "System Error: Could not use cache.")
 
     return user_info
