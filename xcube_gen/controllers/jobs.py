@@ -83,16 +83,18 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
     return job
 
 
-def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[AnyDict, Error]:
+def create(user_id: str, sh_cmd: str, cfg: AnyDict) -> Union[AnyDict, Error]:
     try:
         user_namespaces.create_if_not_exists(user_id=user_id)
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
+        cfg['xcube-gen-cfg'] = {'user_id': user_id, 'job_id': job_id}
+
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
 
         cache = Cache()
-        cache.set(job_id, json.dumps(cfg))
+        cache.set(job_id, cfg)
 
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:

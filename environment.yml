@@ -13,6 +13,7 @@ dependencies:
   - python-jose
   - pandas
   - uwsgi
+  - python-dotenv
 
   - pip:
       # Required
