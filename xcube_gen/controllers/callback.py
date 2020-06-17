@@ -1,4 +1,3 @@
-import json
 from xcube_gen import api
 from xcube_gen.cache import Cache
 from xcube_gen.events import PutEvents, GetEvents, DeleteEvents
@@ -10,9 +9,7 @@ def get_callback(user_id: str, job_id: str) -> JsonObject:
         cache = Cache()
         res = cache.get(user_id + '__' + job_id)
 
-        if res:
-            res = json.loads(res)
-        else:
+        if not res:
             raise api.ApiError(404, 'Could not find any callback entries for that key.')
 
         GetEvents.finished(user_id=user_id, job_id=job_id)
@@ -28,7 +25,7 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
 
     try:
         cache = Cache()
-        res = cache.set(user_id + '__' + job_id, json.dumps(value))
+        res = cache.set(user_id + '__' + job_id, value)
         PutEvents.finished(user_id=user_id, job_id=job_id, value=value)
         return res
     except TimeoutError as e:
@@ -50,5 +47,3 @@ def delete_callback(user_id: str, job_id: str):
         return res
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
-
-
