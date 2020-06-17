@@ -1,9 +1,14 @@
-from abc import abstractmethod
-
+import json
 import os
+from json import JSONDecodeError
 from typing import Optional
 
 from xcube_gen import api
+from xcube_gen.xg_types import JsonObject
+
+
+class _CacheProvider:
+    pass
 
 
 class Cache:
@@ -16,23 +21,35 @@ class Cache:
         """
 
     provider = 'leveldb'
+    validators = []
 
-    _instance = None
+    _cache_provider = None
 
     def __init__(self, **kwargs):
         pass
 
-    def get(self, key):
+    def get(self, key) -> Optional[JsonObject]:
         """
         Get a key value
         :param key:
         :return:
         """
 
-        return self._instance.get(key)
+        res = self._cache_provider.get(key)
+        if not res:
+            return res
 
-    @abstractmethod
-    def set(self, key, value):
+        try:
+            if isinstance(res, str):
+                return json.loads(res)
+            else:
+                return res
+        except JSONDecodeError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+        except ValueError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+
+    def set(self, key, value: JsonObject):
         """
         Set a key value
         :param value:
@@ -40,9 +57,17 @@ class Cache:
         :return:
         """
 
-        return self._instance.set(key, value)
+        try:
+            for validator in self.validators:
+                validator(value)
 
-    @abstractmethod
+            value = json.dumps(value)
+            return self._cache_provider.set(key, value)
+        except JSONDecodeError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+        except ValueError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+
     def delete(self, key):
         """
         Delete a key
@@ -50,14 +75,14 @@ class Cache:
         :return:
         """
 
-        return self._instance.delete(key)
+        return self._cache_provider.delete(key)
 
     @classmethod
     def get_instance(cls):
-        return cls._instance
+        return Cache()
 
     @classmethod
-    def configure(cls, provider: Optional[str] = None, **kwargs) -> Optional["Cache"]:
+    def configure(cls, provider: Optional[str] = None, **kwargs) -> Optional[_CacheProvider]:
         """
         Return a database singleton.
 
@@ -66,25 +91,25 @@ class Cache:
         """
 
         if cls.provider and cls.provider != provider:
-            cls._instance = None
+            cls._cache_provider = None
 
-        cls.provider = provider or cls.provider
         cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
+        cls.provider = provider or cls.provider
 
-        if cls._instance is None:
-            if cls._instance is None:
-                if cls.provider == 'redis':
-                    cls._instance = RedisCache(**kwargs)
-                elif cls.provider == 'leveldb':
-                    cls._instance = LevelDBCache(**kwargs)
-                elif cls.provider == 'inmemory':
-                    cls._instance = InMemoryCache(**kwargs)
-                else:
-                    raise api.ApiError(500, f"Provider {cls.provider} unknown.")
-        return cls._instance
+        if cls._cache_provider is None:
+            if cls.provider == 'redis':
+                cls._cache_provider = _RedisCache(**kwargs)
+            elif cls.provider == 'leveldb':
+                cls._cache_provider = _LevelDBCache(**kwargs)
+            elif cls.provider == 'inmemory':
+                cls._cache_provider = _InMemoryCache(**kwargs)
+            else:
+                raise api.ApiError(500, f"Provider {cls.provider} unknown.")
+
+        return cls._cache_provider
 
 
-class RedisCache(Cache):
+class _RedisCache(_CacheProvider):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -141,7 +166,7 @@ class RedisCache(Cache):
         return self._db.delete(key)
 
 
-class LevelDBCache(Cache):
+class _LevelDBCache(_CacheProvider):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -203,7 +228,7 @@ class LevelDBCache(Cache):
         return True
 
 
-class InMemoryCache(Cache):
+class _InMemoryCache(_CacheProvider):
     __doc__ = \
         f"""
         None Cache if no Provider is given
@@ -211,7 +236,12 @@ class InMemoryCache(Cache):
 
     def __init__(self, db_init: Optional[dict] = None):
         super().__init__()
-        self._db = db_init or dict()
+
+        self._db = dict()
+
+        if db_init:
+            for k, v in db_init.items():
+                self.set(k, json.dumps(v))
 
     def get(self, key):
         """
