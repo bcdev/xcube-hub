@@ -2,8 +2,11 @@ import http.client
 import json
 import os
 
+from dotenv import load_dotenv
+
 
 def setup_auth():
+    load_dotenv()
     conn = http.client.HTTPSConnection("edc.eu.auth0.com")
     client_id = os.getenv('AUTH0_CLIENT_ID')
     client_secret = os.getenv('AUTH0_CLIENT_SECRET')

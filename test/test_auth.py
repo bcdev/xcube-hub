@@ -6,10 +6,12 @@ from test.setup_utils import setup_auth
 from xcube_gen import api
 from xcube_gen.auth import raise_for_invalid_user
 from xcube_gen.service import new_app
+from dotenv import load_dotenv
 
 
 class TestAuth(unittest.TestCase):
     def setUp(self) -> None:
+        load_dotenv()
         os.environ["RUN_LOCAL"] = '1'
         self._access_token = setup_auth()
         self._app = new_app()
