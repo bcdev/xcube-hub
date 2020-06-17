@@ -93,7 +93,7 @@ class TestLevelDbCache(unittest.TestCase):
         self.assertIsNone(res)
 
         res = self._db.get('key')
-        self.assertEqual('value', res)
+        self.assertEqual({'value': 'value'}, res)
 
     @mock.patch('plyvel.DB')
     def test_set(self, mock_db):
