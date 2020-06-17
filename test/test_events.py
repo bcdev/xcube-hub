@@ -23,6 +23,8 @@ class TestEvents(unittest.TestCase):
 
         self.assertEqual("System error (trigger_punit_substract): Callback dict is missing.", str(e.exception))
 
+        PutEvents.finished -= _run_put
+
     def test_get(self):
         def _run_get(*args, **kwargs):
             raise api.ApiError(500, "Testing CallbackGet")
@@ -34,6 +36,8 @@ class TestEvents(unittest.TestCase):
 
         self.assertEqual("Testing CallbackGet", str(e.exception))
 
+        GetEvents.finished -= _run_get
+
     def test_delete(self):
         def _run_delete(*args, **kwargs):
             raise api.ApiError(500, "Testing CallbackDelete")
@@ -44,6 +48,8 @@ class TestEvents(unittest.TestCase):
             DeleteEvents.finished(user_id='sdfvdfsv')
 
         self.assertEqual("Testing CallbackDelete", str(e.exception))
+
+        DeleteEvents.finished -= _run_delete
 
     def test_trigger_punit_substract(self):
         job_id = "ksjndlskvjdfskvnj"

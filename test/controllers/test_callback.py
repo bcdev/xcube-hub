@@ -11,7 +11,6 @@ from xcube_gen.controllers.callback import get_callback, put_callback, delete_ca
 from xcube_gen.service import new_app
 
 
-@unittest.skip("fdv")
 class TestCallback(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["RUN_LOCAL"] = '1'
