@@ -7,19 +7,19 @@ from xcube_gen.cache import Cache
 
 class TestCache(unittest.TestCase):
     def test_instance(self):
-        # Cache._instance = None
-        # inst = Cache.configure(provider='inmemory')
-        # self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.InMemoryCache'>")
-
         Cache._instance = None
+        inst = Cache.configure(provider='inmemory')
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache._InMemoryCache'>")
+
+        Cache._cache_provider = None
         inst = Cache.configure(provider='leveldb', name='/tmp/testinstance')
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.LevelDBCache'>")
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache._LevelDBCache'>")
 
-        Cache._instance = None
+        Cache._cache_provider = None
         inst = Cache.configure(provider='redis')
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache.RedisCache'>")
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache._RedisCache'>")
 
-        Cache._instance = None
+        Cache._cache_provider = None
         with self.assertRaises(api.ApiError) as e:
             Cache.configure('jso')
 
@@ -53,19 +53,19 @@ class TestRedisCache(unittest.TestCase):
         res = self._db.get('äpasoCacheäp')
         self.assertIsNone(res)
 
-        self._mock_get.return_value = 'value'
+        self._mock_get.return_value = {'value': 'testValue'}
         res = self._db.get('key')
-        self.assertEqual('value', res)
+        self.assertEqual({'value': 'testValue'}, res)
 
     def test_set(self):
         self._mock_set.return_value = True
 
-        res = self._db.set('testSet', 'testValue')
+        res = self._db.set('testSet', {'value': 'testValue'})
         self.assertTrue(res)
 
-        self._mock_get.return_value = 'testValue'
+        self._mock_get.return_value = {'value': 'testValue'}
         res = self._db.get('testSet')
-        self.assertEqual('testValue', res)
+        self.assertEqual({'value': 'testValue'}, res)
 
     def test_delete(self):
         self._mock_delete.return_value = True
@@ -84,7 +84,7 @@ class TestLevelDbCache(unittest.TestCase):
 
         self._db = Cache()
 
-        self._db.set('key', 'value')
+        self._db.set('key', {'value': 'value'})
 
     @mock.patch('plyvel.DB')
     def test_get(self, mock_db):
@@ -98,12 +98,12 @@ class TestLevelDbCache(unittest.TestCase):
     @mock.patch('plyvel.DB')
     def test_set(self, mock_db):
         mock_db.set.return_value = True
-        res = self._db.set('testSet', 'testValue')
+        res = self._db.set('testSet',  {'value': 'testValue'})
         self.assertTrue(res)
 
-        mock_db.get.return_value = 'testValue'
+        mock_db.get.return_value = {'value': 'testValue'}
         res = self._db.get('testSet')
-        self.assertEqual('testValue', res)
+        self.assertEqual({'value': 'testValue'}, res)
 
     @mock.patch('plyvel.DB')
     def test_delete(self, mock_db):
@@ -119,8 +119,8 @@ class TestLevelDbCache(unittest.TestCase):
 
 class TestInMemoryCache(unittest.TestCase):
     def setUp(self) -> None:
-        Cache._instance = None
-        Cache.configure(provider='inmemory', db_init={'key': 'value', 'key2': 'value2'})
+        Cache._cache_provider = None
+        Cache.configure(provider='inmemory', db_init={'key': {'value': 'value'}, 'key2': {'value2': 'value2'}})
         self._cache = Cache()
 
     def test_get(self):
@@ -128,14 +128,14 @@ class TestInMemoryCache(unittest.TestCase):
         self.assertIsNone(res)
 
         res = self._cache.get('key')
-        self.assertEqual('value', res)
+        self.assertEqual({'value': 'value'}, res)
 
-    def test_put(self):
-        res = self._cache.set('testSet', 'testValue')
+    def test_set(self):
+        res = self._cache.set('testSet', {'value': 'testValue'})
         self.assertTrue(res)
 
         res = self._cache.get('testSet')
-        self.assertEqual('testValue', res)
+        self.assertEqual({'value': 'testValue'}, res)
 
     def test_delete(self):
         res = self._cache.delete('key2')
