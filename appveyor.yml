@@ -1,0 +1,18 @@
+version: '0.3.0.{build}'
+
+environment:
+  global:
+    PYTHON_LOC: "C:\\Miniconda35-x64"
+
+install:
+  - call %PYTHON_LOC%\Scripts\activate.bat
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+
+build_script:
+  - conda env create --file environment.yml
+  - call %PYTHON_LOC%\Scripts\activate.bat xcube-gen
+  - python setup.py install
+  - conda list
+  - py.test -v test --ignore=test/providers
