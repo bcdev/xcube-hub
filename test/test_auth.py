@@ -8,6 +8,7 @@ from xcube_gen.auth import raise_for_invalid_user
 from xcube_gen.service import new_app
 
 
+@unittest.skip("auth0 not tested by default")
 class TestAuth(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["RUN_LOCAL"] = '1'
