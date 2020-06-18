@@ -1,4 +1,3 @@
-import json
 from xcube_gen import api
 from xcube_gen.api import get_json_request_value
 from xcube_gen.cache import Cache
@@ -12,9 +11,7 @@ def get_callback(user_id: str, job_id: str) -> JsonObject:
         cache = Cache()
         res = cache.get(user_id + '__' + job_id)
 
-        if res:
-            res = json.loads(res)
-        else:
+        if not res:
             raise api.ApiError(404, 'Could not find any callback entries for that key.')
 
         return res
@@ -56,5 +53,3 @@ def delete_callback(user_id: str, job_id: str):
         return res
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
-
-
