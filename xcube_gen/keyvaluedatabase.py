@@ -1,13 +1,13 @@
 import json
 import os
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from json import JSONDecodeError
 from typing import Optional, Any
 from xcube_gen import api
 from xcube_gen.typedefs import JsonObject
 
 
-class KeyValueStore:
+class KeyValueStore(ABC):
     @abstractmethod
     def get(self, key):
         """
