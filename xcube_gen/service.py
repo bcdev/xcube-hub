@@ -36,6 +36,7 @@ from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
 from xcube_gen.cache import Cache
 from dotenv import load_dotenv
+from xcube_gen.kvdb import KvDB
 
 
 def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
@@ -44,8 +45,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     flask_cors.CORS(app)
     Cfg.load_config_once()
-    Cache.configure(provider=cache_provider)
-    load_dotenv(dotenv_path=dotenv_path)
+    KvDB.instance(provider=cache_provider)
 
     def raise_for_invalid_json():
         try:
@@ -150,21 +150,21 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/jobs/<user_id>/<job_id>/callback', methods=['GET', 'PUT', 'DELETE'])
-    # @requires_auth
+    @requires_auth
     def _callback(user_id: str, job_id: str):
         try:
             raise_for_invalid_json()
-            # raise_for_invalid_user(user_id=user_id)
+            raise_for_invalid_user(user_id=user_id)
             if flask.request.method == 'GET':
-                # requires_permissions(['read:callback'])
+                requires_permissions(['read:callback'])
                 res = callback.get_callback(user_id, job_id)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
-                # requires_permissions(['put:callback'])
+                requires_permissions(['put:callback'])
                 callback.put_callback(user_id, job_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
-                # requires_permissions(['delete:callback'])
+                requires_permissions(['delete:callback'])
                 callback.delete_callback(user_id, job_id)
                 return api.ApiResponse.success()
         except api.ApiError as e:

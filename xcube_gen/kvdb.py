@@ -1,17 +1,14 @@
 import json
 import os
+from abc import abstractmethod
 from json import JSONDecodeError
-from typing import Optional
-
+from typing import Optional, Any
+import plyvel
 from xcube_gen import api
 from xcube_gen.xg_types import JsonObject
 
 
-class _CacheProvider:
-    pass
-
-
-class Cache:
+class KvDB:
     __doc__ = \
         f"""
         A key-value pair database interface connector class (e.g. to redis)
@@ -21,12 +18,13 @@ class Cache:
         """
 
     provider = 'leveldb'
-    validators = []
 
-    _cache_provider = None
+    _db = None
+    _instance = None
+    use_mocker = False
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, provider: str, **kwargs):
+        self._db = self.get_db(provider=provider, **kwargs)
 
     def get(self, key) -> Optional[JsonObject]:
         """
@@ -35,7 +33,7 @@ class Cache:
         :return:
         """
 
-        res = self._cache_provider.get(key)
+        res = self._db.get(key)
         if not res:
             return res
 
@@ -58,11 +56,8 @@ class Cache:
         """
 
         try:
-            for validator in self.validators:
-                validator(value)
-
             value = json.dumps(value)
-            return self._cache_provider.set(key, value)
+            return self._db.set(key, value)
         except JSONDecodeError as e:
             raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
         except ValueError as e:
@@ -75,14 +70,9 @@ class Cache:
         :return:
         """
 
-        return self._cache_provider.delete(key)
+        return self._db.delete(key)
 
-    @classmethod
-    def get_instance(cls):
-        return Cache()
-
-    @classmethod
-    def configure(cls, provider: Optional[str] = None, **kwargs) -> Optional[_CacheProvider]:
+    def get_db(self, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
         """
         Return a database singleton.
 
@@ -90,26 +80,54 @@ class Cache:
         :param kwargs: Keyword-arguments passed to ``Database`` constructor.
         """
 
-        if cls.provider and cls.provider != provider:
-            cls._cache_provider = None
+        if provider == 'redis':
+            return _RedisKvDB(use_mocker=self.use_mocker, **kwargs)
+        elif provider == 'leveldb':
+            return _LevelDBKvDB(use_mocker=self.use_mocker, **kwargs)
+        elif provider == 'inmemory':
+            return _InMemoryKvDB(use_mocker=self.use_mocker, **kwargs)
+        else:
+            raise api.ApiError(500, f"Provider {provider} unknown.")
 
-        cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
-        cls.provider = provider or cls.provider
+    @classmethod
+    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KvDB":
+        refresh = refresh or cls._instance is None
+        if refresh and provider:
+            cls._instance = KvDB(provider=provider, **kwargs)
+        elif refresh and not provider:
+            raise api.ApiError(401, "System error: Please provide a KvProvider if you first initiate a KvDB")
 
-        if cls._cache_provider is None:
-            if cls.provider == 'redis':
-                cls._cache_provider = _RedisCache(**kwargs)
-            elif cls.provider == 'leveldb':
-                cls._cache_provider = _LevelDBCache(**kwargs)
-            elif cls.provider == 'inmemory':
-                cls._cache_provider = _InMemoryCache(**kwargs)
-            else:
-                raise api.ApiError(500, f"Provider {cls.provider} unknown.")
-
-        return cls._cache_provider
+        return cls._instance
 
 
-class _RedisCache(_CacheProvider):
+class _KvDBProvider:
+    @abstractmethod
+    def get(self, key):
+        """
+        Get a key value
+        :param key:
+        :return:
+        """
+
+    @abstractmethod
+    def set(self, key, value):
+        """
+        Set a key value
+        :param value:
+        :param key:
+        :return:
+        """
+
+    @abstractmethod
+    def delete(self, key):
+        """
+        Delete a key
+        :param key:
+        :return:
+        """
+
+
+class _RedisKvDB(_KvDBProvider):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -124,7 +142,7 @@ class _RedisCache(_CacheProvider):
         """
 
     # noinspection PyUnresolvedReferences
-    def __init__(self, host='localhost', port=6379, db=0, **kwargs):
+    def __init__(self, host='localhost', port=6379, db=0, use_mocker: bool = False, **kwargs):
         super().__init__()
         try:
             from redis import Redis
@@ -135,7 +153,10 @@ class _RedisCache(_CacheProvider):
         port = os.getenv('XCUBE_GEN_REDIS_POST') or port
         db = os.getenv('XCUBE_GEN_REDIS_DB') or db
 
-        self._db = Redis(host=host, port=port, db=db, **kwargs)
+        if use_mocker:
+            self._db = _KvDBMocker()
+        else:
+            self._db = Redis(host=host, port=port, db=db, **kwargs)
 
     def get(self, key):
         """
@@ -166,7 +187,7 @@ class _RedisCache(_CacheProvider):
         return self._db.delete(key)
 
 
-class _LevelDBCache(_CacheProvider):
+class _LevelDBKvDB(_KvDBProvider):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -180,17 +201,20 @@ class _LevelDBCache(_CacheProvider):
         ```
         """
 
-    def __init__(self, name: str = '/tmp/testdb/', create_if_missing=True, *args, **kwargs):
+    def __init__(self, name: str = '/tmp/testdb/', create_if_missing=True, use_mocker: bool = False, *args, **kwargs):
         super().__init__()
-        try:
-            import plyvel
-        except ImportError:
-            raise api.ApiError(500, "Error: Cannot import plyvel. Please install first.")
+        # try:
+        #     import plyvel
+        # except ImportError:
+        #     raise api.ApiError(500, "Error: Cannot import plyvel. Please install first.")
 
         name = os.getenv('XCUBE_GEN_LEVELDB_NAME') or name
         create_if_missing = os.getenv('XCUBE_GEN_LEVELDB_CREATE_IF_MISSING') or create_if_missing
 
-        self._db = plyvel.DB(name=name, create_if_missing=create_if_missing, *args, **kwargs)
+        if use_mocker:
+            self._db = _KvDBMocker()
+        else:
+            self._db = plyvel.DB(name=name, create_if_missing=create_if_missing, *args, **kwargs)
 
     def get(self, key):
         """
@@ -228,16 +252,19 @@ class _LevelDBCache(_CacheProvider):
         return True
 
 
-class _InMemoryCache(_CacheProvider):
+class _InMemoryKvDB(_KvDBProvider):
     __doc__ = \
         f"""
         None Cache if no Provider is given
         """
 
-    def __init__(self, db_init: Optional[dict] = None):
+    def __init__(self, db_init: Optional[dict] = None, use_mocker: bool = False):
         super().__init__()
 
-        self._db = dict()
+        if use_mocker:
+            self._db = _KvDBMocker()
+        else:
+            self._db = dict()
 
         if db_init:
             for k, v in db_init.items():
@@ -275,3 +302,23 @@ class _InMemoryCache(_CacheProvider):
             return True
 
         return False
+
+
+class _KvDBMocker:
+    __doc__ = \
+        f"""
+        None Cache if no Provider is given
+        """
+    return_value: Optional[Any] = None
+
+    def get(self, *args, **kwargs):
+        return self.return_value
+
+    def set(self, *args, **kwargs):
+        return self.return_value
+
+    def delete(self, *args, **kwargs):
+        return self.return_value
+
+    def put(self, *args, **kwargs):
+        return self.return_value

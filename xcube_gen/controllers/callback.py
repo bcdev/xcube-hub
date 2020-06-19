@@ -1,22 +1,30 @@
 from xcube_gen import api
-from xcube_gen.cache import Cache
-from xcube_gen.events import PutEvents, GetEvents, DeleteEvents
+from xcube_gen.api import get_json_request_value
+from xcube_gen.kvdb import KvDB
+
+from xcube_gen.controllers.users import subtract_processing_units
 from xcube_gen.xg_types import JsonObject, AnyDict
 
 
 def get_callback(user_id: str, job_id: str) -> JsonObject:
     try:
-        cache = Cache()
+        cache = KvDB.instance()
         res = cache.get(user_id + '__' + job_id)
 
         if not res:
             raise api.ApiError(404, 'Could not find any callback entries for that key.')
 
-        GetEvents.finished(user_id=user_id, job_id=job_id)
-
         return res
     except TimeoutError as r:
         raise api.ApiError(401, r.strerror)
+
+
+def trigger_punit_substract(user_id: str, value: AnyDict) -> None:
+    status = get_json_request_value(value, 'status', value_type=str)
+
+    if status == "CUBE_GENERATED":
+        punits_requests = get_json_request_value(value, 'values', value_type=dict)
+        subtract_processing_units(user_id=user_id, punits_request=punits_requests)
 
 
 def put_callback(user_id: str, job_id: str, value: AnyDict):
@@ -24,9 +32,9 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
-        cache = Cache()
+        cache = KvDB.instance()
         res = cache.set(user_id + '__' + job_id, value)
-        PutEvents.finished(user_id=user_id, job_id=job_id, value=value)
+        trigger_punit_substract(user_id=user_id, value=value)
         return res
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)
@@ -34,15 +42,13 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
 
 def delete_callback(user_id: str, job_id: str):
     try:
-        cache = Cache()
-        res = cache.delete(user_id + '__' + job_id)
+        kv = KvDB.instance()
+        res = kv.delete(user_id + '__' + job_id)
 
         if res == 0:
             raise api.ApiError(404, 'Callback not found')
         elif res is None:
             raise api.ApiError(401, 'Deletion error')
-
-        DeleteEvents.finished(user_id=user_id, job_id=job_id)
 
         return res
     except TimeoutError as r:
