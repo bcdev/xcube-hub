@@ -28,11 +28,6 @@ class TestKvDB(unittest.TestCase):
 
         self.assertEqual("Provider jso unknown.", str(e.exception))
 
-        with self.assertRaises(api.ApiError)as e:
-            KeyValueDatabase.instance()
-
-        self.assertEqual("System error: Please provide a KvProvider if you first initiate a KvDB", str(e.exception))
-
 
 class TestRedisCache(unittest.TestCase):
     def setUp(self) -> None:

@@ -43,10 +43,10 @@ class KeyValueDatabase(KeyValueStore):
     """
 
     _instance = None
-    use_mocker = False
 
-    def __init__(self, provider: str, **kwargs):
-        self._provider = self._new_db(provider=provider, **kwargs)
+    def __init__(self, provider: str, use_mocker: bool = False, **kwargs):
+        use_mocker = os.getenv("XCUBE_GEN_API_USE_KV_MOCK") or use_mocker
+        self._provider = self._new_db(provider=provider, use_mocker=use_mocker, **kwargs)
 
     def get(self, key) -> Optional[JsonObject]:
         """
@@ -94,7 +94,7 @@ class KeyValueDatabase(KeyValueStore):
 
         return self._provider.delete(key)
 
-    def _new_db(self, provider: Optional[str] = None, **kwargs) -> "KeyValueStore":
+    def _new_db(self, provider: Optional[str] = None, use_mocker: bool = False, **kwargs) -> "KeyValueStore":
         """
         Return a new database instance.
 
@@ -103,20 +103,21 @@ class KeyValueDatabase(KeyValueStore):
         """
 
         if provider == 'redis':
-            return _RedisKvDB(use_mocker=self.use_mocker, **kwargs)
+            return _RedisKvDB(use_mocker=use_mocker, **kwargs)
         elif provider == 'leveldb':
-            return _LevelDBKvDB(use_mocker=self.use_mocker, **kwargs)
+            return _LevelDBKvDB(use_mocker=use_mocker, **kwargs)
         elif provider == 'inmemory':
-            return _InMemoryKvDB(use_mocker=self.use_mocker, **kwargs)
+            return _InMemoryKvDB(use_mocker=use_mocker, **kwargs)
         else:
             raise api.ApiError(401, f"Provider {provider} unknown.")
 
     @classmethod
-    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KeyValueDatabase":
+    def instance(cls, provider: Optional[str] = None, refresh: bool = False, use_mocker: bool = False, **kwargs)\
+            -> "KeyValueDatabase":
         refresh = refresh or cls._instance is None
         if refresh:
             provider = provider or 'inmemory'
-            cls._instance = KeyValueDatabase(provider=provider, **kwargs)
+            cls._instance = KeyValueDatabase(provider=provider, use_mocker=use_mocker, **kwargs)
 
         return cls._instance
 
