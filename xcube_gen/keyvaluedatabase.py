@@ -182,7 +182,7 @@ class _RedisKvDB(KeyValueStore):
 
 class _LevelDBKvDB(KeyValueStore):
     f"""
-    Redis key-value pair database implementation of Kv
+    LevelDB key-value pair database implementation of the ``_KvDBProvider`` interface.
     
     Defines methods for getting, deleting and putting key value pairs
     
