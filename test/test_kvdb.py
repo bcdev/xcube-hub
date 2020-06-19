@@ -9,15 +9,15 @@ class TestKvDB(unittest.TestCase):
     def test_instance(self):
         KeyValueDatabase._instance = None
         inst = KeyValueDatabase.instance(provider='inmemory')
-        self.assertEqual(str(type(inst._db)), "<class 'xcube_gen.keyvaluedatabase._InMemoryKvDB'>")
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._InMemoryKvDB'>")
 
         KeyValueDatabase._instance = None
         inst = KeyValueDatabase.instance(provider='leveldb', name='/tmp/testinstance')
-        self.assertEqual(str(type(inst._db)), "<class 'xcube_gen.keyvaluedatabase._LevelDBKvDB'>")
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._LevelDBKvDB'>")
 
         KeyValueDatabase._instance = None
         inst = KeyValueDatabase.instance(provider='redis')
-        self.assertEqual(str(type(inst._db)), "<class 'xcube_gen.keyvaluedatabase._RedisKvDB'>")
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._RedisKvDB'>")
 
         inst = KeyValueDatabase.instance()
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.keyvaluedatabase.KeyValueDatabase'>")
@@ -137,7 +137,7 @@ class TestLevelDbCache(unittest.TestCase):
 
 class TestInMemoryCache(unittest.TestCase):
     def setUp(self) -> None:
-        KeyValueDatabase._db = None
+        KeyValueDatabase._provider = None
         self._cache = _InMemoryKvDB(db_init={'key': {'value': 'value'}, 'key2': {'value2': 'value2'}})
 
     def test_get(self):

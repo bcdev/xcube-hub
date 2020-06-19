@@ -7,98 +7,7 @@ from xcube_gen import api
 from xcube_gen.typedefs import JsonObject
 
 
-class KeyValueDatabase:
-    f"""
-    A key-value pair database interface connector class (e.g. to redis)
-    
-    Defines abstract methods fro getting, deleting and putting key value pairs
-    
-    """
-
-    provider = 'leveldb'
-
-    _db = None
-    _instance = None
-    use_mocker = False
-
-    def __init__(self, provider: str, **kwargs):
-        self._db = self._new_db(provider=provider, **kwargs)
-
-    def get(self, key) -> Optional[JsonObject]:
-        """
-        Get a key value
-        :param key:
-        :return:
-        """
-
-        res = self._db.get(key)
-        if not res:
-            return res
-
-        try:
-            if isinstance(res, str):
-                return json.loads(res)
-            else:
-                return res
-        except JSONDecodeError as e:
-            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
-        except ValueError as e:
-            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
-
-    def set(self, key, value: JsonObject):
-        """
-        Set a key value
-        :param value:
-        :param key:
-        :return:
-        """
-
-        try:
-            value = json.dumps(value)
-            return self._db.set(key, value)
-        except JSONDecodeError as e:
-            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
-        except ValueError as e:
-            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
-
-    def delete(self, key):
-        """
-        Delete a key
-        :param key:
-        :return:
-        """
-
-        return self._db.delete(key)
-
-    def _new_db(self, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
-        """
-        Return a new database instance.
-
-        :param provider: Cache provider (redis, leveldb, default leveldb)
-        :param kwargs: Keyword-arguments passed to ``Database`` constructor.
-        """
-
-        if provider == 'redis':
-            return _RedisKvDB(use_mocker=self.use_mocker, **kwargs)
-        elif provider == 'leveldb':
-            return _LevelDBKvDB(use_mocker=self.use_mocker, **kwargs)
-        elif provider == 'inmemory':
-            return _InMemoryKvDB(use_mocker=self.use_mocker, **kwargs)
-        else:
-            raise api.ApiError(500, f"Provider {provider} unknown.")
-
-    @classmethod
-    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KeyValueDatabase":
-        refresh = refresh or cls._instance is None
-        if refresh and provider:
-            cls._instance = KeyValueDatabase(provider=provider, **kwargs)
-        elif refresh and not provider:
-            raise api.ApiError(401, "System error: Please provide a KvProvider if you first initiate a KvDB")
-
-        return cls._instance
-
-
-class _KvDBProvider:
+class KeyValueStore:
     @abstractmethod
     def get(self, key):
         """
@@ -125,7 +34,95 @@ class _KvDBProvider:
         """
 
 
-class _RedisKvDB(_KvDBProvider):
+class KeyValueDatabase(KeyValueStore):
+    f"""
+    A key-value pair database interface connector class (e.g. to redis)
+    
+    Defines abstract methods fro getting, deleting and putting key value pairs
+    
+    """
+
+    _instance = None
+    use_mocker = False
+
+    def __init__(self, provider: str, **kwargs):
+        self._provider = self._new_db(provider=provider, **kwargs)
+
+    def get(self, key) -> Optional[JsonObject]:
+        """
+        Get a key value
+        :param key:
+        :return:
+        """
+
+        res = self._provider.get(key)
+        if not res:
+            return res
+
+        try:
+            if isinstance(res, str):
+                return json.loads(res)
+            else:
+                return res
+        except JSONDecodeError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+        except ValueError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+
+    def set(self, key, value: JsonObject):
+        """
+        Set a key value
+        :param value:
+        :param key:
+        :return:
+        """
+
+        try:
+            value = json.dumps(value)
+            return self._provider.set(key, value)
+        except JSONDecodeError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+        except ValueError as e:
+            raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
+
+    def delete(self, key):
+        """
+        Delete a key
+        :param key:
+        :return:
+        """
+
+        return self._provider.delete(key)
+
+    def _new_db(self, provider: Optional[str] = None, **kwargs) -> "KeyValueStore":
+        """
+        Return a new database instance.
+
+        :param provider: Cache provider (redis, leveldb, default leveldb)
+        :param kwargs: Keyword-arguments passed to ``Database`` constructor.
+        """
+
+        if provider == 'redis':
+            return _RedisKvDB(use_mocker=self.use_mocker, **kwargs)
+        elif provider == 'leveldb':
+            return _LevelDBKvDB(use_mocker=self.use_mocker, **kwargs)
+        elif provider == 'inmemory':
+            return _InMemoryKvDB(use_mocker=self.use_mocker, **kwargs)
+        else:
+            raise api.ApiError(401, f"Provider {provider} unknown.")
+
+    @classmethod
+    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KeyValueDatabase":
+        refresh = refresh or cls._instance is None
+        if refresh and provider:
+            cls._instance = KeyValueDatabase(provider=provider, **kwargs)
+        elif refresh and not provider:
+            raise api.ApiError(401, "System error: Please provide a KvProvider if you first initiate a KvDB")
+
+        return cls._instance
+
+
+class _RedisKvDB(KeyValueStore):
     f"""
     Redis key-value pair database implementation of Kv
     
@@ -183,7 +180,7 @@ class _RedisKvDB(_KvDBProvider):
         return self._db.delete(key)
 
 
-class _LevelDBKvDB(_KvDBProvider):
+class _LevelDBKvDB(KeyValueStore):
     f"""
     Redis key-value pair database implementation of Kv
     
@@ -247,7 +244,7 @@ class _LevelDBKvDB(_KvDBProvider):
         return True
 
 
-class _InMemoryKvDB(_KvDBProvider):
+class _InMemoryKvDB(KeyValueStore):
     f"""
     In memory KVDB if no Provider is given
     """
