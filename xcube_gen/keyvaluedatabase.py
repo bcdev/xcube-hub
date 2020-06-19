@@ -114,24 +114,23 @@ class KeyValueDatabase(KeyValueStore):
     @classmethod
     def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KeyValueDatabase":
         refresh = refresh or cls._instance is None
-        if refresh and provider:
+        if refresh:
+            provider = provider or 'inmemory'
             cls._instance = KeyValueDatabase(provider=provider, **kwargs)
-        elif refresh and not provider:
-            raise api.ApiError(401, "System error: Please provide a KvProvider if you first initiate a KvDB")
 
         return cls._instance
 
 
 class _RedisKvDB(KeyValueStore):
     f"""
-    Redis key-value pair database implementation of Kv
+    Redis key-value pair database implementation of KeyValueStore
     
     Defines methods for getting, deleting and putting key value pairs
     
     :param host, port, db (see also https://github.com/andymccurdy/redis-py)
     Example:
     ```
-        db = Kv.instance(kv_provider='redis', host='localhost', port=6379, db=0)
+        db = KeyValueDatabase.instance(provider='redis', host='localhost', port=6379, db=0)
     ```
     """
 
@@ -182,14 +181,14 @@ class _RedisKvDB(KeyValueStore):
 
 class _LevelDBKvDB(KeyValueStore):
     f"""
-    Redis key-value pair database implementation of Kv
+    Redis key-value pair database implementation of KeyValueStore
     
     Defines methods for getting, deleting and putting key value pairs
     
     :param host, port, db (see also https://github.com/andymccurdy/redis-py)
     Example:
     ```
-        db = Kv.instance(kv_provider='leveldb', name='/tmp/testdb/', create_if_missing=True)
+        db = KeyValueDatabase.instance(provider='leveldb', name='/tmp/testdb/', create_if_missing=True)
     ```
     """
 
@@ -245,8 +244,16 @@ class _LevelDBKvDB(KeyValueStore):
 
 
 class _InMemoryKvDB(KeyValueStore):
-    f"""
-    In memory KVDB if no Provider is given
+    """
+    InMemory key-value pair database implementation of KeyValueStore.
+    
+    Defines methods for getting, deleting and putting key value pairs
+    
+    :param db_init, use_mocker
+    Example:
+    ```
+        db = KeyValueDatabase.instance(provider='inmemory')
+    ```
     """
 
     def __init__(self, db_init: Optional[dict] = None, use_mocker: bool = False):
@@ -297,7 +304,7 @@ class _InMemoryKvDB(KeyValueStore):
 
 class _KvDBMocker:
     """
-    Mocker got unittests
+    Mocker for unittests
     """
     return_value: Optional[Any] = None
 
