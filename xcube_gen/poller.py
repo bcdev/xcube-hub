@@ -5,7 +5,7 @@ from kubernetes.client import V1Deployment, V1DeploymentList
 
 from xcube_gen.controllers.users import subtract_processing_units
 from xcube_gen.controllers.sizeandcost import get_size_and_cost
-from xcube_gen.xg_types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 
 def poll_k8s(poller: Any, check_success: Any, step: int = 1, timeout: int = 3600, **kwargs):

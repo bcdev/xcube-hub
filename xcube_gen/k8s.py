@@ -2,7 +2,7 @@ import os
 
 from kubernetes import client
 
-from xcube_gen.xg_types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 
 def create_deployment_object(name: str, container_name: str, image: str, container_port: int, config: JsonObject):

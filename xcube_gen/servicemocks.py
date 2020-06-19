@@ -28,7 +28,7 @@ from typing import List
 import flask
 
 import xcube_gen.api as api
-from xcube_gen.xg_types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 JOB_ID_KEY = 'job_id'
 

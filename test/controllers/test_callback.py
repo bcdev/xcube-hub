@@ -7,16 +7,16 @@ from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
 from xcube_gen import api
 from xcube_gen.controllers.callback import get_callback, put_callback, delete_callback
-from xcube_gen.kvdb import KvDB
+from xcube_gen.keyvaluedatabase import KeyValueDatabase
 from xcube_gen.service import new_app
 
 
-KvDB.use_mocker = True
+KeyValueDatabase.use_mocker = True
 
 
 class TestCallback(unittest.TestCase):
     def setUp(self) -> None:
-        os.environ["RUN_LOCAL"] = '1'
+        os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
         self._access_token = setup_auth()
         self._app = new_app()
         self._client = self._app.test_client()
@@ -30,7 +30,7 @@ class TestCallback(unittest.TestCase):
             'status': 'ERROR'
         }
 
-        mock_get_patch = patch('xcube_gen.kvdb.KvDB.get')
+        mock_get_patch = patch('xcube_gen.keyvaluedatabase.KeyValueDatabase.get')
         mock_get = mock_get_patch.start()
         mock_get.return_value = json.dumps(expected)
 
@@ -57,7 +57,7 @@ class TestCallback(unittest.TestCase):
             }
         }
 
-        mock_put_patch = patch('xcube_gen.kvdb.KvDB.get')
+        mock_put_patch = patch('xcube_gen.keyvaluedatabase.KeyValueDatabase.get')
         mock_put = mock_put_patch.start()
         mock_put.return_value = True
         mock_put_patch.stop()
@@ -70,7 +70,7 @@ class TestCallback(unittest.TestCase):
         self.assertTrue(res)
 
     def test_delete_callback(self):
-        mock_delete_patch = patch('xcube_gen.kvdb.KvDB.delete')
+        mock_delete_patch = patch('xcube_gen.keyvaluedatabase.KeyValueDatabase.delete')
         mock_delete = mock_delete_patch.start()
         mock_delete.return_value = 1
 

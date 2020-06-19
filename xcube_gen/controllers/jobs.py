@@ -32,7 +32,7 @@ from kubernetes.client.rest import ApiException
 from xcube_gen import api
 from xcube_gen.kvdb import KvDB
 from xcube_gen.controllers import user_namespaces
-from xcube_gen.xg_types import AnyDict, Error
+from xcube_gen.typedefs import AnyDict, Error
 
 
 def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:

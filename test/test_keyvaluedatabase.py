@@ -2,36 +2,31 @@ import json
 import unittest
 from unittest.mock import patch
 from xcube_gen import api
-from xcube_gen.kvdb import KvDB, _LevelDBKvDB, _KvDBMocker, _InMemoryKvDB, _RedisKvDB
+from xcube_gen.keyvaluedatabase import KeyValueDatabase, _LevelDBKvDB, _KvDBMocker, _InMemoryKvDB, _RedisKvDB
 
 
 class TestKvDB(unittest.TestCase):
     def test_instance(self):
-        KvDB._instance = None
-        inst = KvDB.instance(provider='inmemory')
-        self.assertEqual(str(type(inst._db)), "<class 'xcube_gen.kvdb._InMemoryKvDB'>")
+        KeyValueDatabase._instance = None
+        inst = KeyValueDatabase.instance(provider='inmemory')
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._InMemoryKvDB'>")
 
-        KvDB._instance = None
-        inst = KvDB.instance(provider='leveldb', name='/tmp/testinstance')
-        self.assertEqual(str(type(inst._db)), "<class 'xcube_gen.kvdb._LevelDBKvDB'>")
+        KeyValueDatabase._instance = None
+        inst = KeyValueDatabase.instance(provider='leveldb', name='/tmp/testinstance')
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._LevelDBKvDB'>")
 
-        KvDB._instance = None
-        inst = KvDB.instance(provider='redis')
-        self.assertEqual(str(type(inst._db)), "<class 'xcube_gen.kvdb._RedisKvDB'>")
+        KeyValueDatabase._instance = None
+        inst = KeyValueDatabase.instance(provider='redis')
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._RedisKvDB'>")
 
-        inst = KvDB.instance()
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.kvdb.KvDB'>")
+        inst = KeyValueDatabase.instance()
+        self.assertEqual(str(type(inst)), "<class 'xcube_gen.keyvaluedatabase.KeyValueDatabase'>")
 
-        KvDB._instance = None
+        KeyValueDatabase._instance = None
         with self.assertRaises(api.ApiError) as e:
-            KvDB.instance('jso')
+            KeyValueDatabase.instance('jso')
 
         self.assertEqual("Provider jso unknown.", str(e.exception))
-
-        with self.assertRaises(api.ApiError)as e:
-            KvDB.instance()
-
-        self.assertEqual("System error: Please provide a KvProvider if you first initiate a KvDB", str(e.exception))
 
 
 class TestRedisCache(unittest.TestCase):
@@ -137,7 +132,7 @@ class TestLevelDbCache(unittest.TestCase):
 
 class TestInMemoryCache(unittest.TestCase):
     def setUp(self) -> None:
-        KvDB._db = None
+        KeyValueDatabase._provider = None
         self._cache = _InMemoryKvDB(db_init={'key': {'value': 'value'}, 'key2': {'value2': 'value2'}})
 
     def test_get(self):

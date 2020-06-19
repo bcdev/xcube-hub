@@ -34,6 +34,4 @@ COPY --from=quay.io/bcdev/xcube-viewer:latest /usr/src/app/build ./viewer
 EXPOSE 5000
 EXPOSE 5050
 
-CMD ["/bin/bash", "-c", "source activate xcube-gen && python xcube_gen/wsgi.py"]
-
-# CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
