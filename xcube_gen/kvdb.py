@@ -74,7 +74,7 @@ class KeyValueDatabase:
 
     def get_db(self, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
         """
-        Return a database singleton.
+        Return a new database instance.
 
         :param provider: Cache provider (redis, leveldb, default leveldb)
         :param kwargs: Keyword-arguments passed to ``Database`` constructor.
