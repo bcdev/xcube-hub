@@ -8,7 +8,7 @@ from xcube_gen import api
 from xcube_gen.xg_types import JsonObject
 
 
-class KvDB:
+class KeyValueDatabase:
     __doc__ = \
         f"""
         A key-value pair database interface connector class (e.g. to redis)
