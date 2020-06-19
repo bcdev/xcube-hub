@@ -27,11 +27,10 @@ from typing import Optional, Union
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
-# from rq import Queue, Connection
 
 from xcube_gen import api
-from xcube_gen.kvdb import KvDB
 from xcube_gen.controllers import user_namespaces
+from xcube_gen.keyvaluedatabase import KeyValueDatabase
 from xcube_gen.typedefs import AnyDict, Error
 
 
@@ -93,7 +92,7 @@ def create(user_id: str, sh_cmd: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
 
-        kvdb = KvDB.instance()
+        kvdb = KeyValueDatabase.instance()
         kvdb.set(job_id, cfg)
 
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})

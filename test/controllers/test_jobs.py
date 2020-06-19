@@ -20,7 +20,7 @@ class TestJobs(unittest.TestCase):
         subprocess.call(["kubectl", "delete", "namespace", "daffy-duck"])
 
     def test_create(self):
-        res = self._client.put('/jobs/daffy-duck')
+        res = self._client.put('/jobs/daffy-duck', json=SH_CFG)
         self.assertEqual("200 OK", res.status)
 
     def test_delete(self):

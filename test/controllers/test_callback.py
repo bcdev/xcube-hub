@@ -63,7 +63,7 @@ class TestCallback(unittest.TestCase):
         mock_put_patch.stop()
 
         res = put_callback(user_id='ad659004d45088b035f19ec6ff1530b43', job_id='job3', value=expected)
-        cache = KvDB.instance()
+        cache = KeyValueDatabase.instance()
         cache.set('job3', self._sh_config)
 
         res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected)
