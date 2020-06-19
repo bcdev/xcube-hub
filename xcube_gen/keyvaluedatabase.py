@@ -246,7 +246,7 @@ class _LevelDBKvDB(KeyValueStore):
 
 class _InMemoryKvDB(KeyValueStore):
     f"""
-    In memory KVDB if no Provider is given
+    In-memory implementation of the ``_KvDBProvider`` interface. Used by default when no provider is configured,
     """
 
     def __init__(self, db_init: Optional[dict] = None, use_mocker: bool = False):
