@@ -34,7 +34,7 @@ from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
-from xcube_gen.cache import Cache
+from xcube_gen.kvdb import KvDB
 
 
 def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder=''):
@@ -42,7 +42,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     flask_cors.CORS(app)
     Cfg.load_config_once()
-    Cache.configure(provider=cache_provider)
+    KvDB._get_instance(provider=cache_provider)
 
     def raise_for_invalid_json():
         try:

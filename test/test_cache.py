@@ -2,26 +2,26 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from xcube_gen import api
-from xcube_gen.cache import Cache
+from xcube_gen.kvdb import KvDB
 
 
 class TestCache(unittest.TestCase):
     def test_instance(self):
-        Cache._instance = None
-        inst = Cache.configure(provider='inmemory')
+        KvDB._instance = None
+        inst = KvDB._get_instance(provider='inmemory')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache._InMemoryCache'>")
 
-        Cache._cache_provider = None
-        inst = Cache.configure(provider='leveldb', name='/tmp/testinstance')
+        KvDB.instance = None
+        inst = KvDB._get_instance(provider='leveldb', name='/tmp/testinstance')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache._LevelDBCache'>")
 
-        Cache._cache_provider = None
-        inst = Cache.configure(provider='redis')
+        KvDB.instance = None
+        inst = KvDB._get_instance(provider='redis')
         self.assertEqual(str(type(inst)), "<class 'xcube_gen.cache._RedisCache'>")
 
-        Cache._cache_provider = None
+        KvDB.instance = None
         with self.assertRaises(api.ApiError) as e:
-            Cache.configure('jso')
+            KvDB._get_instance('jso')
 
         self.assertEqual("Provider jso unknown.", str(e.exception))
 
@@ -39,8 +39,8 @@ class TestRedisCache(unittest.TestCase):
         self._mock_delete = self._mock_delete_patch.start()
         self._mock_delete.return_value = True
 
-        Cache.configure(provider='redis')
-        self._db = Cache()
+        KvDB._get_instance(provider='redis')
+        self._db = KvDB()
 
     def tearDown(self) -> None:
         self._mock_set_patch.stop()
@@ -80,9 +80,9 @@ class TestRedisCache(unittest.TestCase):
 
 class TestLevelDbCache(unittest.TestCase):
     def setUp(self) -> None:
-        Cache.configure(provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
+        KvDB._get_instance(provider='leveldb', name='/tmp/testleveldb', create_if_missing=True)
 
-        self._db = Cache()
+        self._db = KvDB()
 
         self._db.set('key', {'value': 'value'})
 
@@ -119,9 +119,9 @@ class TestLevelDbCache(unittest.TestCase):
 
 class TestInMemoryCache(unittest.TestCase):
     def setUp(self) -> None:
-        Cache._cache_provider = None
-        Cache.configure(provider='inmemory', db_init={'key': {'value': 'value'}, 'key2': {'value2': 'value2'}})
-        self._cache = Cache()
+        KvDB.instance = None
+        KvDB._get_instance(provider='inmemory', db_init={'key': {'value': 'value'}, 'key2': {'value2': 'value2'}})
+        self._cache = KvDB()
 
     def test_get(self):
         res = self._cache.get('äpasoCacheäp')

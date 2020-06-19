@@ -9,7 +9,7 @@ import requests
 from jose import jwt
 
 from xcube_gen import api
-from xcube_gen.cache import Cache
+from xcube_gen.kvdb import KvDB
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
 ALGORITHMS = ["RS256"]
@@ -51,7 +51,7 @@ def requires_permissions(required_scope: Sequence):
 
 
 def _get_user_info_from_auth0(token, user_id: str):
-    kv = Cache()
+    kv = KvDB()
     user_info = kv.get(user_id + '_user_info')
     if user_info and isinstance(user_info, str):
         return json.loads(user_info)

@@ -7,11 +7,11 @@ from xcube_gen import api
 from xcube_gen.xg_types import JsonObject
 
 
-class _CacheProvider:
+class _KvDBProvider:
     pass
 
 
-class Cache:
+class KvDB:
     __doc__ = \
         f"""
         A key-value pair database interface connector class (e.g. to redis)
@@ -23,10 +23,11 @@ class Cache:
     provider = 'leveldb'
     validators = []
 
-    _cache_provider = None
+    instance = None
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, provider: str, **kwargs):
+        if not self.instance:
+            self._get_instance(provider=provider, **kwargs)
 
     def get(self, key) -> Optional[JsonObject]:
         """
@@ -35,7 +36,7 @@ class Cache:
         :return:
         """
 
-        res = self._cache_provider.get(key)
+        res = self.instance.get(key)
         if not res:
             return res
 
@@ -62,7 +63,7 @@ class Cache:
                 validator(value)
 
             value = json.dumps(value)
-            return self._cache_provider.set(key, value)
+            return self.instance.set(key, value)
         except JSONDecodeError as e:
             raise api.ApiError(401, "System error (Cache): Cash contained invalid json " + str(e))
         except ValueError as e:
@@ -75,14 +76,9 @@ class Cache:
         :return:
         """
 
-        return self._cache_provider.delete(key)
+        return self.instance.delete(key)
 
-    @classmethod
-    def get_instance(cls):
-        return Cache()
-
-    @classmethod
-    def configure(cls, provider: Optional[str] = None, **kwargs) -> Optional[_CacheProvider]:
+    def _get_instance(self, provider: Optional[str] = None, **kwargs) -> _KvDBProvider:
         """
         Return a database singleton.
 
@@ -90,26 +86,18 @@ class Cache:
         :param kwargs: Keyword-arguments passed to ``Database`` constructor.
         """
 
-        if cls.provider and cls.provider != provider:
-            cls._cache_provider = None
-
-        cls.provider = os.getenv('XCUBE_GEN_CACHE_PROVIDER') or cls.provider
-        cls.provider = provider or cls.provider
-
-        if cls._cache_provider is None:
-            if cls.provider == 'redis':
-                cls._cache_provider = _RedisCache(**kwargs)
-            elif cls.provider == 'leveldb':
-                cls._cache_provider = _LevelDBCache(**kwargs)
-            elif cls.provider == 'inmemory':
-                cls._cache_provider = _InMemoryCache(**kwargs)
+        if self.instance is None:
+            if provider == 'redis':
+                return _RedisKvDB(**kwargs)
+            elif provider == 'leveldb':
+                return _LevelDBKvDB(**kwargs)
+            elif provider == 'inmemory':
+                return _InMemoryKvDB(**kwargs)
             else:
-                raise api.ApiError(500, f"Provider {cls.provider} unknown.")
-
-        return cls._cache_provider
+                raise api.ApiError(500, f"Provider {provider} unknown.")
 
 
-class _RedisCache(_CacheProvider):
+class _RedisKvDB(_KvDBProvider):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -166,7 +154,7 @@ class _RedisCache(_CacheProvider):
         return self._db.delete(key)
 
 
-class _LevelDBCache(_CacheProvider):
+class _LevelDBKvDB(_KvDBProvider):
     __doc__ = \
         f"""
         Redis key-value pair database implementation of Kv
@@ -228,7 +216,7 @@ class _LevelDBCache(_CacheProvider):
         return True
 
 
-class _InMemoryCache(_CacheProvider):
+class _InMemoryKvDB(_KvDBProvider):
     __doc__ = \
         f"""
         None Cache if no Provider is given
