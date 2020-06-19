@@ -1,0 +1,878 @@
+openapi: 3.0.0
+info:
+  title: xcube Generation API
+  description: Restful API for handling xcube Generations
+  contact:
+    email: info@brockmann-consult.de
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 1.0.0-oas3
+servers:
+  - url: https://virtserver.swaggerhub.com/dzelge/xcube-gen-api/1.0.0
+  - url: https://xcube-gen.brockmann-consult.de/1.0.0
+tags:
+  - name: admins
+    description: Secured Admin-only calls
+  - name: users
+    description: Users accessing the API for cube generation
+  - name: developers
+    description: Developers accessing the API
+  - name: machines
+    description: Machines accessing the API
+paths:
+  /:
+    get:
+      tags:
+        - developers
+        - admins
+      summary: web service information
+      description: |
+        Returning service information
+      operationId: service_info
+      responses:
+        "200":
+          description: web service information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiServiceInformationResponse'
+  /jobs/{user_id}:
+    get:
+      tags:
+        - users
+      summary: List jobs for users
+      description: |
+        List user jobs
+      operationId: getJobsByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of user jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJobsResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - read_jobs
+    put:
+      tags:
+        - users
+      summary: Create a job for a users
+      description: |
+        Create a job for a users
+      operationId: createJobByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: Job configuration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobConfig'
+        required: true
+      responses:
+        "200":
+          description: Create a job for a users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJobResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - submit_job
+    delete:
+      tags:
+        - users
+        - admin
+      summary: Delete all jobs of a user
+      description: |
+        Delete all jobs of a user
+      operationId: deleteJobsByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - submit_job
+  /jobs/{user_id}/{job_id}:
+    get:
+      tags:
+        - users
+      summary: List jobs for users
+      description: |
+        Get user job information
+      operationId: getJobByUserIdAndJobId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: job_id
+          in: path
+          description: Job ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User job information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJobResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - read_jobs
+    delete:
+      tags:
+        - users
+        - admin
+      summary: Delete a job of a user
+      description: |
+        Delete a job of a user
+      operationId: deleteJobsByUserIdAndJobId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: job_id
+          in: path
+          description: Job ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - delete_jobs
+  /jobs/{user_id}/{job_id}/callback:
+    get:
+      tags:
+        - users
+        - admin
+      summary: Get list of callbacks for a job of a user
+      description: Get list of callbacks for a job of a user
+      operationId: getCallbacksByUserIdAndJobId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: job_id
+          in: path
+          description: Job ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Callback'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - read_callbacks
+    put:
+      tags:
+        - machine
+      summary: Put callbacks for a job of a user
+      description: Put callbacks for a job of a user
+      operationId: putCallbacksByUserIdAndJobId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: job_id
+          in: path
+          description: Job ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: Callbacks
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Callback'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - write_callbacks
+    delete:
+      tags:
+        - machine
+        - users
+        - admin
+      summary: Clear callbacks for a job of a user
+      description: Clear callbacks for a job of a user
+      operationId: deleteCallbacksByUserIdAndJobId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: job_id
+          in: path
+          description: Job ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - put_callbacks
+  /cubes/{user_id}/viewer:
+    get:
+      tags:
+        - users
+      summary: Get cube viewer status
+      description: Get cube viewer status
+      operationId: getCubeViewerStatusByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Viewer information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiViewerInformationResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - submit_job
+    post:
+      tags:
+        - users
+      summary: Start cube viewer
+      description: Start cube viewer
+      operationId: startCubeViewerByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Viewer information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiViewerInformationResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - submit_job
+  /datastores:
+    get:
+      tags:
+        - users
+        - machines
+      summary: Get a list of datastores
+      description: Get a list of datastores
+      operationId: getDataStores
+      responses:
+        "200":
+          description: Datastore list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDatastoresResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: No datastores found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - submit_job
+  /users/{user_id}/punits:
+    get:
+      tags:
+        - users
+        - machines
+      summary: Get user punits
+      description: Get user punits
+      operationId: getPunitsByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: get user punits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiPunitResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - read_punits
+    put:
+      tags:
+        - machines
+      summary: Add user punits
+      description: Add user punits
+      operationId: addPunitByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: Punits
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PunitConfig'
+        required: true
+      responses:
+        "200":
+          description: Add punits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - put_punits
+    delete:
+      tags:
+        - machines
+      summary: Reduce user punits
+      description: Reduce user punits
+      operationId: reducePunitByUserId
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: Punits
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PunitConfig'
+        required: true
+      responses:
+        "200":
+          description: Reduce punits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - oAuthorization:
+            - put_punits
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: object
+    ApiJobResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          $ref: '#/components/schemas/Job'
+    ApiJobsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+    ApiServiceInformationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          $ref: '#/components/schemas/ServiceInformation'
+    ApiViewerInformationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          $ref: '#/components/schemas/ViewerInformation'
+    ApiDatastoresResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          $ref: '#/components/schemas/Datastore'
+    ApiPunitResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          $ref: '#/components/schemas/Punit'
+    ServiceInformation:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        version:
+          type: string
+        serverStartTime:
+          type: string
+          format: date-time
+        serverCurrentTime:
+          type: string
+          format: date-time
+        serverPID:
+          type: integer
+        chartVersion:
+          type: string
+        mockServices:
+          type: string
+        runLocal:
+          type: boolean
+    JobConfig:
+      type: object
+    Job:
+      required:
+        - job_id
+        - status
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+    Callback:
+      required:
+        - message
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        values:
+          type: object
+        total_work:
+          type: number
+        worked:
+          type: number
+    ViewerInformation:
+      required:
+        - server_uri
+        - viewer_uri
+      type: object
+      properties:
+        viewer_uri:
+          type: string
+          format: uri
+        server_uri:
+          type: string
+          format: uri
+    Datastore:
+      required:
+        - datasets
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset'
+    Dataset:
+      required:
+        - id
+        - name
+        - variables
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        variables:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variable'
+    Variable:
+      required:
+        - description
+        - dtype
+        - id
+        - name
+        - spatialRes
+        - temporalRes
+        - units
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        units:
+          type: string
+        dtype:
+          type: string
+        spatialRes:
+          type: number
+        temporalRes:
+          type: string
+        description:
+          type: string
+    Punit:
+      required:
+        - count
+      type: object
+      properties:
+        count:
+          type: integer
+    PunitConfig:
+      required:
+        - punits
+      type: object
+      properties:
+        punits:
+          $ref: '#/components/schemas/PunitConfig_punits'
+    JobStatus:
+      required:
+        - active
+        - completion_time
+        - failed
+        - start_time
+        - succeeded
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        start_time:
+          type: string
+          format: date-time
+        failed:
+          type: boolean
+        succeeded:
+          type: boolean
+        completion_time:
+          type: string
+          format: date-time
+    PunitConfig_punits:
+      required:
+        - total_count
+      type: object
+      properties:
+        total_count:
+          type: integer
+  securitySchemes:
+    oAuthorization:
+      type: oauth2
+      description: This API uses OAuth 2 with the implicit grant flow.
+      flows:
+        implicit:
+          authorizationUrl: https://edc.eu.auth0.com/authorize
+          scopes:
+            read_job: Read job status and result
+            submit_job: Submit jobs to the K8s cluster
+            read_punits: Allow reading the punits level of a user
+            read_callbacks: Allow reading callbacks
+        clientCredentials:
+          tokenUrl: https://edc.eu.auth0.com/oauth/token
+          scopes:
+            read_job: Read job status and result
+            read_punits: Allow reading the punits level of a user
+            put_punits: Allow adding punits to and remove punits from a user
+            read_callbacks: Allow reading callbacks
+            put_callbacks: Allow reading callbacks
+            delete_callbacks: Allow reading callbacks

@@ -1,5 +1,5 @@
 from xcube_gen.api import get_json_request_value, ApiError
-from xcube_gen.types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 
 def _square(x: int) -> int:
@@ -46,10 +46,10 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     time_period = get_json_request_value(cube_config, 'time_period',
                                          value_type=str,
                                          default_value='1D')
-    band_names = get_json_request_value(cube_config, 'band_names',
-                                        value_type=list,
-                                        item_type=str,
-                                        default_value=[])
+    variable_names = get_json_request_value(cube_config, 'variable_names',
+                                            value_type=list,
+                                            item_type=str,
+                                            default_value=[])
 
     is_geo_crs = crs.lower() == 'epsg:4326' or crs.endswith('/4326') or crs.endswith('/WGS84')
 
@@ -73,7 +73,7 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     date_range = pd.date_range(start=start_date, end=end_date, freq=time_period)
 
     num_times = len(date_range)
-    num_variables = len(band_names)
+    num_variables = len(variable_names)
     num_requests = num_variables * num_times * num_tiles_x * num_tiles_y
     num_bytes_per_pixel = 4  # float32 for all variables for time being
     num_bytes = num_variables * num_times * (height * width * num_bytes_per_pixel)

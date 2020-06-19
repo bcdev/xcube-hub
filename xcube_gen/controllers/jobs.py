@@ -22,13 +22,16 @@
 import json
 import os
 import uuid
+from pprint import pprint
 from typing import Optional, Union
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
+# from rq import Queue, Connection
 
 from xcube_gen import api
-from xcube_gen.types import AnyDict, Error
+from xcube_gen.controllers import user_namespaces
+from xcube_gen.typedefs import AnyDict, Error
 
 
 def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
@@ -81,10 +84,19 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
 
 def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[AnyDict, Error]:
     try:
+        user_namespaces.create_if_not_exists(user_id=user_id)
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
+        # with Connection():
+        #     q = Queue()
+        #     q.enqueue(poll_job_status, kwargs={'poller': status,
+        #                                        'user_id': user_id,
+        #                                        'job_id': job_id,
+        #                                        'processing_request': cfg}
+        #               )
+        # poll_job_status(poller=status, user_id=user_id, job_id=job_id, processing_request=cfg)
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
@@ -144,13 +156,13 @@ def logs(user_id: str, job_id: str) -> AnyDict:
     api_pod_instance = client.CoreV1Api()
 
     pods = api_pod_instance.list_namespaced_pod(namespace=user_id, label_selector=f"job-name={job_id}")
-    logs = []
+    lgs = []
     for pod in pods.items:
         name = pod.metadata.name
-        log = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
-        logs = log.splitlines()
+        lg = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
+        lgs = lg.splitlines()
 
-    return logs
+    return lgs
 
 
 def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
@@ -159,4 +171,5 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
         stat = status(user_id=user_id, job_id=job_id)
         return api.ApiResponse.success({'job_id': job_id, 'status': stat, 'output': output})
     except ApiException as e:
+        pprint(str(e))
         raise api.ApiError(e.status, str(e))

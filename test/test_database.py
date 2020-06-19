@@ -9,9 +9,9 @@ from xcube_gen.database import Database
 
 class DatabaseTest(unittest.TestCase):
     def test_instance(self):
-        database = Database.instance(profile_name='dev')
+        database = Database.instance()
         self.assertIsNotNone(database)
-        self.assertEqual('dev', database.profile_name)
+        # self.assertEqual('dev', database.profile_name)
         self.assertEqual(DEFAULT_DB_BUCKET_NAME, database.bucket_name)
 
     def test_user_data_crud(self):

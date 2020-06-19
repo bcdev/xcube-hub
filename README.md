@@ -1,6 +1,5 @@
-# xcube-gen
+![test-xcube-gen-api](https://github.com/bcdev/xcube-gen-api/workflows/test-xcube-gen-api/badge.svg)
 
-An [xcube plug-in](https://github.com/dcs4cop/xcube) that implements a data cube generation service
 
 ## Setup
 
@@ -25,5 +24,5 @@ Check xcube CLI extension added by `xcube_gen` plugin:
 
 Start the service: 
 
-    $ xcube genserv start 
+    $ xcube-genserv start 
 

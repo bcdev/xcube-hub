@@ -12,11 +12,14 @@ dependencies:
   - boto3
   - python-jose
   - pandas
+  - uwsgi
 
   - pip:
       # Required
       - requests_oauthlib
       - kubernetes
+      - polling2
+      - plyvel
 
   # testing
   - moto

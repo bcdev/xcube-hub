@@ -24,37 +24,31 @@ import os
 import flask
 import flask_cors
 import werkzeug
-from flask import jsonify
 
 import xcube_gen.api as api
-from xcube_gen.auth import AuthError, requires_auth, requires_scope
+from xcube_gen.auth import requires_auth, requires_permissions, raise_for_invalid_user
 from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import datastores
+from xcube_gen.controllers import datastores, callback
 from xcube_gen.controllers import info
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
+from xcube_gen.keyvaluedatabase import KeyValueDatabase
 
 
-def new_app(prefix: str = ""):
+def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder=''):
     """Create the service app."""
-    app = flask.Flask('xcube-genserv')
+    app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
+    flask_cors.CORS(app)
     Cfg.load_config_once()
-
-    @app.errorhandler(AuthError)
-    def handle_auth_error(ex):
-        response = jsonify(ex.error)
-        response.status_code = ex.status_code
-        return response
+    KeyValueDatabase.instance(provider=cache_provider)
 
     def raise_for_invalid_json():
         try:
             flask.request.json
         except werkzeug.exceptions.HTTPException:
             raise api.ApiError(400, "Invalid JSON in request body")
-
-    flask_cors.CORS(app)
 
     @app.route(prefix + '/', methods=['GET'])
     def _service_info():
@@ -64,6 +58,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _jobs(user_id: str):
         try:
+            raise_for_invalid_user(user_id=user_id)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -78,6 +73,7 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _job(user_id: str, job_id: str):
         try:
+            raise_for_invalid_user(user_id)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -85,21 +81,15 @@ def new_app(prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/jobs/<user_id>/<job_id>/logs', methods=['GET'])
-    @requires_auth
-    def _result(user_id: str, job_id: str):
-        try:
-            return jobs.logs(user_id=user_id, job_id=job_id)
-        except api.ApiError as e:
-            return e.response
-
-    @app.route(prefix + '/cubes/<user_id>/viewer', methods=['POST'])
+    @app.route(prefix + '/cubes/<user_id>/viewer', methods=['GET', 'POST'])
     @requires_auth
     def _cubes_viewer(user_id: str):
         try:
+            raise_for_invalid_user(user_id)
+            if flask.request.method == "GET":
+                return api.ApiResponse.success(viewer.get_status(user_id=user_id))
             if flask.request.method == "POST":
-                result = viewer.launch_viewer(user_id, flask.request.json)
-                return api.ApiResponse.success(result)
+                return api.ApiResponse.success(viewer.launch_viewer(user_id, flask.request.json))
         except api.ApiError as e:
             return e.response
 
@@ -119,7 +109,9 @@ def new_app(prefix: str = ""):
     @requires_auth
     def _user_data(user_id: str):
         try:
+            raise_for_invalid_user(user_id)
             raise_for_invalid_json()
+
             if flask.request.method == 'GET':
                 user_data = users.get_user_data(user_id)
                 return api.ApiResponse.success(result=user_data)
@@ -133,23 +125,51 @@ def new_app(prefix: str = ""):
             return e.response
 
     @app.route(prefix + '/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
     def _update_processing_units(user_id: str):
         try:
             raise_for_invalid_json()
+            raise_for_invalid_user(user_id)
             if flask.request.method == 'GET':
+                requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
                 processing_units = users.get_processing_units(user_id, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
-                requires_scope(['put:punits'])
+                requires_permissions(['put:punits'])
                 users.add_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                requires_scope(['put:punits'])
+                requires_permissions(['put:punits'])
                 users.subtract_processing_units(user_id, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
+
+    @app.route(prefix + '/jobs/<user_id>/<job_id>/callback', methods=['GET', 'PUT', 'DELETE'])
+    @requires_auth
+    def _callback(user_id: str, job_id: str):
+        try:
+            raise_for_invalid_json()
+            raise_for_invalid_user(user_id=user_id)
+            if flask.request.method == 'GET':
+                requires_permissions(['read:callback'])
+                res = callback.get_callback(user_id, job_id)
+                return api.ApiResponse.success(result=res)
+            elif flask.request.method == 'PUT':
+                requires_permissions(['put:callback'])
+                callback.put_callback(user_id, job_id, flask.request.json)
+                return api.ApiResponse.success()
+            elif flask.request.method == "DELETE":
+                requires_permissions(['delete:callback'])
+                callback.delete_callback(user_id, job_id)
+                return api.ApiResponse.success()
+        except api.ApiError as e:
+            return e.response
+
+    @app.route(prefix + '/viewer')
+    def _viewer():
+        return app.send_static_file('index.html')
 
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
@@ -165,13 +185,15 @@ def new_app(prefix: str = ""):
 
 def start(host: str = None,
           port: int = None,
-          debug: bool = False):
+          debug: bool = False,
+          cache_provider: str = "leveldb"):
     """
     Start the service.
 
+    :param cache_provider:
     :param host: The hostname to listen on. Set this to ``'0.0.0.0'`` to
         have the server available externally as well. Defaults to ``'127.0.0.1'``.
     :param port: The port to listen on. Defaults to ``5000``.
     :param debug: If given, enable or disable debug mode.
     """
-    new_app().run(host=host, port=port, debug=debug)
+    new_app(cache_provider=cache_provider).run(host=host, port=port, debug=debug)

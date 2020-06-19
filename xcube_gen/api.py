@@ -22,7 +22,7 @@
 import datetime
 from typing import Any, Tuple, Union, Optional
 
-from xcube_gen.types import AnyDict, UNDEFINED, JsonObject, JsonValue
+from xcube_gen.typedefs import AnyDict, UNDEFINED, JsonObject, JsonValue
 
 SERVER_NAME = 'xcube-genserv'
 SERVER_DESCRIPTION = 'xcube Generation Service'

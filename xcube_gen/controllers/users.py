@@ -2,9 +2,8 @@ import datetime
 from typing import Optional
 
 from xcube_gen.api import ApiError, get_json_request_value
-from xcube_gen.controllers import user_namespaces
 from xcube_gen.database import Database
-from xcube_gen.types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 
 def get_processing_units(user_id: str, include_history: bool = False) -> JsonObject:
@@ -15,7 +14,6 @@ def get_processing_units(user_id: str, include_history: bool = False) -> JsonObj
 
 
 def add_processing_units(user_id: str, punits_request: JsonObject):
-    user_namespaces.create_if_not_exists(user_id=user_id)
     _update_processing_units(user_id, punits_request, 'add')
 
 
@@ -24,7 +22,8 @@ def subtract_processing_units(user_id: str, punits_request: JsonObject):
 
 
 def _update_processing_units(user_id: str, punits_request: JsonObject, op: str):
-    update_count = get_json_request_value(punits_request, 'count', value_type=int)
+    update_punits = get_json_request_value(punits_request, 'punits', value_type=dict)
+    update_count = get_json_request_value(update_punits, 'total_count', value_type=int)
     if update_count <= 0:
         raise ApiError(400, 'Processing unit counts must be greater than zero.')
     punits_data_old = get_user_data(user_id, dataset_name='punits') or dict()

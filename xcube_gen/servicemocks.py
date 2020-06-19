@@ -28,7 +28,7 @@ from typing import List
 import flask
 
 import xcube_gen.api as api
-from xcube_gen.types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 JOB_ID_KEY = 'job_id'
 
@@ -100,6 +100,7 @@ def delete_job(user_id: str, job_id: str, delete_duration: float = 3):
     _EXECUTOR.submit(_delete_job, user_id, job_id, delete_duration)
 
 
+# noinspection PySameParameterValue
 def delete_jobs(user_id: str, delete_duration: float = 3):
     jobs = get_jobs(user_id)
     num_jobs = len(jobs)
