@@ -21,6 +21,7 @@ class TestCallback(unittest.TestCase):
         self._app = new_app()
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
+        self._sh_config = SH_CFG
         set_env()
 
     def test_get_callback(self):

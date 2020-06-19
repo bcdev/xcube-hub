@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
 from xcube_gen.service import new_app
 import subprocess
@@ -23,12 +24,12 @@ class TestJobs(unittest.TestCase):
         os.environ["SH_CLIENT_ID"] = ''
         os.environ["SH_CLIENT_SECRET"] = ''
         os.environ["SH_INSTANCE_ID"] = ''
-        res = self._client.put('/jobs/daffy-duck')
+        res = self._client.put('/jobs/daffy-duck', json=SH_CFG)
         self.assertEqual('400 BAD REQUEST', res.status)
         self.assertEqual('Could not find any xcube-sh docker image.', res.json['message'])
 
         os.environ["XCUBE_SH_DOCKER_IMG"] = 'quay.io/bcdev/xcube-sh'
-        res = self._client.put('/jobs/daffy-duck')
+        res = self._client.put('/jobs/daffy-duck', json=SH_CFG)
         self.assertEqual('400 BAD REQUEST', res.status)
         self.assertEqual('SentinelHub credentials invalid. Please contact Brockmann Consult', res.json['message'])
 
