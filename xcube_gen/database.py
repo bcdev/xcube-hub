@@ -35,7 +35,7 @@ _DB_USER_DATASET_KEY = 'users/{user_name}/{dataset_name}.json'
 
 class Database:
     # noinspection PyUnusedName
-    f"""
+    __doc__ = f"""
     An object database that uses S3 as backend.
     
     Credentials are read from ``~/.aws/credentials, section [<profile_name>]``.
