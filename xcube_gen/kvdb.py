@@ -72,7 +72,8 @@ class KeyValueDatabase:
 
         return self._db.delete(key)
 
-    def get_db(self, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
+    @classmethod
+    def new_db(cls, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
         """
         Return a new database instance.
 
