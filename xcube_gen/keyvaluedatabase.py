@@ -246,9 +246,9 @@ class _LevelDBKvDB(KeyValueStore):
 class _InMemoryKvDB(KeyValueStore):
     """
     InMemory key-value pair database implementation of KeyValueStore.
-    
+
     Defines methods for getting, deleting and putting key value pairs
-    
+
     :param db_init, use_mocker
     Example:
     ```
