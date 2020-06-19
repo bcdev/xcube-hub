@@ -5,7 +5,11 @@ import os
 from test.setup_utils import setup_auth, set_env
 from xcube_gen import api
 from xcube_gen.controllers.callback import get_callback, put_callback, delete_callback
+from xcube_gen.kvdb import KvDB
 from xcube_gen.service import new_app
+
+
+KvDB.use_mocker = True
 
 
 class TestCallback(unittest.TestCase):
@@ -23,7 +27,7 @@ class TestCallback(unittest.TestCase):
             'status': 'ERROR'
         }
 
-        mock_get_patch = patch('xcube_gen.cache.Cache.get')
+        mock_get_patch = patch('xcube_gen.kvdb.KvDB.get')
         mock_get = mock_get_patch.start()
         mock_get.return_value = json.dumps(expected)
 
@@ -50,16 +54,16 @@ class TestCallback(unittest.TestCase):
             }
         }
 
-        mock_put_patch = patch('xcube_gen.cache.Cache.get')
+        mock_put_patch = patch('xcube_gen.kvdb.KvDB.get')
         mock_put = mock_put_patch.start()
         mock_put.return_value = True
         mock_put_patch.stop()
 
-        res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected)
+        res = put_callback(user_id='ad659004d45088b035f19ec6ff1530b43', job_id='job3', value=expected)
         self.assertTrue(res)
 
     def test_delete_callback(self):
-        mock_delete_patch = patch('xcube_gen.cache.Cache.delete')
+        mock_delete_patch = patch('xcube_gen.kvdb.KvDB.delete')
         mock_delete = mock_delete_patch.start()
         mock_delete.return_value = 1
 

@@ -42,7 +42,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     flask_cors.CORS(app)
     Cfg.load_config_once()
-    KvDB._get_instance(provider=cache_provider)
+    KvDB.instance(provider=cache_provider)
 
     def raise_for_invalid_json():
         try:
