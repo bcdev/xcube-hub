@@ -32,7 +32,7 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
-        cache = KvDB.instance()
+        kvdb = KvDB.instance()
         res = cache.set(user_id + '__' + job_id, value)
         trigger_punit_substract(user_id=user_id, value=value)
         return res
