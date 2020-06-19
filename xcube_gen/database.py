@@ -26,7 +26,7 @@ from typing import Optional
 
 import boto3
 
-from xcube_gen.xg_types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
 
@@ -35,20 +35,19 @@ _DB_USER_DATASET_KEY = 'users/{user_name}/{dataset_name}.json'
 
 class Database:
     # noinspection PyUnusedName
-    __doc__ = \
-        f"""
-        An object database that uses S3 as backend.
-        
-        Credentials are read from ``~/.aws/credentials, section [<profile_name>]``.
-        Use ``aws configure [--profile <profile_name>]`` CLI command to configure a profile.
-        See https://docs.aws.amazon.com/cli/latest/reference/configure/.
-        
-        :param bucket_name: The S3 bucket that stores database objects. 
-            Defaults to "{DEFAULT_DB_BUCKET_NAME}".
-        :param profile_name: The AWS credentials profile. 
-            If not given, credentials are expected to be given by environment variables
-            AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-        """
+    f"""
+    An object database that uses S3 as backend.
+    
+    Credentials are read from ``~/.aws/credentials, section [<profile_name>]``.
+    Use ``aws configure [--profile <profile_name>]`` CLI command to configure a profile.
+    See https://docs.aws.amazon.com/cli/latest/reference/configure/.
+    
+    :param bucket_name: The S3 bucket that stores database objects. 
+        Defaults to "{DEFAULT_DB_BUCKET_NAME}".
+    :param profile_name: The AWS credentials profile. 
+        If not given, credentials are expected to be given by environment variables
+        AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+    """
 
     _instance_lock = threading.Lock()
     _instance = None

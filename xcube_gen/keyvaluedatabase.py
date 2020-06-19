@@ -3,19 +3,17 @@ import os
 from abc import abstractmethod
 from json import JSONDecodeError
 from typing import Optional, Any
-import plyvel
 from xcube_gen import api
-from xcube_gen.xg_types import JsonObject
+from xcube_gen.typedefs import JsonObject
 
 
 class KeyValueDatabase:
-    __doc__ = \
-        f"""
-        A key-value pair database interface connector class (e.g. to redis)
-        
-        Defines abstract methods fro getting, deleting and putting key value pairs
-        
-        """
+    f"""
+    A key-value pair database interface connector class (e.g. to redis)
+    
+    Defines abstract methods fro getting, deleting and putting key value pairs
+    
+    """
 
     provider = 'leveldb'
 
@@ -24,7 +22,7 @@ class KeyValueDatabase:
     use_mocker = False
 
     def __init__(self, provider: str, **kwargs):
-        self._db = self.get_db(provider=provider, **kwargs)
+        self._db = self._new_db(provider=provider, **kwargs)
 
     def get(self, key) -> Optional[JsonObject]:
         """
@@ -72,8 +70,7 @@ class KeyValueDatabase:
 
         return self._db.delete(key)
 
-    @classmethod
-    def new_db(cls, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
+    def _new_db(self, provider: Optional[str] = None, **kwargs) -> "_KvDBProvider":
         """
         Return a new database instance.
 
@@ -91,10 +88,10 @@ class KeyValueDatabase:
             raise api.ApiError(500, f"Provider {provider} unknown.")
 
     @classmethod
-    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KvDB":
+    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) -> "KeyValueDatabase":
         refresh = refresh or cls._instance is None
         if refresh and provider:
-            cls._instance = KvDB(provider=provider, **kwargs)
+            cls._instance = KeyValueDatabase(provider=provider, **kwargs)
         elif refresh and not provider:
             raise api.ApiError(401, "System error: Please provide a KvProvider if you first initiate a KvDB")
 
@@ -129,20 +126,18 @@ class _KvDBProvider:
 
 
 class _RedisKvDB(_KvDBProvider):
-    __doc__ = \
-        f"""
-        Redis key-value pair database implementation of Kv
-        
-        Defines methods for getting, deleting and putting key value pairs
-        
-        :param host, port, db (see also https://github.com/andymccurdy/redis-py)
-        Example:
-        ```
-            db = Kv.instance(kv_provider='redis', host='localhost', port=6379, db=0)
-        ```
-        """
+    f"""
+    Redis key-value pair database implementation of Kv
+    
+    Defines methods for getting, deleting and putting key value pairs
+    
+    :param host, port, db (see also https://github.com/andymccurdy/redis-py)
+    Example:
+    ```
+        db = Kv.instance(kv_provider='redis', host='localhost', port=6379, db=0)
+    ```
+    """
 
-    # noinspection PyUnresolvedReferences
     def __init__(self, host='localhost', port=6379, db=0, use_mocker: bool = False, **kwargs):
         super().__init__()
         try:
@@ -189,25 +184,24 @@ class _RedisKvDB(_KvDBProvider):
 
 
 class _LevelDBKvDB(_KvDBProvider):
-    __doc__ = \
-        f"""
-        Redis key-value pair database implementation of Kv
-        
-        Defines methods for getting, deleting and putting key value pairs
-        
-        :param host, port, db (see also https://github.com/andymccurdy/redis-py)
-        Example:
-        ```
-            db = Kv.instance(kv_provider='leveldb', name='/tmp/testdb/', create_if_missing=True)
-        ```
-        """
+    f"""
+    Redis key-value pair database implementation of Kv
+    
+    Defines methods for getting, deleting and putting key value pairs
+    
+    :param host, port, db (see also https://github.com/andymccurdy/redis-py)
+    Example:
+    ```
+        db = Kv.instance(kv_provider='leveldb', name='/tmp/testdb/', create_if_missing=True)
+    ```
+    """
 
     def __init__(self, name: str = '/tmp/testdb/', create_if_missing=True, use_mocker: bool = False, *args, **kwargs):
         super().__init__()
-        # try:
-        #     import plyvel
-        # except ImportError:
-        #     raise api.ApiError(500, "Error: Cannot import plyvel. Please install first.")
+        try:
+            import plyvel
+        except ImportError:
+            raise api.ApiError(500, "Error: Cannot import plyvel. Please install first.")
 
         name = os.getenv('XCUBE_GEN_LEVELDB_NAME') or name
         create_if_missing = os.getenv('XCUBE_GEN_LEVELDB_CREATE_IF_MISSING') or create_if_missing
@@ -254,10 +248,9 @@ class _LevelDBKvDB(_KvDBProvider):
 
 
 class _InMemoryKvDB(_KvDBProvider):
-    __doc__ = \
-        f"""
-        None Cache if no Provider is given
-        """
+    f"""
+    In memory KVDB if no Provider is given
+    """
 
     def __init__(self, db_init: Optional[dict] = None, use_mocker: bool = False):
         super().__init__()
@@ -306,10 +299,9 @@ class _InMemoryKvDB(_KvDBProvider):
 
 
 class _KvDBMocker:
-    __doc__ = \
-        f"""
-        None Cache if no Provider is given
-        """
+    """
+    Mocker got unittests
+    """
     return_value: Optional[Any] = None
 
     def get(self, *args, **kwargs):

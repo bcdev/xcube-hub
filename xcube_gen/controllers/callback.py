@@ -1,14 +1,14 @@
 from xcube_gen import api
 from xcube_gen.api import get_json_request_value
-from xcube_gen.kvdb import KvDB
+from xcube_gen.keyvaluedatabase import KeyValueDatabase
 
 from xcube_gen.controllers.users import subtract_processing_units
-from xcube_gen.xg_types import JsonObject, AnyDict
+from xcube_gen.typedefs import JsonObject, AnyDict
 
 
 def get_callback(user_id: str, job_id: str) -> JsonObject:
     try:
-        cache = KvDB.instance()
+        cache = KeyValueDatabase.instance()
         res = cache.get(user_id + '__' + job_id)
 
         if not res:
@@ -32,8 +32,8 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
-        kvdb = KvDB.instance()
-        res = cache.set(user_id + '__' + job_id, value)
+        kvdb = KeyValueDatabase.instance()
+        res = kvdb.set(user_id + '__' + job_id, value)
         trigger_punit_substract(user_id=user_id, value=value)
         return res
     except TimeoutError as e:
@@ -42,7 +42,7 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
 
 def delete_callback(user_id: str, job_id: str):
     try:
-        kv = KvDB.instance()
+        kv = KeyValueDatabase.instance()
         res = kv.delete(user_id + '__' + job_id)
 
         if res == 0:
