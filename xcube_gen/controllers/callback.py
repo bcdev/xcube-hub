@@ -19,22 +19,25 @@ def get_callback(user_id: str, job_id: str) -> JsonObject:
         raise api.ApiError(401, r.strerror)
 
 
-def trigger_punit_substract(user_id: str, value: AnyDict) -> None:
-    status = get_json_request_value(value, 'status', value_type=str)
-
-    if status == "CUBE_GENERATED":
-        punits_requests = get_json_request_value(value, 'values', value_type=dict)
-        subtract_processing_units(user_id=user_id, punits_request=punits_requests)
-
-
 def put_callback(user_id: str, job_id: str, value: AnyDict):
-    if not value or 'message' not in value or 'status' not in value:
+    if not value or 'event' not in value or 'state' not in value:
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
         kvdb = KeyValueDatabase.instance()
         res = kvdb.set(user_id + '__' + job_id, value)
-        trigger_punit_substract(user_id=user_id, value=value)
+
+        event = get_json_request_value(value, "event", str)
+        state = get_json_request_value(value, 'state', dict)
+
+        if 'exc_info' in state:
+            exc_info = get_json_request_value(state, 'exc_info', tuple)
+            raise api.ApiError(400, exc_info)
+
+        if event == 'on_end':
+            punits_requests = kvdb.get(job_id)
+            subtract_processing_units(user_id=user_id, punits_request=punits_requests)
+
         return res
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)

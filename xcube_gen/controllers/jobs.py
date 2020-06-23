@@ -49,9 +49,9 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
 
     if cfg is not None:
         cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                                  f"| xcube sh {sh_cmd}"]
+                                  f"| xcube gen2"]
     else:
-        cmd = ["/bin/bash", "-c", f"source activate xcube &&  xcube sh {sh_cmd}"]
+        cmd = ["/bin/bash", "-c", f"source activate xcube &&  xcube gen2 {sh_cmd}"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -85,8 +85,9 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
 def create(user_id: str, sh_cmd: str, cfg: AnyDict) -> Union[AnyDict, Error]:
     try:
         user_namespaces.create_if_not_exists(user_id=user_id)
+        callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL')
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
-        cfg['xcube-gen-cfg'] = {'user_id': user_id, 'job_id': job_id}
+        cfg['callback']['api_uri'] = callback_uri + f'/jobs/{user_id}/{job_id}/callback'
 
         job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
         api_instance = client.BatchV1Api()
