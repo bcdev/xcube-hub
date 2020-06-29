@@ -66,7 +66,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
             if flask.request.method == 'PUT':
-                return jobs.create(user_id=user_id, sh_cmd='gen', cfg=flask.request.json)
+                return jobs.create(user_id=user_id, cfg=flask.request.json)
             if flask.request.method == 'DELETE':
                 return jobs.delete_all(user_id=user_id)
         except api.ApiError as e:

@@ -19,6 +19,7 @@ def create_deployment_object(name: str, container_name: str, image: str, contain
                  f"source activate xcube && xcube serve --prefix {name} --aws-env -P 4000 -A 0.0.0.0 "
                  f"{config.get('bucketUrl')}"],
         env=envs,
+        image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)])
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(

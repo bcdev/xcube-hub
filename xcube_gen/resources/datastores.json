@@ -1,1620 +1,2164 @@
 {
-  "dataStores": [
+  "stores": [
     {
-      "id": "sentinelhub",
-      "name": "SENTINEL Hub",
+      "store_id": "sentinelhub",
+      "description": "SENTINEL Hub Cloud API",
       "datasets": [
         {
-          "id": "S2L1C",
-          "name": "S2L1C",
-          "variables": [
+          "data_id": "S1GRD",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "VV",
+                    "VH",
+                    "HH",
+                    "HV"
+                  ]
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "data_vars": [
             {
-              "id": "B01",
-              "name": "B01"
+              "name": "VV",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             },
             {
-              "id": "B02",
-              "name": "B02"
+              "name": "VH",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             },
             {
-              "id": "B03",
-              "name": "B03"
+              "name": "HH",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             },
             {
-              "id": "B04",
-              "name": "B04"
-            },
-            {
-              "id": "B05",
-              "name": "B05"
-            },
-            {
-              "id": "B06",
-              "name": "B06"
-            },
-            {
-              "id": "B07",
-              "name": "B07"
-            },
-            {
-              "id": "B08",
-              "name": "B08"
-            },
-            {
-              "id": "B8A",
-              "name": "B8A"
-            },
-            {
-              "id": "B09",
-              "name": "B09"
-            },
-            {
-              "id": "B10",
-              "name": "B10"
-            },
-            {
-              "id": "B11",
-              "name": "B11"
-            },
-            {
-              "id": "B12",
-              "name": "B12"
-            },
-            {
-              "id": "viewZenithMean",
-              "name": "viewZenithMean"
-            },
-            {
-              "id": "viewAzimuthMean",
-              "name": "viewAzimuthMean"
-            },
-            {
-              "id": "sunZenithAngles",
-              "name": "sunZenithAngles"
-            },
-            {
-              "id": "sunAzimuthAngles",
-              "name": "sunAzimuthAngles"
-            },
-            {
-              "id": "CLM",
-              "name": "CLM"
-            },
-            {
-              "id": "CLP",
-              "name": "CLP"
+              "name": "HV",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             }
-          ]
+          ],
+          "attrs": {
+            "title": "Sentinel-1 - GRD",
+            "bands": {},
+            "processing_level": "L1B",
+            "request_period": "1D",
+            "feature_type_name": "S1.TILE"
+          }
         },
         {
-          "id": "S2L2A",
-          "name": "S2L2A",
-          "variables": [
+          "data_id": "S2L1C",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "B01",
+                    "B02",
+                    "B03",
+                    "B04",
+                    "B05",
+                    "B06",
+                    "B07",
+                    "B08",
+                    "B8A",
+                    "B09",
+                    "B10",
+                    "B11",
+                    "B12",
+                    "viewZenithMean",
+                    "viewAzimuthMean",
+                    "sunZenithAngles",
+                    "sunAzimuthAngles",
+                    "CLM",
+                    "CLP"
+                  ]
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "data_vars": [
             {
-              "id": "B01",
-              "name": "B01"
+              "name": "B01",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 442.7,
+                "bandwith": 21,
+                "resolution": 60,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B02",
-              "name": "B02"
+              "name": "B02",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 492.4,
+                "bandwith": 66,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B03",
-              "name": "B03"
+              "name": "B03",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 559.8,
+                "bandwith": 36,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B04",
-              "name": "B04"
+              "name": "B04",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 664.6,
+                "bandwith": 31,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B05",
-              "name": "B05"
+              "name": "B05",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 704.1,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B06",
-              "name": "B06"
+              "name": "B06",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 740.5,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B07",
-              "name": "B07"
+              "name": "B07",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 782.8,
+                "bandwith": 20,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B08",
-              "name": "B08"
+              "name": "B08",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 832.8,
+                "bandwith": 106,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B8A",
-              "name": "B8A"
+              "name": "B8A",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 864.7,
+                "bandwith": 21,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B09",
-              "name": "B09"
+              "name": "B09",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 945.1,
+                "bandwith": 20,
+                "resolution": 60,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B11",
-              "name": "B11"
+              "name": "B10",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1373.5,
+                "bandwith": 31,
+                "resolution": 60,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "B12",
-              "name": "B12"
+              "name": "B11",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1613.7,
+                "bandwith": 91,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "SCL",
-              "name": "SCL"
+              "name": "B12",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 2202.4,
+                "bandwith": 175,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "SNW",
-              "name": "SNW"
+              "name": "viewZenithMean",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
             },
             {
-              "id": "CLD",
-              "name": "CLD"
+              "name": "viewAzimuthMean",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
             },
             {
-              "id": "viewZenithMean",
-              "name": "viewZenithMean"
+              "name": "sunZenithAngles",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
             },
             {
-              "id": "viewAzimuthMean",
-              "name": "viewAzimuthMean"
+              "name": "sunAzimuthAngles",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
             },
             {
-              "id": "sunZenithAngles",
-              "name": "sunZenithAngles"
+              "name": "CLM",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             },
             {
-              "id": "sunAzimuthAngles",
-              "name": "sunAzimuthAngles"
-            },
-            {
-              "id": "AOT",
-              "name": "AOT"
-            },
-            {
-              "id": "CLM",
-              "name": "CLM"
-            },
-            {
-              "id": "CLP",
-              "name": "CLP"
+              "name": "CLP",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             }
-          ]
+          ],
+          "attrs": {
+            "title": "Sentinel-2 - L1C",
+            "bands": {
+              "B01": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 442.7,
+                "bandwith": 21,
+                "resolution": 60,
+                "fill_value": 0.0
+              },
+              "B02": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 492.4,
+                "bandwith": 66,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B03": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 559.8,
+                "bandwith": 36,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B04": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 664.6,
+                "bandwith": 31,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B05": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 704.1,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B06": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 740.5,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B07": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 782.8,
+                "bandwith": 20,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B08": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 832.8,
+                "bandwith": 106,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B8A": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 864.7,
+                "bandwith": 21,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B09": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 945.1,
+                "bandwith": 20,
+                "resolution": 60,
+                "fill_value": 0.0
+              },
+              "B10": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1373.5,
+                "bandwith": 31,
+                "resolution": 60,
+                "fill_value": 0.0
+              },
+              "B11": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1613.7,
+                "bandwith": 91,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B12": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 2202.4,
+                "bandwith": 175,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "viewZenithMean": {
+                "sample_type": "FLOAT32"
+              },
+              "viewAzimuthMean": {
+                "sample_type": "FLOAT32"
+              },
+              "sunZenithAngles": {
+                "sample_type": "FLOAT32"
+              },
+              "sunAzimuthAngles": {
+                "sample_type": "FLOAT32"
+              }
+            },
+            "processing_level": "L1C",
+            "request_period": "1D",
+            "feature_type_name": "S2.TILE"
+          }
         },
         {
-          "id": "S1GRD",
-          "name": "S1GRD",
-          "variables": [
+          "data_id": "S2L2A",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "B01",
+                    "B02",
+                    "B03",
+                    "B04",
+                    "B05",
+                    "B06",
+                    "B07",
+                    "B08",
+                    "B8A",
+                    "B09",
+                    "B11",
+                    "B12",
+                    "SCL",
+                    "SNW",
+                    "CLD",
+                    "viewZenithMean",
+                    "viewAzimuthMean",
+                    "sunZenithAngles",
+                    "sunAzimuthAngles",
+                    "AOT",
+                    "CLM",
+                    "CLP"
+                  ]
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "data_vars": [
             {
-              "id": "VV",
-              "name": "VV"
+              "name": "B01",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 442.7,
+                "bandwith": 21,
+                "resolution": 60,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "VH",
-              "name": "VH"
+              "name": "B02",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 492.4,
+                "bandwith": 66,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "HV",
-              "name": "HV"
+              "name": "B03",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 559.8,
+                "bandwith": 36,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "HH",
-              "name": "HH"
+              "name": "B04",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 664.6,
+                "bandwith": 31,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
             },
             {
-              "id": "dataMask",
-              "name": "dataMask"
+              "name": "B05",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 704.1,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B06",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 740.5,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B07",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 782.8,
+                "bandwith": 20,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B08",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 832.8,
+                "bandwith": 106,
+                "resolution": 10,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B8A",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 864.7,
+                "bandwith": 21,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B09",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 945.1,
+                "bandwith": 20,
+                "resolution": 60,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B11",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1613.7,
+                "bandwith": 91,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "B12",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 2202.4,
+                "bandwith": 175,
+                "resolution": 20,
+                "fill_value": 0.0
+              }
+            },
+            {
+              "name": "SCL",
+              "dtype": "UINT8",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "UINT8",
+                "flag_values": "0,1,2,3,4,5,6,7,8,9,10,11",
+                "flag_meanings": "no_data saturated_or_defective dark_area_pixels cloud_shadows vegetation bare_soils water clouds_low_probability_or_unclassified clouds_medium_probability clouds_high_probability cirrus snow_or_ice"
+              }
+            },
+            {
+              "name": "SNW",
+              "dtype": "UINT8",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "UINT8"
+              }
+            },
+            {
+              "name": "CLD",
+              "dtype": "UINT8",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "UINT8"
+              }
+            },
+            {
+              "name": "viewZenithMean",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
+            },
+            {
+              "name": "viewAzimuthMean",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
+            },
+            {
+              "name": "sunZenithAngles",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
+            },
+            {
+              "name": "sunAzimuthAngles",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
+            },
+            {
+              "name": "AOT",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3,
+              "attrs": {
+                "sample_type": "FLOAT32"
+              }
+            },
+            {
+              "name": "CLM",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
+            },
+            {
+              "name": "CLP",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             }
-          ]
+          ],
+          "attrs": {
+            "title": "Sentinel-2 - L2A",
+            "bands": {
+              "B01": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 442.7,
+                "bandwith": 21,
+                "resolution": 60,
+                "fill_value": 0.0
+              },
+              "B02": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 492.4,
+                "bandwith": 66,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B03": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 559.8,
+                "bandwith": 36,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B04": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 664.6,
+                "bandwith": 31,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B05": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 704.1,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B06": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 740.5,
+                "bandwith": 15,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B07": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 782.8,
+                "bandwith": 20,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B08": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 832.8,
+                "bandwith": 106,
+                "resolution": 10,
+                "fill_value": 0.0
+              },
+              "B8A": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 864.7,
+                "bandwith": 21,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B09": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 945.1,
+                "bandwith": 20,
+                "resolution": 60,
+                "fill_value": 0.0
+              },
+              "B10": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1373.5,
+                "bandwith": 31,
+                "resolution": 60,
+                "fill_value": 0.0
+              },
+              "B11": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 1613.7,
+                "bandwith": 91,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "B12": {
+                "sample_type": "FLOAT32",
+                "units": "reflectance",
+                "wavelength": 2202.4,
+                "bandwith": 175,
+                "resolution": 20,
+                "fill_value": 0.0
+              },
+              "viewZenithMean": {
+                "sample_type": "FLOAT32"
+              },
+              "viewAzimuthMean": {
+                "sample_type": "FLOAT32"
+              },
+              "sunZenithAngles": {
+                "sample_type": "FLOAT32"
+              },
+              "sunAzimuthAngles": {
+                "sample_type": "FLOAT32"
+              },
+              "AOT": {
+                "sample_type": "FLOAT32"
+              },
+              "SCL": {
+                "sample_type": "UINT8",
+                "flag_values": "0,1,2,3,4,5,6,7,8,9,10,11",
+                "flag_meanings": "no_data saturated_or_defective dark_area_pixels cloud_shadows vegetation bare_soils water clouds_low_probability_or_unclassified clouds_medium_probability clouds_high_probability cirrus snow_or_ice"
+              },
+              "SNW": {
+                "sample_type": "UINT8"
+              },
+              "CLD": {
+                "sample_type": "UINT8"
+              }
+            },
+            "processing_level": "L2A",
+            "request_period": "1D",
+            "feature_type_name": "DSS2"
+          }
         },
         {
-          "id": "DEM",
-          "name": "DEM",
-          "variables": [
-            {
-              "id": "DEM",
-              "name": "DEM"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "cciodp",
-      "name": "ESA CCI Open Data Portal",
-      "datasets": [
-        {
-          "id": "esacci.OZONE.month.L3.NP.multi-sensor.multi-platform.MERGED.fv0002.r1",
-          "name": "ESA Ozone Climate Change Initiative (Ozone CCI): Level 3 Nadir Ozone Profile Merged Data Product, version 2",
-          "fid": "4eb4e801424a47f7b77434291921f889",
-          "variables": [
-            {
-              "id": "surface_pressure",
-              "units": "hPa",
-              "name": "surface_pressure",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "Pressure at the bottom of the atmosphere."
+          "data_id": "S3OLCI",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
             },
-            {
-              "id": "O3e_ndens",
-              "units": "6.02214E-17 mol m-3",
-              "name": "O3e_ndens",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "error in the weighted average of the number density (#molecules/cm3)"
-            },
-            {
-              "id": "O3e_du",
-              "units": "446.15E-6 mol m-2",
-              "name": "O3e_du",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "error in the weighted average of the partial ozone columns (DU/layer)"
-            },
-            {
-              "id": "O3e_vmr",
-              "units": "1e-6",
-              "name": "O3e_vmr",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "error in the weighted average of the volume mixing ratio (ppmv)"
-            },
-            {
-              "id": "O3e_du_tot",
-              "units": "446.15E-6 mol m-2",
-              "name": "O3e_du_tot",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "total column error: quadratically added o3e_du (DU)"
-            },
-            {
-              "id": "O3_du_tot",
-              "units": "446.15E-6 mol m-2",
-              "name": "O3_du_tot",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "total column: vertically integrated O3_du dataset (DU)"
-            },
-            {
-              "id": "O3_ndens",
-              "units": "6.02214E-17 mol m-3",
-              "name": "O3_ndens",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "weighted average of the number density (#molecules/cm3)"
-            },
-            {
-              "id": "O3_du",
-              "units": "446.15E-6 mol m-2",
-              "name": "O3_du",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "weighted average of the partial ozone columns (DU/layer)"
-            },
-            {
-              "id": "O3_vmr",
-              "units": "1e-6",
-              "name": "O3_vmr",
-              "dtype": "float32",
-              "spatialRes": 1.0,
-              "temporalRes": "1M",
-              "description": "weighted average of the volume mixing ratio (ppmv)"
-            }
-          ]
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "attrs": {
+            "title": "Sentinel-3 - OLCI",
+            "bands": {},
+            "processing_level": "L1B",
+            "request_period": "1D",
+            "feature_type_name": "S3.TILE"
+          }
         },
         {
-          "id": "esacci.OZONE.day.L3S.TC.multi-sensor.multi-platform.MERGED.fv0100.r1",
-          "name": "ESA Ozone Climate Change Initiative (Ozone CCI): Level 3 Total Ozone Merged Data Product, version 01",
-          "fid": "0d2260ad4e2c42b6b14fe5b3308f5eaa",
-          "variables": [
-            {
-              "id": "atmosphere_mole_content_of_ozone",
-              "units": "DU",
-              "name": "atmosphere_mole_content_of_ozone",
-              "description": "Mean Total Ozone Column in Dobson Units"
+          "data_id": "S3SLSTR",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
             },
-            {
-              "id": "atmosphere_mole_content_of_ozone_standard_deviation",
-              "units": "DU",
-              "name": "atmosphere_mole_content_of_ozone_standard_deviation",
-              "description": "Standard Deviation of the Mean Total Ozone Column in Dobson Units"
-            },
-            {
-              "id": "atmosphere_mole_content_of_ozone_standard_error",
-              "units": "DU",
-              "name": "atmosphere_mole_content_of_ozone_standard_error",
-              "description": "Standard Error of the Mean Total Ozone Column in Dobson Units"
-            },
-            {
-              "id": "atmosphere_mole_content_of_ozone_number_of_observations",
-              "units": "1",
-              "name": "atmosphere_mole_content_of_ozone_number_of_observations",
-              "description": "The number of measurements use to derive the Mean Total Ozone Column in Dobson Units"
-            }
-          ]
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "attrs": {
+            "title": "Sentinel-3 - SLSTR",
+            "bands": {},
+            "processing_level": "L1B",
+            "request_period": "1D",
+            "feature_type_name": "S3.TILE"
+          }
         },
         {
-          "id": "esacci.OZONE.month.L3.LP.SMR.ODIN.MZM.v0001.r1",
-          "name": "ESA Ozone Climate Change Initiative (Ozone CCI): ODIN/SMR (544.6 GHz) Level 3 Limb Ozone Monthly Zonal Mean (MZM) Profiles, Version 1",
-          "fid": "fe651dbef5d44248bef70906f4b3d12b",
-          "variables": [
-            {
-              "id": "sample_standard_deviation",
-              "units": "%",
-              "name": "sample_standard_deviation",
-              "description": "Sample standard deviation in 1 month x10 deg bins"
+          "data_id": "S5PL2",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
             },
-            {
-              "id": "approximate_altitude",
-              "units": "km",
-              "name": "approximate_altitude",
-              "description": "approximate altitude corresponding to pressure levels"
-            },
-            {
-              "id": "latitude_centers",
-              "units": "degrees_north",
-              "name": "latitude_centers",
-              "description": "centers of latitude bins"
-            },
-            {
-              "id": "inhomogeneity_in_latitude",
-              "units": "1",
-              "name": "inhomogeneity_in_latitude",
-              "description": "inhomogeneity measure in latitude"
-            },
-            {
-              "id": "inhomogeneity_in_time",
-              "units": "1",
-              "name": "inhomogeneity_in_time",
-              "description": "inhomogeneity measure in time"
-            },
-            {
-              "id": "mean_uncertainty_estimate",
-              "units": "%",
-              "name": "mean_uncertainty_estimate",
-              "description": "mean of error estimates"
-            },
-            {
-              "id": "standard_error_of_the_mean",
-              "units": "%",
-              "name": "standard_error_of_the_mean",
-              "description": "uncertainty of the monthly zonal mean data"
-            },
-            {
-              "id": "air_pressure",
-              "units": "hPa",
-              "name": "air_pressure",
-              "description": "air_pressure"
-            },
-            {
-              "id": "ozone_mole_concentation",
-              "units": "mol cm-3",
-              "name": "ozone_mole_concentation",
-              "description": "ozone_mole_concentation"
-            },
-            {
-              "id": "ozone_mixing_ratio",
-              "units": "1",
-              "name": "ozone_mixing_ratio",
-              "description": "ozone_mixing_ratio"
-            }
-          ]
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "attrs": {
+            "title": "Sentinel-5P - L2",
+            "bands": {}
+          }
         },
         {
-          "id": "esacci.CLOUD.month.L3C.CLD_PRODUCTS.MODIS.Terra.MODIS_TERRA.2-0.r1",
-          "name": "ESA Cloud Climate Change Initiative (Cloud_cci): MODIS-TERRA monthly gridded cloud properties, version 2.0",
-          "fid": "f1ab07b5292f4813bd3090b51d270aa8",
-          "variables": [
-            {
-              "id": "hist1d_cer_bin_border",
-              "units": "um",
-              "name": "hist1d_cer_bin_border",
-              "description": "cer histogram bin border values"
-            },
-            {
-              "id": "hist1d_cer_bin_centre",
-              "units": "um",
-              "name": "hist1d_cer_bin_centre",
-              "description": "cer histogram bin centres"
-            },
-            {
-              "id": "hist1d_cla_vis006_bin_centre",
-              "units": "1",
-              "name": "hist1d_cla_vis006_bin_centre",
-              "description": "cloud abedo1 histogram bin centres"
-            },
-            {
-              "id": "cla_vis006_corr_unc",
-              "units": "1",
-              "name": "cla_vis006_corr_unc",
-              "description": "cloud albedo at 0.6 um correlated uncertainty"
-            },
-            {
-              "id": "cla_vis006_prop_unc",
-              "units": "1",
-              "name": "cla_vis006_prop_unc",
-              "description": "cloud albedo at 0.6 um propagated uncertainty"
-            },
-            {
-              "id": "cla_vis006_std",
-              "units": "1",
-              "name": "cla_vis006_std",
-              "description": "cloud albedo at 0.6 um standard deviation"
-            },
-            {
-              "id": "cla_vis006_unc",
-              "units": "1",
-              "name": "cla_vis006_unc",
-              "description": "cloud albedo at 0.6 um uncertainty"
-            },
-            {
-              "id": "cla_vis006",
-              "units": "1",
-              "name": "cla_vis006",
-              "description": "cloud albedo at 0.6 um"
-            },
-            {
-              "id": "cla_vis008_corr_unc",
-              "units": "1",
-              "name": "cla_vis008_corr_unc",
-              "description": "cloud albedo at 0.8 um correlated uncertainty"
-            },
-            {
-              "id": "cla_vis008_prop_unc",
-              "units": "1",
-              "name": "cla_vis008_prop_unc",
-              "description": "cloud albedo at 0.8 um propagated uncertainty"
-            },
-            {
-              "id": "cla_vis008_std",
-              "units": "1",
-              "name": "cla_vis008_std",
-              "description": "cloud albedo at 0.8 um standard deviation"
-            },
-            {
-              "id": "cla_vis008_unc",
-              "units": "1",
-              "name": "cla_vis008_unc",
-              "description": "cloud albedo at 0.8 um uncertainty"
-            },
-            {
-              "id": "cla_vis008",
-              "units": "1",
-              "name": "cla_vis008",
-              "description": "cloud albedo at 0.8 um"
-            },
-            {
-              "id": "hist1d_cla_vis006_bin_border",
-              "units": "1",
-              "name": "hist1d_cla_vis006_bin_border",
-              "description": "cloud albedo1 histogram bin border values"
-            },
-            {
-              "id": "hist1d_cla_vis008_bin_border",
-              "units": "1",
-              "name": "hist1d_cla_vis008_bin_border",
-              "description": "cloud albedo2 histogram bin border values"
-            },
-            {
-              "id": "hist1d_cla_vis008_bin_centre",
-              "units": "1",
-              "name": "hist1d_cla_vis008_bin_centre",
-              "description": "cloud albedo2 histogram bin centres"
-            },
-            {
-              "id": "cee_corr_unc",
-              "units": "1",
-              "name": "cee_corr_unc",
-              "description": "cloud effective emissivity at 10.8 um correlated uncertainty"
-            },
-            {
-              "id": "cee_prop_unc",
-              "units": "1",
-              "name": "cee_prop_unc",
-              "description": "cloud effective emissivity at 10.8 um propagated uncertainty"
-            },
-            {
-              "id": "cee_std",
-              "units": "1",
-              "name": "cee_std",
-              "description": "cloud effective emissivity at 10.8 um standard deviation"
-            },
-            {
-              "id": "cee_unc",
-              "units": "1",
-              "name": "cee_unc",
-              "description": "cloud effective emissivity at 10.8 um uncertainty"
-            },
-            {
-              "id": "cee",
-              "units": "1",
-              "name": "cee",
-              "description": "cloud effective emissivity at 10.8 um"
-            },
-            {
-              "id": "cer_corr_unc",
-              "units": "um",
-              "name": "cer_corr_unc",
-              "description": "cloud effective radius correlated uncertainty"
-            },
-            {
-              "id": "cer_prop_unc",
-              "units": "um",
-              "name": "cer_prop_unc",
-              "description": "cloud effective radius propagated uncertainty"
-            },
-            {
-              "id": "cer_std",
-              "units": "um",
-              "name": "cer_std",
-              "description": "cloud effective radius standard deviation"
-            },
-            {
-              "id": "cer_unc",
-              "units": "um",
-              "name": "cer_unc",
-              "description": "cloud effective radius uncertainty"
-            },
-            {
-              "id": "cer",
-              "units": "um",
-              "name": "cer",
-              "description": "cloud effective radius"
-            },
-            {
-              "id": "cfc_corr_unc",
-              "units": "%",
-              "name": "cfc_corr_unc",
-              "description": "cloud fraction correlated uncertainty"
-            },
-            {
-              "id": "cfc_day",
-              "units": "1",
-              "name": "cfc_day",
-              "description": "cloud fraction day"
-            },
-            {
-              "id": "cfc_night",
-              "units": "1",
-              "name": "cfc_night",
-              "description": "cloud fraction night"
-            },
-            {
-              "id": "cfc_prop_unc",
-              "units": "%",
-              "name": "cfc_prop_unc",
-              "description": "cloud fraction propagated uncertainty"
-            },
-            {
-              "id": "cfc_std",
-              "units": "1",
-              "name": "cfc_std",
-              "description": "cloud fraction standard deviation"
-            },
-            {
-              "id": "cfc_twl",
-              "units": "1",
-              "name": "cfc_twl",
-              "description": "cloud fraction twilight"
-            },
-            {
-              "id": "cfc_unc",
-              "units": "%",
-              "name": "cfc_unc",
-              "description": "cloud fraction uncertainty"
-            },
-            {
-              "id": "cfc",
-              "units": "1",
-              "name": "cfc",
-              "description": "cloud fraction"
-            },
-            {
-              "id": "iwp_corr_unc",
-              "units": "g/m2",
-              "name": "iwp_corr_unc",
-              "description": "cloud ice water path correlated uncertainty"
-            },
-            {
-              "id": "iwp_prop_unc",
-              "units": "g/m2",
-              "name": "iwp_prop_unc",
-              "description": "cloud ice water path propagated uncertainty"
-            },
-            {
-              "id": "iwp_std",
-              "units": "g/m2",
-              "name": "iwp_std",
-              "description": "cloud ice water path standard deviation"
-            },
-            {
-              "id": "iwp_unc",
-              "units": "g/m2",
-              "name": "iwp_unc",
-              "description": "cloud ice water path uncertainty"
-            },
-            {
-              "id": "iwp",
-              "units": "g/m2",
-              "name": "iwp",
-              "description": "cloud ice water path"
-            },
-            {
-              "id": "lwp_corr_unc",
-              "units": "g/m2",
-              "name": "lwp_corr_unc",
-              "description": "cloud liquid water path correlated uncertainty"
-            },
-            {
-              "id": "lwp_prop_unc",
-              "units": "g/m2",
-              "name": "lwp_prop_unc",
-              "description": "cloud liquid water path propagated uncertainty"
-            },
-            {
-              "id": "lwp_std",
-              "units": "g/m2",
-              "name": "lwp_std",
-              "description": "cloud liquid water path standard deviation"
-            },
-            {
-              "id": "lwp_unc",
-              "units": "g/m2",
-              "name": "lwp_unc",
-              "description": "cloud liquid water path uncertainty"
-            },
-            {
-              "id": "lwp",
-              "units": "g/m2",
-              "name": "lwp",
-              "description": "cloud liquid water path"
-            },
-            {
-              "id": "cot_corr_unc",
-              "units": "1",
-              "name": "cot_corr_unc",
-              "description": "cloud optical thickness correlated uncertainty"
-            },
-            {
-              "id": "cot_log",
-              "units": "1",
-              "name": "cot_log",
-              "description": "cloud optical thickness logarithmically averaged"
-            },
-            {
-              "id": "cot_prop_unc",
-              "units": "1",
-              "name": "cot_prop_unc",
-              "description": "cloud optical thickness propagated uncertainty"
-            },
-            {
-              "id": "cot_std",
-              "units": "1",
-              "name": "cot_std",
-              "description": "cloud optical thickness standard deviation"
-            },
-            {
-              "id": "cot_unc",
-              "units": "1",
-              "name": "cot_unc",
-              "description": "cloud optical thickness uncertainty"
-            },
-            {
-              "id": "cot",
-              "units": "1",
-              "name": "cot",
-              "description": "cloud optical thickness"
-            },
-            {
-              "id": "cth_corr_unc",
-              "units": "km",
-              "name": "cth_corr_unc",
-              "description": "cloud top height correlated uncertainty"
-            },
-            {
-              "id": "cth_corrected_corr_unc",
-              "units": "km",
-              "name": "cth_corrected_corr_unc",
-              "description": "cloud top height correlated uncertainty"
-            },
-            {
-              "id": "cth_corrected_prop_unc",
-              "units": "km",
-              "name": "cth_corrected_prop_unc",
-              "description": "cloud top height propagated uncertainty"
-            },
-            {
-              "id": "cth_prop_unc",
-              "units": "km",
-              "name": "cth_prop_unc",
-              "description": "cloud top height propagated uncertainty"
-            },
-            {
-              "id": "cth_corrected_std",
-              "units": "km",
-              "name": "cth_corrected_std",
-              "description": "cloud top height standard deviation"
-            },
-            {
-              "id": "cth_std",
-              "units": "km",
-              "name": "cth_std",
-              "description": "cloud top height standard deviation"
-            },
-            {
-              "id": "cth_corrected_unc",
-              "units": "km",
-              "name": "cth_corrected_unc",
-              "description": "cloud top height uncertainty"
-            },
-            {
-              "id": "cth_unc",
-              "units": "km",
-              "name": "cth_unc",
-              "description": "cloud top height uncertainty"
-            },
-            {
-              "id": "cth",
-              "units": "km",
-              "name": "cth",
-              "description": "cloud top height"
-            },
-            {
-              "id": "cth_corrected",
-              "units": "km",
-              "name": "cth_corrected",
-              "description": "cloud top height"
-            },
-            {
-              "id": "ctp_corr_unc",
-              "units": "hPa",
-              "name": "ctp_corr_unc",
-              "description": "cloud top pressure correlated uncertainty"
-            },
-            {
-              "id": "ctp_corrected_corr_unc",
-              "units": "hPa",
-              "name": "ctp_corrected_corr_unc",
-              "description": "cloud top pressure correlated uncertainty"
-            },
-            {
-              "id": "ctp_log",
-              "units": "hPa",
-              "name": "ctp_log",
-              "description": "cloud top pressure logarithmically averaged"
-            },
-            {
-              "id": "ctp_corrected_prop_unc",
-              "units": "hPa",
-              "name": "ctp_corrected_prop_unc",
-              "description": "cloud top pressure propagated uncertainty"
-            },
-            {
-              "id": "ctp_prop_unc",
-              "units": "hPa",
-              "name": "ctp_prop_unc",
-              "description": "cloud top pressure propagated uncertainty"
-            },
-            {
-              "id": "ctp_corrected_std",
-              "units": "hPa",
-              "name": "ctp_corrected_std",
-              "description": "cloud top pressure standard deviation"
-            },
-            {
-              "id": "ctp_std",
-              "units": "hPa",
-              "name": "ctp_std",
-              "description": "cloud top pressure standard deviation"
-            },
-            {
-              "id": "ctp_corrected_unc",
-              "units": "hPa",
-              "name": "ctp_corrected_unc",
-              "description": "cloud top pressure uncertainty"
-            },
-            {
-              "id": "ctp_unc",
-              "units": "hPa",
-              "name": "ctp_unc",
-              "description": "cloud top pressure uncertainty"
-            },
-            {
-              "id": "ctp",
-              "units": "hPa",
-              "name": "ctp",
-              "description": "cloud top pressure"
-            },
-            {
-              "id": "ctp_corrected",
-              "units": "hPa",
-              "name": "ctp_corrected",
-              "description": "cloud top pressure"
-            },
-            {
-              "id": "ctt_corr_unc",
-              "units": "K",
-              "name": "ctt_corr_unc",
-              "description": "cloud top temperature correlated uncertainty"
-            },
-            {
-              "id": "ctt_corrected_corr_unc",
-              "units": "K",
-              "name": "ctt_corrected_corr_unc",
-              "description": "cloud top temperature correlated uncertainty"
-            },
-            {
-              "id": "ctt_corrected_prop_unc",
-              "units": "K",
-              "name": "ctt_corrected_prop_unc",
-              "description": "cloud top temperature propagated uncertainty"
-            },
-            {
-              "id": "ctt_prop_unc",
-              "units": "K",
-              "name": "ctt_prop_unc",
-              "description": "cloud top temperature propagated uncertainty"
-            },
-            {
-              "id": "ctt_corrected_std",
-              "units": "K",
-              "name": "ctt_corrected_std",
-              "description": "cloud top temperature standard deviation"
-            },
-            {
-              "id": "ctt_std",
-              "units": "K",
-              "name": "ctt_std",
-              "description": "cloud top temperature standard deviation"
-            },
-            {
-              "id": "ctt_corrected_unc",
-              "units": "K",
-              "name": "ctt_corrected_unc",
-              "description": "cloud top temperature uncertainty"
-            },
-            {
-              "id": "ctt_unc",
-              "units": "K",
-              "name": "ctt_unc",
-              "description": "cloud top temperature uncertainty"
-            },
-            {
-              "id": "ctt",
-              "units": "K",
-              "name": "ctt",
-              "description": "cloud top temperature"
-            },
-            {
-              "id": "ctt_corrected",
-              "units": "K",
-              "name": "ctt_corrected",
-              "description": "cloud top temperature"
-            },
-            {
-              "id": "hist1d_cot_bin_border",
-              "units": "1",
-              "name": "hist1d_cot_bin_border",
-              "description": "cot histogram bin border values"
-            },
-            {
-              "id": "hist2d_cot_bin_border",
-              "units": "1",
-              "name": "hist2d_cot_bin_border",
-              "description": "cot histogram bin border values"
-            },
-            {
-              "id": "hist1d_cot_bin_centre",
-              "units": "1",
-              "name": "hist1d_cot_bin_centre",
-              "description": "cot histogram bin centres"
-            },
-            {
-              "id": "hist2d_cot_bin_centre",
-              "units": "1",
-              "name": "hist2d_cot_bin_centre",
-              "description": "cot histogram bin centres"
-            },
-            {
-              "id": "hist1d_ctp_bin_border",
-              "units": "hPa",
-              "name": "hist1d_ctp_bin_border",
-              "description": "ctp histogram bin border values"
-            },
-            {
-              "id": "hist2d_ctp_bin_border",
-              "units": "hPa",
-              "name": "hist2d_ctp_bin_border",
-              "description": "ctp histogram bin border values"
-            },
-            {
-              "id": "hist1d_ctp_bin_centre",
-              "units": "hPa",
-              "name": "hist1d_ctp_bin_centre",
-              "description": "ctp histogram bin centres"
-            },
-            {
-              "id": "hist2d_ctp_bin_centre",
-              "units": "hPa",
-              "name": "hist2d_ctp_bin_centre",
-              "description": "ctp histogram bin centres"
-            },
-            {
-              "id": "hist1d_ctt_bin_border",
-              "units": "K",
-              "name": "hist1d_ctt_bin_border",
-              "description": "ctt histogram bin border values"
-            },
-            {
-              "id": "hist1d_ctt_bin_centre",
-              "units": "K",
-              "name": "hist1d_ctt_bin_centre",
-              "description": "ctt histogram bin centres"
-            },
-            {
-              "id": "hist1d_cwp_bin_border",
-              "units": "g/m2",
-              "name": "hist1d_cwp_bin_border",
-              "description": "cwp histogram bin border values"
-            },
-            {
-              "id": "hist1d_cwp_bin_centre",
-              "units": "g/m2",
-              "name": "hist1d_cwp_bin_centre",
-              "description": "cwp histogram bin centres"
-            },
-            {
-              "id": "cph_day_std",
-              "units": "1",
-              "name": "cph_day_std",
-              "description": "daytime fraction of liquid water clouds standard deviation"
-            },
-            {
-              "id": "cph_day",
-              "units": "1",
-              "name": "cph_day",
-              "description": "daytime fraction of liquid water clouds"
-            },
-            {
-              "id": "cph_std",
-              "units": "1",
-              "name": "cph_std",
-              "description": "fraction of liquid water clouds standard deviation"
-            },
-            {
-              "id": "cph",
-              "units": "1",
-              "name": "cph",
-              "description": "fraction of liquid water clouds"
-            },
-            {
-              "id": "iwp_allsky",
-              "units": "g/m2",
-              "name": "iwp_allsky",
-              "description": "grid box mean of cloud ice water path"
-            },
-            {
-              "id": "lwp_allsky",
-              "units": "g/m2",
-              "name": "lwp_allsky",
-              "description": "grid box mean of cloud liquid water path"
-            },
-            {
-              "id": "cfc_high",
-              "units": "1",
-              "name": "cfc_high",
-              "description": "high level cloud fraction"
-            },
-            {
-              "id": "hist1d_cla_vis006",
-              "units": "1",
-              "name": "hist1d_cla_vis006",
-              "description": "histogram of cloud albedo at 0.6 um"
-            },
-            {
-              "id": "hist1d_cla_vis008",
-              "units": "1",
-              "name": "hist1d_cla_vis008",
-              "description": "histogram of cloud albedo at 0.8 um"
-            },
-            {
-              "id": "hist1d_cer",
-              "units": "1",
-              "name": "hist1d_cer",
-              "description": "histogram of cloud effective radius"
-            },
-            {
-              "id": "hist1d_cot",
-              "units": "1",
-              "name": "hist1d_cot",
-              "description": "histogram of cloud optical thickness"
-            },
-            {
-              "id": "hist1d_ctp",
-              "units": "1",
-              "name": "hist1d_ctp",
-              "description": "histogram of cloud top pressure"
-            },
-            {
-              "id": "hist1d_ctt",
-              "units": "1",
-              "name": "hist1d_ctt",
-              "description": "histogram of cloud top temperature"
-            },
-            {
-              "id": "hist1d_cwp",
-              "units": "1",
-              "name": "hist1d_cwp",
-              "description": "histogram of cloud water path"
-            },
-            {
-              "id": "cla_vis006_ice_std",
-              "units": "1",
-              "name": "cla_vis006_ice_std",
-              "description": "ice water cloud albedo at 0.6 um standard deviation"
-            },
-            {
-              "id": "cla_vis006_ice_unc",
-              "units": "1",
-              "name": "cla_vis006_ice_unc",
-              "description": "ice water cloud albedo at 0.6 um uncertainty"
-            },
-            {
-              "id": "cla_vis006_ice",
-              "units": "1",
-              "name": "cla_vis006_ice",
-              "description": "ice water cloud albedo at 0.6 um"
-            },
-            {
-              "id": "cla_vis008_ice_std",
-              "units": "1",
-              "name": "cla_vis008_ice_std",
-              "description": "ice water cloud albedo at 0.8 um standard deviation"
-            },
-            {
-              "id": "cla_vis008_ice_unc",
-              "units": "1",
-              "name": "cla_vis008_ice_unc",
-              "description": "ice water cloud albedo at 0.8 um uncertainty"
-            },
-            {
-              "id": "cla_vis008_ice",
-              "units": "1",
-              "name": "cla_vis008_ice",
-              "description": "ice water cloud albedo at 0.8 um"
-            },
-            {
-              "id": "cer_ice_corr_unc",
-              "units": "um",
-              "name": "cer_ice_corr_unc",
-              "description": "ice water cloud effective radius correlated uncertainty"
-            },
-            {
-              "id": "cer_ice_prop_unc",
-              "units": "um",
-              "name": "cer_ice_prop_unc",
-              "description": "ice water cloud effective radius propagated uncertainty"
-            },
-            {
-              "id": "cer_ice_std",
-              "units": "um",
-              "name": "cer_ice_std",
-              "description": "ice water cloud effective radius standard deviation"
-            },
-            {
-              "id": "cer_ice_unc",
-              "units": "um",
-              "name": "cer_ice_unc",
-              "description": "ice water cloud effective radius uncertainty"
-            },
-            {
-              "id": "cer_ice",
-              "units": "um",
-              "name": "cer_ice",
-              "description": "ice water cloud effective radius"
-            },
-            {
-              "id": "cot_ice_corr_unc",
-              "units": "1",
-              "name": "cot_ice_corr_unc",
-              "description": "ice water cloud optical thickness correlated uncertainty"
-            },
-            {
-              "id": "cot_ice_prop_unc",
-              "units": "1",
-              "name": "cot_ice_prop_unc",
-              "description": "ice water cloud optical thickness propagated uncertainty"
-            },
-            {
-              "id": "cot_ice_std",
-              "units": "1",
-              "name": "cot_ice_std",
-              "description": "ice water cloud optical thickness standard deviation"
-            },
-            {
-              "id": "cot_ice_unc",
-              "units": "1",
-              "name": "cot_ice_unc",
-              "description": "ice water cloud optical thickness uncertainty"
-            },
-            {
-              "id": "cot_ice",
-              "units": "1",
-              "name": "cot_ice",
-              "description": "ice water cloud optical thickness"
-            },
-            {
-              "id": "hist2d_cot_ctp",
-              "units": "1",
-              "name": "hist2d_cot_ctp",
-              "description": "joint histogram of cloud optical thickness and cloud top pressure"
-            },
-            {
-              "id": "lat",
-              "units": "degrees_north",
-              "name": "lat",
-              "description": "latitude"
-            },
-            {
-              "id": "cla_vis006_liq_std",
-              "units": "1",
-              "name": "cla_vis006_liq_std",
-              "description": "liquid water cloud albedo at 0.6 um standard deviation"
-            },
-            {
-              "id": "cla_vis006_liq_unc",
-              "units": "1",
-              "name": "cla_vis006_liq_unc",
-              "description": "liquid water cloud albedo at 0.6 um uncertainty"
-            },
-            {
-              "id": "cla_vis006_liq",
-              "units": "1",
-              "name": "cla_vis006_liq",
-              "description": "liquid water cloud albedo at 0.6 um"
-            },
-            {
-              "id": "cla_vis008_liq_std",
-              "units": "1",
-              "name": "cla_vis008_liq_std",
-              "description": "liquid water cloud albedo at 0.8 um standard deviation"
-            },
-            {
-              "id": "cla_vis008_liq_unc",
-              "units": "1",
-              "name": "cla_vis008_liq_unc",
-              "description": "liquid water cloud albedo at 0.8 um uncertainty"
-            },
-            {
-              "id": "cla_vis008_liq",
-              "units": "1",
-              "name": "cla_vis008_liq",
-              "description": "liquid water cloud albedo at 0.8 um"
-            },
-            {
-              "id": "cer_liq_corr_unc",
-              "units": "um",
-              "name": "cer_liq_corr_unc",
-              "description": "liquid water cloud effective radius correlated uncertainty"
-            },
-            {
-              "id": "cer_liq_prop_unc",
-              "units": "um",
-              "name": "cer_liq_prop_unc",
-              "description": "liquid water cloud effective radius propagated uncertainty"
-            },
-            {
-              "id": "cer_liq_std",
-              "units": "um",
-              "name": "cer_liq_std",
-              "description": "liquid water cloud effective radius standard deviation"
-            },
-            {
-              "id": "cer_liq_unc",
-              "units": "um",
-              "name": "cer_liq_unc",
-              "description": "liquid water cloud effective radius uncertainty"
-            },
-            {
-              "id": "cer_liq",
-              "units": "um",
-              "name": "cer_liq",
-              "description": "liquid water cloud effective radius"
-            },
-            {
-              "id": "cot_liq_corr_unc",
-              "units": "1",
-              "name": "cot_liq_corr_unc",
-              "description": "liquid water cloud optical thickness correlated uncertainty"
-            },
-            {
-              "id": "cot_liq_prop_unc",
-              "units": "1",
-              "name": "cot_liq_prop_unc",
-              "description": "liquid water cloud optical thickness propagated uncertainty"
-            },
-            {
-              "id": "cot_liq_std",
-              "units": "1",
-              "name": "cot_liq_std",
-              "description": "liquid water cloud optical thickness standard deviation"
-            },
-            {
-              "id": "cot_liq_unc",
-              "units": "1",
-              "name": "cot_liq_unc",
-              "description": "liquid water cloud optical thickness uncertainty"
-            },
-            {
-              "id": "cot_liq",
-              "units": "1",
-              "name": "cot_liq",
-              "description": "liquid water cloud optical thickness"
-            },
-            {
-              "id": "lon",
-              "units": "degrees_east",
-              "name": "lon",
-              "description": "longitude"
-            },
-            {
-              "id": "cfc_low",
-              "units": "1",
-              "name": "cfc_low",
-              "description": "low level cloud fraction"
-            },
-            {
-              "id": "cfc_mid",
-              "units": "1",
-              "name": "cfc_mid",
-              "description": "mid level cloud fraction"
-            },
-            {
-              "id": "nobs_clear_day",
-              "units": "1",
-              "name": "nobs_clear_day",
-              "description": "number of clear daytime observations"
-            },
-            {
-              "id": "nobs_clear_night",
-              "units": "1",
-              "name": "nobs_clear_night",
-              "description": "number of clear nighttime observations"
-            },
-            {
-              "id": "nobs_clear_twl",
-              "units": "1",
-              "name": "nobs_clear_twl",
-              "description": "number of clear twilight observations"
-            },
-            {
-              "id": "nobs_cloudy_day",
-              "units": "1",
-              "name": "nobs_cloudy_day",
-              "description": "number of cloudy daytime observations"
-            },
-            {
-              "id": "nobs_cloudy_night",
-              "units": "1",
-              "name": "nobs_cloudy_night",
-              "description": "number of cloudy nighttime observations"
-            },
-            {
-              "id": "nobs_cloudy",
-              "units": "1",
-              "name": "nobs_cloudy",
-              "description": "number of cloudy observations"
-            },
-            {
-              "id": "nobs_cloudy_twl",
-              "units": "1",
-              "name": "nobs_cloudy_twl",
-              "description": "number of cloudy twilight observations"
-            },
-            {
-              "id": "nobs_day",
-              "units": "1",
-              "name": "nobs_day",
-              "description": "number of daytime observations"
-            },
-            {
-              "id": "nobs",
-              "units": "1",
-              "name": "nobs",
-              "description": "number of observations"
-            },
-            {
-              "id": "nretr_cloudy",
-              "units": "1",
-              "name": "nretr_cloudy",
-              "description": "number of valid cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_day",
-              "units": "1",
-              "name": "nretr_cloudy_day",
-              "description": "number of valid daytime cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_high",
-              "units": "1",
-              "name": "nretr_cloudy_high",
-              "description": "number of valid high level cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_ice",
-              "units": "1",
-              "name": "nretr_cloudy_ice",
-              "description": "number of valid ice phase cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_day_ice",
-              "units": "1",
-              "name": "nretr_cloudy_day_ice",
-              "description": "number of valid ice phase daytime cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_liq",
-              "units": "1",
-              "name": "nretr_cloudy_liq",
-              "description": "number of valid liquid phase cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_day_liq",
-              "units": "1",
-              "name": "nretr_cloudy_day_liq",
-              "description": "number of valid liquid phase daytime cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_low",
-              "units": "1",
-              "name": "nretr_cloudy_low",
-              "description": "number of valid low level cloudy retrievals"
-            },
-            {
-              "id": "nretr_cloudy_mid",
-              "units": "1",
-              "name": "nretr_cloudy_mid",
-              "description": "number of valid mid level cloudy retrievals"
-            },
-            {
-              "id": "hist_phase",
-              "units": "1",
-              "name": "hist_phase",
-              "description": "phase histogram bins"
-            },
-            {
-              "id": "stemp_corr_unc",
-              "units": "K",
-              "name": "stemp_corr_unc",
-              "description": "surface temperature correlated uncertainty"
-            },
-            {
-              "id": "stemp_prop_unc",
-              "units": "K",
-              "name": "stemp_prop_unc",
-              "description": "surface temperature propagated uncertainty"
-            },
-            {
-              "id": "stemp_std",
-              "units": "K",
-              "name": "stemp_std",
-              "description": "surface temperature standard deviation"
-            },
-            {
-              "id": "stemp_unc",
-              "units": "K",
-              "name": "stemp_unc",
-              "description": "surface temperature uncertainty"
-            },
-            {
-              "id": "stemp",
-              "units": "K",
-              "name": "stemp",
-              "description": "surface temperature"
-            }
-          ]
+          "data_id": "L8L1C",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "attrs": {
+            "title": "Landsat 8 - L1C",
+            "bands": {},
+            "processing_level": "L1C",
+            "request_period": "1D",
+            "feature_type_name": "L8.TILE"
+          }
         },
         {
-          "id": "esacci.AEROSOL.satellite-orbit-frequency.L2P.AER_PRODUCTS.ATSR-2.ERS-2.ORAC.03-02.r1",
-          "name": "ESA Aerosol Climate Change Initiative (Aerosol CCI): Level 2 aerosol products from ATSR2 (ORAC algorithm), Version 3.02",
-          "fid": "b6751acb59b242bfa33af689c4778abd",
-          "variables": [
-            {
-              "id": "aerosol_type",
-              "units": "1",
-              "name": "aerosol_type",
-              "description": "Best-guess aerosol type"
+          "data_id": "DEM",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "DEM"
+                  ]
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
             },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "data_vars": [
             {
-              "id": "cloud_fraction",
-              "units": "1",
-              "name": "cloud_fraction",
-              "description": "Cloud fraction"
-            },
-            {
-              "id": "fit_error",
-              "units": "1",
-              "name": "fit_error",
-              "description": "Cost function at solution"
-            },
-            {
-              "id": "instrument_view",
-              "units": "1",
-              "name": "instrument_view",
-              "description": "Instrument view"
-            },
-            {
-              "id": "surface_type_number",
-              "units": "1",
-              "name": "surface_type_number",
-              "description": "Land / sea flag"
-            },
-            {
-              "id": "quality_flag",
-              "units": "1",
-              "name": "quality_flag",
-              "description": "Quality check results"
-            },
-            {
-              "id": "relative_azimuth_at_center",
-              "units": "degrees",
-              "name": "relative_azimuth_at_center",
-              "description": "Relative azimuth angle"
-            },
-            {
-              "id": "iterations",
-              "units": "1",
-              "name": "iterations",
-              "description": "Retrieval iterations"
-            },
-            {
-              "id": "satellite_zenith_at_center",
-              "units": "degrees",
-              "name": "satellite_zenith_at_center",
-              "description": "Satellite zenith angle"
-            },
-            {
-              "id": "pixel_number",
-              "units": "1",
-              "name": "pixel_number",
-              "description": "Sinusoidal pixel index"
-            },
-            {
-              "id": "sun_zenith_at_center",
-              "units": "degrees",
-              "name": "sun_zenith_at_center",
-              "description": "Solar zenith angle"
-            },
-            {
-              "id": "surface_reflectance1600",
-              "units": "1",
-              "name": "surface_reflectance1600",
-              "description": "Surface bihemispherical reflectance at 1600 nm"
-            },
-            {
-              "id": "surface_reflectance550",
-              "units": "1",
-              "name": "surface_reflectance550",
-              "description": "Surface bihemispherical reflectance at 550 nm"
-            },
-            {
-              "id": "surface_reflectance670",
-              "units": "1",
-              "name": "surface_reflectance670",
-              "description": "Surface bihemispherical reflectance at 670 nm"
-            },
-            {
-              "id": "surface_reflectance870",
-              "units": "1",
-              "name": "surface_reflectance870",
-              "description": "Surface bihemispherical reflectance at 870 nm"
-            },
-            {
-              "id": "AOD550_uncertainty",
-              "units": "1",
-              "name": "AOD550_uncertainty",
-              "description": "Uncertainty on AOT at 550 nm"
-            },
-            {
-              "id": "AOD870_uncertainty",
-              "units": "1",
-              "name": "AOD870_uncertainty",
-              "description": "Uncertainty on AOT at 870 nm"
-            },
-            {
-              "id": "REFF_uncertainty",
-              "units": "microns",
-              "name": "REFF_uncertainty",
-              "description": "Uncertainty on aerosol effective radius"
-            },
-            {
-              "id": "surface_reflectance1600_uncertainty",
-              "units": "1",
-              "name": "surface_reflectance1600_uncertainty",
-              "description": "Uncertainty on surface reflectance at 1600 nm"
-            },
-            {
-              "id": "surface_reflectance550_uncertainty",
-              "units": "1",
-              "name": "surface_reflectance550_uncertainty",
-              "description": "Uncertainty on surface reflectance at 550 nm"
-            },
-            {
-              "id": "surface_reflectance670_uncertainty",
-              "units": "1",
-              "name": "surface_reflectance670_uncertainty",
-              "description": "Uncertainty on surface reflectance at 670nm"
-            },
-            {
-              "id": "surface_reflectance870_uncertainty",
-              "units": "1",
-              "name": "surface_reflectance870_uncertainty",
-              "description": "Uncertainty on surface reflectance at 870 nm"
-            },
-            {
-              "id": "ANG550_870",
-              "units": "1",
-              "name": "ANG550_870",
-              "description": "aerosol Angstrom exponent between 550 and 870 nm"
-            },
-            {
-              "id": "AAOD550",
-              "units": "1",
-              "name": "AAOD550",
-              "description": "aerosol absorption optical thickness at 550 nm"
-            },
-            {
-              "id": "REFF",
-              "units": "microns",
-              "name": "REFF",
-              "description": "aerosol effective radius"
-            },
-            {
-              "id": "AOD1600",
-              "units": "1",
-              "name": "AOD1600",
-              "description": "aerosol optical thickness at 1600 nm"
-            },
-            {
-              "id": "AOD550",
-              "units": "1",
-              "name": "AOD550",
-              "description": "aerosol optical thickness at 550 nm"
-            },
-            {
-              "id": "AOD670",
-              "units": "1",
-              "name": "AOD670",
-              "description": "aerosol optical thickness at 670 nm"
-            },
-            {
-              "id": "AOD870",
-              "units": "1",
-              "name": "AOD870",
-              "description": "aerosol optical thickness at 870 nm"
-            },
-            {
-              "id": "D_AOD550",
-              "units": "1",
-              "name": "D_AOD550",
-              "description": "dust aerosol optical thickness at 550 nm"
-            },
-            {
-              "id": "FM_AOD550",
-              "units": "1",
-              "name": "FM_AOD550",
-              "description": "fine-mode aerosol optical thickness at 550 nm"
+              "name": "DEM",
+              "dtype": "FLOAT32",
+              "dims": [
+                "time",
+                "lat",
+                "lon"
+              ],
+              "ndim": 3
             }
-          ]
+          ],
+          "attrs": {
+            "title": "Mapzen DEM",
+            "bands": {}
+          }
+        },
+        {
+          "data_id": "MODIS",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "attrs": {
+            "title": "MODIS MCD43A4",
+            "bands": {}
+          }
+        },
+        {
+          "data_id": "CUSTOM",
+          "type_id": "dataset",
+          "open_params_schema": {
+            "type": "object",
+            "properties": {
+              "dataset_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "variable_names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "variable_units": {
+                "type": "array"
+              },
+              "variable_sample_types": {
+                "type": "array"
+              },
+              "tile_size": {
+                "type": "array",
+                "default": [
+                  1000,
+                  1000
+                ],
+                "items": [
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  },
+                  {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 1,
+                    "maximum": 2500
+                  }
+                ]
+              },
+              "crs": {
+                "type": "string",
+                "default": "http://www.opengis.net/def/crs/EPSG/0/4326"
+              },
+              "bbox": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "spatial_res": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              "time_range": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "time_period": {
+                "type": "string",
+                "default": "1D"
+              },
+              "time_tolerance": {
+                "type": "string",
+                "default": "10M"
+              },
+              "collection_id": {
+                "type": "string"
+              },
+              "four_d": {
+                "type": "boolean",
+                "default": false
+              },
+              "max_cache_size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "spatial_res",
+              "time_range",
+              "variable_names",
+              "bbox"
+            ]
+          },
+          "attrs": {
+            "title": "Bring Your Own COG",
+            "bands": {}
+          }
         }
       ]
     }
