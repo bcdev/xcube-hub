@@ -1,3 +1,9 @@
+### Changes in v1.0.6
+
+* Suports now cciodp and cds data stores
+* Handles new bucket url config from xcube-gen-ui
+* Can now handle callbacks using a KeyValue database (either redis or leveldb or inmemory)
+
 ### Changes in v1.0.5
 
 * Updated computation of processing units. Now also "cciodp" datastore is supported.

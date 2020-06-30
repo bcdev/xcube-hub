@@ -1,4 +1,4 @@
-ARG XCUBE_VERSION=latest
+ARG XCUBE_VERSION=0.4.2
 
 FROM quay.io/bcdev/xcube-python-base:${XCUBE_VERSION}
 
@@ -21,17 +21,17 @@ RUN conda install -c conda-forge -n base mamba
 
 WORKDIR /home/${XCUBE_USER_NAME}
 ADD --chown=1000:1000 environment.yml environment.yml
+
 RUN mamba env create
 
 ADD --chown=1000:1000 ./ .
-RUN source activate xcube-gen && pip install redis
+RUN source activate xcube-gen && pip install redis pydevd-pycharm~=201.7846.76
 RUN source activate xcube-gen && pip install -e .
 
-RUN source activate xcube-gen && pip install pydevd-pycharm~=201.7846.76
-
-COPY --from=quay.io/bcdev/xcube-viewer:latest /usr/src/app/build ./viewer
+COPY --from=quay.io/bcdev/xcube-viewer:latest /usr/src/app/build /home/${XCUBE_USER_NAME}
 
 EXPOSE 5000
 EXPOSE 5050
 
-CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-genserv start -p 8000 -a 0.0.0.0"]
+# CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]

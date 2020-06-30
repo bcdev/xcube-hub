@@ -2,6 +2,8 @@ import json
 import unittest
 from unittest.mock import patch
 import os
+
+from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
 from xcube_gen import api
 from xcube_gen.controllers.callback import get_callback, put_callback, delete_callback
@@ -19,6 +21,7 @@ class TestCallback(unittest.TestCase):
         self._app = new_app()
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
+        self._sh_config = SH_CFG
         set_env()
 
     def test_get_callback(self):
@@ -60,6 +63,10 @@ class TestCallback(unittest.TestCase):
         mock_put_patch.stop()
 
         res = put_callback(user_id='ad659004d45088b035f19ec6ff1530b43', job_id='job3', value=expected)
+        cache = KeyValueDatabase.instance()
+        cache.set('job3', self._sh_config)
+
+        res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected)
         self.assertTrue(res)
 
     def test_delete_callback(self):
@@ -67,19 +74,19 @@ class TestCallback(unittest.TestCase):
         mock_delete = mock_delete_patch.start()
         mock_delete.return_value = 1
 
-        res = delete_callback('user2', 'job3')
+        res = delete_callback(user_id='user2', job_id='job3')
         self.assertEqual(1, res)
 
         mock_delete.return_value = 0
         with self.assertRaises(api.ApiError) as e:
-            delete_callback('user2', 'job3')
+            delete_callback(user_id='user2', job_id='job3')
 
         self.assertEqual('Callback not found', str(e.exception))
         self.assertEqual(404, e.exception.status_code)
 
         mock_delete.return_value = None
         with self.assertRaises(api.ApiError) as e:
-            delete_callback('user2', 'job3')
+            delete_callback(user_id='user2', job_id='job3')
 
         self.assertEqual('Deletion error', str(e.exception))
         self.assertEqual(401, e.exception.status_code)

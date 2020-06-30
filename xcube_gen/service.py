@@ -34,11 +34,14 @@ from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
 from xcube_gen.controllers import users
 from xcube_gen.controllers import viewer
+from dotenv import load_dotenv
 from xcube_gen.keyvaluedatabase import KeyValueDatabase
 
 
-def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder=''):
+def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
+            dotenv_path: str = '.env'):
     """Create the service app."""
+    load_dotenv()
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     flask_cors.CORS(app)
     Cfg.load_config_once()
@@ -63,7 +66,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
             if flask.request.method == 'PUT':
-                return jobs.create(user_id=user_id, sh_cmd='gen', cfg=flask.request.json)
+                return jobs.create(user_id=user_id, cfg=flask.request.json)
             if flask.request.method == 'DELETE':
                 return jobs.delete_all(user_id=user_id)
         except api.ApiError as e:

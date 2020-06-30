@@ -23,35 +23,37 @@ import json
 import os
 import uuid
 from pprint import pprint
-from typing import Optional, Union
+from typing import Union
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
-# from rq import Queue, Connection
 
 from xcube_gen import api
+from xcube_gen.auth import get_token_auth_header
 from xcube_gen.controllers import user_namespaces
+from xcube_gen.keyvaluedatabase import KeyValueDatabase
 from xcube_gen.typedefs import AnyDict, Error
 
 
-def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> client.V1Job:
+def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
     # Configureate Pod template container
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
     sh_instance_id = os.environ.get("SH_INSTANCE_ID")
-    sh_image = os.environ.get("XCUBE_SH_DOCKER_IMG")
+    gen_image = os.environ.get("XCUBE_DOCKER_IMG")
+    gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
 
-    if not sh_image:
+    if not gen_image:
         raise api.ApiError(400, "Could not find any xcube-sh docker image.")
 
     if not sh_client_secret or not sh_client_id or not sh_instance_id:
         raise api.ApiError(400, "SentinelHub credentials invalid. Please contact Brockmann Consult")
 
-    if cfg is not None:
-        cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                                  f"| xcube sh {sh_cmd}"]
-    else:
-        cmd = ["/bin/bash", "-c", f"source activate xcube &&  xcube sh {sh_cmd}"]
+    if not cfg:
+        raise api.ApiError(400, "create_gen_job_object needs a config dict.")
+
+    cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
+                              f"| xcube gen2 -v --store-conf store_config.json"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -61,8 +63,9 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
 
     container = client.V1Container(
         name="xcube-gen",
-        image=sh_image,
+        image=gen_image,
         command=cmd,
+        image_pull_policy=gen_container_pull_policy,
         env=sh_envs)
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
@@ -82,21 +85,24 @@ def create_sh_job_object(job_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None
     return job
 
 
-def create(user_id: str, sh_cmd: str, cfg: Optional[AnyDict] = None) -> Union[AnyDict, Error]:
+def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
     try:
         user_namespaces.create_if_not_exists(user_id=user_id)
+        callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL')
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
-        job = create_sh_job_object(job_id, sh_cmd=sh_cmd, cfg=cfg)
+
+        cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
+                                      access_token=get_token_auth_header())
+
+        cfg['output_config']['data_id'] = job_id
+
+        job = create_gen_job_object(job_id, cfg=cfg)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
-        # with Connection():
-        #     q = Queue()
-        #     q.enqueue(poll_job_status, kwargs={'poller': status,
-        #                                        'user_id': user_id,
-        #                                        'job_id': job_id,
-        #                                        'processing_request': cfg}
-        #               )
-        # poll_job_status(poller=status, user_id=user_id, job_id=job_id, processing_request=cfg)
+
+        kvdb = KeyValueDatabase.instance()
+        kvdb.set(job_id, cfg)
+
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:
         raise api.ApiError(e.status, str(e))

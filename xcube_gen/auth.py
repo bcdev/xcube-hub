@@ -53,8 +53,8 @@ def requires_permissions(required_scope: Sequence):
 def _get_user_info_from_auth0(token, user_id: str):
     kv = KeyValueDatabase.instance()
     user_info = kv.get(user_id + '_user_info')
-    if user_info and isinstance(user_info, str):
-        return json.loads(user_info)
+    if user_info:
+        return user_info
 
     endpoint = "https://edc.eu.auth0.com/userinfo"
     headers = {'Authorization': 'Bearer %s' % token}

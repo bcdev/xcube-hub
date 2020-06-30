@@ -18,10 +18,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import os
 import sys
 import click
 from typing import Optional
 from xcube_gen.version import version
+
+
+xcube_gen_debug_host = os.getenv('XCUBE_GEN_DEBUG_HOST')
+
+if xcube_gen_debug_host:
+    import pydevd_pycharm
+    pydevd_pycharm.settrace(xcube_gen_debug_host, port=9000, stdoutToServer=True, stderrToServer=True)
 
 
 @click.command(name="start")

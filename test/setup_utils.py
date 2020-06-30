@@ -3,8 +3,11 @@ import json
 import os
 from dotenv import load_dotenv
 
+from dotenv import load_dotenv
+
 
 def setup_auth():
+    load_dotenv()
     conn = http.client.HTTPSConnection("edc.eu.auth0.com")
 
     load_dotenv()
@@ -29,4 +32,6 @@ def setup_auth():
 
 
 def set_env():
-    os.environ["XCUBE_SH_DOCKER_IMG"] = 'quay.io/bcdev/xcube-sh'
+    from dotenv import load_dotenv
+
+    load_dotenv()

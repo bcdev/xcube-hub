@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
 from xcube_gen.service import new_app
 import subprocess
@@ -19,9 +20,8 @@ class TestJobs(unittest.TestCase):
         subprocess.call(["kubectl", "delete", "namespace", "daffy-duck"])
 
     def test_create(self):
-        res = self._client.put('/jobs/daffy-duck')
+        res = self._client.put('/jobs/daffy-duck', json=SH_CFG)
         self.assertEqual("200 OK", res.status)
-        print(res)
 
     def test_delete(self):
         set_env()

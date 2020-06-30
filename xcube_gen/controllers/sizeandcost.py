@@ -16,14 +16,28 @@ OUTPUT_PUNITS_WEIGHT = 1.0
 
 
 def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
-    input_config = get_json_request_value(processing_request, 'input_config',
-                                          value_type=dict)
-    datastore_id = get_json_request_value(input_config, 'datastore_id',
+    input_configs = get_json_request_value(processing_request, 'input_configs',
+                                           value_type=list)
+    input_config = input_configs[0]
+    datastore_id = get_json_request_value(input_config, 'store_id',
                                           value_type=str,
-                                          key_path='input_config')
+                                          key_path='input_configs')
+    open_params = get_json_request_value(input_config, 'open_params',
+                                         value_type=dict,
+                                         item_count=2,
+                                         item_type=dict)
+    if 'tile_size' in open_params:
+        tile_width, tile_height = get_json_request_value(open_params, 'tile_size',
+                                                         value_type=list,
+                                                         item_count=2,
+                                                         item_type=int)
+    else:
+        tile_width = 1
+        tile_height = 1
+
     cube_config = get_json_request_value(processing_request, 'cube_config',
                                          value_type=dict)
-    x1, y1, x2, y2 = get_json_request_value(cube_config, 'geometry',
+    x1, y1, x2, y2 = get_json_request_value(cube_config, 'bbox',
                                             value_type=list,
                                             item_count=4,
                                             item_type=(int, float),
@@ -34,10 +48,6 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     spatial_res = get_json_request_value(cube_config, 'spatial_res',
                                          value_type=(int, float),
                                          key_path='cube_config')
-    tile_width, tile_height = get_json_request_value(cube_config, 'tile_size',
-                                                     value_type=list,
-                                                     item_count=2,
-                                                     item_type=int)
     start_date, end_date = get_json_request_value(cube_config, 'time_range',
                                                   value_type=list,
                                                   item_count=2,
@@ -78,10 +88,13 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     num_bytes_per_pixel = 4  # float32 for all variables for time being
     num_bytes = num_variables * num_times * (height * width * num_bytes_per_pixel)
 
-    if datastore_id == 'sentinelhub':
+    if 'sentinelhub' in datastore_id:
         input_pixels_per_punit = SH_INPUT_PIXELS_PER_PUNIT
         input_punits_weight = SH_INPUT_PUNITS_WEIGHT
-    elif datastore_id == 'cciodp':
+    elif 'cciodp' in datastore_id:
+        input_pixels_per_punit = CCI_INPUT_PIXELS_PER_PUNIT
+        input_punits_weight = CCI_INPUT_PUNITS_WEIGHT
+    elif 'cds' in datastore_id:
         input_pixels_per_punit = CCI_INPUT_PIXELS_PER_PUNIT
         input_punits_weight = CCI_INPUT_PUNITS_WEIGHT
     else:

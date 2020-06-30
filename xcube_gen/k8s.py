@@ -1,3 +1,5 @@
+import os
+
 from kubernetes import client
 
 from xcube_gen.typedefs import JsonObject
@@ -10,13 +12,16 @@ def create_deployment_object(name: str, container_name: str, image: str, contain
         client.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=config.get('accessKeyId')),
     ]
 
+    bucketUrl = "https://s3.amazonaws.com/" + config.get('bucketUrl') + '/' + config.get('dataId')
+
     container = client.V1Container(
         name=container_name,
         image=image,
         command=["bash", "-c",
                  f"source activate xcube && xcube serve --prefix {name} --aws-env -P 4000 -A 0.0.0.0 "
-                 f"{config.get('bucketUrl')}"],
+                 f"{bucketUrl}"],
         env=envs,
+        image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)])
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
@@ -89,13 +94,21 @@ def list_service(name: str, namespace: str = 'default'):
 
 
 def create_xcube_serve_ingress_object(name: str, service_name: str, service_port: int, user_id: str):
+    xcube_webapi_uri = os.environ.get("XCUBE_WEBAPI_URI")
+
+    xcube_webapi_host = xcube_webapi_uri
+    if xcube_webapi_uri.startswith('https://'):
+        xcube_webapi_host = xcube_webapi_uri.replace("https://", "")
+    elif xcube_webapi_uri.startswith('http://'):
+        xcube_webapi_host = xcube_webapi_uri.replace("http://", "")
+
     body = client.NetworkingV1beta1Ingress(
         api_version="networking.k8s.io/v1beta1",
         kind="Ingress",
         metadata=client.V1ObjectMeta(name=name),
         spec=client.NetworkingV1beta1IngressSpec(
             rules=[client.NetworkingV1beta1IngressRule(
-                host="xcube-gen.brockmann-consult.de",
+                host=xcube_webapi_host,
                 http=client.NetworkingV1beta1HTTPIngressRuleValue(
                     paths=[client.NetworkingV1beta1HTTPIngressPath(
                         path="/" + user_id,
