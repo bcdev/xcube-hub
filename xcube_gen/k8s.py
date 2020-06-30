@@ -12,12 +12,14 @@ def create_deployment_object(name: str, container_name: str, image: str, contain
         client.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=config.get('accessKeyId')),
     ]
 
+    bucketUrl = "https://s3.amazonaws.com/" + config.get('bucketUrl') + '/' + config.get('dataId')
+
     container = client.V1Container(
         name=container_name,
         image=image,
         command=["bash", "-c",
                  f"source activate xcube && xcube serve --prefix {name} --aws-env -P 4000 -A 0.0.0.0 "
-                 f"{config.get('bucketUrl')}"],
+                 f"{bucketUrl}"],
         env=envs,
         image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)])

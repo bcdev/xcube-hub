@@ -20,21 +20,29 @@ def get_callback(user_id: str, job_id: str) -> JsonObject:
 
 
 def put_callback(user_id: str, job_id: str, value: AnyDict):
-    if not value or 'event' not in value or 'state' not in value:
+    if not value or 'state' not in value:
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
         kvdb = KeyValueDatabase.instance()
-        res = kvdb.set(user_id + '__' + job_id, value)
+        kv = kvdb.get(user_id + '__' + job_id)
+        if kv and 'progress' in kv:
+            kv['progress'].append(value)
+        if kv and 'progress' not in kv:
+            kv['progress'] = [value]
+        else:
+            kv = dict(progress=[value])
 
-        event = get_json_request_value(value, "event", str)
+        res = kvdb.set(user_id + '__' + job_id, kv)
+
+        event = get_json_request_value(value, "sender", str)
         state = get_json_request_value(value, 'state', dict)
 
-        if 'exc_info' in state:
-            exc_info = get_json_request_value(state, 'exc_info', tuple)
-            raise api.ApiError(400, exc_info)
+        # if 'exc_info' in state:
+        #     exc_info = get_json_request_value(state, 'exc_info', tuple)
+        #     raise api.ApiError(400, exc_info)
 
-        if event == 'on_end':
+        if event == 'on_end' and not state['error']:
             punits_requests = kvdb.get(job_id)
             subtract_processing_units(user_id=user_id, punits_request=punits_requests)
 

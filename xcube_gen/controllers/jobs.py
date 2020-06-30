@@ -29,6 +29,7 @@ from kubernetes import client
 from kubernetes.client.rest import ApiException
 
 from xcube_gen import api
+from xcube_gen.auth import get_token_auth_header
 from xcube_gen.controllers import user_namespaces
 from xcube_gen.keyvaluedatabase import KeyValueDatabase
 from xcube_gen.typedefs import AnyDict, Error
@@ -39,7 +40,7 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
     sh_instance_id = os.environ.get("SH_INSTANCE_ID")
-    gen_image = os.environ.get("XCUBE_GEN_DOCKER_IMG")
+    gen_image = os.environ.get("XCUBE_DOCKER_IMG")
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
 
     if not gen_image:
@@ -52,7 +53,7 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
         raise api.ApiError(400, "create_gen_job_object needs a config dict.")
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube gen2 --stores /config/store_config.json"]
+                              f"| xcube gen2 -v --store-conf store_config.json"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -89,7 +90,11 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         user_namespaces.create_if_not_exists(user_id=user_id)
         callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL')
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
-        cfg['callback']['api_uri'] = callback_uri + f'/jobs/{user_id}/{job_id}/callback'
+
+        cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
+                                      access_token=get_token_auth_header())
+
+        cfg['output_config']['data_id'] = job_id
 
         job = create_gen_job_object(job_id, cfg=cfg)
         api_instance = client.BatchV1Api()
