@@ -94,7 +94,7 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
                                       access_token=get_token_auth_header())
 
-        cfg['output_config']['data_id'] = job_id
+        cfg['output_config']['data_id'] = job_id + '.zarr'
 
         job = create_gen_job_object(job_id, cfg=cfg)
         api_instance = client.BatchV1Api()
