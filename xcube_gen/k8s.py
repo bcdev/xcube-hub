@@ -12,7 +12,7 @@ def create_deployment_object(name: str, container_name: str, image: str, contain
         client.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=config.get('accessKeyId')),
     ]
 
-    bucketUrl = "https://s3.amazonaws.com/" + config.get('bucketUrl') + '/' + config.get('dataId')
+    bucketUrl = "https://s3.amazonaws.com/" + config.get('bucketUrl') + '/' + config.get('dataId') + '.zarr'
 
     container = client.V1Container(
         name=container_name,
