@@ -21,6 +21,7 @@ dependencies:
       - kubernetes
       - polling2
       - plyvel
+      - requests-mock
 
   # testing
   - moto

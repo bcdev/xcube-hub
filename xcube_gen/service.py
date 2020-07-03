@@ -18,7 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+import hashlib
 import os
 
 import flask
@@ -26,7 +26,7 @@ import flask_cors
 import werkzeug
 
 import xcube_gen.api as api
-from xcube_gen.auth import requires_auth, requires_permissions, raise_for_invalid_user
+from xcube_gen.auth import requires_auth, requires_permissions, raise_for_invalid_user_id
 from xcube_gen.cfg import Cfg
 from xcube_gen.controllers import datastores, callback
 from xcube_gen.controllers import info
@@ -50,8 +50,8 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     def raise_for_invalid_json():
         try:
             flask.request.json
-        except werkzeug.exceptions.HTTPException:
-            raise api.ApiError(400, "Invalid JSON in request body")
+        except werkzeug.exceptions.HTTPException as e:
+            raise api.ApiError(400, "Invalid JSON in request body " + str(e))
 
     @app.route(prefix + '/', methods=['GET'])
     def _service_info():
@@ -61,7 +61,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _jobs(user_id: str):
         try:
-            raise_for_invalid_user(user_id=user_id)
+            raise_for_invalid_user_id(user_id=user_id)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -76,7 +76,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _job(user_id: str, job_id: str):
         try:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user_id(user_id)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -84,11 +84,11 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/cubes/<user_id>/viewer', methods=['GET', 'POST'])
+    @app.route(prefix + '/cubes/<user_id>/xcviewer', methods=['GET', 'POST'])
     @requires_auth
     def _cubes_viewer(user_id: str):
         try:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user_id(user_id)
             if flask.request.method == "GET":
                 return api.ApiResponse.success(viewer.get_status(user_id=user_id))
             if flask.request.method == "POST":
@@ -108,43 +108,48 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/users/<user_id>/data', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
-    def _user_data(user_id: str):
+    def _user_data(user_name: str):
         try:
-            raise_for_invalid_user(user_id)
+            res = hashlib.md5(user_name.encode())
+            user_id = 'a' + res.hexdigest()
+            raise_for_invalid_user_id(user_id)
             raise_for_invalid_json()
 
             if flask.request.method == 'GET':
-                user_data = users.get_user_data(user_id)
+                user_data = users.get_user_data(user_name)
                 return api.ApiResponse.success(result=user_data)
             elif flask.request.method == 'PUT':
-                users.put_user_data(user_id, flask.request.json)
+                users.put_user_data(user_name, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                users.delete_user_data(user_id)
+                users.delete_user_data(user_name)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/users/<user_id>/punits', methods=['GET', 'PUT', 'DELETE'])
+    @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
     @requires_auth
-    def _update_processing_units(user_id: str):
+    def _processing_units(user_name: str):
         try:
             raise_for_invalid_json()
-            raise_for_invalid_user(user_id)
+            res = hashlib.md5(user_name.encode())
+            user_id = 'a' + res.hexdigest()
+            raise_for_invalid_user_id(user_id)
+
             if flask.request.method == 'GET':
                 requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
-                processing_units = users.get_processing_units(user_id, include_history=include_history)
+                processing_units = users.get_processing_units(user_name, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
                 requires_permissions(['put:punits'])
-                users.add_processing_units(user_id, flask.request.json)
+                users.add_processing_units(user_name, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
                 requires_permissions(['put:punits'])
-                users.subtract_processing_units(user_id, flask.request.json)
+                users.subtract_processing_units(user_name, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
@@ -153,14 +158,14 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @requires_auth
     def _callback(user_id: str, job_id: str):
         try:
-            raise_for_invalid_json()
-            raise_for_invalid_user(user_id=user_id)
+            raise_for_invalid_user_id(user_id=user_id)
             if flask.request.method == 'GET':
-                requires_permissions(['read:callback'])
+                requires_permissions(['read:callback', 'submit:job'])
                 res = callback.get_callback(user_id, job_id)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
-                requires_permissions(['put:callback'])
+                raise_for_invalid_json()
+                requires_permissions(['put:callback', 'submit:job'])
                 callback.put_callback(user_id, job_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
@@ -172,7 +177,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
 
     @app.route(prefix + '/viewer')
     def _viewer():
-        return app.send_static_file('index.html')
+        return app.send_static_file('viewer/index.html')
 
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)

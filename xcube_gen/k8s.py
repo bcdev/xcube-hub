@@ -18,7 +18,7 @@ def create_deployment_object(name: str, container_name: str, image: str, contain
         name=container_name,
         image=image,
         command=["bash", "-c",
-                 f"source activate xcube && xcube serve --prefix {name} --aws-env -P 4000 -A 0.0.0.0 "
+                 f"source activate xcube && xcube serve --traceperf -v --prefix {name} --aws-env -P 4000 -A 0.0.0.0 "
                  f"{bucketUrl}"],
         env=envs,
         image_pull_policy="Always",

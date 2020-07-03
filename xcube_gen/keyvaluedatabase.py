@@ -146,7 +146,7 @@ class _RedisKvDB(KeyValueStore):
         port = os.getenv('XCUBE_GEN_REDIS_POST') or port
         db = os.getenv('XCUBE_GEN_REDIS_DB') or db
 
-        if use_mocker:
+        if use_mocker is True or use_mocker == 1:
             self._db = _KvDBMocker()
         else:
             self._db = Redis(host=host, port=port, db=db, **kwargs)
@@ -203,7 +203,7 @@ class _LevelDBKvDB(KeyValueStore):
         name = os.getenv('XCUBE_GEN_LEVELDB_NAME') or name
         create_if_missing = os.getenv('XCUBE_GEN_LEVELDB_CREATE_IF_MISSING') or create_if_missing
 
-        if use_mocker:
+        if use_mocker is True or use_mocker == 1:
             self._db = _KvDBMocker()
         else:
             self._db = plyvel.DB(name=name, create_if_missing=create_if_missing, *args, **kwargs)
@@ -260,7 +260,7 @@ class _InMemoryKvDB(KeyValueStore):
     def __init__(self, db_init: Optional[dict] = None, use_mocker: bool = False):
         super().__init__()
 
-        if use_mocker:
+        if use_mocker is True or use_mocker == 1:
             self._db = _KvDBMocker()
         else:
             self._db = dict()
