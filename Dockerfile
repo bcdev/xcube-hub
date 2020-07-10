@@ -3,6 +3,7 @@ ARG XCUBE_VERSION=0.5.0
 FROM quay.io/bcdev/xcube-python-base:${XCUBE_VERSION}
 
 ARG XCUBE_VERSION=0.5.0
+ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_GEN_VERSION=1.0.8
 ARG XCUBE_USER_NAME=xcube
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
@@ -29,7 +30,7 @@ ADD --chown=1000:1000 ./ .
 RUN source activate xcube-gen && pip install redis pydevd-pycharm~=201.7846.76
 RUN source activate xcube-gen && pip install -e .
 
-COPY --from=quay.io/bcdev/xcube-viewer:latest /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer/viewer
+COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
 
 EXPOSE 5000
 EXPOSE 5050
