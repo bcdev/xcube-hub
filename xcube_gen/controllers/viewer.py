@@ -36,7 +36,7 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
     try:
         user_namespaces.create_if_not_exists(user_id=user_id)
 
-        xcube_image = os.environ.get("XCUBE_DOCKER_IMG")
+        xcube_image = os.environ.get("XCUBE_DOCKER_WEBAPI_IMG")
         xcube_webapi_uri = os.environ.get("XCUBE_WEBAPI_URI")
         xcube_viewer_path = os.environ.get("XCUBE_VIEWER_PATH") or '/viewer'
 

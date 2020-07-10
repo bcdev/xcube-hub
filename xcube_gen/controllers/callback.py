@@ -24,6 +24,7 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "status"')
 
     try:
+        print(f"Calling progress for {job_id}.")
         kvdb = KeyValueDatabase.instance()
         kv = kvdb.get(user_id + '__' + job_id)
         if kv and 'progress' in kv:
@@ -35,14 +36,14 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
 
         res = kvdb.set(user_id + '__' + job_id, kv)
 
-        event = get_json_request_value(value, "sender", str)
+        sender = get_json_request_value(value, "sender", str)
         state = get_json_request_value(value, 'state', dict)
 
         # if 'exc_info' in state:
         #     exc_info = get_json_request_value(state, 'exc_info', tuple)
         #     raise api.ApiError(400, exc_info)
 
-        if event == 'on_end' and not state['error']:
+        if sender == 'on_end' and not state['error']:
             punits_requests = kvdb.get(job_id)
             subtract_processing_units(user_id=user_id, punits_request=punits_requests)
 

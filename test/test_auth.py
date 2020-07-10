@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from test.setup_utils import setup_auth
 from xcube_gen import api
-from xcube_gen.auth import raise_for_invalid_user
+from xcube_gen.auth import raise_for_invalid_user_id
 from xcube_gen.service import new_app
 from dotenv import load_dotenv
 
@@ -36,19 +36,19 @@ class TestAuth(unittest.TestCase):
         mock_get = mock_get_patch.start()
         mock_get.return_value = {'name': 'Tom.Jones@brockmann-consult.de'}
 
-        res = raise_for_invalid_user(user_id)
+        res = raise_for_invalid_user_id(user_id)
         self.assertTrue(res)
 
         user_id = 'hacking'
         with self.assertRaises(api.ApiError) as e:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user_id(user_id)
 
         self.assertEqual("access denied: Insufficient privileges for this operation.",
                          str(e.exception))
 
         mock_get.return_value = {'nam': 'Tom.Jones@brockmann-consult.de'}
         with self.assertRaises(api.ApiError) as e:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user_id(user_id)
 
         self.assertEqual("access denied: Could not read name from user info.",
                          str(e.exception))
@@ -67,12 +67,12 @@ class TestAuth(unittest.TestCase):
         mock_headers.return_value = {'gty': 'client-credentials'}
 
         user_id = 'hacking'
-        res = raise_for_invalid_user(user_id)
+        res = raise_for_invalid_user_id(user_id)
         self.assertTrue(res)
 
         mock_headers.return_value = {'qty': 'client-credential'}
         with self.assertRaises(api.ApiError) as e:
-            raise_for_invalid_user(user_id)
+            raise_for_invalid_user_id(user_id)
 
         self.assertEqual("Unauthorized", str(e.exception))
 

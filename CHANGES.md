@@ -1,8 +1,27 @@
-### Changes in v1.0.6
+## Changes in v1.0.8
 
-* Suports now cciodp and cds data stores
-* Handles new bucket url config from xcube-gen-ui
-* Can now handle callbacks using a KeyValue database (either redis or leveldb or inmemory)
+### New Features
+
+* Supports now cciodp and cds data stores 
+* can now handle callbacks using a KeyValue database (either redis or leveldb or inmemory)
+* can now serve as a wsgi service
+* Can now spawn an xcube webservice and a corresponding xcube viewer 
+
+### Enhancements
+
+* Includes now a poller for e.g. observing K8s processes
+* Added a service mock to simplify service mocks
+* An openapi yaml config file was added
+* Authentication and authorization processes were strengthened
+
+### Fixed
+
+* handles  bucket url config from xcube-gen-ui
+
+
+### Changes in v1.0.5 and v1.0.6
+
+* Synced version with xcube-gen-ui
 
 ### Changes in v1.0.5
 

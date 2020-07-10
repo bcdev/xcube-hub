@@ -70,7 +70,7 @@ def _get_user_info_from_auth0(token, user_id: str):
     return user_info
 
 
-def raise_for_invalid_user(user_id: str):
+def raise_for_invalid_user_id(user_id: str):
     token = get_token_auth_header()
     unverified_claims = jwt.get_unverified_claims(token)
     if 'gty' in unverified_claims and unverified_claims['gty'] == 'client-credentials':
