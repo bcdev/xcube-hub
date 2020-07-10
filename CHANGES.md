@@ -17,7 +17,6 @@
 ### Fixed
 
 * handles  bucket url config from xcube-gen-ui
-* Bucker data out test is now using teh correct bucket name 
 
 
 ### Changes in v1.0.5 and v1.0.6
