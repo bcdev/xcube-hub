@@ -24,11 +24,13 @@ import os
 import flask
 import flask_cors
 import werkzeug
+from flask_oidc import OpenIDConnect
+from flask import g
 
 import xcube_gen.api as api
-from xcube_gen.auth import requires_auth, requires_permissions, raise_for_invalid_user_id
+from xcube_gen import auth0
 from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import datastores, callback
+from xcube_gen.controllers import datastores, callback, cate
 from xcube_gen.controllers import info
 from xcube_gen.controllers import jobs
 from xcube_gen.controllers import sizeandcost
@@ -43,6 +45,21 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     """Create the service app."""
     load_dotenv()
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
+    app.config.update({
+        'SECRET_KEY': 'SomethingNotEntirelySecret',
+        'TESTING': True,
+        'DEBUG': True,
+        'OIDC_CLIENT_SECRETS': '/home/helge/IdeaProjects/xcube-gen-api/xcube_gen/client_secrets.json',
+        'OIDC_ID_TOKEN_COOKIE_SECURE': False,
+        'OIDC_REQUIRE_VERIFIED_EMAIL': False,
+        'OVERWRITE_REDIRECT_URI': 'http://localhost:3000/login',
+        'OIDC_USER_INFO_ENABLED': True,
+        'OIDC_OPENID_REALM': 'master',
+        'OIDC_SCOPES': ['openid', 'email', 'profile'],
+        'OIDC_INTROSPECTION_AUTH_METHOD': 'client_secret_post'
+    })
+
+    oidc = OpenIDConnect(app)
     flask_cors.CORS(app)
     Cfg.load_config_once()
     KeyValueDatabase.instance(provider=cache_provider)
@@ -58,10 +75,10 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         return api.ApiResponse.success(info.service_info())
 
     @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'PUT', 'DELETE'])
-    @requires_auth
+    @auth0.requires_auth
     def _jobs(user_id: str):
         try:
-            raise_for_invalid_user_id(user_id=user_id)
+            auth0.raise_for_invalid_user_id(user_id=user_id)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -73,10 +90,10 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/jobs/<user_id>/<job_id>', methods=['GET', 'DELETE'])
-    @requires_auth
+    @auth0.requires_auth
     def _job(user_id: str, job_id: str):
         try:
-            raise_for_invalid_user_id(user_id)
+            auth0.raise_for_invalid_user_id(user_id)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -84,11 +101,32 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         except api.ApiError as e:
             return e.response
 
+    def _accept_role(role: str):
+        token_info = g.oidc_token_info
+        if role not in token_info['resource_access']['cate-login']['roles']:
+            raise api.ApiError(403,
+                               f"Access denied. You need {role} access to cate. \n If registered already, "
+                               f"your account might be in the process of being approved.")
+
+    @app.route(prefix + '/cate/<user_id>/webapi', methods=['GET', 'POST', 'DELETE'])
+    @oidc.accept_token(require_token=True, scopes_required=['profile'])
+    def _cate_webapi(user_id: str):
+        try:
+            _accept_role('user')
+            if flask.request.method == "GET":
+                return api.ApiResponse.success(cate.get_status(user_id=user_id))
+            if flask.request.method == "POST":
+                return api.ApiResponse.success(cate.launch_cate(user_id=user_id, output_config=flask.request.json))
+            if flask.request.method == "DELETE":
+                return api.ApiResponse.success(cate.delete_cate(user_id=user_id, prune=True))
+        except api.ApiError as e:
+            return e.response
+
     @app.route(prefix + '/cubes/<user_id>/xcviewer', methods=['GET', 'POST'])
-    @requires_auth
+    @auth0.requires_auth
     def _cubes_viewer(user_id: str):
         try:
-            raise_for_invalid_user_id(user_id)
+            auth0.raise_for_invalid_user_id(user_id)
             if flask.request.method == "GET":
                 return api.ApiResponse.success(viewer.get_status(user_id=user_id))
             if flask.request.method == "POST":
@@ -109,12 +147,12 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
-    @requires_auth
+    @auth0.requires_auth
     def _user_data(user_name: str):
         try:
             res = hashlib.md5(user_name.encode())
             user_id = 'a' + res.hexdigest()
-            raise_for_invalid_user_id(user_id)
+            auth0.raise_for_invalid_user_id(user_id)
             raise_for_invalid_json()
 
             if flask.request.method == 'GET':
@@ -130,46 +168,46 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
-    @requires_auth
+    @auth0.requires_auth
     def _processing_units(user_name: str):
         try:
             raise_for_invalid_json()
             res = hashlib.md5(user_name.encode())
             user_id = 'a' + res.hexdigest()
-            raise_for_invalid_user_id(user_id)
+            auth0.raise_for_invalid_user_id(user_id)
 
             if flask.request.method == 'GET':
-                requires_permissions(['read:punits'])
+                auth0.requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
                 processing_units = users.get_processing_units(user_name, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
-                requires_permissions(['put:punits'])
+                auth0.requires_permissions(['put:punits'])
                 users.add_processing_units(user_name, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                requires_permissions(['put:punits'])
+                auth0.requires_permissions(['put:punits'])
                 users.subtract_processing_units(user_name, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
             return e.response
 
     @app.route(prefix + '/jobs/<user_id>/<job_id>/callback', methods=['GET', 'PUT', 'DELETE'])
-    @requires_auth
+    @auth0.requires_auth
     def _callback(user_id: str, job_id: str):
         try:
-            raise_for_invalid_user_id(user_id=user_id)
+            auth0.raise_for_invalid_user_id(user_id=user_id)
             if flask.request.method == 'GET':
-                requires_permissions(['read:callback', 'submit:job'])
+                auth0.requires_permissions(['read:callback', 'submit:job'])
                 res = callback.get_callback(user_id, job_id)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
                 raise_for_invalid_json()
-                requires_permissions(['put:callback', 'submit:job'])
+                auth0.requires_permissions(['put:callback', 'submit:job'])
                 callback.put_callback(user_id, job_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
-                requires_permissions(['delete:callback'])
+                auth0.requires_permissions(['delete:callback'])
                 callback.delete_callback(user_id, job_id)
                 return api.ApiResponse.success()
         except api.ApiError as e:

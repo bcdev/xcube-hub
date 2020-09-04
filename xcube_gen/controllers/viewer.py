@@ -26,9 +26,9 @@ from kubernetes.client.rest import ApiException
 from xcube_gen import api
 from xcube_gen.controllers import user_namespaces
 from xcube_gen.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
-    create_xcube_serve_ingress_object, create_xcube_genserv_ingress, delete_deployment, delete_service, delete_ingress, \
-    list_ingress, list_service
-from xcube_gen.poller import poll_viewer_status
+    create_ingress_object, create_ingress, delete_deployment, delete_service, delete_ingress, \
+    list_ingress, list_service, get_pod
+from xcube_gen.poller import poll_deployment_status
 from xcube_gen.typedefs import JsonObject
 
 
@@ -50,7 +50,7 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         deployments = apps_v1_api.list_namespaced_deployment(namespace=user_id)
         deployments = [deployment.metadata.name for deployment in deployments.items]
         if len(deployments) > 0:
-            delete_deployment(api_instance=apps_v1_api, name=user_id, namespace=user_id)
+            delete_deployment(name=user_id, namespace=user_id)
             delete_service(name=user_id, namespace=user_id)
 
         services = list_service(name=user_id, namespace=user_id)
@@ -63,24 +63,43 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         if len(ingresses) > 0:
             delete_ingress(name=user_id, namespace=user_id)
 
-        poll_viewer_status(apps_v1_api.list_namespaced_deployment, status='empty', namespace=user_id)
+        poll_deployment_status(apps_v1_api.list_namespaced_deployment, status='empty', namespace=user_id)
 
-        deployment = create_deployment_object(name=user_id,
-                                              container_name=user_id,
+        envs = [
+            client.V1EnvVar(name="AWS_SECRET_ACCESS_KEY", value=output_config.get('secretAccessKey')),
+            client.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=output_config.get('accessKeyId')),
+        ]
+
+        bucket_url = "https://s3.amazonaws.com/" + output_config.get('bucketUrl') + '/' + output_config.get(
+            'dataId') + '.zarr'
+
+        command = ["bash", "-c",
+                   f"source activate xcube && xcube serve --traceperf -v --prefix {user_id} --aws-env "
+                   f"-P 4000 -A 0.0.0.0 "
+                   f"{bucket_url}"]
+
+        deployment = create_deployment_object(name=user_id + '-xcube-gen-ui',
+                                              user_id=user_id,
+                                              container_name=user_id + '-xcube-gen-ui',
                                               image=xcube_image,
                                               container_port=4000,
-                                              config=output_config)
+                                              envs=envs,
+                                              command=command)
 
-        create_deployment(api_instance=apps_v1_api, deployment=deployment, namespace=user_id)
+        create_deployment(deployment=deployment, namespace=user_id)
 
         service = create_service_object(name=user_id, port=4000, target_port=4000)
         create_service(service=service, namespace=user_id)
 
-        ingress = create_xcube_serve_ingress_object(name=user_id, service_name=user_id, service_port=4000,
-                                                    user_id=user_id)
-        create_xcube_genserv_ingress(ingress, namespace=user_id)
+        host_uri = os.environ.get("XCUBE_WEBAPI_URI")
+        ingress = create_ingress_object(name=user_id,
+                                        service_name=user_id,
+                                        service_port=4000,
+                                        user_id=user_id,
+                                        host_uri=host_uri)
+        create_ingress(ingress, namespace=user_id)
 
-        poll_viewer_status(apps_v1_api.read_namespaced_deployment, status='ready', namespace=user_id, name=user_id)
+        poll_deployment_status(apps_v1_api.read_namespaced_deployment, status='ready', namespace=user_id, name=user_id)
 
         return dict(viewerUri=f'{xcube_webapi_uri}{xcube_viewer_path}',
                     serverUri=f'{xcube_webapi_uri}/{user_id}')
@@ -89,6 +108,8 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
 
 
 def get_status(user_id: str):
-    apps_v1_api = client.AppsV1Api()
-    deployment = apps_v1_api.read_namespaced_deployment(namespace=user_id, name=user_id)
-    return deployment.status
+    pod = get_pod(prefix=user_id + '-xcube-gen-ui', namespace=user_id)
+    if pod:
+        return pod.status.to_dict()
+    else:
+        raise api.ApiError(404, f'No  xcube-gen-ui Pod for user {user_id}')
