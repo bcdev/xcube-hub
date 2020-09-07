@@ -22,6 +22,7 @@ dependencies:
       - polling2
       - plyvel
       - requests-mock
+      - flask_oidc
 
   # testing
   - moto

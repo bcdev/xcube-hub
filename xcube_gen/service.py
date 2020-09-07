@@ -49,7 +49,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         'SECRET_KEY': 'SomethingNotEntirelySecret',
         'TESTING': True,
         'DEBUG': True,
-        'OIDC_CLIENT_SECRETS': '/home/helge/IdeaProjects/xcube-gen-api/xcube_gen/client_secrets.json',
+        'OIDC_CLIENT_SECRETS': '/home/xcube/client_secrets.json',
         'OIDC_ID_TOKEN_COOKIE_SECURE': False,
         'OIDC_REQUIRE_VERIFIED_EMAIL': False,
         'OVERWRITE_REDIRECT_URI': 'http://localhost:3000/login',
