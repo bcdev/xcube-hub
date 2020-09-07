@@ -44,17 +44,19 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             dotenv_path: str = '.env'):
     """Create the service app."""
     load_dotenv()
+    oidc_client_secrets_file = os.environ.get('OIDC_CLIENT_SECRETS_FILE')
+
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     app.config.update({
         'SECRET_KEY': 'SomethingNotEntirelySecret',
         'TESTING': True,
         'DEBUG': True,
-        'OIDC_CLIENT_SECRETS': '/home/xcube/client_secrets.json',
+        'OIDC_CLIENT_SECRETS': oidc_client_secrets_file,
         'OIDC_ID_TOKEN_COOKIE_SECURE': False,
         'OIDC_REQUIRE_VERIFIED_EMAIL': False,
-        'OVERWRITE_REDIRECT_URI': 'http://localhost:3000/login',
+        # 'OVERWRITE_REDIRECT_URI': 'http://localhost:3000/login',
         'OIDC_USER_INFO_ENABLED': True,
-        'OIDC_OPENID_REALM': 'master',
+        'OIDC_OPENID_REALM': 'cate',
         'OIDC_SCOPES': ['openid', 'email', 'profile'],
         'OIDC_INTROSPECTION_AUTH_METHOD': 'client_secret_post'
     })
