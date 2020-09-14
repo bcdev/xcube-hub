@@ -1,3 +1,11 @@
+## Changes in v1.0.9
+
+### New Features
+
+* Suppoots now spawning of cate containers.
+* Also supports Keycloak auth for cate
+
+
 ## Changes in v1.0.8
 
 ### New Features
