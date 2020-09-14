@@ -2,12 +2,8 @@ import os
 
 from xcube_gen.service import new_app
 
-
-xcube_gen_debug_host = os.getenv('XCUBE_GEN_DEBUG_HOST')
-
-if xcube_gen_debug_host:
-    import pydevd_pycharm
-    pydevd_pycharm.settrace(xcube_gen_debug_host, port=9000, stdoutToServer=True, stderrToServer=True)
+# import pydevd_pycharm
+# pydevd_pycharm.settrace('172.17.0.1', port=9000, stdoutToServer=True, stderrToServer=True)
 
 
 def new_wsgi_app():

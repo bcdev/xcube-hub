@@ -29,7 +29,7 @@ from kubernetes import client
 from kubernetes.client.rest import ApiException
 
 from xcube_gen import api
-from xcube_gen.auth import get_token_auth_header
+from xcube_gen.auth0 import get_token_auth_header
 from xcube_gen.controllers import user_namespaces
 from xcube_gen.keyvaluedatabase import KeyValueDatabase
 from xcube_gen.typedefs import AnyDict, Error

@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, Optional
 
 import polling2
-from kubernetes.client import V1Deployment, V1DeploymentList
+from kubernetes.client import V1Deployment, V1DeploymentList, V1Pod
 
 from xcube_gen.controllers.users import subtract_processing_units
 from xcube_gen.controllers.sizeandcost import get_size_and_cost
@@ -34,8 +34,10 @@ def poll_job_status(poller: Any, user_id: str, job_id: str, processing_request: 
     poll_k8s(poller=poller, check_success=_is_finished_status, user_id=user_id)
 
 
-def poll_viewer_status(poller: Any, status='ready', **kwargs):
-    def _is_ready_status(deployment: V1Deployment):
+def poll_deployment_status(poller: Any, status='ready', **kwargs):
+    def _is_status(deployment: V1Deployment):
+        if not deployment:
+            return False
         """Check that the response returned 'success'"""
         for st in deployment.status.conditions:
             if st.type == 'Available':
@@ -44,7 +46,24 @@ def poll_viewer_status(poller: Any, status='ready', **kwargs):
         return False
 
     def _is_empty(deployments: V1DeploymentList):
+        if not deployments:
+            return False
+
         """Check that the response returned 'success'"""
         return len(deployments.items) == 0
 
-    poll_k8s(poller=poller, check_success=_is_ready_status if status == 'ready' else _is_empty, **kwargs)
+    poll_k8s(poller=poller, check_success=_is_status if status == 'ready' else _is_empty, **kwargs)
+
+
+def poll_pod_phase(poller: Any, phase='running', **kwargs):
+    def _is_phase(pod: Optional[V1Pod]) -> bool:
+        """Check that the response returned 'success'"""
+
+        if pod is None:
+            return False
+        elif pod.status.phase.lower() == phase:
+            return True
+
+        return False
+
+    poll_k8s(poller=poller, check_success=_is_phase, **kwargs)
