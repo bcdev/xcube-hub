@@ -128,6 +128,16 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         except api.ApiError as e:
             return e.response
 
+    @app.route(prefix + '/user/<user_id>/webapi/shutdown', methods=['DELETE'])
+    @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
+    def _cate_delete_webapi(user_id: str):
+        try:
+            # _accept_role('user')
+            if flask.request.method == "DELETE":
+                return api.ApiResponse.success(cate.delete_cate(user_id=user_id, prune=False))
+        except api.ApiError as e:
+            return e.response
+
     @app.route(prefix + '/webapi/count', methods=['GET'])
     # @oidc.accept_token(require_token=True, scopes_required=['profile'])
     @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])

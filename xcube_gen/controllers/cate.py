@@ -67,6 +67,11 @@ def delete_cate(user_id: str, prune: bool = False) -> bool:
 
 def launch_cate(user_id: str) -> JsonObject:
     try:
+        max_pods = 500
+
+        if count_pods(label_selector="purpose=cate-webapi") > max_pods:
+            raise api.ApiError(410, "Too many pods running.")
+
         user_namespaces.create_if_not_exists(user_id=user_id)
 
         cate_image = os.environ.get("CATE_IMG")

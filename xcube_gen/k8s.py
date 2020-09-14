@@ -44,6 +44,7 @@ def create_deployment_object(name: str, user_id: str, container_name: str, image
         image=image,
         command=command,
         env=envs,
+
         security_context=client.V1SecurityContext(run_as_user=1000, run_as_group=1000),
         image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)],
@@ -53,6 +54,7 @@ def create_deployment_object(name: str, user_id: str, container_name: str, image
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": container_name, "purpose": "cate-webapi"}),
         spec=client.V1PodSpec(
+            # restart_policy="Never",
             security_context=client.V1PodSecurityContext(run_as_user=1000, run_as_group=1000, fs_group=1000),
             containers=[container],
             volumes=[{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
