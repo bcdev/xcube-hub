@@ -1,6 +1,7 @@
 from typing import Optional, Sequence, Union
 from kubernetes import client
 from kubernetes.client import V1Pod
+
 from xcube_gen.poller import poll_deployment_status
 
 
@@ -43,14 +44,16 @@ def create_deployment_object(name: str, user_id: str, container_name: str, image
         image=image,
         command=command,
         env=envs,
+        security_context=client.V1SecurityContext(run_as_user=1000, run_as_group=1000),
         image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)],
         volume_mounts=[{'mountPath': "/home/cate", 'name': 'claim-' + user_id}]
     )
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": container_name}),
+        metadata=client.V1ObjectMeta(labels={"app": container_name, "purpose": "cate-webapi"}),
         spec=client.V1PodSpec(
+            security_context=client.V1PodSecurityContext(run_as_user=1000, run_as_group=1000, fs_group=1000),
             containers=[container],
             volumes=[{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
         )
@@ -230,16 +233,33 @@ def list_ingress(namespace: str = 'default'):
     return networking_v1_beta1_api.list_namespaced_ingress(namespace=namespace)
 
 
-def get_pod(prefix: str, namespace: str = 'default') -> Union[type(None), V1Pod]:
-    pods = list_pods(namespace=namespace)
+def get_pod(prefix: str, namespace: Optional[str] = None, label_selector: str = None) -> Union[type(None), V1Pod]:
+    pods = get_pods(namespace=namespace, label_selector=label_selector)
+
     for pod in pods.items:
         if pod.metadata.name.startswith(prefix):
             return pod
     return None
 
 
-def list_pods(namespace: str = 'default'):
+def get_pods(namespace: Optional[str] = None, label_selector: str = None):
     v1 = client.CoreV1Api()
-    return v1.list_namespaced_pod(namespace=namespace)
+
+    if namespace:
+        if label_selector:
+            return v1.list_namespaced_pod(namespace=namespace, label_selector=label_selector)
+        else:
+            return v1.list_namespaced_pod(namespace=namespace)
+    else:
+        if label_selector:
+            return v1.list_pod_for_all_namespaces(label_selector=label_selector)
+        else:
+            return v1.list_pod_for_all_namespaces()
 
 
+def count_pods(namespace: Optional[str] = None, label_selector: str = None) -> int:
+    pods = get_pods(namespace=namespace, label_selector=label_selector)
+    if pods:
+        return len(pods.items)
+    else:
+        return 0

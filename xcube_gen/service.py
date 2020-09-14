@@ -24,6 +24,7 @@ import os
 import flask
 import flask_cors
 import werkzeug
+from flask_cors import cross_origin
 from flask_oidc import OpenIDConnect
 from flask import g
 
@@ -45,6 +46,8 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     """Create the service app."""
     load_dotenv()
     oidc_client_secrets_file = os.environ.get('OIDC_CLIENT_SECRETS_FILE')
+    if not oidc_client_secrets_file:
+        raise ValueError('Cannot get secrets env')
 
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     app.config.update({
@@ -110,17 +113,42 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
                                f"Access denied. You need {role} access to cate. \n If registered already, "
                                f"your account might be in the process of being approved.")
 
-    @app.route(prefix + '/cate/<user_id>/webapi', methods=['GET', 'POST', 'DELETE'])
-    @oidc.accept_token(require_token=True, scopes_required=['profile'])
+    @app.route(prefix + '/user/<user_id>/webapi', methods=['GET', 'POST', 'DELETE'])
+    @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
+    @oidc.accept_token(require_token=True)
     def _cate_webapi(user_id: str):
         try:
-            _accept_role('user')
+            # _accept_role('user')
             if flask.request.method == "GET":
                 return api.ApiResponse.success(cate.get_status(user_id=user_id))
             if flask.request.method == "POST":
-                return api.ApiResponse.success(cate.launch_cate(user_id=user_id, output_config=flask.request.json))
+                return api.ApiResponse.success(cate.launch_cate(user_id=user_id))
             if flask.request.method == "DELETE":
                 return api.ApiResponse.success(cate.delete_cate(user_id=user_id, prune=True))
+        except api.ApiError as e:
+            return e.response
+
+    @app.route(prefix + '/webapi/count', methods=['GET'])
+    # @oidc.accept_token(require_token=True, scopes_required=['profile'])
+    @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
+    def _cate_count_webapis():
+        try:
+            if flask.request.method == "GET":
+                return api.ApiResponse.success(cate.get_pod_count(label_selector="purpose=cate-webapi"))
+        except api.ApiError as e:
+            return e.response
+
+    @app.route(prefix + '/webapi/available', methods=['GET'])
+    # @oidc.accept_token(require_token=True, scopes_required=['profile'])
+    @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
+    def _cate_get_webapi_availabale():
+        try:
+            if flask.request.method == "GET":
+                pod_count = cate.get_pod_count(label_selector="purpose=cate-webapi")
+                if pod_count < 20:
+                    return api.ApiResponse.success({'service_available': True})
+                else:
+                    raise api.ApiError(428, "No further service available")
         except api.ApiError as e:
             return e.response
 

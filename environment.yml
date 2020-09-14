@@ -23,6 +23,7 @@ dependencies:
       - plyvel
       - requests-mock
       - flask_oidc
+      - flask_cors
 
   # testing
   - moto

@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+from typing import Optional
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
@@ -28,7 +29,7 @@ from xcube_gen.controllers import user_namespaces
 from xcube_gen.k8s import create_deployment_object, create_service_object, \
     create_ingress_object, delete_deployment, delete_service, delete_ingress, \
     list_ingress, list_service, get_pod, create_pvc_object, create_pvc_if_not_exists, create_deployment_if_not_exists, \
-    create_service_if_not_exists, create_ingress_if_not_exists
+    create_service_if_not_exists, create_ingress_if_not_exists, count_pods
 from xcube_gen.poller import poll_pod_phase
 from xcube_gen.typedefs import JsonObject
 
@@ -64,29 +65,45 @@ def delete_cate(user_id: str, prune: bool = False) -> bool:
     return True
 
 
-def launch_cate(user_id: str, output_config: JsonObject) -> JsonObject:
+def launch_cate(user_id: str) -> JsonObject:
     try:
         user_namespaces.create_if_not_exists(user_id=user_id)
 
-        cate_image = os.environ.get("CATE_WEBAPI_IMG")
+        cate_image = os.environ.get("CATE_IMG")
+        cate_version = os.environ.get("CATE_VERSION")
+        cate_command = os.environ.get("CATE_COMMAND", False)
+        cate_env_activate_command = os.environ.get("CATE_ENV_ACTIVATE_COMMAND", False)
         cate_webapi_uri = os.environ.get("CATE_WEBAPI_URI")
+
+        if not cate_command:
+            cate_command = "cate-webapi-start -b -v -p 4000 -a 0.0.0.0"
+
+        if not cate_env_activate_command:
+            cate_env_activate_command = "source activate cate-env"
 
         if not cate_image:
             raise api.ApiError(400, "Could not find the cate webapi docker image.")
 
+        cate_image = cate_image + ':' + cate_version
         pvc = create_pvc_object(user_id)
         create_pvc_if_not_exists(pvc, user_id)
 
-        command = ["/bin/bash", "-c", "echo 'Hello' && source activate cate-env && cate-webapi-start "
-                                      "-b -v -p 4000 -a 0.0.0.0"]
+        command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
+        envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate"), ]
         deployment = create_deployment_object(name=user_id + '-cate',
                                               user_id=user_id,
                                               container_name=user_id + '-cate',
                                               image=cate_image,
+                                              envs=envs,
                                               container_port=4000,
                                               command=command)
 
+        # TODO: Make create_if_exists test for broken pods
+        # pod_status = get_status(user_id)
+        # if pod_status != "Running":
+        #     create_deployment(namespace=user_id, deployment=deployment)
+        # else:
         create_deployment_if_not_exists(user_id, deployment)
 
         service = create_service_object(name=user_id + '-cate', port=4000, target_port=4000)
@@ -104,7 +121,7 @@ def launch_cate(user_id: str, output_config: JsonObject) -> JsonObject:
 
         poll_pod_phase(get_pod, namespace=user_id, prefix=user_id)
 
-        return dict(serverUri=f'{cate_webapi_uri}/{user_id}')
+        return dict(serverUrl=f'https://{cate_webapi_uri}/{user_id}')
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
@@ -114,4 +131,9 @@ def get_status(user_id: str):
     if pod:
         return pod.status.to_dict()
     else:
-        raise api.ApiError(404, f'No cate Pod for user {user_id}')
+        return {'status': 'Pending'}
+
+
+def get_pod_count(label_selector: Optional[str] = None):
+    ct = count_pods(label_selector=label_selector)
+    return {'running_pods': ct}
