@@ -2,7 +2,7 @@
 
 ### New Features
 
-* Suppoots now spawning of cate containers.
+* Supports now spawning of cate containers.
 * Also supports Keycloak auth for cate
 
 
