@@ -1,4 +1,4 @@
-## Changes in v1.0.9
+## Changes in v1.0.10
 
 ### Fixes
 
