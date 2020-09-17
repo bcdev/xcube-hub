@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+import time
 from typing import Optional
 
 from kubernetes import client
@@ -81,7 +82,7 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_webapi_uri = os.environ.get("CATE_WEBAPI_URI")
 
         if not cate_command:
-            cate_command = "cate-webapi-start -b -v -p 4000 -a 0.0.0.0"
+            cate_command = "cate-webapi-start -b -p 4000 -a 0.0.0.0"
 
         if not cate_env_activate_command:
             cate_env_activate_command = "source activate cate-env"
@@ -95,7 +96,8 @@ def launch_cate(user_id: str) -> JsonObject:
 
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
-        envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate"), ]
+        envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate"),
+                client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
         deployment = create_deployment_object(name=user_id + '-cate',
                                               user_id=user_id,
                                               container_name=user_id + '-cate',
@@ -125,6 +127,9 @@ def launch_cate(user_id: str) -> JsonObject:
         create_ingress_if_not_exists(ingress, namespace=user_id)
 
         poll_pod_phase(get_pod, namespace=user_id, prefix=user_id)
+
+        grace = os.environ.get("CATE_LAUNCH_GRACE", False) or 2
+        time.sleep(grace)
 
         return dict(serverUrl=f'https://{cate_webapi_uri}/{user_id}')
     except ApiException as e:

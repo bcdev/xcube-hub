@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3
 
-ARG XCUBE_GEN_VERSION=1.0.8
+ARG XCUBE_GEN_VERSION=1.0.10
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
@@ -37,8 +37,9 @@ RUN source activate xcube-gen && pip install -e .
 
 COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
 
+
 EXPOSE 8000
 EXPOSE 5050
 
 CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-genserv start -p 8000 -a 0.0.0.0"]
-# CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+#CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]

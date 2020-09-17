@@ -1,10 +1,17 @@
 ## Changes in v1.0.9
 
+### Fixes
+
+* Cate is spawned with JUPYTERHUB_SERVICE_PREFIX. Fixes CORS errors for accessing ws tiles
+* xcube gen adds a grace sleep when the cate webapi is started. Fixes issues when starting the
+    cate webapi from the webui
+
+## Changes in v1.0.9
+
 ### New Features
 
 * Supports now spawning of cate containers.
 * Also supports Keycloak auth for cate
-
 
 ## Changes in v1.0.8
 

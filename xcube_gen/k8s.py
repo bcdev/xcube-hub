@@ -167,13 +167,14 @@ def create_ingress_object(name: str, service_name: str, service_port: int, user_
         kind="Ingress",
         metadata=client.V1ObjectMeta(name=name, annotations={
             # "cert-manager.io/cluster-issuer": "letsencrypt",
-            "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
+            # "nginx.ingress.kubernetes.io/rewrite-target": "/$1",
             "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
             "nginx.ingress.kubernetes.io/proxy-connect-timeout": "1800",
             "nginx.ingress.kubernetes.io/proxy-read-timeout": "1800",
             "nginx.ingress.kubernetes.io/proxy-send-timeout": "1800",
             "nginx.ingress.kubernetes.io/send-timeout": "1800",
-            "nginx.ingress.kubernetes.io/proxy-body-size": "2000m"
+            "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
+            "nginx.ingress.kubernetes.io/enable-cors": "true"
         }),
         spec=client.NetworkingV1beta1IngressSpec(
             # tls=client.NetworkingV1beta1IngressTLS(
@@ -184,7 +185,7 @@ def create_ingress_object(name: str, service_name: str, service_port: int, user_
                 host=webapi_host,
                 http=client.NetworkingV1beta1HTTPIngressRuleValue(
                     paths=[client.NetworkingV1beta1HTTPIngressPath(
-                        path="/" + user_id + "/(.*)",
+                        path="/" + user_id + "/.*",
                         backend=client.NetworkingV1beta1IngressBackend(
                             service_port=service_port,
                             service_name=service_name)
