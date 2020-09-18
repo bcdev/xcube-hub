@@ -33,6 +33,7 @@ from xcube_gen.k8s import create_deployment_object, create_service_object, \
     create_service_if_not_exists, create_ingress_if_not_exists, count_pods
 from xcube_gen.poller import poll_pod_phase
 from xcube_gen.typedefs import JsonObject
+from xcube_gen.utilities import raise_for_invalid_username
 
 
 def delete_cate(user_id: str, prune: bool = False) -> bool:
@@ -69,6 +70,8 @@ def delete_cate(user_id: str, prune: bool = False) -> bool:
 def launch_cate(user_id: str) -> JsonObject:
     try:
         max_pods = 500
+
+        raise_for_invalid_username(user_id)
 
         if count_pods(label_selector="purpose=cate-webapi") > max_pods:
             raise api.ApiError(410, "Too many pods running.")

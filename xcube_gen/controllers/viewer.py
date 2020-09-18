@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+import time
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
@@ -28,7 +29,7 @@ from xcube_gen.controllers import user_namespaces
 from xcube_gen.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
     create_ingress_object, create_ingress, delete_deployment, delete_service, delete_ingress, \
     list_ingress, list_service, get_pod
-from xcube_gen.poller import poll_deployment_status
+from xcube_gen.poller import poll_deployment_status, poll_pod_phase
 from xcube_gen.typedefs import JsonObject
 
 
@@ -99,7 +100,11 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
                                         host_uri=host_uri)
         create_ingress(ingress, namespace=user_id)
 
-        poll_deployment_status(apps_v1_api.read_namespaced_deployment, status='ready', namespace=user_id, name=user_id)
+        # poll_deployment_status(apps_v1_api.read_namespaced_deployment, status='ready', namespace=user_id, name=user_id)
+        poll_pod_phase(get_pod, namespace=user_id, prefix=user_id)
+
+        grace = os.environ.get("CATE_LAUNCH_GRACE", False) or 2
+        time.sleep(grace)
 
         return dict(viewerUri=f'{xcube_webapi_uri}{xcube_viewer_path}',
                     serverUri=f'{xcube_webapi_uri}/{user_id}')
@@ -108,7 +113,7 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
 
 
 def get_status(user_id: str):
-    pod = get_pod(prefix=user_id + '-xcube-gen-ui', namespace=user_id)
+    pod = get_pod(prefix=user_id, namespace=user_id)
     if pod:
         return pod.status.to_dict()
     else:

@@ -1,3 +1,10 @@
+## Changes in v1.0.11
+
+### Fixes
+
+- When the xcube webapi is started the service waits ofr a grace period in order to avoid issues with the xcube-gen-ui.json
+- A username validation function was added to avoid conflicts with kubernetes naming conventions
+
 ## Changes in v1.0.10
 
 ### Fixes
