@@ -79,9 +79,9 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
                    f"-P 4000 -A 0.0.0.0 "
                    f"{bucket_url}"]
 
-        deployment = create_deployment_object(name=user_id + '-xcube',
+        deployment = create_deployment_object(name=user_id,
                                               user_id=user_id,
-                                              container_name=user_id + '-xcube',
+                                              container_name=user_id,
                                               image=xcube_image,
                                               container_port=4000,
                                               envs=envs,
