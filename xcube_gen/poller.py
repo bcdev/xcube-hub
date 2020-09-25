@@ -63,7 +63,7 @@ def poll_pod_phase(poller: Any, phase='running', **kwargs):
             return False
         elif pod.status.phase.lower() == phase:
             return True
-
-        return False
+        else:
+            return False
 
     poll_k8s(poller=poller, check_success=_is_phase, **kwargs)

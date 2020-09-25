@@ -101,6 +101,8 @@ def launch_cate(user_id: str) -> JsonObject:
 
         envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate"),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
+
+        volumes = [{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
         deployment = create_deployment_object(name=user_id + '-cate',
                                               user_id=user_id,
                                               container_name=user_id + '-cate',

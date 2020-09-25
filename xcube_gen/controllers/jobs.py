@@ -70,7 +70,10 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": "xcube-gen"}),
-        spec=client.V1PodSpec(restart_policy="Never", containers=[container]))
+        spec=client.V1PodSpec(
+            restart_policy="Never",
+            containers=[container]
+        ))
     # Create the specification of deployment
     spec = client.V1JobSpec(
         template=template,

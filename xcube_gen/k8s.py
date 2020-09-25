@@ -35,7 +35,8 @@ def create_pvc_if_not_exists(pvc: client.V1PersistentVolumeClaim, namespace: str
 
 
 def create_deployment_object(name: str, user_id: str, container_name: str, image: str, container_port: int,
-                             command: Union[str, Sequence[str]], envs: Optional[Sequence] = None):
+                             command: Union[str, Sequence[str]], envs: Optional[Sequence] = None,
+                             volume_mounts: Optional[Sequence] = None):
     # Configureate Pod template container
     envs = [] if not envs else envs
 
@@ -48,7 +49,7 @@ def create_deployment_object(name: str, user_id: str, container_name: str, image
         security_context=client.V1SecurityContext(run_as_user=1000, run_as_group=1000),
         image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)],
-        volume_mounts=[{'mountPath': "/home/cate", 'name': 'claim-' + user_id}]
+        volume_mounts=volume_mounts
     )
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(

@@ -27,6 +27,7 @@ import werkzeug
 from flask_cors import cross_origin
 from flask_oidc import OpenIDConnect
 from flask import g
+from werkzeug import exceptions
 
 import xcube_gen.api as api
 from xcube_gen import auth0
@@ -45,9 +46,9 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             dotenv_path: str = '.env'):
     """Create the service app."""
     load_dotenv()
-    oidc_client_secrets_file = os.environ.get('OIDC_CLIENT_SECRETS_FILE')
+    oidc_client_secrets_file = os.environ.get('OIDC_CLIENT_SECRETS_FILE', False)
     if not oidc_client_secrets_file:
-        raise ValueError('Cannot get secrets env')
+        print("WARNING: No oidc clients secret file. Only relevant if you use cate on keycloak.")
 
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     app.config.update({
@@ -69,10 +70,11 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     Cfg.load_config_once()
     KeyValueDatabase.instance(provider=cache_provider)
 
+    # noinspection PyStatementEffect
     def raise_for_invalid_json():
         try:
             flask.request.json
-        except werkzeug.exceptions.HTTPException as e:
+        except exceptions.HTTPException as e:
             raise api.ApiError(400, "Invalid JSON in request body " + str(e))
 
     @app.route(prefix + '/', methods=['GET'])
@@ -133,8 +135,11 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     def _cate_delete_webapi(user_id: str):
         try:
             # _accept_role('user')
+            prefer_header = flask.request.headers.get('Prefer', False)
+            prune = (prefer_header and prefer_header == 'prune') or False
+
             if flask.request.method == "DELETE":
-                return api.ApiResponse.success(cate.delete_cate(user_id=user_id, prune=False))
+                return api.ApiResponse.success(cate.delete_cate(user_id=user_id, prune=prune))
         except api.ApiError as e:
             return e.response
 
