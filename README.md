@@ -1,6 +1,3 @@
-![test-xcube-gen-api](https://github.com/bcdev/xcube-gen-api/workflows/test-xcube-gen-api/badge.svg)
-
-
 ## Setup
 
 ```bash
