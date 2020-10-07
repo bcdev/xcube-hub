@@ -2,12 +2,13 @@ FROM continuumio/miniconda3:4.8.2
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
+ENV XCUBE_GEN_API_VERSION=1.0.12
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
 LABEL name="xcube hub service"
 LABEL xcube_version=${XCUBE_BASE_VERSION}
-LABEL xcube_gen_version=${XCUBE_GEN_VERSION}
+LABEL xcube_gen_api_version=${XCUBE_GEN_API_VERSION}
 
 USER root
 SHELL ["/bin/bash", "-c"]
@@ -31,8 +32,8 @@ ADD --chown=1000:100 environment.yml environment.yml
 RUN mamba env create
 
 ADD --chown=1000:100 ./ .
-RUN source activate xcube-gen && pip install redis pydevd-pycharm~=202.6397.94
-RUN source activate xcube-gen && pip install -e .
+RUN source activate xcube-gen && pip install redis
+RUN source activate xcube-gen && pip install .
 
 COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
 

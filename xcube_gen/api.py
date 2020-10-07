@@ -39,10 +39,21 @@ class ApiResponse:
         return response
 
     @classmethod
-    def error(cls, error: Union[str, BaseException] = None, status_code: int = 500) -> Tuple[AnyDict, int]:
+    def error(cls,
+              error: Optional[Union[str, BaseException]] = None,
+              output: Optional[Union[str, BaseException]] = None,
+              traceback: Optional[Union[str, BaseException]] = None,
+              status_code: int = 500) -> Tuple[AnyDict, int]:
         response = dict(status='error')
         if error is not None:
             response['message'] = f'{error}'
+
+        if output is not None:
+            response['output'] = f'{output}'
+
+        if traceback is not None:
+            response['traceback'] = f'{traceback}'
+
         return response, status_code
 
 

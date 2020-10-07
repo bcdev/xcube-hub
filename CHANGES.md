@@ -1,3 +1,14 @@
+## Changes in v1.0.12
+
+### New Features
+
+- The launch of cate and xcube-gen-api handlers can now be configured
+
+### Fixes
+
+- Sets now correct xcube-gen-api version in Dockerfile's labels
+- The error can now handle errors and tracebacks  
+
 ## Changes in v1.0.11
 
 ### Fixes
