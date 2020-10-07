@@ -103,6 +103,8 @@ def launch_cate(user_id: str) -> JsonObject:
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
 
         volume_mounts = [{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
+        volumes = [{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
+
         deployment = create_deployment_object(name=user_id + '-cate',
                                               user_id=user_id,
                                               container_name=user_id + '-cate',
@@ -110,6 +112,7 @@ def launch_cate(user_id: str) -> JsonObject:
                                               envs=envs,
                                               container_port=4000,
                                               command=command,
+                                              volumes=volumes,
                                               volume_mounts=volume_mounts)
 
         # TODO: Make create_if_exists test for broken pods

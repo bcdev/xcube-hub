@@ -91,7 +91,7 @@ def raise_for_invalid_user_id(user_id: str):
     return True
 
 
-def requires_auth(f):
+def requires_auth0(f):
     """Determines if the access token is valid
     """
 

@@ -42,15 +42,60 @@ from dotenv import load_dotenv
 from xcube_gen.keyvaluedatabase import KeyValueDatabase
 
 
+# noinspection PyStatementEffect
+def raise_for_invalid_json():
+    try:
+        flask.request.json
+    except exceptions.HTTPException as e:
+        raise api.ApiError(400, "Invalid JSON in request body " + str(e))
+
+
 def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
             dotenv_path: str = '.env'):
     """Create the service app."""
     load_dotenv()
+    app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
+    flask_cors.CORS(app)
+    Cfg.load_config_once()
+    KeyValueDatabase.instance(provider=cache_provider)
+
+    @app.route(prefix + '/', methods=['GET'])
+    def _service_info():
+        return api.ApiResponse.success(info.service_info())
+
+    try:
+        launch_cate = int(os.environ.get("LAUNCH_CATE", 0))
+    except ValueError as e:
+        raise api.ApiError(500, "Error: LAUNCH_CATE must be 0 or 1.")
+
+    try:
+        launch_xcube_gen = int(os.environ.get("LAUNCH_XCUBE_GEN", 0))
+    except ValueError as e:
+        raise api.ApiError(500, "Error: LAUNCH_XCUBE_GEN must be 0 or 1.")
+
+    if launch_cate == 1:
+        app = new_cate_app(app, prefix)
+    if launch_xcube_gen == 1:
+        app = new_xcube_gen_app(app, prefix)
+
+    # Flask Error Handler
+    @app.errorhandler(werkzeug.exceptions.HTTPException)
+    def handle_http_exception(e):
+        return api.ApiResponse.error(e.description, e.code)
+
+    if os.environ.get('XCUBE_GEN_MOCK_SERVICES') == '1':
+        from .servicemocks import extend_app
+        extend_app(app, prefix)
+
+    return app
+
+
+def new_cate_app(app, prefix: str = ""):
+
     oidc_client_secrets_file = os.environ.get('OIDC_CLIENT_SECRETS_FILE', False)
     if not oidc_client_secrets_file:
-        print("WARNING: No oidc clients secret file. Only relevant if you use cate on keycloak.")
+        raise api.ApiError(500, "ERROR: No oidc clients secret file.")
 
-    app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
     app.config.update({
         'SECRET_KEY': 'SomethingNotEntirelySecret',
         'TESTING': True,
@@ -60,60 +105,12 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         'OIDC_REQUIRE_VERIFIED_EMAIL': False,
         # 'OVERWRITE_REDIRECT_URI': 'http://localhost:3000/login',
         'OIDC_USER_INFO_ENABLED': True,
-        'OIDC_OPENID_REALM': 'cate',
+        'OIDC_OPENID_REALM': 'https://xcube-gen.brockmann-consult.de/api/v1/',
         'OIDC_SCOPES': ['openid', 'email', 'profile'],
-        'OIDC_INTROSPECTION_AUTH_METHOD': 'client_secret_post'
+        'OIDC_INTROSPECTION_AUTH_METHOD': 'bearer'
     })
 
     oidc = OpenIDConnect(app)
-    flask_cors.CORS(app)
-    Cfg.load_config_once()
-    KeyValueDatabase.instance(provider=cache_provider)
-
-    # noinspection PyStatementEffect
-    def raise_for_invalid_json():
-        try:
-            flask.request.json
-        except exceptions.HTTPException as e:
-            raise api.ApiError(400, "Invalid JSON in request body " + str(e))
-
-    @app.route(prefix + '/', methods=['GET'])
-    def _service_info():
-        return api.ApiResponse.success(info.service_info())
-
-    @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth
-    def _jobs(user_id: str):
-        try:
-            auth0.raise_for_invalid_user_id(user_id=user_id)
-            raise_for_invalid_json()
-            if flask.request.method == 'GET':
-                return jobs.list(user_id=user_id)
-            if flask.request.method == 'PUT':
-                return jobs.create(user_id=user_id, cfg=flask.request.json)
-            if flask.request.method == 'DELETE':
-                return jobs.delete_all(user_id=user_id)
-        except api.ApiError as e:
-            return e.response
-
-    @app.route(prefix + '/jobs/<user_id>/<job_id>', methods=['GET', 'DELETE'])
-    @auth0.requires_auth
-    def _job(user_id: str, job_id: str):
-        try:
-            auth0.raise_for_invalid_user_id(user_id)
-            if flask.request.method == "GET":
-                return jobs.get(user_id=user_id, job_id=job_id)
-            if flask.request.method == "DELETE":
-                return jobs.delete_one(user_id=user_id, job_id=job_id)
-        except api.ApiError as e:
-            return e.response
-
-    def _accept_role(role: str):
-        token_info = g.oidc_token_info
-        if role not in token_info['resource_access']['cate-login']['roles']:
-            raise api.ApiError(403,
-                               f"Access denied. You need {role} access to cate. \n If registered already, "
-                               f"your account might be in the process of being approved.")
 
     @app.route(prefix + '/user/<user_id>/webapi', methods=['GET', 'POST', 'DELETE'])
     @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
@@ -144,7 +141,6 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/webapi/count', methods=['GET'])
-    # @oidc.accept_token(require_token=True, scopes_required=['profile'])
     @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
     def _cate_count_webapis():
         try:
@@ -154,7 +150,6 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/webapi/available', methods=['GET'])
-    # @oidc.accept_token(require_token=True, scopes_required=['profile'])
     @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
     def _cate_get_webapi_availabale():
         try:
@@ -167,8 +162,47 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
         except api.ApiError as e:
             return e.response
 
+    return app
+
+
+def new_xcube_gen_app(app, prefix: str = ""):
+
+    @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'PUT', 'DELETE'])
+    @auth0.requires_auth0
+    def _jobs(user_id: str):
+        try:
+            auth0.raise_for_invalid_user_id(user_id=user_id)
+            raise_for_invalid_json()
+            if flask.request.method == 'GET':
+                return jobs.list(user_id=user_id)
+            if flask.request.method == 'PUT':
+                return jobs.create(user_id=user_id, cfg=flask.request.json)
+            if flask.request.method == 'DELETE':
+                return jobs.delete_all(user_id=user_id)
+        except api.ApiError as e:
+            return e.response
+
+    @app.route(prefix + '/jobs/<user_id>/<job_id>', methods=['GET', 'DELETE'])
+    @auth0.requires_auth0
+    def _job(user_id: str, job_id: str):
+        try:
+            auth0.raise_for_invalid_user_id(user_id)
+            if flask.request.method == "GET":
+                return jobs.get(user_id=user_id, job_id=job_id)
+            if flask.request.method == "DELETE":
+                return jobs.delete_one(user_id=user_id, job_id=job_id)
+        except api.ApiError as e:
+            return e.response
+
+    def _accept_role(role: str):
+        token_info = g.oidc_token_info
+        if role not in token_info['resource_access']['cate-login']['roles']:
+            raise api.ApiError(403,
+                               f"Access denied. You need {role} access to cate. \n If registered already, "
+                               f"your account might be in the process of being approved.")
+
     @app.route(prefix + '/cubes/<user_id>/xcviewer', methods=['GET', 'POST'])
-    @auth0.requires_auth
+    @auth0.requires_auth0
     def _cubes_viewer(user_id: str):
         try:
             auth0.raise_for_invalid_user_id(user_id)
@@ -192,7 +226,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth
+    @auth0.requires_auth0
     def _user_data(user_name: str):
         try:
             res = hashlib.md5(user_name.encode())
@@ -213,7 +247,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth
+    @auth0.requires_auth0
     def _processing_units(user_name: str):
         try:
             raise_for_invalid_json()
@@ -238,7 +272,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
             return e.response
 
     @app.route(prefix + '/jobs/<user_id>/<job_id>/callback', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth
+    @auth0.requires_auth0
     def _callback(user_id: str, job_id: str):
         try:
             auth0.raise_for_invalid_user_id(user_id=user_id)
@@ -261,15 +295,6 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     @app.route(prefix + '/viewer')
     def _viewer():
         return app.send_static_file('viewer/index.html')
-
-    # Flask Error Handler
-    @app.errorhandler(werkzeug.exceptions.HTTPException)
-    def handle_http_exception(e):
-        return api.ApiResponse.error(e.description, e.code)
-
-    if os.environ.get('XCUBE_GEN_MOCK_SERVICES') == '1':
-        from .servicemocks import extend_app
-        extend_app(app, prefix)
 
     return app
 
