@@ -2,6 +2,9 @@
 
 ### New Features
 
+- Getting a job status does now raise an HTTP error when the job had failed.
+- The ApiError and Apireponse returns now outputs and tracebacks when applicable
+
 ### Fixes
 
 - Set ingress timeouts to 1 day

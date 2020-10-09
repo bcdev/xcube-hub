@@ -23,7 +23,7 @@ import json
 import os
 import uuid
 from pprint import pprint
-from typing import Union
+from typing import Union, Sequence
 
 from kubernetes import client
 from kubernetes.client.rest import ApiException
@@ -161,7 +161,7 @@ def status(user_id: str, job_id: str) -> AnyDict:
     return api_response.status.to_dict()
 
 
-def logs(user_id: str, job_id: str) -> AnyDict:
+def logs(user_id: str, job_id: str) -> Sequence:
     api_pod_instance = client.CoreV1Api()
 
     pods = api_pod_instance.list_namespaced_pod(namespace=user_id, label_selector=f"job-name={job_id}")
@@ -178,6 +178,9 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
     try:
         output = logs(user_id=user_id, job_id=job_id)
         stat = status(user_id=user_id, job_id=job_id)
+        if stat['failed']:
+            raise api.ApiError(400, message=f"Job {job_id} failed", output='\n'.join(output))
+
         return api.ApiResponse.success({'job_id': job_id, 'status': stat, 'output': output})
     except ApiException as e:
         pprint(str(e))
