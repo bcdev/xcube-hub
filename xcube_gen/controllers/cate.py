@@ -69,7 +69,9 @@ def delete_cate(user_id: str, prune: bool = False) -> bool:
 
 def launch_cate(user_id: str) -> JsonObject:
     try:
-        max_pods = 500
+        max_pods = 50
+
+        grace = os.environ.get("CATE_LAUNCH_GRACE", 2)
 
         raise_for_invalid_username(user_id)
 
@@ -137,8 +139,12 @@ def launch_cate(user_id: str) -> JsonObject:
 
         poll_pod_phase(get_pod, namespace=user_id, prefix=user_id)
 
-        grace = os.environ.get("CATE_LAUNCH_GRACE", False) or 2
-        time.sleep(grace)
+        try:
+            grace = int(grace)
+        except ValueError as e:
+            raise api.ApiError(500, "Grace wait period must be an integer.")
+
+        time.sleep(int(grace))
 
         return dict(serverUrl=f'https://{cate_webapi_uri}/{user_id}')
     except ApiException as e:
