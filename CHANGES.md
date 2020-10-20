@@ -10,7 +10,7 @@
 
 ### Fixes
 
-- Set ingress timeouts to one day
+- Set ingress timeouts to 1 day
 - Ensured that the grace period foe launching cate services is integer 
 
 ## Changes in v1.0.12
