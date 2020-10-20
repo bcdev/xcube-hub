@@ -4,7 +4,7 @@
 
 ```bash
 cd xcube-gen
-conda env create
+mamba env create
 conda activate xcube-gen
 python setup.py develop
 ```
