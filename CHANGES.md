@@ -6,7 +6,7 @@
 - Set ingress websocket timeouts to 1 day
 - Ensured that the grace period foe launching cate services is integer 
 - Getting a job status does now raise an HTTP error when the job had failed.
-- The ApiError and Api-response returns now outputs and tracebacks when applicable
+- The ApiError and webapi-response returns now outputs and tracebacks when applicable
 
 ### Fixes
 
