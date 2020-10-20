@@ -1,15 +1,8 @@
-## Changes in v1.0.14.dev1
+## Changes in v1.0.13.dev1
 
 ### New Features
 
 - data-stores.json location is now configurable via environment variables.
-
-### Fixes
-
-## Changes in v1.0.13
-
-### New Features
-
 - Set ingress websocket timeouts to 1 day
 - Ensured that the grace period foe launching cate services is integer 
 - Getting a job status does now raise an HTTP error when the job had failed.
