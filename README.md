@@ -1,3 +1,5 @@
+[![Docker Repository on Quay](https://quay.io/repository/bcdev/xcube-hub/status "Docker Repository on Quay")](https://quay.io/repository/bcdev/xcube-hub)
+
 ## Setup
 
 ```bash
