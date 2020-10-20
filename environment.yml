@@ -1,4 +1,4 @@
-name: xcube-gen
+name: xcube-hub
 channels:
   - conda-forge
   - defaults
