@@ -31,11 +31,11 @@ install:
   - conda install -y -c conda-forge mamba;
   - conda info -a
   - mamba env create
-  - source activate xcube_hub
+  - source activate xcube-hub
   - python setup.py install
 
 script:
-  - py.test -v --cov=xcube_hub
+  - py.test -v --cov=xcube-hub
   - pip install codecov
   - codecov --env TRAVIS_PYTHON_VERSION
 
