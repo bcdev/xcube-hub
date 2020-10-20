@@ -1,9 +1,9 @@
 import datetime
 from typing import Optional
 
-from xcube_gen.api import ApiError, get_json_request_value
-from xcube_gen.database import Database
-from xcube_gen.typedefs import JsonObject
+from xcube_hub.api import ApiError, get_json_request_value
+from xcube_hub.database import Database
+from xcube_hub.typedefs import JsonObject
 
 
 def get_processing_units(user_id: str, include_history: bool = False) -> JsonObject:

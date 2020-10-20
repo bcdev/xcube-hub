@@ -29,17 +29,17 @@ from flask_oidc import OpenIDConnect
 from flask import g
 from werkzeug import exceptions
 
-import xcube_gen.api as api
-from xcube_gen import auth0
-from xcube_gen.cfg import Cfg
-from xcube_gen.controllers import datastores, callback, cate
-from xcube_gen.controllers import info
-from xcube_gen.controllers import jobs
-from xcube_gen.controllers import sizeandcost
-from xcube_gen.controllers import users
-from xcube_gen.controllers import viewer
+import xcube_hub.api as api
+from xcube_hub import auth0
+from xcube_hub.cfg import Cfg
+from xcube_hub.controllers import datastores, callback, cate
+from xcube_hub.controllers import info
+from xcube_hub.controllers import jobs
+from xcube_hub.controllers import sizeandcost
+from xcube_hub.controllers import users
+from xcube_hub.controllers import viewer
 from dotenv import load_dotenv
-from xcube_gen.keyvaluedatabase import KeyValueDatabase
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
 
 # noinspection PyStatementEffect

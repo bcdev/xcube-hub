@@ -1,9 +1,6 @@
 import os
 
-from xcube_gen.service import new_app
-
-# import pydevd_pycharm
-# pydevd_pycharm.settrace('172.17.0.1', port=9000, stdoutToServer=True, stderrToServer=True)
+from xcube_hub.service import new_app
 
 
 def new_wsgi_app():

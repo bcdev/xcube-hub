@@ -1,11 +1,11 @@
 import datetime
 import os
 
-from xcube_gen.api import SERVER_DESCRIPTION
-from xcube_gen.api import SERVER_NAME
-from xcube_gen.api import SERVER_START_TIME
-from xcube_gen.typedefs import JsonObject
-from xcube_gen.version import version
+from xcube_hub.api import SERVER_DESCRIPTION
+from xcube_hub.api import SERVER_NAME
+from xcube_hub.api import SERVER_START_TIME
+from xcube_hub.typedefs import JsonObject
+from xcube_hub.version import version
 
 
 def service_info() -> JsonObject:

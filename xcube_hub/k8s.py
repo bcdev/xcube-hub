@@ -2,7 +2,7 @@ from typing import Optional, Sequence, Union
 from kubernetes import client
 from kubernetes.client import V1Pod
 
-from xcube_gen.poller import poll_deployment_status
+from xcube_hub.poller import poll_deployment_status
 
 
 def create_pvc_object(user_id: str, storage: str = '10Gi'):

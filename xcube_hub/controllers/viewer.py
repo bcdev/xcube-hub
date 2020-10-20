@@ -24,13 +24,13 @@ import time
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from xcube_gen import api
-from xcube_gen.controllers import user_namespaces
-from xcube_gen.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
+from xcube_hub import api
+from xcube_hub.controllers import user_namespaces
+from xcube_hub.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
     create_ingress_object, create_ingress, delete_deployment, delete_service, delete_ingress, \
     list_ingress, list_service, get_pod
-from xcube_gen.poller import poll_deployment_status, poll_pod_phase
-from xcube_gen.typedefs import JsonObject
+from xcube_hub.poller import poll_deployment_status, poll_pod_phase
+from xcube_hub.typedefs import JsonObject
 
 
 def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:

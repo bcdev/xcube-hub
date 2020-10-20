@@ -2,9 +2,9 @@ import os
 import unittest
 
 from test.setup_utils import setup_auth
-from xcube_gen.api import ApiError
-from xcube_gen.controllers.sizeandcost import get_size_and_cost
-from xcube_gen.service import new_app
+from xcube_hub.api import ApiError
+from xcube_hub.controllers.sizeandcost import get_size_and_cost
+from xcube_hub.service import new_app
 
 
 class CalcTest(unittest.TestCase):

@@ -2,7 +2,7 @@ from typing import Optional
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from xcube_gen import api
+from xcube_hub import api
 
 
 def create_if_not_exists(user_id: Optional[str] = None):

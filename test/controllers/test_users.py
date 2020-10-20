@@ -6,11 +6,11 @@ from test.setup_utils import setup_auth
 import boto3
 import moto
 
-from xcube_gen.controllers.users import get_user_data
-from xcube_gen.controllers.users import add_processing_units
-from xcube_gen.controllers.users import subtract_processing_units
-from xcube_gen.database import DEFAULT_DB_BUCKET_NAME
-from xcube_gen.service import new_app
+from xcube_hub.controllers.users import get_user_data
+from xcube_hub.controllers.users import add_processing_units
+from xcube_hub.controllers.users import subtract_processing_units
+from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
+from xcube_hub.service import new_app
 
 
 class UsersTest(unittest.TestCase):

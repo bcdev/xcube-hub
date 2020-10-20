@@ -3,9 +3,9 @@ import unittest
 from unittest.mock import patch
 
 from test.setup_utils import setup_auth
-from xcube_gen import api
-from xcube_gen.auth0 import raise_for_invalid_user_id
-from xcube_gen.service import new_app
+from xcube_hub import api
+from xcube_hub.auth0 import raise_for_invalid_user_id
+from xcube_hub.service import new_app
 from dotenv import load_dotenv
 
 

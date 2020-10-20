@@ -1,9 +1,9 @@
-from xcube_gen import api
-from xcube_gen.api import get_json_request_value
-from xcube_gen.keyvaluedatabase import KeyValueDatabase
+from xcube_hub import api
+from xcube_hub.api import get_json_request_value
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
-from xcube_gen.controllers.users import subtract_processing_units
-from xcube_gen.typedefs import JsonObject, AnyDict
+from xcube_hub.controllers.users import subtract_processing_units
+from xcube_hub.typedefs import JsonObject, AnyDict
 
 
 def get_callback(user_id: str, job_id: str) -> JsonObject:

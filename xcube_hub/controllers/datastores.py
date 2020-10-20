@@ -1,8 +1,8 @@
 import json
 import os.path
 
-from xcube_gen import api
-from xcube_gen.typedefs import JsonObject
+from xcube_hub import api
+from xcube_hub.typedefs import JsonObject
 
 
 def get_datastores() -> JsonObject:

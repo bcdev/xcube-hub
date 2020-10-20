@@ -25,15 +25,15 @@ from typing import Optional
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from xcube_gen import api
-from xcube_gen.controllers import user_namespaces
-from xcube_gen.k8s import create_deployment_object, create_service_object, \
+from xcube_hub import api
+from xcube_hub.controllers import user_namespaces
+from xcube_hub.k8s import create_deployment_object, create_service_object, \
     create_ingress_object, delete_deployment, delete_service, delete_ingress, \
     list_ingress, list_service, get_pod, create_pvc_object, create_pvc_if_not_exists, create_deployment_if_not_exists, \
     create_service_if_not_exists, create_ingress_if_not_exists, count_pods
-from xcube_gen.poller import poll_pod_phase
-from xcube_gen.typedefs import JsonObject
-from xcube_gen.utilities import raise_for_invalid_username
+from xcube_hub.poller import poll_pod_phase
+from xcube_hub.typedefs import JsonObject
+from xcube_hub.utilities import raise_for_invalid_username
 
 
 def delete_cate(user_id: str, prune: bool = False) -> bool:

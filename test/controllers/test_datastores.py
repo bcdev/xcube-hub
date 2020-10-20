@@ -1,5 +1,5 @@
 import unittest
-from xcube_gen.controllers.datastores import get_datastores
+from xcube_hub.controllers.datastores import get_datastores
 
 
 class DatastoresTest(unittest.TestCase):

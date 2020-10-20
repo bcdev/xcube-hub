@@ -1,9 +1,9 @@
 import unittest
 from click.testing import CliRunner
 
-from xcube_gen.cli import cli
-from xcube_gen.cli import start
-from xcube_gen.cli import stop
+from xcube_hub.cli import cli
+from xcube_hub.cli import start
+from xcube_hub.cli import stop
 
 
 class CliTest(unittest.TestCase):

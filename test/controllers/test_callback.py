@@ -5,10 +5,10 @@ import os
 
 from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
-from xcube_gen import api
-from xcube_gen.controllers.callback import get_callback, put_callback, delete_callback
-from xcube_gen.keyvaluedatabase import KeyValueDatabase
-from xcube_gen.service import new_app
+from xcube_hub import api
+from xcube_hub.controllers.callback import get_callback, put_callback, delete_callback
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
+from xcube_hub.service import new_app
 
 
 KeyValueDatabase.use_mocker = True

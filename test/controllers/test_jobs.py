@@ -3,7 +3,7 @@ import unittest
 
 from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
-from xcube_gen.service import new_app
+from xcube_hub.service import new_app
 import subprocess
 
 

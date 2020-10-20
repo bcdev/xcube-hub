@@ -1,8 +1,8 @@
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from xcube_gen import api
-from xcube_gen.typedefs import AnyDict
+from xcube_hub import api
+from xcube_hub.typedefs import AnyDict
 
 
 def get_pods(user_id: str, job_id: str) -> AnyDict:

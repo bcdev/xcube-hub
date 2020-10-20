@@ -28,11 +28,11 @@ from typing import Union, Sequence
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from xcube_gen import api
-from xcube_gen.auth0 import get_token_auth_header
-from xcube_gen.controllers import user_namespaces
-from xcube_gen.keyvaluedatabase import KeyValueDatabase
-from xcube_gen.typedefs import AnyDict, Error
+from xcube_hub import api
+from xcube_hub.auth0 import get_token_auth_header
+from xcube_hub.controllers import user_namespaces
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
+from xcube_hub.typedefs import AnyDict, Error
 
 
 def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:

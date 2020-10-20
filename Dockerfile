@@ -2,7 +2,7 @@ FROM continuumio/miniconda3:4.8.2
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
-ENV XCUBE_GEN_API_DOCKER_VERSION=1.0.13.dev2
+ENV XCUBE_GEN_API_DOCKER_VERSION=1.0.13.dev1
 ENV XCUBE_GEN_API_VERSION=1.0.13.dev1
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
 
@@ -33,8 +33,8 @@ ADD --chown=1000:100 environment.yml environment.yml
 RUN mamba env create
 
 ADD --chown=1000:100 ./ .
-RUN source activate xcube-gen && pip install redis
-RUN source activate xcube-gen && pip install .
+RUN source activate xcube-hub && pip install redis
+RUN source activate xcube-hub && pip install .
 
 COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
 
@@ -42,5 +42,5 @@ COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_US
 EXPOSE 8000
 EXPOSE 5050
 
-#CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-genserv start -p 8000 -a 0.0.0.0"]
-CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+#CMD ["/bin/bash", "-c", "source activate xcube-hub && xcube-hub start -p 8000 -a 0.0.0.0"]
+CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]

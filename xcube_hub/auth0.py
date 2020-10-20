@@ -8,8 +8,8 @@ import flask
 import requests
 from jose import jwt
 
-from xcube_gen import api
-from xcube_gen.keyvaluedatabase import KeyValueDatabase
+from xcube_hub import api
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
 ALGORITHMS = ["RS256"]

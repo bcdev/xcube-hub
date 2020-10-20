@@ -22,7 +22,7 @@
 import sys
 import click
 from typing import Optional
-from xcube_gen.version import version
+from xcube_hub.version import version
 
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('172.17.0.1', port=9000, stdoutToServer=True, stderrToServer=True)
@@ -46,7 +46,7 @@ def start(address: Optional[str],
     Start the service.
     """
 
-    from xcube_gen.service import start
+    from xcube_hub.service import start
     start(host=address, port=port, debug=debug, cache_provider=cache_provider)
 
 
@@ -59,7 +59,7 @@ def stop():
 
 
 # noinspection PyShadowingBuiltins,PyUnusedLocal
-@click.group(name="genserv")
+@click.group(name="xcube-hub")
 @click.version_option(version)
 def cli():
     """
