@@ -5,7 +5,6 @@
 
 sudo: required
 language: bash
-services: docker
 os: linux
 
 install:
@@ -17,12 +16,13 @@ install:
   - mamba env create
   - source activate xcube-hub
   - python setup.py install
-  - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-  - chmod +x ./kubectl
-  - sudo mv ./kubectl /usr/local/bin/kubectl
-  - mkdir ${HOME}/.kube
-  - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
-  - kubectl config use-context arn:aws:eks:eu-central-1:346516713328:cluster/xcube-webapis-stage
+
+before_script:
+  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+  - sudo minikube start --vm-driver=none --kubernetes-version=v1.7.0
+  - minikube update-context
+  - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
 
 script:
   - kubectl get pods
