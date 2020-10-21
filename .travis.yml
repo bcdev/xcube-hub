@@ -12,16 +12,20 @@ install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda;
   - export PATH="$HOME/miniconda/bin:$PATH";
-  - curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-  - sudo install minikube-linux-amd64 /usr/local/bin/minikube
-  - minikube start --driver docker
   - conda install -y -c conda-forge mamba;
   - conda info -a
   - mamba env create
   - source activate xcube-hub
   - python setup.py install
+  - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+  - chmod +x ./kubectl
+  - sudo mv ./kubectl /usr/local/bin/kubectl
+  - mkdir ${HOME}/.kube
+  - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
+  - kubectl config use-context arn:aws:eks:eu-central-1:346516713328:cluster/xcube-webapis-stage
 
 script:
+  - kubectl get pods
   - py.test -v --cov=xcube-hub
   - pip install codecov
   - codecov --env TRAVIS_PYTHON_VERSION

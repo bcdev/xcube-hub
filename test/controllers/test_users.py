@@ -17,7 +17,6 @@ class UsersTest(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["RUN_LOCAL"] = '1'
         self._access_token = setup_auth()
-        print(self._access_token)
         self._app = new_app()
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
