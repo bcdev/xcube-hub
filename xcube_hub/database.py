@@ -95,10 +95,9 @@ class Database:
             response = self._client.get_object(**self._user_data_kwargs(user_name, dataset_name))
         except self._client.exceptions.NoSuchKey:
             return None
-        # print('get_user_data:', response)
         object_data = self._check_response(response)
         if object_data is not None:
-            return json.load(object_data, encoding='utf-8')
+            return json.load(object_data)
         else:
             raise DatabaseError('No data found')
 

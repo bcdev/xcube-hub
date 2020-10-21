@@ -1,15 +1,19 @@
+import hashlib
 import json
 import unittest
 from unittest.mock import patch
 import os
 
+import boto3
+import moto
+
 from test.config import SH_CFG
 from test.setup_utils import setup_auth, set_env
 from xcube_hub import api
 from xcube_hub.controllers.callback import get_callback, put_callback, delete_callback
+from xcube_hub.controllers.users import add_processing_units
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.service import new_app
-
 
 KeyValueDatabase.use_mocker = True
 
@@ -30,7 +34,7 @@ class TestCallback(unittest.TestCase):
             'status': 'ERROR'
         }
 
-        mock_get_patch = patch('xcube_gen.keyvaluedatabase.KeyValueDatabase.get')
+        mock_get_patch = patch('xcube_hub.keyvaluedatabase.KeyValueDatabase.get')
         mock_get = mock_get_patch.start()
         mock_get.return_value = json.dumps(expected)
 
@@ -47,30 +51,62 @@ class TestCallback(unittest.TestCase):
         mock_get_patch.stop()
 
     def test_put_callback(self):
-        expected = {
-            "status": "CUBE_GENERATED",
-            "message": "Cube generation finished",
-            "values": {
-                "punits": {
-                    "total_count": 1000
+        with moto.mock_s3():
+            s3 = boto3.client('s3')
+            s3.create_bucket(Bucket='eurodatacube')
+            user_name = 'heinrich'
+            user_id = hashlib.md5(user_name.encode('utf-8')).hexdigest()
+
+            punits_request_1 = dict(punits=dict(total_count=1000000,
+                                                user_name=user_name,
+                                                price_amount=200,
+                                                price_currency='€'))
+
+            add_processing_units(user_id, punits_request_1)
+
+            punits = {
+                'schema': {
+                    'dims': {
+                        'time': 1177,
+                        'y': 2048,
+                        'x': 2048
+                    },
+                    'image_size': [2048, 2048],
+                    'tile_size': [1024, 1024],
+                    'num_variables': 2,
+                    'num_tiles': [2, 2],
+                    'num_requests': 9416,
+                    'num_bytes': 39493566464
+                },
+                'punits': {
+                    'input_count': 37664,
+                    'input_weight': 1.0,
+                    'output_count': 37664,
+                    'output_weight': 1.0,
+                    'total_count': 37664
                 }
             }
-        }
 
-        mock_put_patch = patch('xcube_gen.keyvaluedatabase.KeyValueDatabase.get')
-        mock_put = mock_put_patch.start()
-        mock_put.return_value = True
-        mock_put_patch.stop()
+            expected = {
+                "state": {"error": False},
+                "sender": "on_end",
+                "message": punits
+            }
 
-        res = put_callback(user_id='ad659004d45088b035f19ec6ff1530b43', job_id='job3', value=expected)
-        cache = KeyValueDatabase.instance()
-        cache.set('job3', self._sh_config)
+            mock_put_patch = patch('xcube_hub.keyvaluedatabase.KeyValueDatabase.get')
+            mock_put = mock_put_patch.start()
+            mock_put.return_value = True
+            mock_put_patch.stop()
 
-        res = put_callback('ad659004d45088b035f19ec6ff1530b43', 'job3', expected)
-        self.assertTrue(res)
+            res = put_callback(user_id='620698091bdd62d3dc05d58c2db07939', job_id='job3', value=expected)
+            cache = KeyValueDatabase.instance()
+            cache.set('job3', self._sh_config)
+
+            res = put_callback('620698091bdd62d3dc05d58c2db07939', 'job3', expected)
+            self.assertTrue(res)
 
     def test_delete_callback(self):
-        mock_delete_patch = patch('xcube_gen.keyvaluedatabase.KeyValueDatabase.delete')
+        mock_delete_patch = patch('xcube_hub.keyvaluedatabase.KeyValueDatabase.delete')
         mock_delete = mock_delete_patch.start()
         mock_delete.return_value = 1
 

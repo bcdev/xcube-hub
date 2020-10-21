@@ -10,6 +10,7 @@ import subprocess
 class TestJobs(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["RUN_LOCAL"] = '1'
+        os.environ["XCUBE_GEN_API_CALLBACK_URL"] = 'http://test/'
         self._access_token = setup_auth()
         self._app = new_app()
         self._client = self._app.test_client()
@@ -22,6 +23,15 @@ class TestJobs(unittest.TestCase):
     def test_create(self):
         res = self._client.put('/jobs/daffy-duck', json=SH_CFG)
         self.assertEqual("200 OK", res.status)
+
+    def test_create_without_callback_url(self):
+        del os.environ["XCUBE_GEN_API_CALLBACK_URL"]
+        res = self._client.put('/jobs/daffy-duck', json=SH_CFG)
+
+        response = res.json
+
+        self.assertEqual(400, res.status_code)
+        self.assertEqual('XCUBE_GEN_API_CALLBACK_URL must be given', response['message'])
 
     def test_delete(self):
         set_env()

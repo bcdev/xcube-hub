@@ -9,18 +9,18 @@ class TestKvDB(unittest.TestCase):
     def test_instance(self):
         KeyValueDatabase._instance = None
         inst = KeyValueDatabase.instance(provider='inmemory')
-        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._InMemoryKvDB'>")
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_hub.keyvaluedatabase._InMemoryKvDB'>")
 
         KeyValueDatabase._instance = None
         inst = KeyValueDatabase.instance(provider='leveldb', name='/tmp/testinstance')
-        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._LevelDBKvDB'>")
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_hub.keyvaluedatabase._LevelDBKvDB'>")
 
         KeyValueDatabase._instance = None
         inst = KeyValueDatabase.instance(provider='redis')
-        self.assertEqual(str(type(inst._provider)), "<class 'xcube_gen.keyvaluedatabase._RedisKvDB'>")
+        self.assertEqual(str(type(inst._provider)), "<class 'xcube_hub.keyvaluedatabase._RedisKvDB'>")
 
         inst = KeyValueDatabase.instance()
-        self.assertEqual(str(type(inst)), "<class 'xcube_gen.keyvaluedatabase.KeyValueDatabase'>")
+        self.assertEqual(str(type(inst)), "<class 'xcube_hub.keyvaluedatabase.KeyValueDatabase'>")
 
         KeyValueDatabase._instance = None
         with self.assertRaises(api.ApiError) as e:

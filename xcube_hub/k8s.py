@@ -1,6 +1,6 @@
 from typing import Optional, Sequence, Union
 from kubernetes import client
-from kubernetes.client import V1Pod
+from kubernetes.client import V1Pod, V1PodList
 
 from xcube_hub.poller import poll_deployment_status
 
@@ -241,25 +241,32 @@ def list_ingress(namespace: str = 'default'):
 def get_pod(prefix: str, namespace: Optional[str] = None, label_selector: str = None) -> Union[type(None), V1Pod]:
     pods = get_pods(namespace=namespace, label_selector=label_selector)
 
+    res = None
     for pod in pods.items:
         if pod.metadata.name.startswith(prefix):
-            return pod
-    return None
+            res = pod
+
+    # if not res:
+    #     raise api.ApiError(404, f"No pods for {prefix} in namespace {namespace} found")
+
+    return res
 
 
-def get_pods(namespace: Optional[str] = None, label_selector: str = None):
+def get_pods(namespace: Optional[str] = None, label_selector: str = None) -> V1PodList:
     v1 = client.CoreV1Api()
 
     if namespace:
         if label_selector:
-            return v1.list_namespaced_pod(namespace=namespace, label_selector=label_selector)
+            pods = v1.list_namespaced_pod(namespace=namespace, label_selector=label_selector)
         else:
-            return v1.list_namespaced_pod(namespace=namespace)
+            pods = v1.list_namespaced_pod(namespace=namespace)
     else:
         if label_selector:
-            return v1.list_pod_for_all_namespaces(label_selector=label_selector)
+            pods = v1.list_pod_for_all_namespaces(label_selector=label_selector)
         else:
-            return v1.list_pod_for_all_namespaces()
+            pods = v1.list_pod_for_all_namespaces()
+
+    return pods
 
 
 def count_pods(namespace: Optional[str] = None, label_selector: str = None) -> int:

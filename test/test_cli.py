@@ -12,7 +12,7 @@ class CliTest(unittest.TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, '--help')
         self.assertEqual(result.exit_code, 0)
-        self.assertTrue(result.output.startswith('Usage: genserv [OPTIONS] COMMAND [ARGS]...\n\n  '),
+        self.assertTrue(result.output.startswith('Usage: xcube-hub [OPTIONS] COMMAND [ARGS]...\n\n  '),
                         msg=result.output)
 
     def test_start(self):

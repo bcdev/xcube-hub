@@ -16,87 +16,229 @@ class CalcTest(unittest.TestCase):
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
 
     def test_get_size_and_cost_sh(self):
-        result = get_size_and_cost({
-            "input_config": {
-                "datastore_id": "sentinelhub",
-            },
+        data = {"input_configs": [
+            {
+                "store_id": "@sentinelhub",
+                "data_id": "S2L2A",
+                "open_params": {
+                    "tile_size": [
+                        1024,
+                        1024
+                    ]
+                }
+            }
+        ],
             "cube_config": {
-                "dataset_name": "S2L2A",
-                "variable_names": ["B01", "B02", "B03"],
-                "tile_size": [1000, 1000],
-                "geometry": [7.0, 53.0, 9.0, 55.0],
+                "variable_names": [
+                    "B01",
+                    "B02"
+                ],
+                "bbox": [
+                    7,
+                    53,
+                    9,
+                    55
+                ],
                 "spatial_res": 0.001,
-                "crs": "http://www.opengis.net/def/crs/EPSG/0/4326",
-                "time_range": ["2019-01-01", "2019-12-31"],
-                "time_period": "1D",
-                "time_tolerance": "10M"
+                "crs": "WGS84",
+                "time_range": [
+                    "2020-09-01",
+                    "2020-10-20"
+                ],
+                "time_period": "1H"
             },
             "output_config": {
+                "store_id": "s3",
+                "store_params": {
+                    "bucket_name": "test",
+                    "aws_access_key_id": "dasvasdadsv",
+                    "aws_secret_access_key": "dfvdsfvdsvdfsv"
+                }
             }
-        })
-        self.assertEqual({'punits': {'input_count': 17520,
-                                     'input_weight': 1.0,
-                                     'output_count': 17520,
-                                     'output_weight': 1.0,
-                                     'total_count': 17520},
-                          'schema': {'dims': {'lat': 2000, 'lon': 2000, 'time': 365},
-                                     'num_variables': 3,
-                                     'num_requests': 4380,
-                                     'num_bytes': 17520000000,
-                                     'num_tiles': [2, 2],
-                                     'image_size': [2000, 2000],
-                                     'tile_size': [1000, 1000]}},
-                         result)
+        }
+        result = get_size_and_cost(data)
+        self.assertDictEqual({
+            'schema': {
+                'dims': {
+                    'time': 1177,
+                    'y': 2048,
+                    'x': 2048
+                },
+                'image_size': [2048, 2048],
+                'tile_size': [1024, 1024],
+                'num_variables': 2,
+                'num_tiles': [2, 2],
+                'num_requests': 9416,
+                'num_bytes': 39493566464
+            },
+            'punits': {
+                'input_count': 37664,
+                'input_weight': 1.0,
+                'output_count': 37664,
+                'output_weight': 1.0,
+                'total_count': 37664
+            }
+        }, result)
 
     def test_get_size_and_cost_cci(self):
         result = get_size_and_cost({
-            "input_config": {
-                "datastore_id": "cciodp",
-            },
+            "input_configs": [
+                {
+                    "store_id": "@cciodp",
+                    "data_id": "esacci.OC.mon.L3S.CHLOR_A.multi-sensor.multi-platform.MERGED.3-1.geographic",
+                    "open_params": {}
+                }
+            ],
             "cube_config": {
-                "dataset_name": "esacci.OZONE.month.L3.NP.multi-sensor.multi-platform.MERGED.fv0002.r1",
-                "variable_names": ["O3e_du_tot", "surface_pressure"],
-                "geometry": [-180, -90, 180, 90],
-                "spatial_res": 0.5,
-                "tile_size": [720, 360],
-                "crs": "http://www.opengis.net/def/crs/EPSG/0/4326",
-                "time_range": ["2010-01-01", "2010-12-31"],
-                "time_period": "1D",
+                "variable_names": [
+                    "chlor_a"
+                ],
+                "bbox": [
+                    7,
+                    53,
+                    9,
+                    55
+                ],
+                "spatial_res": 0.041666666666666664,
+                "crs": "WGS84",
+                "time_range": [
+                    "1997-09-03",
+                    "2016-12-31"
+                ],
+                "time_period": "5D"
             },
             "output_config": {
+                "store_id": "s3",
+                "store_params": {
+                    "bucket_name": "test",
+                    "aws_access_key_id": "dfsvdfsv",
+                    "aws_secret_access_key": "dfvdas"
+                }
             }
         })
-        self.assertEqual({'punits': {'input_count': 730,
-                                     'input_weight': 1.0,
-                                     'output_count': 730,
-                                     'output_weight': 1.0,
-                                     'total_count': 730},
-                          'schema': {'dims': {'lat': 360, 'lon': 720, 'time': 365},
-                                     'image_size': [720, 360],
-                                     'num_bytes': 756864000,
-                                     'num_requests': 730,
-                                     'num_tiles': [1, 1],
-                                     'num_variables': 2,
-                                     'tile_size': [720, 360]}},
-                         result)
+        self.assertDictEqual({
+            'schema': {
+                'dims': {
+                    'time': 1412,
+                    'y': 48,
+                    'x': 48
+                },
+                'image_size': [48, 48],
+                'tile_size': [1, 1],
+                'num_variables': 1,
+                'num_tiles': [48, 48],
+                'num_requests': 3253248,
+                'num_bytes': 13012992
+            },
+            'punits': {
+                'input_count': 1412,
+                'input_weight': 1.0,
+                'output_count': 1412,
+                'output_weight': 1.0,
+                'total_count': 1412
+            }
+        }, result)
+
+    def test_get_size_and_cost_cds(self):
+        result = get_size_and_cost({
+            "input_configs": [
+                {
+                    "store_id": "@cds",
+                    "data_id": "reanalysis-era5-land",
+                    "open_params": {
+                        "tile_size": [
+                            1024,
+                            1024
+                        ]
+                    }
+                }
+            ],
+            "cube_config": {
+                "variable_names": [
+                    "2m_temperature"
+                ],
+                "bbox": [
+                    7,
+                    53,
+                    9,
+                    55
+                ],
+                "spatial_res": 0.1,
+                "crs": "WGS84",
+                "time_range": [
+                    "1981-01-01",
+                    "1982-01-01"
+                ],
+                "time_period": "1H"
+            },
+            "output_config": {
+                "store_id": "s3",
+                "store_params": {
+                    "bucket_name": "eurodatacube-test",
+                    "aws_access_key_id": "AKIAVBLQBN5YKECLN5QL",
+                    "aws_secret_access_key": "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"
+                }
+            }
+        })
+
+        self.assertDictEqual({
+            'schema': {
+                'dims': {
+                    'time': 8761,
+                    'y': 20,
+                    'x': 20
+                },
+                'image_size': [20, 20],
+                'tile_size': [20, 20],
+                'num_variables': 1,
+                'num_tiles': [1, 1],
+                'num_requests': 8761,
+                'num_bytes': 14017600
+            },
+            'punits': {
+                'input_count': 8761,
+                'input_weight': 1.0,
+                'output_count': 8761,
+                'output_weight': 1.0,
+                'total_count': 8761
+            }
+        }, result)
 
     def test_get_size_and_cost_invalid(self):
         with self.assertRaises(ApiError) as cm:
             get_size_and_cost({
-                "input_config": {
-                    "datastore_id": "c3s",
-                },
+                "input_configs": [
+                    {
+                        "store_id": "@bölablubb",
+                        "data_id": "esacci.OC.mon.L3S.CHLOR_A.multi-sensor.multi-platform.MERGED.3-1.geographic",
+                        "open_params": {}
+                    }
+                ],
                 "cube_config": {
-                    "dataset_name": "esacci.OZONE.month.L3.NP.multi-sensor.multi-platform.MERGED.fv0002.r1",
-                    "band_names": ["O3e_du_tot", "surface_pressure"],
-                    "geometry": [-180, -90, 180, 90],
-                    "spatial_res": 0.5,
-                    "tile_size": [720, 360],
-                    "crs": "http://www.opengis.net/def/crs/EPSG/0/4326",
-                    "time_range": ["2010-01-01", "2010-12-31"],
-                    "time_period": "1D",
+                    "variable_names": [
+                        "chlor_a"
+                    ],
+                    "bbox": [
+                        7,
+                        53,
+                        9,
+                        55
+                    ],
+                    "spatial_res": 0.041666666666666664,
+                    "crs": "WGS84",
+                    "time_range": [
+                        "1997-09-03",
+                        "2016-12-31"
+                    ],
+                    "time_period": "5D"
                 },
                 "output_config": {
+                    "store_id": "s3",
+                    "store_params": {
+                        "bucket_name": "test",
+                        "aws_access_key_id": "dfsvdfsv",
+                        "aws_secret_access_key": "dfvdas"
+                    }
                 }
             })
-        self.assertEqual('unsupported "input_config/datastore_id" entry: "c3s"', f'{cm.exception}')
+        self.assertEqual('unsupported "input_config/datastore_id" entry: "@bölablubb"', f'{cm.exception}')

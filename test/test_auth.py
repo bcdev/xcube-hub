@@ -24,7 +24,7 @@ class TestAuth(unittest.TestCase):
 
     def test_raise_for_invalid_user(self):
         user_id = 'a4b7f0554c1a5b2085c5ae0513b49cc04'
-        mock_token_auth_patch = patch('xcube_gen.auth.get_token_auth_header')
+        mock_token_auth_patch = patch('xcube_hub.auth0.get_token_auth_header')
         mock_tocken_auth = mock_token_auth_patch.start()
         mock_tocken_auth.return_value = "akuicvgkasduczgdkauscgkauscdz"
 
@@ -32,7 +32,7 @@ class TestAuth(unittest.TestCase):
         mock_headers = mock_headers_patcher.start()
         mock_headers.return_value = {}
 
-        mock_get_patch = patch('xcube_gen.auth._get_user_info_from_auth0')
+        mock_get_patch = patch('xcube_hub.auth0._get_user_info_from_auth0')
         mock_get = mock_get_patch.start()
         mock_get.return_value = {'name': 'Tom.Jones@brockmann-consult.de'}
 
@@ -58,7 +58,7 @@ class TestAuth(unittest.TestCase):
         mock_get_patch.stop()
 
     def test_raise_for_invalid_user_when_m2m(self):
-        mock_token_auth_patch = patch('xcube_gen.auth.get_token_auth_header')
+        mock_token_auth_patch = patch('xcube_hub.auth0.get_token_auth_header')
         mock_tocken_auth = mock_token_auth_patch.start()
         mock_tocken_auth.return_value = "akuicvgkasduczgdkauscgkauscdz"
 

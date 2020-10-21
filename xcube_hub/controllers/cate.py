@@ -104,8 +104,18 @@ def launch_cate(user_id: str) -> JsonObject:
         envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate"),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
 
-        volume_mounts = [{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
-        volumes = [{'name': 'claim-' + user_id, 'persistentVolumeClaim': {'claimName': 'claim-' + user_id}}, ]
+        volume_mounts = [{
+            'name': 'claim-' + user_id,
+            'mountPath': '/home/cate',
+            'persistentVolumeClaim': {
+                'claimName': 'claim-' + user_id
+            }
+        }, ]
+        volumes = [{
+            'name': 'claim-' + user_id,
+            'mountPath': '/home/cate',
+            'persistentVolumeClaim': {'claimName': 'claim-' + user_id}
+        }, ]
 
         deployment = create_deployment_object(name=user_id + '-cate',
                                               user_id=user_id,
@@ -156,7 +166,7 @@ def get_status(user_id: str):
     if pod:
         return pod.status.to_dict()
     else:
-        return {'status': 'Pending'}
+        return {'phase': 'Unknown'}
 
 
 def get_pod_count(label_selector: Optional[str] = None):

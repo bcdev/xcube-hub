@@ -91,7 +91,10 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
 def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
     try:
         user_namespaces.create_if_not_exists(user_id=user_id)
-        callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL')
+        callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL', False)
+        if callback_uri is False:
+            raise api.ApiError(400, "XCUBE_GEN_API_CALLBACK_URL must be given")
+
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
 
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
