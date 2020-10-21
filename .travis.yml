@@ -5,29 +5,16 @@
 
 sudo: required
 language: bash
-
-os:
-  - linux
-  - osx
-  - windows
+services: docker
+os: linux
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-      bash miniconda.sh -b -p $HOME/miniconda;
-      export PATH="$HOME/miniconda/bin:$PATH";
-    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      choco install -y openssl;
-      choco install -y miniconda3;
-      export PATH="/c/tools/miniconda3/Scripts:$PATH";
-      source activate base;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-      bash miniconda.sh -b -p $HOME/miniconda;
-      export PATH="$HOME/miniconda/bin:$PATH";
-      conda install -y -c conda-forge postgis;
-    fi
-
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda;
+  - export PATH="$HOME/miniconda/bin:$PATH";
+  - curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+  - sudo install minikube-linux-amd64 /usr/local/bin/minikube
+  - minikube start --driver docker
   - conda install -y -c conda-forge mamba;
   - conda info -a
   - mamba env create
