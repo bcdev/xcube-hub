@@ -14,7 +14,6 @@ dependencies:
   - pandas
   - uwsgi
   - python-dotenv
-  - redis
 
   - pip:
       # Required
@@ -25,6 +24,7 @@ dependencies:
       - requests-mock
       - flask_oidc
       - flask_cors
+      - redis
 
   # testing
   - moto
