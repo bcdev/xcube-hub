@@ -20,7 +20,6 @@ class TestAuth(unittest.TestCase):
         res = self._client.get('/')
         self.assertEqual(200, res.status_code, False)
 
-    @unittest.skip('')
     def test_raise_for_invalid_user(self):
         user_id = 'a4b7f0554c1a5b2085c5ae0513b49cc04'
         mock_token_auth_patch = patch('xcube_hub.auth0.get_token_auth_header')
@@ -56,7 +55,6 @@ class TestAuth(unittest.TestCase):
         mock_headers_patcher.stop()
         mock_get_patch.stop()
 
-    @unittest.skip('')
     def test_raise_for_invalid_user_when_m2m(self):
         mock_token_auth_patch = patch('xcube_hub.auth0.get_token_auth_header')
         mock_tocken_auth = mock_token_auth_patch.start()

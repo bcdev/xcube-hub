@@ -8,7 +8,7 @@ import boto3
 import moto
 
 from test.config import SH_CFG
-from test.setup_utils import setup_auth, set_env
+from test.setup_utils import set_env
 from xcube_hub import api
 from xcube_hub.controllers.callback import get_callback, put_callback, delete_callback
 from xcube_hub.controllers.users import add_processing_units
@@ -21,7 +21,7 @@ KeyValueDatabase.use_mocker = True
 class TestCallback(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
-        self._access_token = setup_auth()
+        self._access_token = {'access_token': "sdfvsdvdsfv"}
         self._app = new_app()
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']

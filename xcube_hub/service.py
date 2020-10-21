@@ -113,8 +113,8 @@ def new_cate_app(app, prefix: str = ""):
     oidc = OpenIDConnect(app)
 
     @app.route(prefix + '/user/<user_id>/webapi', methods=['GET', 'POST', 'DELETE'])
-    #@cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
-    #@oidc.accept_token(require_token=True)
+    @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
+    @oidc.accept_token(require_token=True)
     def _cate_webapi(user_id: str):
         try:
             # _accept_role('user')
