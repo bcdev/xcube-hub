@@ -1,8 +1,6 @@
 import os
 import unittest
 from unittest.mock import patch
-
-from test.setup_utils import setup_auth
 from xcube_hub import api
 from xcube_hub.auth0 import raise_for_invalid_user_id
 from xcube_hub.service import new_app
@@ -13,7 +11,7 @@ class TestAuth(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv()
         os.environ["RUN_LOCAL"] = '1'
-        self._access_token = setup_auth()
+        self._access_token = {"access_token": "fdvnds"}
         self._app = new_app()
         self._client = self._app.test_client()
         self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
