@@ -35,6 +35,7 @@ install:
 script:
   - py.test -v --cov=xcube-hub
   - pip install codecov
+  - pip install Flask-Testing
   - codecov --env TRAVIS_PYTHON_VERSION
 
 

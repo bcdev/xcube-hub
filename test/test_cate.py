@@ -1,18 +1,7 @@
 import unittest
 from unittest.mock import patch
-
-import kubernetes
-
-from test.config import TEST_PODS, TEST_PODS_EMPTY
+from test.config import TEST_PODS_EMPTY, TEST_PODS_RUNNING
 from xcube_hub.controllers import cate
-
-pod = kubernetes.client.V1Pod(
-    metadata=kubernetes.client.V1ObjectMeta(name='helge-cate-ascvhndasv'),
-    status=kubernetes.client.V1PodStatus(phase='Running')
-)
-
-pods = kubernetes.client.V1PodList(items=[pod])
-pods_empty = kubernetes.client.V1PodList(items=[])
 
 
 class MyTestCase(unittest.TestCase):
@@ -23,14 +12,13 @@ class MyTestCase(unittest.TestCase):
 
         self.assertDictEqual(expected_value, res)
 
-    @patch('kubernetes.client.CoreV1Api.list_namespaced_pod', return_value=TEST_PODS)
+    @patch('kubernetes.client.CoreV1Api.list_namespaced_pod', return_value=TEST_PODS_EMPTY)
     def test_get_status_empty(self, m_list):
         expected_value = 'Unknown'
         status = cate.get_status('helge')
         self.assertEqual(expected_value, status['phase'])
 
-    @patch('kubernetes.client.CoreV1Api.list_namespaced_pod', return_value=pods)
-    # @patch('kubernetes.client.V1Pod.status', return_value={'status': 'Running'})
+    @patch('kubernetes.client.CoreV1Api.list_namespaced_pod', return_value=TEST_PODS_RUNNING)
     def test_get_status(self, m_list):
         expected_value = 'Running'
         status = cate.get_status('helge')
