@@ -9,7 +9,7 @@ from xcube_hub.service import new_app
 
 class CalcTest(unittest.TestCase):
     def setUp(self) -> None:
-        os.environ["RUN_LOCAL"] = '1'
+        os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
         self._access_token = setup_auth()
         self._app = new_app()
         self._client = self._app.test_client()
