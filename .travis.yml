@@ -31,11 +31,11 @@ install:
   - mamba env create
   - source activate xcube-hub
   - python setup.py install
+  - pip install Flask-Testing
+  - pip install codecov
 
 script:
   - py.test -v --cov=xcube-hub
-  - pip install codecov
-  - pip install Flask-Testing
   - codecov --env TRAVIS_PYTHON_VERSION
 
 
