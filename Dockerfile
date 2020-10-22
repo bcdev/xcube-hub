@@ -38,7 +38,6 @@ RUN source activate xcube-hub && pip install .
 
 COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
 
-
 EXPOSE 8000
 EXPOSE 5050
 
