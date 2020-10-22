@@ -4,7 +4,7 @@ ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
 ENV XCUBE_GEN_API_DOCKER_VERSION=1.0.13.dev1
 ENV XCUBE_GEN_API_VERSION=1.0.13.dev1
-ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
+ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_hub/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
 LABEL name="xcube hub service"
