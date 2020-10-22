@@ -18,7 +18,6 @@ RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 
 RUN source activate base && conda update -n base conda && conda init
 RUN source activate base && conda install -y -c conda-forge mamba
-RUN echo "conda activate cate-env" >> ~/.bashrc
 
 RUN apt-get -y update && apt-get -y install curl unzip build-essential iputils-ping vim
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
@@ -31,6 +30,7 @@ WORKDIR /home/${XCUBE_USER_NAME}
 ADD --chown=1000:100 environment.yml environment.yml
 
 RUN mamba env create
+RUN echo "conda activate xcube-hub" >> ~/.bashrc
 
 ADD --chown=1000:100 ./ .
 RUN source activate xcube-hub && pip install redis
