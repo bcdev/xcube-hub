@@ -7,7 +7,7 @@ sudo: required
 language: bash
 os: linux
 env:
-  - UNITTEST_WITH_K8S=0
+  - UNITTEST_WITH_K8S=true
 
 install:
   - if [[ "${UNITTEST_WITH_K8S}" == "true" ]];
