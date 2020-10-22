@@ -6,18 +6,23 @@
 sudo: required
 language: bash
 os: linux
+env:
+  - UNITTEST_WITH_K8S=0
 
 install:
-  - sudo apt-get -y update
-  - sudo apt-get install  -y conntrack
-  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
-  - sudo minikube start --vm-driver=none
-  - sudo chown -R $USER $HOME/.kube
-  - sudo chown $USER $HOME/.kube/config && sudo chmod 600 $HOME/.kube/config
-  - sudo chown -R $USER $HOME/.minikube; chmod -R u+wrx $HOME/.minikube
-  - minikube update-context
-  - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
+  - if [[ "${UNITTEST_WITH_K8S}" == "true" ]]
+    then
+      sudo apt-get -y update;
+      sudo apt-get install  -y conntrack;
+      curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/;
+      curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/;
+      sudo minikube start --vm-driver=none;
+      sudo chown -R $USER $HOME/.kube;
+      sudo chown $USER $HOME/.kube/config && sudo chmod 600 $HOME/.kube/config;
+      sudo chown -R $USER $HOME/.minikube; chmod -R u+wrx $HOME/.minikube;
+      minikube update-context;
+      JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done;
+    fi;
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda;
   - export PATH="$HOME/miniconda/bin:$PATH";

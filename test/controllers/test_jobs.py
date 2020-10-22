@@ -7,6 +7,7 @@ from xcube_hub.service import new_app
 import subprocess
 
 
+@unittest.skipIf(os.environ.get("UNITTEST_WITH_K8S", False) == 'true', "K8s test supressed.")
 class TestJobs(unittest.TestCase):
     def setUp(self) -> None:
         os.environ["RUN_LOCAL"] = '1'
