@@ -29,7 +29,7 @@ install:
 
 script:
   - kubectl get pods
-  - py.test -v --cov=xcube-hub
+  - travis_wait py.test -v --cov=xcube-hub
   - pip install codecov
   - codecov --env TRAVIS_PYTHON_VERSION
 
