@@ -52,7 +52,7 @@ def raise_for_invalid_json():
 
 
 def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
-            dotenv_path: str = '.env'):
+            dotenv_path: str = 'ci.env'):
     """Create the service app."""
     load_dotenv()
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)

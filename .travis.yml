@@ -35,7 +35,8 @@ install:
   - pip install codecov
 
 before_script:
-  - mv .env_ci .env
+  - mv ci/ci.env .env
+  - mv ci/client_secrets.json .
 
 script:
   - py.test -v --cov=xcube-hub
