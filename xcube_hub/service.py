@@ -52,7 +52,7 @@ def raise_for_invalid_json():
 
 
 def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
-            dotenv_path: str = 'ci.env'):
+            dotenv_path: str = '.env'):
     """Create the service app."""
     load_dotenv()
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
@@ -66,12 +66,12 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
 
     try:
         launch_cate = int(os.environ.get("LAUNCH_CATE", 0))
-    except ValueError as e:
+    except ValueError:
         raise api.ApiError(500, "Error: LAUNCH_CATE must be 0 or 1.")
 
     try:
         launch_xcube_gen = int(os.environ.get("LAUNCH_XCUBE_GEN", 0))
-    except ValueError as e:
+    except ValueError:
         raise api.ApiError(500, "Error: LAUNCH_XCUBE_GEN must be 0 or 1.")
 
     if launch_cate == 1:
