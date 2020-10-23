@@ -135,7 +135,7 @@ class _RedisKvDB(KeyValueStore):
     ```
     """
 
-    def __init__(self, host='localhost', port=6379, db=0, use_mocker: bool = False, **kwargs):
+    def __init__(self, host='xcube-gen-stage-redis', port=6379, db=0, use_mocker: bool = False, **kwargs):
         super().__init__()
         try:
             from redis import Redis

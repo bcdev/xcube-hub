@@ -177,7 +177,13 @@ def logs(user_id: str, job_id: str) -> Sequence:
     lgs = []
     for pod in pods.items:
         name = pod.metadata.name
-        lg = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
+        lg = ""
+        # noinspection PyBroadException
+        try:
+            lg = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
+        except BaseException:
+            lg = "no output"
+
         lgs.append(lg)
 
     return lgs
