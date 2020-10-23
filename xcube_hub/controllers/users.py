@@ -7,11 +7,10 @@ from xcube_hub.typedefs import JsonObject
 
 
 def get_processing_units(user_id: str, include_history: bool = False) -> JsonObject:
-    return {"count": 963656, "history": []}
-    # processing_units = Database.instance().get_user_data(user_id, dataset_name='punits')
-    # if processing_units is not None and not include_history and 'history' in processing_units:
-    #     processing_units.pop('history')
-    # return processing_units
+    processing_units = Database.instance().get_user_data(user_id, dataset_name='punits')
+    if processing_units is not None and not include_history and 'history' in processing_units:
+        processing_units.pop('history')
+    return processing_units
 
 
 def add_processing_units(user_id: str, punits_request: JsonObject):

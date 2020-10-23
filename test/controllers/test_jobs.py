@@ -17,9 +17,6 @@ class TestJobs(unittest.TestCase):
         os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
         os.environ["XCUBE_GEN_API_CALLBACK_URL"] = 'http://test/'
         self._app = new_app()
-        # self._client = self._app.test_client()
-        # self._token = setup_auth()
-        # self._client.head('Authorization: Bearer ' + self._token['access token'])
         subprocess.call(["kubectl", "create", "namespace", "daffy-duck"])
 
     def tearDown(self) -> None:

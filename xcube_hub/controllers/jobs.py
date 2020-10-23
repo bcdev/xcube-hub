@@ -144,14 +144,20 @@ def list(user_id: str) -> Union[AnyDict, Error]:
     try:
         api_response = api_instance.list_namespaced_job(namespace=user_id)
         jobs = api_response.items
-        res = [{'job_id': job.metadata.name,
-                'status': {
-                    'active': job.status.active,
-                    'start_time': job.status.start_time,
-                    'failed': job.status.failed,
-                    'succeeded': job.status.succeeded,
-                    'completion_time': job.status.completion_time,
-                }} for job in jobs]
+
+        res = []
+        for job in jobs:
+            lgs = logs(user_id=user_id, job_id=job.metadata.name)
+            res.append({'job_id': job.metadata.name,
+                        'status': {
+                            'active': job.status.active,
+                            'start_time': job.status.start_time,
+                            'failed': job.status.failed,
+                            'succeeded': job.status.succeeded,
+                            'completion_time': job.status.completion_time,
+                            'output': lgs,
+                        }})
+
         return api.ApiResponse.success(res)
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
@@ -172,7 +178,7 @@ def logs(user_id: str, job_id: str) -> Sequence:
     for pod in pods.items:
         name = pod.metadata.name
         lg = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
-        lgs = lg.splitlines()
+        lgs.append(lg)
 
     return lgs
 
