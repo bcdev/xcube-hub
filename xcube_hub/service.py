@@ -31,6 +31,7 @@ from werkzeug import exceptions
 
 import xcube_hub.api as api
 from xcube_hub import auth0
+from xcube_hub.auth0 import Auth0
 from xcube_hub.cfg import Cfg
 from xcube_hub.controllers import datastores, callback, cate
 from xcube_hub.controllers import info
@@ -171,7 +172,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
     @auth0.requires_auth0
     def _jobs(user_id: str):
         try:
-            auth0.raise_for_invalid_user_id(user_id=user_id)
+            Auth0.raise_for_invalid_user_id(user_id=user_id)
             raise_for_invalid_json()
             if flask.request.method == 'GET':
                 return jobs.list(user_id=user_id)
@@ -186,7 +187,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
     @auth0.requires_auth0
     def _job(user_id: str, job_id: str):
         try:
-            auth0.raise_for_invalid_user_id(user_id)
+            Auth0.raise_for_invalid_user_id(user_id)
             if flask.request.method == "GET":
                 return jobs.get(user_id=user_id, job_id=job_id)
             if flask.request.method == "DELETE":
@@ -205,7 +206,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
     @auth0.requires_auth0
     def _cubes_viewer(user_id: str):
         try:
-            auth0.raise_for_invalid_user_id(user_id)
+            Auth0.raise_for_invalid_user_id(user_id)
             if flask.request.method == "GET":
                 return api.ApiResponse.success(viewer.get_status(user_id=user_id))
             if flask.request.method == "POST":
@@ -231,7 +232,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
         try:
             res = hashlib.md5(user_name.encode())
             user_id = 'a' + res.hexdigest()
-            auth0.raise_for_invalid_user_id(user_id)
+            Auth0.raise_for_invalid_user_id(user_id)
             raise_for_invalid_json()
 
             if flask.request.method == 'GET':
@@ -253,19 +254,19 @@ def new_xcube_gen_app(app, prefix: str = ""):
             raise_for_invalid_json()
             res = hashlib.md5(user_name.encode())
             user_id = 'a' + res.hexdigest()
-            auth0.raise_for_invalid_user_id(user_id)
+            Auth0.raise_for_invalid_user_id(user_id)
 
             if flask.request.method == 'GET':
-                auth0.requires_permissions(['read:punits'])
+                Auth0.requires_permissions(['read:punits'])
                 include_history = flask.request.args.get('history', False)
                 processing_units = users.get_processing_units(user_name, include_history=include_history)
                 return api.ApiResponse.success(result=processing_units)
             elif flask.request.method == 'PUT':
-                auth0.requires_permissions(['put:punits'])
+                Auth0.requires_permissions(['put:punits'])
                 users.add_processing_units(user_name, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == 'DELETE':
-                auth0.requires_permissions(['put:punits'])
+                Auth0.requires_permissions(['put:punits'])
                 users.subtract_processing_units(user_name, flask.request.json)
                 return api.ApiResponse.success()
         except api.ApiError as e:
@@ -275,18 +276,18 @@ def new_xcube_gen_app(app, prefix: str = ""):
     @auth0.requires_auth0
     def _callback(user_id: str, job_id: str):
         try:
-            auth0.raise_for_invalid_user_id(user_id=user_id)
+            Auth0.raise_for_invalid_user_id(user_id=user_id)
             if flask.request.method == 'GET':
-                auth0.requires_permissions(['read:callback', 'submit:job'])
+                Auth0.requires_permissions(['read:callback', 'submit:job'])
                 res = callback.get_callback(user_id, job_id)
                 return api.ApiResponse.success(result=res)
             elif flask.request.method == 'PUT':
                 raise_for_invalid_json()
-                auth0.requires_permissions(['put:callback', 'submit:job'])
+                Auth0.requires_permissions(['put:callback', 'submit:job'])
                 callback.put_callback(user_id, job_id, flask.request.json)
                 return api.ApiResponse.success()
             elif flask.request.method == "DELETE":
-                auth0.requires_permissions(['delete:callback'])
+                Auth0.requires_permissions(['delete:callback'])
                 callback.delete_callback(user_id, job_id)
                 return api.ApiResponse.success()
         except api.ApiError as e:

@@ -16,79 +16,81 @@ ALGORITHMS = ["RS256"]
 API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v1/'
 
 
-def get_token_auth_header():
-    """Obtains the access token from the Authorization Header
-    """
-    auth = flask.request.headers.get("Authorization", None)
-    if not auth:
-        raise api.ApiError(403, "Missing authorization header.")
+class Auth0:
+    @classmethod
+    def get_token_auth_header(cls):
+        """Obtains the access token from the Authorization Header
+        """
+        auth = flask.request.headers.get("Authorization", None)
+        if not auth:
+            raise api.ApiError(403, "Missing authorization header.")
 
-    parts = auth.split()
+        parts = auth.split()
 
-    if parts[0].lower() != "bearer":
-        raise api.ApiError(401, "invalid_header: Authorization header must start with Bearer")
-    elif len(parts) == 1:
-        raise api.ApiError(401, "invalid_header: Token not found")
-    elif len(parts) > 2:
-        raise api.ApiError(401, "invalid_header: Authorization header must be Bearer token")
+        if parts[0].lower() != "bearer":
+            raise api.ApiError(401, "invalid_header: Authorization header must start with Bearer")
+        elif len(parts) == 1:
+            raise api.ApiError(401, "invalid_header: Token not found")
+        elif len(parts) > 2:
+            raise api.ApiError(401, "invalid_header: Authorization header must be Bearer token")
 
-    token = parts[1]
-    return token
+        token = parts[1]
+        return token
 
+    @classmethod
+    def requires_permissions(cls, required_scope: Sequence):
+        """Determines if the required scope is present in the access token
+        Args:
+            required_scope (str): The scope required to access the resource
+        """
+        token = cls.get_token_auth_header()
+        unverified_claims = jwt.get_unverified_claims(token)
+        if unverified_claims.get("permissions"):
+            token_scopes = unverified_claims["permissions"]
+            res = set(required_scope) & set(token_scopes)
+            if len(res) == 0:
+                raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
 
-def requires_permissions(required_scope: Sequence):
-    """Determines if the required scope is present in the access token
-    Args:
-        required_scope (str): The scope required to access the resource
-    """
-    token = get_token_auth_header()
-    unverified_claims = jwt.get_unverified_claims(token)
-    if unverified_claims.get("permissions"):
-        token_scopes = unverified_claims["permissions"]
-        res = set(required_scope) & set(token_scopes)
-        if len(res) == 0:
-            raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
+    @classmethod
+    def _get_user_info_from_auth0(cls, token, user_id: str):
+        kv = KeyValueDatabase.instance()
+        user_info = kv.get(user_id + '_user_info')
+        if user_info:
+            return user_info
 
+        endpoint = "https://edc.eu.auth0.com/userinfo"
+        headers = {'Authorization': 'Bearer %s' % token}
 
-def _get_user_info_from_auth0(token, user_id: str):
-    kv = KeyValueDatabase.instance()
-    user_info = kv.get(user_id + '_user_info')
-    if user_info:
+        req = requests.get(endpoint, headers=headers)
+        if req.status_code >= 400:
+            raise api.ApiError(req.status_code, req.reason)
+
+        user_info = req.json()
+        if not kv.set(user_id + '_user_info', user_info):
+            raise api.ApiError(401, "System Error: Could not use cache.")
+
         return user_info
 
-    endpoint = "https://edc.eu.auth0.com/userinfo"
-    headers = {'Authorization': 'Bearer %s' % token}
+    @classmethod
+    def raise_for_invalid_user_id(cls, user_id: str):
+        token = cls.get_token_auth_header()
+        unverified_claims = jwt.get_unverified_claims(token)
+        if 'gty' in unverified_claims and unverified_claims['gty'] == 'client-credentials':
+            return True
 
-    req = requests.get(endpoint, headers=headers)
-    if req.status_code >= 400:
-        raise api.ApiError(req.status_code, req.reason)
+        user_info = cls._get_user_info_from_auth0(token, user_id)
 
-    user_info = req.json()
-    if not kv.set(user_id + '_user_info', user_info):
-        raise api.ApiError(401, "System Error: Could not use cache.")
+        if 'name' not in user_info:
+            raise api.ApiError(403, "access denied: Could not read name from user info.")
 
-    return user_info
+        name = user_info['name']
+        # noinspection InsecureHash
+        res = hashlib.md5(name.encode())
+        name = 'a' + res.hexdigest()
+        if user_id != name:
+            raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
 
-
-def raise_for_invalid_user_id(user_id: str):
-    token = get_token_auth_header()
-    unverified_claims = jwt.get_unverified_claims(token)
-    if 'gty' in unverified_claims and unverified_claims['gty'] == 'client-credentials':
         return True
-
-    user_info = _get_user_info_from_auth0(token, user_id)
-
-    if 'name' not in user_info:
-        raise api.ApiError(403, "access denied: Could not read name from user info.")
-
-    name = user_info['name']
-    # noinspection InsecureHash
-    res = hashlib.md5(name.encode())
-    name = 'a' + res.hexdigest()
-    if user_id != name:
-        raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
-
-    return True
 
 
 def requires_auth0(f):
@@ -97,7 +99,7 @@ def requires_auth0(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = get_token_auth_header()
+        token = Auth0.get_token_auth_header()
         json_url = urlopen("https://" + AUTH0_DOMAIN + "/.well-known/jwks.json")
         jwks = json.loads(json_url.read())
 

@@ -29,7 +29,7 @@ from kubernetes import client
 from kubernetes.client.rest import ApiException
 
 from xcube_hub import api
-from xcube_hub.auth0 import get_token_auth_header
+from xcube_hub.auth0 import Auth0
 from xcube_hub.controllers import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error
@@ -98,7 +98,7 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
 
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
-                                      access_token=get_token_auth_header())
+                                      access_token=Auth0.get_token_auth_header())
 
         cfg['output_config']['data_id'] = job_id + '.zarr'
 
