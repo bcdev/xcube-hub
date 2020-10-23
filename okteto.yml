@@ -1,0 +1,11 @@
+name: xcube-gen
+image: quay.io/bcdev/xcube-hub:v1.0.13.dev1
+forward:
+  - 8080:8080
+  - 8000:8000
+remote: 2222
+sync:
+  - .:/usr/src/app
+command:
+  - bash
+namespace: xcube-gen-stage
