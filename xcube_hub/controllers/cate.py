@@ -82,6 +82,7 @@ def launch_cate(user_id: str) -> JsonObject:
 
         cate_image = os.environ.get("CATE_IMG")
         cate_version = os.environ.get("CATE_VERSION")
+        cate_pvc_limit = os.environ.get("CATE_PVC_LIMIT", False)
         cate_command = os.environ.get("CATE_COMMAND", False)
         cate_env_activate_command = os.environ.get("CATE_ENV_ACTIVATE_COMMAND", False)
         cate_webapi_uri = os.environ.get("CATE_WEBAPI_URI")
@@ -96,7 +97,7 @@ def launch_cate(user_id: str) -> JsonObject:
             raise api.ApiError(400, "Could not find the cate webapi docker image.")
 
         cate_image = cate_image + ':' + cate_version
-        pvc = create_pvc_object(user_id)
+        pvc = create_pvc_object(user_id, cate_pvc_limit)
         create_pvc_if_not_exists(pvc, user_id)
 
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]

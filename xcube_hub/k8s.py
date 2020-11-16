@@ -5,7 +5,7 @@ from kubernetes.client import V1Pod, V1PodList
 from xcube_hub.poller import poll_deployment_status
 
 
-def create_pvc_object(user_id: str, storage: str = '10Gi'):
+def create_pvc_object(user_id: str, storage: str = '2Gi'):
     pvc = client.V1PersistentVolumeClaim(
         metadata={'name': 'claim-' + user_id},
         spec=client.V1PersistentVolumeClaimSpec(
@@ -238,7 +238,7 @@ def list_ingress(namespace: str = 'default'):
     return networking_v1_beta1_api.list_namespaced_ingress(namespace=namespace)
 
 
-def get_pod(prefix: str, namespace: Optional[str] = None, label_selector: str = None) -> Union[type(None), V1Pod]:
+def get_pod(prefix: str, namespace: Optional[str] = None, label_selector: str = None) -> Optional[V1Pod]:
     pods = get_pods(namespace=namespace, label_selector=label_selector)
 
     res = None

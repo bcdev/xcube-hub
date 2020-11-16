@@ -33,7 +33,7 @@ import xcube_hub.api as api
 from xcube_hub import auth0
 from xcube_hub.auth0 import Auth0
 from xcube_hub.cfg import Cfg
-from xcube_hub.controllers import datastores, callback, cate
+from xcube_hub.controllers import datastores, callback, cate, geodb
 from xcube_hub.controllers import info
 from xcube_hub.controllers import jobs
 from xcube_hub.controllers import sizeandcost
@@ -51,8 +51,7 @@ def raise_for_invalid_json():
         raise api.ApiError(400, "Invalid JSON in request body " + str(e))
 
 
-def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='',
-            dotenv_path: str = '.env'):
+def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='', dotenv_path: str = '.env'):
     """Create the service app."""
     load_dotenv()
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
@@ -74,10 +73,17 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     except ValueError:
         raise api.ApiError(500, "Error: LAUNCH_XCUBE_GEN must be 0 or 1.")
 
+    try:
+        launch_xcube_geodb = int(os.environ.get("LAUNCH_XCUBE_GEODB", 0))
+    except ValueError:
+        raise api.ApiError(500, "Error: LAUNCH_XCUBE_GEODB must be 0 or 1.")
+
     if launch_cate == 1:
         app = new_cate_app(app, prefix)
     if launch_xcube_gen == 1:
         app = new_xcube_gen_app(app, prefix)
+    if launch_xcube_geodb == 1:
+        app = new_xcube_geodb_app(app, prefix)
 
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
@@ -296,6 +302,18 @@ def new_xcube_gen_app(app, prefix: str = ""):
     @app.route(prefix + '/viewer')
     def _viewer():
         return app.send_static_file('viewer/index.html')
+
+    return app
+
+
+def new_xcube_geodb_app(app, prefix: str = ""):
+    @app.route(prefix + '/geodb/credentials', methods=['GET'])
+    def _auth_app_credentials():
+        try:
+            res = geodb.geodb_auth_login_app()
+            return api.ApiResponse.success(result=res)
+        except api.ApiError as e:
+            return e.response
 
     return app
 
