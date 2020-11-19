@@ -1,10 +1,7 @@
 import unittest
-
 import requests_mock
-
 from xcube_hub import api
 from xcube_hub.auth0 import AUTH0_DOMAIN
-
 from xcube_hub.controllers import geodb
 
 
@@ -68,6 +65,27 @@ class TestGeodb(unittest.TestCase):
         m.delete(f"https://{AUTH0_DOMAIN}/api/v2/users/asdc", text='test')
         res = geodb.delete_user(token='ascd', user_id='asdc')
         self.assertEqual(True, res)
+
+    @requests_mock.Mocker()
+    def test_get_user(self, m):
+        mock_token = "fdvkdfv"
+
+        with self.assertRaises(api.ApiError) as e:
+            pl = self._payload.copy()
+            del pl['user_id']
+            geodb.register_user(token=mock_token, payload=pl)
+
+        self.assertEqual("Registering a user needs a user_id", str(e.exception))
+
+        m.get(f"https://{AUTH0_DOMAIN}/api/v2/users/asdc", json={'email': 'h@mail.org'}, status_code=400)
+        with self.assertRaises(api.ApiError) as e:
+            geodb.get_user(token='ascd', user_id='asdc')
+
+        self.assertEqual(f"400 Client Error: None for url: https://{AUTH0_DOMAIN}/api/v2/users/asdc", str(e.exception))
+
+        m.get(f"https://{AUTH0_DOMAIN}/api/v2/users/asdc", json={'email': 'h@mail.org'})
+        res = geodb.get_user(token='ascd', user_id='asdc')
+        self.assertEqual({'email': 'h@mail.org'}, res)
 
 
 if __name__ == '__main__':

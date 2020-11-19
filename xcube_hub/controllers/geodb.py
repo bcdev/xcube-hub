@@ -6,6 +6,7 @@ from requests import HTTPError
 
 from xcube_hub import api
 from xcube_hub.auth0 import AUTH0_DOMAIN
+from xcube_hub.typedefs import JsonObject
 
 
 def geodb_auth_login_app():
@@ -59,3 +60,21 @@ def delete_user(token: str, user_id: str) -> bool:
         raise api.ApiError(400, str(e))
 
     return True
+
+
+def get_user(token: str, user_id: str) -> JsonObject:
+    headers = {'Authorization': f"Bearer {token}", }
+
+    if not user_id:
+        raise api.ApiError(400, "Deleting a user needs a user_id")
+
+    try:
+        url = f"https://{AUTH0_DOMAIN}/api/v2/users/{user_id}"
+        res = requests.get(url=url, headers=headers)
+        res.raise_for_status()
+        return res.json()
+    except HTTPError as e:
+        raise api.ApiError(e.errno, str(e))
+    except UnicodeError as e:
+        raise api.ApiError(400, str(e))
+
