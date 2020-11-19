@@ -2,6 +2,7 @@
 
 ### New Features
 
+- Added geodb operators to manage users
 - data-stores.json location is now configurable via environment variables.
 - Set ingress websocket timeouts to 1 day
 - Ensured that the grace period foe launching cate services is integer 

@@ -232,6 +232,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
+    # noinspection InsecureHash
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
     @auth0.requires_auth0
     def _user_data(user_name: str):
@@ -253,6 +254,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
+    # noinspection InsecureHash
     @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
     @auth0.requires_auth0
     def _processing_units(user_name: str):
@@ -312,6 +314,17 @@ def new_xcube_geodb_app(app, prefix: str = ""):
         try:
             res = geodb.geodb_auth_login_app()
             return api.ApiResponse.success(result=res)
+        except api.ApiError as e:
+            return e.response
+
+    @app.route(prefix + '/geodb/register_user', methods=['POST'])
+    @auth0.requires_auth0
+    def user():
+        try:
+            payload = flask.request.json
+            token = Auth0.get_token_auth_header()
+            geodb.register_user(token=token, payload=payload)
+            return api.ApiResponse.success(result="success")
         except api.ApiError as e:
             return e.response
 
