@@ -20,6 +20,7 @@
 # SOFTWARE.
 import hashlib
 import os
+from typing import Optional
 
 import flask
 import flask_cors
@@ -33,7 +34,7 @@ import xcube_hub.api as api
 from xcube_hub import auth0
 from xcube_hub.auth0 import Auth0
 from xcube_hub.cfg import Cfg
-from xcube_hub.controllers import datastores, callback, cate, geodb
+from xcube_hub.controllers import datastores, callback, cate, auth
 from xcube_hub.controllers import info
 from xcube_hub.controllers import jobs
 from xcube_hub.controllers import sizeandcost
@@ -312,18 +313,35 @@ def new_xcube_geodb_app(app, prefix: str = ""):
     @app.route(prefix + '/geodb/credentials', methods=['GET'])
     def _auth_app_credentials():
         try:
-            res = geodb.geodb_auth_login_app()
+            res = auth.auth_login_app()
             return api.ApiResponse.success(result=res)
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/geodb/register_user', methods=['POST'])
+    @app.route(prefix + '/geodb/user/<user_id>', methods=['GET', 'POST', 'DELETE'])
     @auth0.requires_auth0
-    def user():
+    def user(user_id: Optional[str] = None):
         try:
             payload = flask.request.json
             token = Auth0.get_token_auth_header()
-            geodb.register_user(token=token, payload=payload)
+            if flask.request.method == 'POST':
+                auth.register_user(token=token, payload=payload)
+            elif flask.request.method == 'GET':
+                auth.get_user(token=token, user_id=user_id)
+            elif flask.request.method == 'DELETE':
+                auth.delete_user(token=token, user_id=user_id)
+
+            return api.ApiResponse.success(result="success")
+        except api.ApiError as e:
+            return e.response
+
+    @app.route(prefix + '/geodb/role', methods=['PUT'])
+    @auth0.requires_auth0
+    def role(user_id: str, role_id: str):
+        try:
+            payload = flask.request.json
+            token = Auth0.get_token_auth_header()
+            auth.add_user_to_role(token=token, user_id=user_id, role_id=role_id)
             return api.ApiResponse.success(result="success")
         except api.ApiError as e:
             return e.response
