@@ -32,7 +32,7 @@ from werkzeug import exceptions
 
 import xcube_hub.api as api
 from xcube_hub import auth0
-from xcube_hub.auth0 import Auth0
+from xcube_hub.auth0 import Auth0, API_AUTH_IDENTIFIER
 from xcube_hub.cfg import Cfg
 from xcube_hub.controllers import datastores, callback, cate, auth
 from xcube_hub.controllers import info
@@ -176,7 +176,7 @@ def new_cate_app(app, prefix: str = ""):
 def new_xcube_gen_app(app, prefix: str = ""):
 
     @app.route(prefix + '/jobs/<user_id>', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth0
+    @auth0.requires_auth0()
     def _jobs(user_id: str):
         try:
             Auth0.raise_for_invalid_user_id(user_id=user_id)
@@ -191,7 +191,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
             return e.response
 
     @app.route(prefix + '/jobs/<user_id>/<job_id>', methods=['GET', 'DELETE'])
-    @auth0.requires_auth0
+    @auth0.requires_auth0()
     def _job(user_id: str, job_id: str):
         try:
             Auth0.raise_for_invalid_user_id(user_id)
@@ -210,7 +210,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
                                f"your account might be in the process of being approved.")
 
     @app.route(prefix + '/cubes/<user_id>/xcviewer', methods=['GET', 'POST'])
-    @auth0.requires_auth0
+    @auth0.requires_auth0()
     def _cubes_viewer(user_id: str):
         try:
             Auth0.raise_for_invalid_user_id(user_id)
@@ -235,7 +235,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
 
     # noinspection InsecureHash
     @app.route(prefix + '/users/<user_name>/data', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth0
+    @auth0.requires_auth0()
     def _user_data(user_name: str):
         try:
             res = hashlib.md5(user_name.encode())
@@ -257,7 +257,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
 
     # noinspection InsecureHash
     @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth0
+    @auth0.requires_auth0()
     def _processing_units(user_name: str):
         try:
             raise_for_invalid_json()
@@ -282,7 +282,7 @@ def new_xcube_gen_app(app, prefix: str = ""):
             return e.response
 
     @app.route(prefix + '/jobs/<user_id>/<job_id>/callback', methods=['GET', 'PUT', 'DELETE'])
-    @auth0.requires_auth0
+    @auth0.requires_auth0()
     def _callback(user_id: str, job_id: str):
         try:
             Auth0.raise_for_invalid_user_id(user_id=user_id)
@@ -318,25 +318,31 @@ def new_xcube_geodb_app(app, prefix: str = ""):
         except api.ApiError as e:
             return e.response
 
-    @app.route(prefix + '/geodb/user/<user_id>', methods=['GET', 'POST', 'DELETE'])
-    @auth0.requires_auth0
+    @app.route(prefix + '/auth/user', methods=['POST', 'GET', 'DELETE'], defaults={'user_id': None})
+    @app.route(prefix + '/auth/user/<user_id>')
+    @auth0.requires_auth0(audience=API_AUTH_IDENTIFIER)
     def user(user_id: Optional[str] = None):
         try:
             payload = flask.request.json
             token = Auth0.get_token_auth_header()
             if flask.request.method == 'POST':
                 auth.register_user(token=token, payload=payload)
+                res = "success"
             elif flask.request.method == 'GET':
-                auth.get_user(token=token, user_id=user_id)
+                res = auth.get_user(token=token, user_id=user_id)
             elif flask.request.method == 'DELETE':
                 auth.delete_user(token=token, user_id=user_id)
-
-            return api.ApiResponse.success(result="success")
+                res = "success"
+            else:
+                res = "failed"
+            return api.ApiResponse.success(result=res)
         except api.ApiError as e:
             return e.response
+        except BaseException as e:
+            return api.ApiResponse.error(e)
 
-    @app.route(prefix + '/geodb/role', methods=['PUT'])
-    @auth0.requires_auth0
+    @app.route(prefix + '/auth/role', methods=['PUT'])
+    @auth0.requires_auth0(audience=API_AUTH_IDENTIFIER)
     def role(user_id: str, role_id: str):
         try:
             payload = flask.request.json

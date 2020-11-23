@@ -42,8 +42,12 @@ def auth_login_app():
     return {"client_id": client_id, "client-secret": client_secret}
 
 
+# noinspection PyUnboundLocalVariable
 def register_user(token: str, payload: Dict) -> bool:
-    headers = {'Authorization': f"Bearer {token}", }
+    headers = {'Authorization': f"Bearer {token}",  "Content-Type": "application/json" }
+
+    if not isinstance(payload, Dict):
+        raise api.ApiError(400, "Payload needs to be a dict.")
 
     if 'user_id' not in payload:
         raise api.ApiError(400, "Registering a user needs a user_id")
@@ -56,8 +60,8 @@ def register_user(token: str, payload: Dict) -> bool:
         res = requests.post(url=url, headers=headers, json=payload)
         res.raise_for_status()
     except HTTPError as e:
-        raise api.ApiError(e.errno, str(e))
-    except UnicodeError as e:
+        raise api.ApiError(e.errno, str(e) + ': ' + res.text)
+    except BaseException as e:
         raise api.ApiError(400, str(e))
 
     return True
@@ -74,8 +78,9 @@ def delete_user(token: str, user_id: str) -> bool:
         res = requests.delete(url=url, headers=headers)
         res.raise_for_status()
     except HTTPError as e:
-        raise api.ApiError(e.errno, str(e))
-    except UnicodeError as e:
+        # noinspection PyUnboundLocalVariable
+        raise api.ApiError(e.errno, str(e) + ': ' + res.text)
+    except BaseException as e:
         raise api.ApiError(400, str(e))
 
     return True
@@ -93,16 +98,17 @@ def get_user(token: str, user_id: str) -> JsonObject:
         res.raise_for_status()
         return res.json()
     except HTTPError as e:
-        raise api.ApiError(e.errno, str(e))
-    except UnicodeError as e:
+        # noinspection PyUnboundLocalVariable
+        raise api.ApiError(e.errno, str(e) + ': ' + res.text)
+    except BaseException as e:
         raise api.ApiError(400, str(e))
 
 
 def add_user_to_role(token: str, user_id: str, role_id: str):
     payload = {
-        "roles": [
-            f"auth0|{user_id}"
-        ]
+        "users": [
+            user_id,
+        ],
     }
 
     headers = {'Authorization': f"Bearer {token}", }
@@ -115,10 +121,11 @@ def add_user_to_role(token: str, user_id: str, role_id: str):
 
     try:
         url = f"https://{AUTH0_DOMAIN}/api/v2/roles/{role_id}/users"
-        res = requests.put(url=url, headers=headers)
+        res = requests.post(url=url, json=payload, headers=headers)
         res.raise_for_status()
         return res.json()
     except HTTPError as e:
-        raise api.ApiError(e.errno, str(e))
-    except UnicodeError as e:
+        # noinspection PyUnboundLocalVariable
+        raise api.ApiError(e.errno, str(e) + ': ' + res.text)
+    except BaseException as e:
         raise api.ApiError(400, str(e))

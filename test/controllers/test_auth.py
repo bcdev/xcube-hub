@@ -31,6 +31,12 @@ class TestGeodb(unittest.TestCase):
         mock_token = "fdvkdfv"
 
         with self.assertRaises(api.ApiError) as e:
+            # noinspection PyTypeChecker
+            auth.register_user(token=mock_token, payload=None)
+
+        self.assertEqual("Payload needs to be a dict.", str(e.exception))
+
+        with self.assertRaises(api.ApiError) as e:
             pl = self._payload.copy()
             del pl['user_id']
             auth.register_user(token=mock_token, payload=pl)

@@ -133,4 +133,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /client_secrets.json
-*.py.tmp
+*.tmp

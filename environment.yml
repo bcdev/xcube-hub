@@ -25,6 +25,7 @@ dependencies:
       - flask_oidc
       - flask_cors
       - redis
+      - flask_testing
 
   # testing
   - moto
