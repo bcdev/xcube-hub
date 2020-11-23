@@ -39,7 +39,7 @@ before_script:
   - mv ci/client_secrets.json .
 
 script:
-  - py.test -v --cov=xcube-hub
+  - py.test -v --cov=xcube_hub
   - codecov --env TRAVIS_PYTHON_VERSION
 
 
