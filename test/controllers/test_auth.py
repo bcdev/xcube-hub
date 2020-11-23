@@ -54,7 +54,7 @@ class TestGeodb(unittest.TestCase):
         with self.assertRaises(api.ApiError) as e:
             auth.register_user(token=mock_token, payload=self._payload)
 
-        self.assertEqual(f"400 Client Error: None for url: https://{AUTH0_DOMAIN}/api/v2/users", str(e.exception))
+        self.assertEqual(f"400 Client Error: None for url: https://{AUTH0_DOMAIN}/api/v2/users: test", str(e.exception))
 
         m.post(f"https://{AUTH0_DOMAIN}/api/v2/users", text='test')
         res = auth.register_user(token='ascd', payload=self._payload)
@@ -66,7 +66,7 @@ class TestGeodb(unittest.TestCase):
         with self.assertRaises(api.ApiError) as e:
             auth.delete_user(token='ascd', user_id='asdc')
 
-        self.assertEqual(f"400 Client Error: None for url: https://{AUTH0_DOMAIN}/api/v2/users/asdc", str(e.exception))
+        self.assertEqual(f"400 Client Error: None for url: https://{AUTH0_DOMAIN}/api/v2/users/asdc: test", str(e.exception))
 
         m.delete(f"https://{AUTH0_DOMAIN}/api/v2/users/asdc", text='test')
         res = auth.delete_user(token='ascd', user_id='asdc')
@@ -87,7 +87,9 @@ class TestGeodb(unittest.TestCase):
         with self.assertRaises(api.ApiError) as e:
             auth.get_user(token='ascd', user_id='asdc')
 
-        self.assertEqual(f"400 Client Error: None for url: https://{AUTH0_DOMAIN}/api/v2/users/asdc", str(e.exception))
+        self.assertEqual("400 Client Error: None for url: https://" +
+                         AUTH0_DOMAIN +
+                         "/api/v2/users/asdc: {\"email\": \"h@mail.org\"}", str(e.exception))
 
         m.get(f"https://{AUTH0_DOMAIN}/api/v2/users/asdc", json={'email': 'h@mail.org'})
         res = auth.get_user(token='ascd', user_id='asdc')
