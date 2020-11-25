@@ -3,6 +3,7 @@ import os
 import unittest
 import uuid
 import dotenv
+import requests
 
 from xcube_hub.controllers import auth
 import http.client
@@ -73,6 +74,38 @@ class TestAuth(unittest.TestCase):
 
         res = auth.delete_user(token=self._token, user_id="auth0|" + self._user_id)
         self.assertEqual(True, res)
+
+    def test_db_access(self):
+        dotenv.load_dotenv(dotenv_path='test/envs/.env_password', verbose=True)
+        client_id = os.environ.get("GEODB_AUTH_CLIENT_ID")
+        client_secret = os.environ.get("GEODB_AUTH_CLIENT_SECRET")
+        username = os.environ.get("GEODB_AUTH_USERNAME")
+        password = os.environ.get("GEODB_AUTH_PASSWORD")
+        audience = os.environ.get("GEODB_AUTH_AUD")
+
+        payload = {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "username": username,
+            "password": password,
+            "audience": audience,
+            "scope": "role:create",
+            "grant_type": "password"
+        }
+        headers = {'content-type': "application/x-www-form-urlencoded"}
+        r = requests.post("https://edc.eu.auth0.com/oauth/token", data=payload, headers=headers)
+
+        self.assertEqual(200, r.status_code)
+
+        data = r.json()
+
+        r = requests.get("https://stage.xcube-geodb.brockmann-consult.de")
+
+        self.assertEqual(400, r.status_code)
+
+        headers = {'Authorization': 'Bearer: ' + data['access_token']}
+        r = requests.get("https://xcube-geodb.brockmann-consult.de", headers=headers)
+        self.assertEqual(200, r.status_code)
 
 
 if __name__ == '__main__':
