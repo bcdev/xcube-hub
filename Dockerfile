@@ -19,7 +19,9 @@ RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 RUN source activate base && conda update -n base conda && conda init
 RUN source activate base && conda install -y -c conda-forge mamba
 
-RUN apt-get -y update && apt-get -y install curl unzip build-essential iputils-ping vim
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get -y install curl unzip build-essential iputils-ping vim
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 
 USER ${XCUBE_USER_NAME}
