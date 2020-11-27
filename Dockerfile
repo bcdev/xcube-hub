@@ -3,7 +3,7 @@ FROM continuumio/miniconda3:4.8.2
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
 ENV XCUBE_GEN_API_DOCKER_VERSION=1.0.13.dev2
-ENV XCUBE_GEN_API_VERSION=1.0.13.dev1
+ENV XCUBE_GEN_API_VERSION=dzelge_1.0.13
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_hub/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
@@ -16,9 +16,6 @@ SHELL ["/bin/bash", "-c"]
 RUN useradd -u 1000 -g 100 -ms /bin/bash ${XCUBE_USER_NAME}
 RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 
-RUN source activate base && conda update -n base conda && conda init
-RUN source activate base && conda install -y -c conda-forge mamba
-
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get -y install curl unzip build-essential iputils-ping vim
@@ -26,7 +23,8 @@ RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 
 USER ${XCUBE_USER_NAME}
 
-RUN conda install -c conda-forge -n base mamba
+RUN source activate base && conda update -n base conda && conda init
+RUN source activate base && conda install -y -c conda-forge mamba
 
 WORKDIR /home/${XCUBE_USER_NAME}
 ADD --chown=1000:100 environment.yml environment.yml
