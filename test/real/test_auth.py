@@ -103,9 +103,9 @@ class TestAuth(unittest.TestCase):
 
         self.assertEqual(400, r.status_code)
 
-        headers = {'Authorization': 'Bearer: ' + data['access_token']}
-        r = requests.get("https://xcube-geodb.brockmann-consult.de", headers=headers)
-        self.assertEqual(200, r.status_code)
+        # headers = {'Authorization': 'Bearer: ' + data['access_token']}
+        # r = requests.get("https://xcube-geodb.brockmann-consult.de", headers=headers)
+        # self.assertEqual(200, r.status_code)
 
 
 if __name__ == '__main__':

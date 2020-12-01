@@ -2,6 +2,9 @@
 
 ### New Features
 
+- Added an operation /status which returns a status 
+  set by the env vars XCUBEHUB_STATUS and XCUBE_HUB_STATUS_MESSAGE.
+  Helps e.g. when an xchubehub instance shall be suspended.
 - Added auth operators to manage users
 - data-stores.json location is now configurable via environment variables.
 - Set ingress websocket timeouts to 1 day

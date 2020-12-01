@@ -86,6 +86,13 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     if launch_xcube_geodb == 1:
         app = new_xcube_geodb_app(app, prefix)
 
+    @app.route(prefix + '/status')
+    def _status():
+        status = os.environ.get("XCUBEHUB_STATUS", "Running")
+        status_message = os.environ.get("XCUBEHUB_STATUS_MESSAGE", "Running")
+
+        return api.ApiResponse.success({"status": status, "status-message": status_message})
+
     # Flask Error Handler
     @app.errorhandler(werkzeug.exceptions.HTTPException)
     def handle_http_exception(e):
