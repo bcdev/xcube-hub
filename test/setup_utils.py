@@ -3,14 +3,10 @@ import json
 import os
 from dotenv import load_dotenv
 
-from dotenv import load_dotenv
-
 
 def setup_auth():
     load_dotenv()
     conn = http.client.HTTPSConnection("edc.eu.auth0.com")
-
-    load_dotenv()
 
     client_id = os.getenv('AUTH0_CLIENT_ID')
     client_secret = os.getenv('AUTH0_CLIENT_SECRET')

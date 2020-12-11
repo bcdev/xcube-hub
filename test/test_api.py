@@ -1,6 +1,6 @@
 import unittest
 
-from xcube_gen.api import get_json_request_value, ApiError, ApiResponse
+from xcube_hub.api import get_json_request_value, ApiError, ApiResponse
 
 
 class ApiErrorTest(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
 
-from xcube_gen.utilities import raise_for_invalid_username
+from xcube_hub.utilities import raise_for_invalid_username
 
 
 class MyTestCase(unittest.TestCase):

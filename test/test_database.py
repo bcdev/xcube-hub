@@ -3,8 +3,8 @@ import unittest
 import boto3
 import moto
 
-from xcube_gen.database import DEFAULT_DB_BUCKET_NAME
-from xcube_gen.database import Database
+from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
+from xcube_hub.database import Database
 
 
 class DatabaseTest(unittest.TestCase):

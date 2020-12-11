@@ -1,3 +1,5 @@
+import kubernetes
+
 SH_CFG = {
     "input_config": {
         "datastore_id": "sentinelhub"
@@ -31,3 +33,23 @@ SH_CFG = {
         "provider_secret_access_key": "ädflsvkdsöfl"
     }
 }
+
+
+TEST_POD_RUNNING = kubernetes.client.V1Pod(
+    metadata=kubernetes.client.V1ObjectMeta(name='helge-cate-running'),
+    status=kubernetes.client.V1PodStatus(phase='Running')
+)
+
+TEST_POD_PENDING = kubernetes.client.V1Pod(
+    metadata=kubernetes.client.V1ObjectMeta(name='helge-cate-pending'),
+    status=kubernetes.client.V1PodStatus(phase='Pending')
+)
+
+TEST_POD_TERMINATING = kubernetes.client.V1Pod(
+    metadata=kubernetes.client.V1ObjectMeta(name='helge-cate-terminating'),
+    status=kubernetes.client.V1PodStatus(phase='Terminating')
+)
+
+TEST_PODS = kubernetes.client.V1PodList(items=[TEST_POD_RUNNING, TEST_POD_PENDING, TEST_POD_TERMINATING])
+TEST_PODS_RUNNING = kubernetes.client.V1PodList(items=[TEST_POD_RUNNING, ])
+TEST_PODS_EMPTY = kubernetes.client.V1PodList(items=[])

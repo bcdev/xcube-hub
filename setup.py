@@ -23,7 +23,7 @@
 
 
 from setuptools import setup, find_packages
-from xcube_gen.version import version
+from xcube_hub.version import version
 
 requirements = [
     # Use ./environment.yml for deps.
@@ -33,9 +33,9 @@ packages = find_packages(exclude=["test", "test.*"])
 
 
 setup(
-    name="xcube_gen",
+    name="xcube_hub",
     version=version,
-    description='An xcube plug-in that implements a data cube generation service',
+    description='A webapi that manages websevices to be deployed in a kubernetes cluster',
     license='MIT',
     author='xcube Development Team',
     packages=packages,
@@ -45,7 +45,7 @@ setup(
     entry_points={
         'console_scripts': [
             # xcube's CLI
-            'xcube-genserv = xcube_gen.cli:main',
+            'xcube-hub = xcube_hub.cli:main',
         ],
     },
     install_requires=requirements,

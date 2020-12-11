@@ -2,8 +2,9 @@ FROM continuumio/miniconda3:4.8.2
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
-ENV XCUBE_GEN_API_VERSION=1.0.12
-ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_gen/resources/uwsgi.yaml"
+ENV XCUBE_GEN_API_DOCKER_VERSION=1.0.13.dev2
+ENV XCUBE_GEN_API_VERSION=dzelge_1.0.13
+ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_hub/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
 LABEL name="xcube hub service"
@@ -15,31 +16,30 @@ SHELL ["/bin/bash", "-c"]
 RUN useradd -u 1000 -g 100 -ms /bin/bash ${XCUBE_USER_NAME}
 RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 
-RUN source activate base && conda update -n base conda && conda init
-RUN source activate base && conda install -y -c conda-forge mamba
-RUN echo "conda activate cate-env" >> ~/.bashrc
-
-RUN apt-get -y update && apt-get -y install curl unzip build-essential iputils-ping vim
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get -y install curl unzip build-essential iputils-ping vim
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 
 USER ${XCUBE_USER_NAME}
 
-RUN conda install -c conda-forge -n base mamba
+RUN source activate base && conda update -n base conda && conda init
+RUN source activate base && conda install -y -c conda-forge mamba
 
 WORKDIR /home/${XCUBE_USER_NAME}
 ADD --chown=1000:100 environment.yml environment.yml
 
 RUN mamba env create
+RUN echo "conda activate xcube-hub" >> ~/.bashrc
 
 ADD --chown=1000:100 ./ .
-RUN source activate xcube-gen && pip install redis
-RUN source activate xcube-gen && pip install .
+RUN source activate xcube-hub && pip install redis
+RUN source activate xcube-hub && pip install .
 
 COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
-
 
 EXPOSE 8000
 EXPOSE 5050
 
-#CMD ["/bin/bash", "-c", "source activate xcube-gen && xcube-genserv start -p 8000 -a 0.0.0.0"]
-CMD ["/bin/bash", "-c", "source activate xcube-gen && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+CMD ["/bin/bash", "-c", "source activate xcube-hub && xcube-hub start -p 8000 -a 0.0.0.0"]
+#CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]

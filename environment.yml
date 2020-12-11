@@ -1,4 +1,4 @@
-name: xcube-gen
+name: xcube-hub
 channels:
   - conda-forge
   - defaults
@@ -24,6 +24,8 @@ dependencies:
       - requests-mock
       - flask_oidc
       - flask_cors
+      - redis
+      - flask_testing
 
   # testing
   - moto
