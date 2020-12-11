@@ -8,4 +8,10 @@ sync:
   - .:/usr/src/app
 command:
   - bash
-namespace: xcube-gen-stage
+namespace: default
+
+securityContext:
+  capabilities:
+    add:
+      - SYS_PTRACE
+      - SYS_ADMIN

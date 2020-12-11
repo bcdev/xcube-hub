@@ -7,7 +7,7 @@ def new_wsgi_app():
     cache_provider = os.getenv('XCUBE_API_CACHE_PROVIDER') or 'leveldb'
     static_folder = os.getenv('XCUBE_API_STATIC_FOLDER') or '/home/xcube/viewer'
 
-    return new_app(prefix="/api/v1", static_folder=static_folder, cache_provider=cache_provider)
+    return new_app(static_folder=static_folder, cache_provider=cache_provider)
 
 
 app = new_wsgi_app()

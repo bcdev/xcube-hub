@@ -28,7 +28,7 @@ from xcube_hub import api
 from xcube_hub.controllers import user_namespaces
 from xcube_hub.k8s import create_deployment, create_deployment_object, create_service_object, create_service, \
     create_ingress_object, create_ingress, delete_deployment, delete_service, delete_ingress, \
-    list_ingress, list_service, get_pod
+    list_ingresses, list_services, get_pod
 from xcube_hub.poller import poll_deployment_status, poll_pod_phase
 from xcube_hub.typedefs import JsonObject
 
@@ -54,12 +54,12 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
             delete_deployment(name=user_id, namespace=user_id)
             delete_service(name=user_id, namespace=user_id)
 
-        services = list_service(name=user_id, namespace=user_id)
+        services = list_services(namespace=user_id)
         services = [service.metadata.name for service in services.items]
         if len(services) > 0:
             delete_service(name=user_id, namespace=user_id)
 
-        ingresses = list_ingress(namespace=user_id)
+        ingresses = list_ingresses(namespace=user_id)
         ingresses = [ingress.metadata.name for ingress in ingresses.items]
         if len(ingresses) > 0:
             delete_ingress(name=user_id, namespace=user_id)

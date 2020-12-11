@@ -28,41 +28,35 @@ from kubernetes.client.rest import ApiException
 from xcube_hub import api
 from xcube_hub.controllers import user_namespaces
 from xcube_hub.k8s import create_deployment_object, create_service_object, \
-    create_ingress_object, delete_deployment, delete_service, delete_ingress, \
-    list_ingress, list_service, get_pod, create_pvc_object, create_pvc_if_not_exists, create_deployment_if_not_exists, \
-    create_service_if_not_exists, create_ingress_if_not_exists, count_pods
+    delete_deployment, delete_service, list_services, get_pod, \
+    create_deployment_if_not_exists, create_service_if_not_exists, count_pods, \
+    add_cate_path_to_ingress, get_deployment
 from xcube_hub.poller import poll_pod_phase
 from xcube_hub.typedefs import JsonObject
 from xcube_hub.utilities import raise_for_invalid_username
 
 
 def delete_cate(user_id: str, prune: bool = False) -> bool:
-    user_namespaces.create_if_not_exists(user_id=user_id)
+    cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate")
+
+    user_namespaces.create_if_not_exists(user_id=cate_namespace)
+
+    deployment = get_deployment(name=user_id + '-cate', namespace=cate_namespace)
+
+    if deployment:
+        delete_deployment(name=user_id + '-cate', namespace=cate_namespace)
 
     if prune:
-        core_v1_api = client.CoreV1Api()
-        pvcs = core_v1_api.list_namespaced_persistent_volume_claim(namespace=user_id)
-        pvcs = [pvc.metadata.name for pvc in pvcs.items]
-        if len(pvcs) == 0:
-            core_v1_api.delete_collection_namespaced_persistent_volume_claim(namespace=user_id)
-
-    apps_v1_api = client.AppsV1Api()
-
-    deployments = apps_v1_api.list_namespaced_deployment(namespace=user_id)
-    deployments = [deployment.metadata.name for deployment in deployments.items]
-    if len(deployments) > 0:
-        delete_deployment(name=user_id + '-cate', namespace=user_id)
-
-    if prune:
-        services = list_service(name=user_id + '-cate', namespace=user_id)
+        service_name = user_id + '-cate'
+        services = list_services(namespace=cate_namespace)
         services = [service.metadata.name for service in services.items]
-        if len(services) > 0:
-            delete_service(name=user_id + '-cate', namespace=user_id)
+        if service_name in services:
+            delete_service(name=service_name, namespace=cate_namespace)
 
-        ingresses = list_ingress(namespace=user_id)
-        ingresses = [ingress.metadata.name for ingress in ingresses.items]
-        if len(ingresses) > 0:
-            delete_ingress(name=user_id + '-cate', namespace=user_id)
+        # ingresses = list_ingress(namespace=cate_namespace)
+        # ingresses = [ingress.metadata.name for ingress in ingresses.items]
+        # if len(ingresses) > 0:
+        #     delete_ingress(name=user_id + '-cate', namespace=cate_namespace)
 
     return True
 
@@ -78,17 +72,17 @@ def launch_cate(user_id: str) -> JsonObject:
         if count_pods(label_selector="purpose=cate-webapi") > max_pods:
             raise api.ApiError(410, "Too many pods running.")
 
-        user_namespaces.create_if_not_exists(user_id=user_id)
-
         cate_image = os.environ.get("CATE_IMG")
         cate_version = os.environ.get("CATE_VERSION")
-        cate_pvc_limit = os.environ.get("CATE_PVC_LIMIT", False)
         cate_command = os.environ.get("CATE_COMMAND", False)
         cate_env_activate_command = os.environ.get("CATE_ENV_ACTIVATE_COMMAND", False)
         cate_webapi_uri = os.environ.get("CATE_WEBAPI_URI")
+        cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate")
+
+        user_namespaces.create_if_not_exists(user_id=cate_namespace)
 
         if not cate_command:
-            cate_command = "cate-webapi-start -b -p 4000 -a 0.0.0.0"
+            cate_command = "cate-webapi-start -b -p 4000 -a 0.0.0.0 -r /home/cate/workspace"
 
         if not cate_env_activate_command:
             cate_env_activate_command = "source activate cate-env"
@@ -97,26 +91,63 @@ def launch_cate(user_id: str) -> JsonObject:
             raise api.ApiError(400, "Could not find the cate webapi docker image.")
 
         cate_image = cate_image + ':' + cate_version
-        pvc = create_pvc_object(user_id, cate_pvc_limit)
-        create_pvc_if_not_exists(pvc, user_id)
 
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
-        envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate"),
+        envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate/workspace"),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
 
-        volume_mounts = [{
-            'name': 'claim-' + user_id,
-            'mountPath': '/home/cate',
-            'persistentVolumeClaim': {
-                'claimName': 'claim-' + user_id
-            }
-        }, ]
-        volumes = [{
-            'name': 'claim-' + user_id,
-            'mountPath': '/home/cate',
-            'persistentVolumeClaim': {'claimName': 'claim-' + user_id}
-        }, ]
+        volume_mounts = [
+            {
+                'name': 'workspace-pvc',
+                'mountPath': '/home/cate/workspace',
+                'subPath': user_id + '-scratch'
+            },
+            {
+                'name': 'workspace-pvc',
+                'mountPath': '/home/cate/.cate',
+                'subPath': user_id + '-cate'
+            }, ]
+        # {
+        #     'mountPath': "/home/cate/storage",
+        #     'subPath': user_id,
+        #     'name': 'mnt-goofys',
+        # }]
+
+        volumes = [
+            # {
+            #     'name': 'mnt-goofys',
+            #     'hostPath': {
+            #         'path': '/var/s3'
+            #     }
+            # },
+            {
+                'name': 'workspace-pvc',
+                'persistentVolumeClaim': {
+                    'claimName': 'workspace-pvc',
+                }
+            }]
+
+        # init_containers = None
+        init_containers = [
+            {
+                "name": "fix-owner",
+                "image": "bash",
+                "command": ["chown", "-R", "1000.1000", "/home/cate/.cate", "/home/cate/workspace"],
+                "volumeMounts": [
+                    {
+                        "mountPath": "/home/cate/.cate",
+                        "subPath": user_id + '-cate',
+                        "name": "workspace-pvc",
+                    },
+                    {
+                        "mountPath": "/home/cate/workspace",
+                        "subPath": user_id + '-scratch',
+                        "name": "workspace-pvc",
+                    },
+                ]
+            },
+        ]
 
         deployment = create_deployment_object(name=user_id + '-cate',
                                               user_id=user_id,
@@ -126,29 +157,29 @@ def launch_cate(user_id: str) -> JsonObject:
                                               container_port=4000,
                                               command=command,
                                               volumes=volumes,
-                                              volume_mounts=volume_mounts)
+                                              volume_mounts=volume_mounts,
+                                              init_containers=init_containers)
 
         # TODO: Make create_if_exists test for broken pods
         # pod_status = get_status(user_id)
         # if pod_status != "Running":
         #     create_deployment(namespace=user_id, deployment=deployment)
         # else:
-        create_deployment_if_not_exists(user_id, deployment)
+        create_deployment_if_not_exists(namespace=cate_namespace, deployment=deployment)
 
         service = create_service_object(name=user_id + '-cate', port=4000, target_port=4000)
-        create_service_if_not_exists(service=service, namespace=user_id)
+        create_service_if_not_exists(service=service, namespace=cate_namespace)
 
         host_uri = os.environ.get("CATE_WEBAPI_URI")
 
-        ingress = create_ingress_object(name=user_id + '-cate',
-                                        service_name=user_id + '-cate',
-                                        service_port=4000,
-                                        user_id=user_id,
-                                        host_uri=host_uri)
+        add_cate_path_to_ingress(
+            name='xcubehub-stage-cate',
+            namespace=cate_namespace,
+            user_id=user_id,
+            host_uri=host_uri
+        )
 
-        create_ingress_if_not_exists(ingress, namespace=user_id)
-
-        poll_pod_phase(get_pod, namespace=user_id, prefix=user_id)
+        poll_pod_phase(get_pod, namespace=cate_namespace, prefix=user_id)
 
         try:
             grace = int(grace)
@@ -157,13 +188,14 @@ def launch_cate(user_id: str) -> JsonObject:
 
         time.sleep(int(grace))
 
-        return dict(serverUrl=f'https://{cate_webapi_uri}/{user_id}')
+        return dict(serverUrl=f'{cate_webapi_uri}/{user_id}')
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
 
 def get_status(user_id: str):
-    pod = get_pod(prefix=user_id + '-cate', namespace=user_id)
+    cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate")
+    pod = get_pod(prefix=user_id + '-cate', namespace=cate_namespace)
     if pod:
         return pod.status.to_dict()
     else:

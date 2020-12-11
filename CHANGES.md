@@ -14,8 +14,14 @@
 
 ### Fixes
 
+- Removed poll_job_status. Not used.
+- The cate ingress is now patched not created
+- Cate instances are now run in namespace cate allowing for NFS permanent 
+  volumes in Kubernetes.
+- Launch_cate is not returning the URL without https
 - Set ingress timeouts to 1 day
 - Ensured that the grace period foe launching cate services is integer 
+- Improved testing for K8s functions
 
 ## Changes in v1.0.12
 
