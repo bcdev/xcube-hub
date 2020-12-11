@@ -36,6 +36,7 @@ def get_auth_token():
     return data['access_token']
 
 
+@unittest.skip("Not run on CI")
 class TestAuth(unittest.TestCase):
     def setUp(self) -> None:
         self._user_id = str(uuid.uuid1())
