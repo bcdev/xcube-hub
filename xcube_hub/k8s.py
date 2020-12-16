@@ -221,7 +221,8 @@ def create_ingress_object(name: str,
             "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
             "nginx.ingress.kubernetes.io/send-timeout": "86400",
             "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
-            "nginx.ingress.kubernetes.io/enable-cors": "true"
+            "nginx.ingress.kubernetes.io/enable-cors": "true",
+            "nginx.ingress.kubernetes.io/websocket-services": service_name
         }),
         spec=client.NetworkingV1beta1IngressSpec(
             rules=[client.NetworkingV1beta1IngressRule(

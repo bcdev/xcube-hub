@@ -188,7 +188,7 @@ def launch_cate(user_id: str) -> JsonObject:
 
         time.sleep(int(grace))
 
-        return dict(serverUrl=f'{cate_webapi_uri}/{user_id}')
+        return dict(serverUrl=f'https://{cate_webapi_uri}/{user_id}')
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
 
