@@ -1,4 +1,4 @@
-## Changes in v1.0.13.dev1
+## Changes in v1.0.13
 
 ### New Features
 
