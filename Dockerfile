@@ -2,14 +2,14 @@ FROM continuumio/miniconda3:4.8.2
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
-ENV XCUBE_GEN_API_DOCKER_VERSION=1.0.13.dev2
-ENV XCUBE_GEN_API_VERSION=dzelge_1.0.13
+ENV XCUBE_HUB_DOCKER_VERSION=1.0.14.dev1
+ENV XCUBE_HUB_VERSION=1.0.14.dev1
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_hub/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
 LABEL name="xcube hub service"
 LABEL xcube_version=${XCUBE_BASE_VERSION}
-LABEL xcube_gen_api_version=${XCUBE_GEN_API_VERSION}
+LABEL xcube_gen_api_version=${XCUBE_HUB_VERSION}
 
 USER root
 SHELL ["/bin/bash", "-c"]
