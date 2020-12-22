@@ -1,5 +1,7 @@
 ## Changes in v1.0.14.dev1
 ### New Features
+- okteto uses now a xhubehub-base image
+
 ### Fixes
 
 ## Changes in v1.0.13

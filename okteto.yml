@@ -1,5 +1,5 @@
 name: xcube-gen
-image: quay.io/bcdev/xcube-hub:v1.0.13.base
+image: quay.io/bcdev/xcubehub-base:latest
 forward:
   - 8080:8080
   - 8000:8000
