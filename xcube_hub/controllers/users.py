@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Optional, Sequence
 
 from xcube_hub.api import ApiError, get_json_request_value
 from xcube_hub.database import Database
@@ -51,7 +51,7 @@ def delete_user_data(user_id: str, dataset_name: str = 'data'):
     Database.instance().delete_user_data(user_id, dataset_name)
 
 
-def get_users(token: str) -> JsonObject:
+def get_users(token: str) -> Sequence[JsonObject]:
     import requests
     headers = {'Authorization': f'Bearer {token}'}
     res = requests.get("https://edc.eu.auth0.com/api/v2/users", headers=headers)

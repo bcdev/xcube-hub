@@ -263,6 +263,29 @@ def new_xcube_gen_app(app, prefix: str = ""):
             return e.response
 
     # noinspection InsecureHash
+    @app.route(prefix + '/users', methods=['GET'])
+    @auth0.requires_auth0(audience="https://edc.eu.auth0.com/api/v2/")
+    def _users():
+        try:
+            token = Auth0.get_token_auth_header()
+            if flask.request.method == 'GET':
+                user_list = users.get_users(token=token)
+                total_punits = 0
+
+                for user in user_list:
+                    punits = users.get_processing_units(user_id=user['name'], include_history=False)
+                    user['punits'] = punits
+                    roles = users.get_role(user['user_id'], token)
+                    user['roles'] = roles
+                    if punits is not None and isinstance(punits, dict) and 'count' in punits:
+                        total_punits += int(punits['count'])
+                    del user['identities']
+                res = dict(users=user_list, sums=dict(total_punits=total_punits))
+                return api.ApiResponse.success(result=res)
+        except api.ApiError as e:
+            return e.response
+
+    # noinspection InsecureHash
     @app.route(prefix + '/users/<user_name>/punits', methods=['GET', 'PUT', 'DELETE'])
     @auth0.requires_auth0()
     def _processing_units(user_name: str):
