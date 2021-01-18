@@ -49,3 +49,19 @@ def put_user_data(user_id: str, user_data: JsonObject, dataset_name: str = 'data
 
 def delete_user_data(user_id: str, dataset_name: str = 'data'):
     Database.instance().delete_user_data(user_id, dataset_name)
+
+
+def get_users(token: str) -> JsonObject:
+    import requests
+    headers = {'Authorization': f'Bearer {token}'}
+    res = requests.get("https://edc.eu.auth0.com/api/v2/users", headers=headers)
+    res.raise_for_status()
+    return res.json()
+
+
+def get_role(user_id: str, token: str):
+    import requests
+    headers = {'Authorization': f'Bearer {token}'}
+    res = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/roles", headers=headers)
+    res.raise_for_status()
+    return res.json()

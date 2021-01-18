@@ -42,6 +42,113 @@ def create_pvc_if_not_exists(pvc: client.V1PersistentVolumeClaim, namespace: str
         create_pvc(pvc, namespace=namespace)
 
 
+def create_goofys_daemonset_object(name: str, user_id: str, envs: Sequence):
+    envs = [] if not envs else envs
+
+    container = client.V1Container(
+        name=name,
+        image="quay.io/bcdev/cate-s3-daemon:0.1",
+        command=["/usr/local/bin/goofys", "-o", "allow_other", "--uid", "1000", "--gid", "1000", "-f", "--region",
+                 "eu-central-1", "eurodatacube:" + user_id, "/var/s3"],
+        env=envs,
+        image_pull_policy="Always",
+        volume_mounts=[
+            {
+                "mountPath": '/dev/fuse',
+                "name": "devfuse-" + user_id,
+            },
+            {
+                "mountPath": "var/s3:shared",
+                "name": 'mnt-goofys-' + user_id,
+            },
+        ],
+        security_context=client.V1SecurityContext(privileged=True, capabilities={'add': ["SYS_ADMIN"]})
+    )
+
+    template = client.V1PodTemplateSpec(
+        metadata=client.V1ObjectMeta(labels={"app": name, "purpose": "cate-webapi"}),
+        spec=client.V1PodSpec(
+            containers=[container],
+            volumes=[
+                {
+                    'name': 'devfuse-' + user_id,
+                    'hostPath': {'path': '/dev/fuse'}
+                },
+                {
+                    'name': 'mnt-goofys-' + user_id,
+                    'hostPath': {'path': '/var/s3'}
+                }],
+            security_context=client.V1PodSecurityContext(fs_group=1000)
+        )
+    )
+
+    spec = client.V1DeploymentSpec(
+        replicas=1,
+        template=template,
+        selector={'matchLabels': {'app': name}}
+    )
+
+    daemon_set = client.V1DaemonSet(
+        metadata=client.V1ObjectMeta(name=name, labels={"app": name, "purpose": "cate-webapi"}),
+        spec=spec,
+    )
+
+    return daemon_set
+
+
+def create_goofys_daemonset(daemonset: client.V1DaemonSet,
+                            namespace: str = 'default',
+                            core_api: Optional[client.AppsV1Api] = None):
+    # Create deployment
+    apps_v1_api = core_api or client.AppsV1Api()
+    try:
+        api_response = apps_v1_api.create_namespaced_daemon_set(
+            body=daemonset,
+            namespace=namespace)
+        print("Deployment created. status='%s'" % str(api_response.status))
+    except (ApiException, ApiTypeError) as e:
+        raise api.ApiError(400, f"Error when creating the deployment {daemonset.metadata.name}: {str(e)}")
+
+
+def list_goofys_daemonsets(namespace: str, core_api: Optional[client.AppsV1Api] = None):
+    api_instance = core_api or client.AppsV1Api()
+    try:
+        return api_instance.list_namespaced_daemon_set(namespace)
+    except (ApiException, ApiTypeError) as e:
+        raise api.ApiError(400, f"Error when listing daemonsets in namespace {namespace}: {str(e)}")
+
+
+def get_goofys_daemonset(namespace: str, name: str):
+    daemonsets = list_goofys_daemonsets(namespace=namespace)
+    for daemonset in daemonsets.items:
+        if daemonset.metadata.name == name:
+            return daemonset
+
+    return None
+
+
+def delete_goofys_daemonset(name: str, namespace: str = 'default', core_api: Optional[client.AppsV1Api] = None):
+    apps_v1_api = core_api or client.AppsV1Api()
+
+    try:
+        api_response = apps_v1_api.delete_namespaced_daemon_set(
+            name=name,
+            namespace=namespace,
+            body=client.V1DeleteOptions(
+                propagation_policy='Foreground',
+                grace_period_seconds=5))
+        print("Daemonset deleted. status='%s'" % str(api_response.status))
+    except (ApiException, ApiTypeError) as e:
+        raise api.ApiError(400, f"Error when deleting the deployment {name}: {str(e)}")
+
+
+def create_goofys_daemonset_if_not_exists(namespace: str, daemonset: client.V1DaemonSet):
+    daemonset_exists = get_goofys_daemonset(namespace=namespace, name=daemonset.metadata.name)
+
+    if daemonset_exists is None:
+        create_goofys_daemonset(daemonset=daemonset, namespace=namespace)
+
+
 def create_deployment_object(name: str, user_id: str, container_name: str, image: str, container_port: int,
                              command: Union[str, Sequence[str]], envs: Optional[Sequence] = None,
                              volume_mounts: Optional[Sequence] = None,
@@ -58,15 +165,17 @@ def create_deployment_object(name: str, user_id: str, container_name: str, image
         image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)],
         volume_mounts=volume_mounts,
-
+        security_context=client.V1SecurityContext(privileged=True)
     )
+
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": container_name, "purpose": "cate-webapi"}),
         spec=client.V1PodSpec(
             containers=[container],
             volumes=volumes,
-            init_containers=init_containers
+            init_containers=init_containers,
+            security_context=client.V1PodSecurityContext(fs_group=1000)
         )
     )
     # Create the specification of deployment
@@ -199,6 +308,7 @@ def has_service(name: str, namespace: str = 'default', core_api: Optional[client
     services = list_services(namespace=namespace, core_api=core_api)
     services = [service.metadata.name for service in services.items]
     return name in services
+
 
 def create_ingress_object(name: str,
                           service_name: str,

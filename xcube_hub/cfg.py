@@ -22,7 +22,7 @@ class Cfg:
     @classmethod
     def _load_config(cls):
         from kubernetes import config
-        if os.environ.get('XCUBE_GEN_API_RUN_LOCAL'):
+        if os.environ.get('XCUBE_HUB_RUN_LOCAL'):
             print("Kubernetes configured to run locally.")
             config.load_kube_config()
         else:

@@ -35,7 +35,7 @@ packages = find_packages(exclude=["test", "test.*"])
 setup(
     name="xcube_hub",
     version=version,
-    description='A webapi that manages websevices to be deployed in a kubernetes cluster',
+    description='A webapi that manages webservices to be deployed in a kubernetes cluster',
     license='MIT',
     author='xcube Development Team',
     packages=packages,

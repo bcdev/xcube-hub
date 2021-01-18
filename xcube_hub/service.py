@@ -98,7 +98,7 @@ def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='
     def handle_http_exception(e):
         return api.ApiResponse.error(e.description, e.code)
 
-    if os.environ.get('XCUBE_GEN_MOCK_SERVICES') == '1':
+    if os.environ.get('XCUBE_HUB_MOCK_SERVICES') == '1':
         from .servicemocks import extend_app
         extend_app(app, prefix)
 
@@ -129,7 +129,7 @@ def new_cate_app(app, prefix: str = ""):
 
     @app.route(prefix + '/user/<user_id>/webapi', methods=['GET', 'POST', 'DELETE'])
     @cross_origin(supports_credentials=True, allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
-    @oidc.accept_token(require_token=True)
+    # @oidc.accept_token(require_token=True)
     def _cate_webapi(user_id: str):
         try:
             # _accept_role('user')

@@ -15,6 +15,6 @@ def service_info() -> JsonObject:
                 serverStartTime=SERVER_START_TIME,
                 serverCurrentTime=datetime.datetime.now().isoformat(),
                 serverPID=os.getpid(),
-                chartVersion=os.getenv("XCUBE_GEN_CHART_VERSION"),
-                mockServices=os.getenv("XCUBE_GEN_MOCK_SERVICES"),
-                runLocal=os.getenv("XCUBE_GEN_API_RUN_LOCAL"))
+                chartVersion=os.getenv("XCUBE_HUB_CHART_VERSION"),
+                mockServices=os.getenv("XCUBE_HUB_MOCK_SERVICES"),
+                runLocal=os.getenv("XCUBE_HUB_RUN_LOCAL"))

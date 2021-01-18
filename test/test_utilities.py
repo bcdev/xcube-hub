@@ -1,6 +1,6 @@
+import os
 import unittest
-
-from xcube_hub.utilities import raise_for_invalid_username
+from xcube_hub.utilities import raise_for_invalid_username, load_env_by_regex
 
 
 class MyTestCase(unittest.TestCase):
@@ -26,6 +26,22 @@ class MyTestCase(unittest.TestCase):
 
         res = raise_for_invalid_username('that-moron')
         self.assertTrue(res)
+
+    def test_load_env_by_regex(self):
+        os.environ["DEBUSSY_LA_MERE"] = "1"
+        os.environ["DEBUSSY_CLAIRE_DE_LUNE"] = "2"
+        os.environ["DEBUSSY_LA_FILLE_AUX_CHEVEUX_DE_LIN"] = "3"
+        os.environ["NOTDEBUSSY_GYMNOPEDIE"] = "4"
+
+        res = load_env_by_regex(r'^DEBUSSY_')
+        self.assertEqual(3, len(res))
+
+        res = load_env_by_regex(r'^DEBUSSIE_')
+        self.assertEqual(0, len(res))
+
+        # This should return all envs which is DEBUSSY + NOTDEBUSSY + all the rest; hence, must be greater 3
+        res = load_env_by_regex()
+        self.assertLess(3, len(res))
 
 
 if __name__ == '__main__':

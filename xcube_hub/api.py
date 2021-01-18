@@ -60,19 +60,18 @@ class ApiResponse:
 class ApiError(BaseException):
     def __init__(self, status_code: int,
                  message: str,
-                 traceback: Optional[str] = None,
                  output: Optional[str] = None):
         super().__init__(message)
         self.status_code = status_code
         self._output = output
-        self._traceback = traceback
 
     @property
     def response(self):
+        import traceback
         return ApiResponse.error(error=self,
                                  status_code=self.status_code,
                                  output=self._output,
-                                 traceback=self._traceback)
+                                 traceback=traceback.format_exc())
 
 
 def get_json_request_value(request: JsonObject,
