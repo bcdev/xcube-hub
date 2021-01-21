@@ -31,6 +31,7 @@ from kubernetes.client.rest import ApiException
 from xcube_hub import api
 from xcube_hub.auth0 import Auth0
 from xcube_hub.controllers import user_namespaces
+from xcube_hub.k8s import create_configmap
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error
 
@@ -61,16 +62,33 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
         client.V1EnvVar(name="SH_INSTANCE_ID", value=sh_instance_id),
     ]
 
+    volume_mounts = [
+        {
+            'name': 'xcube-datapools',
+            'mountPath': '/etc/xcube',
+            'readOnly': True
+        }, ]
+
+    volumes = [
+        {
+            'name': 'xcube-datapools',
+            'configMap': {
+                'name': 'xcube-datapools'
+            }
+        }, ]
+
     container = client.V1Container(
         name="xcube-gen",
         image=gen_image,
         command=cmd,
+        volume_mounts=volume_mounts,
         image_pull_policy=gen_container_pull_policy,
         env=sh_envs)
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": "xcube-gen"}),
         spec=client.V1PodSpec(
+            volumes=volumes,
             restart_policy="Never",
             containers=[container]
         ))
@@ -94,6 +112,10 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL', False)
         if callback_uri is False:
             raise api.ApiError(400, "XCUBE_GEN_API_CALLBACK_URL must be given")
+
+        with open('/etc/xcube/store_config.json') as f:
+            configmap = client.V1ConfigMap(metadata={'name': 'xcube-datapools'}, data=json.load(f))
+            create_configmap(namespace=user_id, body=configmap)
 
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
 

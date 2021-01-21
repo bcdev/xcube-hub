@@ -375,7 +375,6 @@ def new_xcube_geodb_app(app, prefix: str = ""):
     @auth0.requires_auth0(audience=API_AUTH_IDENTIFIER)
     def role(user_id: str, role_id: str):
         try:
-            payload = flask.request.json
             token = Auth0.get_token_auth_header()
             auth.add_user_to_role(token=token, user_id=user_id, role_id=role_id)
             return api.ApiResponse.success(result="success")

@@ -1,6 +1,8 @@
 from typing import Optional, Sequence, Union
 from kubernetes import client
-from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError
+from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError, ApiValueError
+from xcube_hub.typedefs import JsonObject
+
 from xcube_hub import api
 
 from xcube_hub.poller import poll_deployment_status
@@ -508,3 +510,19 @@ def count_pods(namespace: Optional[str] = None, label_selector: str = None) -> i
         return len(pods.items)
     else:
         return 0
+
+
+def create_configmap_object(name: str, data: JsonObject) -> client.V1ConfigMap:
+    return client.V1ConfigMap(metadata=client.V1ObjectMeta(name=name), data=data)
+
+
+def create_configmap(namespace: str, body: client.V1ConfigMap, core_api: Optional[client.CoreV1Api] = None):
+    # Creation of the Deployment in specified namespace
+    # (Can replace "default" with a namespace you may have created)
+
+    try:
+        core_api = core_api or client.CoreV1Api()
+        core_api.create_namespaced_config_map(namespace=namespace, body=body)
+    except (ApiException, ApiValueError) as e:
+        raise api.ApiError(400,
+                           f"Error when creating the configmap {body.metadata.name} in {namespace or 'All'}: {str(e)}")

@@ -8,7 +8,11 @@ sync:
   - .:/usr/src/app
 command:
   - bash
+
 namespace: default
+
+environment:
+
 
 securityContext:
   capabilities:
