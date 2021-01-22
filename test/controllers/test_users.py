@@ -1,32 +1,21 @@
-import os
 import hashlib
 import unittest
 
 from moto import mock_s3
-
-from test.setup_utils import setup_auth
 import boto3
-import moto
 
 from xcube_hub.controllers.users import get_user_data
 from xcube_hub.controllers.users import add_processing_units
 from xcube_hub.controllers.users import subtract_processing_units
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
-from xcube_hub.service import new_app
 
 
 class UsersTest(unittest.TestCase):
-    def setUp(self) -> None:
-        os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
-        self._access_token = setup_auth()
-        self._app = new_app()
-        self._client = self._app.test_client()
-        self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
-
+    # noinspection InsecureHash
     @mock_s3
     def test_update_processing_units(self):
         s3 = boto3.client('s3')
-        s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME)
+        s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
 
         user_name = 'heinrich'
         user_id = hashlib.md5(user_name.encode('utf-8')).hexdigest()

@@ -17,7 +17,8 @@ class DatabaseTest(unittest.TestCase):
     def test_user_data_crud(self):
         with moto.mock_s3():
             s3 = boto3.client('s3')
-            s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME)
+            s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME,
+                             CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
 
             database = Database()
 

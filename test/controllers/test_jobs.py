@@ -10,7 +10,6 @@ from xcube_hub.service import new_app
 import subprocess
 
 
-# @unittest.skipIf(os.environ.get("UNITTEST_WITH_K8S", False) == 'true', "K8s test supressed.")
 @patch("xcube_hub.auth0.Auth0.get_token_auth_header", return_value="sdfvfsdvdfsv")
 class TestJobs(unittest.TestCase):
     def setUp(self) -> None:

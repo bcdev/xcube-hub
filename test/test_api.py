@@ -8,7 +8,7 @@ class ApiErrorTest(unittest.TestCase):
         error = ApiError(403, 'hands off')
         self.assertEqual(403, error.status_code)
         self.assertEqual('hands off', f'{error}')
-        self.assertEqual((dict(status='error', message='hands off'), 403),
+        self.assertEqual((dict(status='error', message='hands off', traceback='NoneType: None\n'), 403),
                          error.response)
 
 

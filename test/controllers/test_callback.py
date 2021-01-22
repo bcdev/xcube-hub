@@ -50,10 +50,11 @@ class TestCallback(unittest.TestCase):
 
         mock_get_patch.stop()
 
+    # noinspection InsecureHash
     def test_put_callback(self):
         with moto.mock_s3():
             s3 = boto3.client('s3')
-            s3.create_bucket(Bucket='eurodatacube')
+            s3.create_bucket(Bucket='eurodatacube', CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
             user_name = 'heinrich'
             user_id = hashlib.md5(user_name.encode('utf-8')).hexdigest()
 
