@@ -11,7 +11,7 @@ from flask_testing import TestCase
 class TestAuth(TestCase):
     def create_app(self) -> None:
         load_dotenv()
-        os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
+        os.environ["XCUBE_HUB_RUN_LOCAL"] = '1'
         app = new_app()
         return app
 
