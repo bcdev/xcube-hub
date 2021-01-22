@@ -1,20 +1,10 @@
-import os
 import unittest
 
-from test.setup_utils import setup_auth
 from xcube_hub.api import ApiError
 from xcube_hub.controllers.sizeandcost import get_size_and_cost
-from xcube_hub.service import new_app
 
 
 class CalcTest(unittest.TestCase):
-    def setUp(self) -> None:
-        os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
-        self._access_token = setup_auth()
-        self._app = new_app()
-        self._client = self._app.test_client()
-        self._client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self._access_token['access_token']
-
     def test_get_size_and_cost_sh(self):
         data = {"input_configs": [
             {

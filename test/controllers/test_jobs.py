@@ -14,7 +14,7 @@ import subprocess
 @patch("xcube_hub.auth0.Auth0.get_token_auth_header", return_value="sdfvfsdvdfsv")
 class TestJobs(unittest.TestCase):
     def setUp(self) -> None:
-        os.environ["XCUBE_GEN_API_RUN_LOCAL"] = '1'
+        os.environ["XCUBE_HUB_RUN_LOCAL"] = '1'
         os.environ["XCUBE_GEN_API_CALLBACK_URL"] = 'http://test/'
         self._app = new_app()
         subprocess.call(["kubectl", "create", "namespace", "daffy-duck"])

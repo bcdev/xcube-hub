@@ -52,7 +52,7 @@ def raise_for_invalid_json():
         raise api.ApiError(400, "Invalid JSON in request body " + str(e))
 
 
-def new_app(prefix: str = "", cache_provider: str = "leveldb", static_url_path='', static_folder='', dotenv_path: str = '.env'):
+def new_app(prefix: str = "", cache_provider: str = "inmemory", static_url_path='', static_folder='', dotenv_path: str = '.env'):
     """Create the service app."""
     load_dotenv()
     app = flask.Flask('xcube-genserv', static_url_path, static_folder=static_folder)
