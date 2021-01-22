@@ -107,7 +107,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
 venv/
@@ -134,3 +134,4 @@ dmypy.json
 .pyre/
 /client_secrets.json
 *.tmp
+
