@@ -1,9 +1,14 @@
-name: xcube-gen
-image: quay.io/bcdev/xcubehub-base:latest
+name: xcube-gen-dev
+image: quay.io/bcdev/xcubehub-base:1.0.dev0
 forward:
   - 8080:8080
   - 8000:8000
+reverse:
+  - 9000:9000
+
 remote: 2222
+
+workdir: /usr/src/app
 sync:
   - .:/usr/src/app
 command:
@@ -11,11 +16,7 @@ command:
 
 namespace: default
 
-environment:
-
-
 securityContext:
   capabilities:
     add:
       - SYS_PTRACE
-      - SYS_ADMIN
