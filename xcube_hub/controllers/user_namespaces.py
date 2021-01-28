@@ -5,12 +5,12 @@ from kubernetes.client.rest import ApiException
 from xcube_hub import api
 
 
-def create_if_not_exists(user_id: Optional[str] = None):
+def create_if_not_exists(user_namespace: Optional[str] = None):
     api_pod_instance = client.CoreV1Api()
-    body = client.V1Namespace(metadata=client.V1ObjectMeta(name=user_id))
+    body = client.V1Namespace(metadata=client.V1ObjectMeta(name=user_namespace))
 
     try:
-        if not exists(user_id):
+        if not exists(user_namespace):
             api_pod_instance.create_namespace(body=body)
             return True
         else:

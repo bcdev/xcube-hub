@@ -35,7 +35,7 @@ from xcube_hub.typedefs import JsonObject
 
 def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
     try:
-        user_namespaces.create_if_not_exists(user_id=user_id)
+        user_namespaces.create_if_not_exists(user_namespace=user_id)
 
         xcube_image = os.environ.get("XCUBE_DOCKER_WEBAPI_IMG")
         xcube_webapi_uri = os.environ.get("XCUBE_WEBAPI_URI")

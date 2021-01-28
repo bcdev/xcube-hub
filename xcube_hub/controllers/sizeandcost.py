@@ -1,3 +1,5 @@
+from datetime import date
+
 from xcube_hub.api import get_json_request_value, ApiError
 from xcube_hub.typedefs import JsonObject
 
@@ -51,7 +53,7 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
     start_date, end_date = get_json_request_value(cube_config, 'time_range',
                                                   value_type=list,
                                                   item_count=2,
-                                                  item_type=str,
+                                                  item_type=(str, type(None)),
                                                   key_path='cube_config')
     time_period = get_json_request_value(cube_config, 'time_period',
                                          value_type=str,
@@ -80,7 +82,11 @@ def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
         height = num_tiles_y * tile_height
 
     import pandas as pd
-    date_range = pd.date_range(start=start_date, end=end_date, freq=time_period)
+    try:
+        end_date = end_date or date.today().strftime("%Y-%m-%d")
+        date_range = pd.date_range(start=start_date, end=end_date, freq=time_period)
+    except ValueError as e:
+        raise ApiError(400, str(e))
 
     num_times = len(date_range)
     num_variables = len(variable_names)

@@ -157,8 +157,10 @@ class _RedisKvDB(KeyValueStore):
         :param key:
         :return:
         """
-
-        return self._db.get(key)
+        val = self._db.get(key)
+        if isinstance(val, bytes):
+            val = val.decode('utf-8')
+        return val
 
     def set(self, key, value):
         """

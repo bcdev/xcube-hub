@@ -36,7 +36,7 @@ from xcube_hub.typedefs import AnyDict, Error
 
 
 def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
-    # Configureate Pod template container
+    # Configure Pod template container
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
     sh_instance_id = os.environ.get("SH_INSTANCE_ID")
@@ -53,7 +53,7 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
         raise api.ApiError(400, "create_gen_job_object needs a config dict.")
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube gen2 -v --store-conf store_config.json"]
+                              f"| xcube --traceback gen2 -v --store-conf /etc/xcube/data-pools.yaml"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -61,33 +61,33 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
         client.V1EnvVar(name="SH_INSTANCE_ID", value=sh_instance_id),
     ]
 
-    # volume_mounts = [
-    #     {
-    #         'name': 'xcube-datapools',
-    #         'mountPath': '/etc/xcube',
-    #         'readOnly': True
-    #     }, ]
-    #
-    # volumes = [
-    #     {
-    #         'name': 'xcube-datapools',
-    #         'configMap': {
-    #             'name': 'xcube-datapools'
-    #         }
-    #     }, ]
+    volume_mounts = [
+        {
+            'name': 'xcube-datapools',
+            'mountPath': '/etc/xcube',
+            'readOnly': True
+        }, ]
+
+    volumes = [
+        {
+            'name': 'xcube-datapools',
+            'configMap': {
+                'name': 'xcube-datapools'
+            }
+        }, ]
 
     container = client.V1Container(
         name="xcube-gen",
         image=gen_image,
         command=cmd,
-        # volume_mounts=volume_mounts,
+        volume_mounts=volume_mounts,
         image_pull_policy=gen_container_pull_policy,
         env=sh_envs)
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": "xcube-gen"}),
         spec=client.V1PodSpec(
-            # volumes=volumes,
+            volumes=volumes,
             restart_policy="Never",
             containers=[container]
         ))
@@ -107,14 +107,11 @@ def create_gen_job_object(job_id: str, cfg: AnyDict) -> client.V1Job:
 
 def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
     try:
-        user_namespaces.create_if_not_exists(user_id=user_id)
-        callback_uri = os.getenv('XCUBE_GEN_API_CALLBACK_URL', False)
+        xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
+        user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
+        callback_uri = os.getenv('XCUBE_HUB_CALLBACK_URL', False)
         if callback_uri is False:
-            raise api.ApiError(400, "XCUBE_GEN_API_CALLBACK_URL must be given")
-
-        # with open('/etc/xcube/store_config.json') as f:
-        #     configmap = client.V1ConfigMap(metadata={'name': 'xcube-datapools'}, data=json.load(f))
-        #     create_configmap(namespace=user_id, body=configmap)
+            raise api.ApiError(400, "XCUBE_HUB_CALLBACK_URL must be given")
 
         job_id = f"xcube-gen-{str(uuid.uuid4())}"
 
@@ -125,7 +122,7 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
 
         job = create_gen_job_object(job_id, cfg=cfg)
         api_instance = client.BatchV1Api()
-        api_response = api_instance.create_namespaced_job(body=job, namespace=user_id)
+        api_response = api_instance.create_namespaced_job(body=job, namespace=xcube_hub_namespace)
 
         kvdb = KeyValueDatabase.instance()
         kvdb.set(job_id, cfg)
@@ -150,9 +147,9 @@ def delete_one(user_id: str, job_id: str) -> Union[AnyDict, Error]:
 
 def delete_all(user_id: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-
+    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     try:
-        api_response = api_instance.delete_collection_namespaced_job(namespace=user_id)
+        api_response = api_instance.delete_collection_namespaced_job(namespace=xcube_hub_namespace)
         return api.ApiResponse.success(api_response.status)
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
@@ -161,9 +158,9 @@ def delete_all(user_id: str) -> Union[AnyDict, Error]:
 # noinspection PyShadowingBuiltins
 def list(user_id: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-
+    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     try:
-        api_response = api_instance.list_namespaced_job(namespace=user_id)
+        api_response = api_instance.list_namespaced_job(namespace=xcube_hub_namespace)
         jobs = api_response.items
 
         res = []
@@ -185,27 +182,33 @@ def list(user_id: str) -> Union[AnyDict, Error]:
 
 
 def status(user_id: str, job_id: str) -> AnyDict:
+    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     api_instance = client.BatchV1Api()
-    api_response = api_instance.read_namespaced_job_status(namespace=user_id, name=job_id)
+    try:
+        api_response = api_instance.read_namespaced_job_status(namespace=xcube_hub_namespace, name=job_id)
+    except (client.ApiValueError, client.ApiException) as e:
+        print(str(e))
+        return {}
 
     return api_response.status.to_dict()
 
 
 def logs(user_id: str, job_id: str) -> Sequence:
+    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     api_pod_instance = client.CoreV1Api()
 
-    pods = api_pod_instance.list_namespaced_pod(namespace=user_id, label_selector=f"job-name={job_id}")
     lgs = []
-    for pod in pods.items:
-        name = pod.metadata.name
-        lg = ""
-        # noinspection PyBroadException
-        try:
-            lg = api_pod_instance.read_namespaced_pod_log(namespace=user_id, name=name)
-        except BaseException:
-            lg = "no output"
+    try:
+        pods = api_pod_instance.list_namespaced_pod(namespace=xcube_hub_namespace, label_selector=f"job-name={job_id}")
 
-        lgs.append(lg)
+        for pod in pods.items:
+            name = pod.metadata.name
+
+            lg = api_pod_instance.read_namespaced_pod_log(namespace=xcube_hub_namespace, name=name)
+
+            lgs.append(lg)
+    except (client.ApiValueError, client.ApiException) as e:
+        pprint(str(e))
 
     return lgs
 
@@ -214,6 +217,7 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
     try:
         output = logs(user_id=user_id, job_id=job_id)
         stat = status(user_id=user_id, job_id=job_id)
+
         if stat['failed']:
             raise api.ApiError(400, message=f"Job {job_id} failed", output='\n'.join(output))
 

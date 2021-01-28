@@ -39,7 +39,7 @@ from xcube_hub.utilities import raise_for_invalid_username, load_env_by_regex
 def delete_cate(user_id: str, prune: bool = False) -> bool:
     cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate-userspace")
 
-    user_namespaces.create_if_not_exists(user_id=cate_namespace)
+    user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
     deployment = get_deployment(name=user_id + '-cate', namespace=cate_namespace)
 
@@ -89,7 +89,7 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate-userspace")
         cate_workspace_claim_name = os.environ.get("CATE_WORKSPACE_CLAIM_NAME", "workspace-pvc")
 
-        user_namespaces.create_if_not_exists(user_id=cate_namespace)
+        user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
         if not cate_command:
             cate_command = "cate-webapi-start -b -p 4000 -a 0.0.0.0 -r /home/cate/workspace"

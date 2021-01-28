@@ -1,6 +1,8 @@
 ## Changes in v1.0.14.dev1
 ### New Features
 - okteto uses now a xhubehub-base image
+- The default cache provider is now inmemory
+
 
 ### Fixes
 
