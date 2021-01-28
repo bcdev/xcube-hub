@@ -2,9 +2,18 @@
 ### New Features
 - okteto uses now a xhubehub-base image
 - The default cache provider is now inmemory
-
+- Changed parameter user_id to user_namespace in create_if_not_exist
+- get_datastores accepts now yaml files
+- wsgi will start a debug service if XCUBE_HUB_DEBUG is set to 1
+- sizeandcost accepts now a None enddate. Defaults to now()
 
 ### Fixes
+
+- The location of data-pools.yaml is changed to /etc/xcube
+- use jobs are now spawned in the xcube-gen namespace instead of a namespace for each user
+- The user_info in auth0 is now accepting checking whether the userinfo from teh kv store is string
+- The redis kv store converts bytes to string in the method 'get'
+
 
 ## Changes in v1.0.13
 
