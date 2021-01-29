@@ -6,11 +6,10 @@
 sudo: required
 language: bash
 os: linux
-env:
-  - UNITTEST_WITH_K8S=true
-  - XCUBE_HUB_CALLBACK_URL=https://ci.xcube-gen.brockmann-consult.de
 
 install:
+  - export UNITTEST_WITH_K8S=true
+  - export XCUBE_HUB_CALLBACK_URL=https://ci.xcube-gen.brockmann-consult.de
   - if [[ "${UNITTEST_WITH_K8S}" == "true" ]];
     then
       sudo apt-get -y update;
