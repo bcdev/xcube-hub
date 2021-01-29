@@ -6,6 +6,8 @@
 - get_datastores accepts now yaml files
 - wsgi will start a debug service if XCUBE_HUB_DEBUG is set to 1
 - sizeandcost accepts now a None enddate. Defaults to now()
+- Added a okteto service patch to allow external K8s services accessing the hub
+- Added an setup.sh to setup dependencies in okteto
 
 ### Fixes
 
@@ -13,6 +15,7 @@
 - use jobs are now spawned in the xcube-gen namespace instead of a namespace for each user
 - The user_info in auth0 is now accepting checking whether the userinfo from teh kv store is string
 - The redis kv store converts bytes to string in the method 'get'
+- Fixed user_info error which was causing the  hub to frequently accessing the auth0 user_info api. That caused 429 errors from teh auth0 api. 
 
 
 ## Changes in v1.0.13
