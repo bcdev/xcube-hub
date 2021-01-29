@@ -8,6 +8,7 @@ language: bash
 os: linux
 env:
   - UNITTEST_WITH_K8S=true
+  - XCUBE_HUB_CALLBACK_URL=https://ci.xcube-gen.brockmann-consult.de
 
 install:
   - if [[ "${UNITTEST_WITH_K8S}" == "true" ]];
