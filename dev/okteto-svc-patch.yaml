@@ -1,0 +1,6 @@
+spec:
+  ports:
+    - name: xcube-gen-dev-d
+      port: 8000
+      protocol: TCP
+      targetPort: 8000

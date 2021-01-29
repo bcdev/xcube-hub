@@ -56,7 +56,7 @@ class Auth0:
     def _get_user_info_from_auth0(cls, token, user_id: str):
         kv = KeyValueDatabase.instance()
         user_info = kv.get(user_id + '_user_info')
-        if user_info and isinstance(user_info, str):
+        if user_info and isinstance(user_info, dict):
             return user_info
 
         endpoint = "https://edc.eu.auth0.com/userinfo"
