@@ -218,7 +218,7 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
         output = logs(user_id=user_id, job_id=job_id)
         stat = status(user_id=user_id, job_id=job_id)
 
-        if stat['failed']:
+        if 'failed' in stat and stat['failed']:
             raise api.ApiError(400, message=f"Job {job_id} failed", output='\n'.join(output))
 
         return api.ApiResponse.success({'job_id': job_id, 'status': stat, 'output': output})
