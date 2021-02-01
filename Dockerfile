@@ -33,6 +33,5 @@ WORKDIR /home/${XCUBE_USER_NAME}
 
 ADD --chown=1000:100 ./ .
 
-RUN mamba env update -n base
-
-ENTRYPOINT ["/bin/bash", "-c"]
+RUN mamba env create
+RUN pip install -e .
