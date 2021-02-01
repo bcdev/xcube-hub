@@ -26,11 +26,11 @@ class TestJobs(unittest.TestCase):
         self.assertEqual("ok", res['status'])
 
     def test_create_without_callback_url(self, m_header):
-        del os.environ["XCUBE_GEN_API_CALLBACK_URL"]
+        del os.environ["XCUBE_HUB_CALLBACK_URL"]
         with self.assertRaises(api.ApiError) as e:
             jobs.create('daffy-duck', SH_CFG)
 
-        self.assertEqual('XCUBE_GEN_API_CALLBACK_URL must be given', str(e.exception))
+        self.assertEqual('XCUBE_HUB_CALLBACK_URL must be given', str(e.exception))
 
     def test_delete(self, m_header):
         set_env()

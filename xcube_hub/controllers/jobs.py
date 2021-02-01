@@ -113,7 +113,7 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         if callback_uri is False:
             raise api.ApiError(400, "XCUBE_HUB_CALLBACK_URL must be given")
 
-        job_id = f"xcube-gen-{str(uuid.uuid4())}"
+        job_id = f"{user_id}-{str(uuid.uuid4())[:18]}"
 
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
                                       access_token=Auth0.get_token_auth_header())
@@ -134,11 +134,11 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
 
 def delete_one(user_id: str, job_id: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-
+    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     try:
         api_response = api_instance.delete_namespaced_job(
             name=job_id,
-            namespace=user_id,
+            namespace=xcube_hub_namespace,
             body=client.V1DeleteOptions(propagation_policy='Background', grace_period_seconds=5))
         return api.ApiResponse.success(api_response.status)
     except ApiException as e:
@@ -165,16 +165,17 @@ def list(user_id: str) -> Union[AnyDict, Error]:
 
         res = []
         for job in jobs:
-            lgs = logs(user_id=user_id, job_id=job.metadata.name)
-            res.append({'job_id': job.metadata.name,
-                        'status': {
-                            'active': job.status.active,
-                            'start_time': job.status.start_time,
-                            'failed': job.status.failed,
-                            'succeeded': job.status.succeeded,
-                            'completion_time': job.status.completion_time,
-                            'output': lgs,
-                        }})
+            if user_id in job.metadata.name:
+                lgs = logs(user_id=user_id, job_id=job.metadata.name)
+                res.append({'job_id': job.metadata.name,
+                            'status': {
+                                'active': job.status.active,
+                                'start_time': job.status.start_time,
+                                'failed': job.status.failed,
+                                'succeeded': job.status.succeeded,
+                                'completion_time': job.status.completion_time,
+                                'output': lgs,
+                            }})
 
         return api.ApiResponse.success(res)
     except ApiException as e:
@@ -220,6 +221,8 @@ def get(user_id: str, job_id: str) -> Union[AnyDict, Error]:
 
         if 'failed' in stat and stat['failed']:
             raise api.ApiError(400, message=f"Job {job_id} failed", output='\n'.join(output))
+        if not stat:
+            raise api.ApiError(404, message=f"Job {job_id} not found")
 
         return api.ApiResponse.success({'job_id': job_id, 'status': stat, 'output': output})
     except ApiException as e:
