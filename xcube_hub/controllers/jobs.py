@@ -125,7 +125,7 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
         api_response = api_instance.create_namespaced_job(body=job, namespace=xcube_hub_namespace)
 
         kvdb = KeyValueDatabase.instance()
-        kvdb.set(job_id, cfg)
+        kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
 
         return api.ApiResponse.success({'job_id': job_id, 'status': api_response.status.to_dict()})
     except ApiException as e:
