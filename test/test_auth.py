@@ -29,7 +29,7 @@ class TestAuth(TestCase):
         mock_headers = mock_headers_patcher.start()
         mock_headers.return_value = {}
 
-        mock_get_patch = patch('xcube_hub.auth0.Auth0._get_user_info_from_auth0')
+        mock_get_patch = patch('xcube_hub.auth0.Auth0.get_user_info_from_auth0')
         mock_get = mock_get_patch.start()
         mock_get.return_value = {'name': 'Tom.Jones@brockmann-consult.de'}
 
