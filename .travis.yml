@@ -40,5 +40,3 @@ script:
   - py.test -v --cov=xcube_hub
   - codecov --env TRAVIS_PYTHON_VERSION
 
-after_script:
-  - kubectl -n xcube-gen-ci delete pod --all
