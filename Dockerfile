@@ -1,4 +1,4 @@
-FROM bcdev/miniconda3:latest
+FROM quay.io/bcdev/miniconda3:latest
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
