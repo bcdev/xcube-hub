@@ -17,8 +17,8 @@ RUN useradd -u 1000 -g 100 -ms /bin/bash ${XCUBE_USER_NAME}
 RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 
 RUN apt-get -y update
-RUN apt-get -y upgrade
 RUN apt-get -y install apt-utils
+RUN apt-get -y upgrade
 RUN apt-get -y install curl unzip build-essential iputils-ping vim
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 
@@ -34,7 +34,6 @@ RUN mamba env create
 RUN echo "conda activate xcube-hub" >> ~/.bashrc
 
 ADD --chown=1000:100 ./ .
-RUN source activate xcube-hub && pip install redis
 RUN source activate xcube-hub && pip install .
 
 COPY --from=quay.io/bcdev/xcube-viewer:0.4.2 /usr/src/app/build /home/${XCUBE_USER_NAME}/viewer
