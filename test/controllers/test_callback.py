@@ -93,7 +93,7 @@ class TestCallback(unittest.TestCase):
         with moto.mock_s3():
             mock_get_patch = patch('xcube_hub.auth0.Auth0.get_token_auth_header')
             mock_get = mock_get_patch.start()
-            mock_get.return_value = "dsvdfsvdsvfdsvdsvdsv"
+            mock_get.return_value = "dsvdfsvdsvfdsvdsvdssv"
 
             mock_get2_patch = patch('xcube_hub.auth0.Auth0.get_user_info_from_auth0')
             mock_get2 = mock_get2_patch.start()
