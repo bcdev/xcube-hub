@@ -17,6 +17,44 @@ from xcube_hub.service import new_app
 
 KeyValueDatabase.use_mocker = True
 
+CFG = {
+    "input_configs": [
+        {
+            "store_id": "@sentinelhub_codede",
+            "data_id": "S2L1C",
+            "open_params": {
+                "tile_size": [
+                    1000,
+                    1000
+                ]
+            }
+        }
+    ],
+    "cube_config": {
+        "variable_names": [
+            "B01"
+        ],
+        "crs": "http://www.opengis.net/def/crs/EPSG/0/4326",
+        "spatial_res": 0.001,
+        "bbox": [
+            -6.635742187500001,
+            6.489983332670651,
+            -5.185546875000001,
+            7.27529233637217
+        ],
+        "time_range": [
+            "2015-11-01",
+            "2015-11-04"
+        ],
+        "time_period": "1D"
+    },
+    "output_config": {
+        "store_id": "s3",
+        "store_params": {
+            "bucket_name": "eurodatacube-test"
+        }
+    }
+}
 
 class TestCallback(unittest.TestCase):
     def setUp(self) -> None:
@@ -53,6 +91,14 @@ class TestCallback(unittest.TestCase):
     # noinspection InsecureHash
     def test_put_callback(self):
         with moto.mock_s3():
+            mock_get_patch = patch('xcube_hub.auth0.Auth0.get_token_auth_header')
+            mock_get = mock_get_patch.start()
+            mock_get.return_value = "dsvdfsvdsvfdsvdsvdsv"
+
+            mock_get2_patch = patch('xcube_hub.auth0.Auth0.get_user_info_from_auth0')
+            mock_get2 = mock_get2_patch.start()
+            mock_get2.return_value = {'name': "heinrich"}
+
             s3 = boto3.client('s3')
             s3.create_bucket(Bucket='eurodatacube', CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
             user_name = 'heinrich'
@@ -63,7 +109,7 @@ class TestCallback(unittest.TestCase):
                                                 price_amount=200,
                                                 price_currency='€'))
 
-            add_processing_units(user_id, punits_request_1)
+            add_processing_units('heinrich', punits_request_1)
 
             punits = {
                 'schema': {
@@ -94,17 +140,14 @@ class TestCallback(unittest.TestCase):
                 "message": punits
             }
 
-            mock_put_patch = patch('xcube_hub.keyvaluedatabase.KeyValueDatabase.get')
-            mock_put = mock_put_patch.start()
-            mock_put.return_value = True
-            mock_put_patch.stop()
-
+            kvdb = KeyValueDatabase.instance()
+            kvdb.set(user_id + '__job3__cfg', CFG)
             res = put_callback(user_id='620698091bdd62d3dc05d58c2db07939', job_id='job3', value=expected)
-            cache = KeyValueDatabase.instance()
-            cache.set('job3', self._sh_config)
 
-            res = put_callback('620698091bdd62d3dc05d58c2db07939', 'job3', expected)
             self.assertTrue(res)
+
+            mock_get_patch.stop()
+            mock_get2_patch.stop()
 
     def test_delete_callback(self):
         mock_delete_patch = patch('xcube_hub.keyvaluedatabase.KeyValueDatabase.delete')
