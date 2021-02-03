@@ -53,7 +53,7 @@ class Auth0:
                 raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
 
     @classmethod
-    def _get_user_info_from_auth0(cls, token, user_id: str):
+    def get_user_info_from_auth0(cls, token, user_id: str):
         kv = KeyValueDatabase.instance()
         user_info = kv.get(user_id + '_user_info')
         if user_info and isinstance(user_info, dict):
@@ -79,7 +79,7 @@ class Auth0:
         if 'gty' in unverified_claims and unverified_claims['gty'] == 'client-credentials':
             return True
 
-        user_info = cls._get_user_info_from_auth0(token, user_id)
+        user_info = cls.get_user_info_from_auth0(token, user_id)
 
         if 'name' not in user_info:
             raise api.ApiError(403, "access denied: Could not read name from user info.")

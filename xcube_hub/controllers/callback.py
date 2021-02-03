@@ -1,5 +1,7 @@
 from xcube_hub import api
 from xcube_hub.api import get_json_request_value
+from xcube_hub.auth0 import Auth0
+from xcube_hub.controllers.sizeandcost import get_size_and_cost
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
 from xcube_hub.controllers.users import subtract_processing_units
@@ -40,9 +42,15 @@ def put_callback(user_id: str, job_id: str, value: AnyDict):
         state = get_json_request_value(value, 'state', dict)
 
         if sender == 'on_end' and not state['error']:
-            punits_requests = kvdb.get(user_id + '__' + job_id)
-            # punits_requests = get_json_request_value(punits_requests, 'punits', value_type=dict)
-            subtract_processing_units(user_id=user_id, punits_request=punits_requests['progress'][0]['message'])
+            processing_request = kvdb.get(user_id + '__' + job_id + '__cfg')
+            punits_requests = get_size_and_cost(processing_request)
+            token = Auth0.get_token_auth_header()
+            user_info = Auth0.get_user_info_from_auth0(token, user_id)
+
+            try:
+                    subtract_processing_units(user_id=user_info['name'], punits_request=punits_requests)
+            except KeyError as e:
+                raise api.ApiError(400, "System error: Could not substract processing units: " + str(e))
 
         return res
     except TimeoutError as e:

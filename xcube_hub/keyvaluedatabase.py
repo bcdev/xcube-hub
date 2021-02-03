@@ -3,6 +3,9 @@ import os
 from abc import abstractmethod, ABC
 from json import JSONDecodeError
 from typing import Optional, Any
+
+import redis
+
 from xcube_hub import api
 from xcube_hub.typedefs import JsonObject
 
@@ -157,7 +160,10 @@ class _RedisKvDB(KeyValueStore):
         :param key:
         :return:
         """
-        val = self._db.get(key)
+        try:
+            val = self._db.get(key)
+        except redis.exceptions.ConnectionError:
+            raise api.ApiError(400, "System Error: redis cache not ready.")
         if isinstance(val, bytes):
             val = val.decode('utf-8')
         return val
