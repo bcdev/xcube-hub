@@ -135,3 +135,4 @@ dmypy.json
 /client_secrets.json
 *.tmp
 
+/okteto.yml
