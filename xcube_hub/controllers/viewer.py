@@ -39,13 +39,17 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
 
         xcube_image = os.environ.get("XCUBE_DOCKER_WEBAPI_IMG")
         xcube_webapi_uri = os.environ.get("XCUBE_WEBAPI_URI")
+        xcube_viewer_uri = os.environ.get("XCUBE_VIEWER_URI")
         xcube_viewer_path = os.environ.get("XCUBE_VIEWER_PATH") or '/viewer'
 
         if not xcube_image:
-            raise api.ApiError(400, "Could not find the xcube docker image.")
+            raise api.ApiError(400, f"Could not find the xcube docker image {xcube_image}.")
 
         if not xcube_webapi_uri:
-            raise api.ApiError(400, "Could not find the xcube webapi uri.")
+            raise api.ApiError(400, f"Could not find the xcube webapi uri {xcube_webapi_uri}.")
+
+        if not xcube_viewer_uri:
+            raise api.ApiError(400, f"Could not find the xcube viewer uri {xcube_viewer_uri}.")
 
         apps_v1_api = client.AppsV1Api()
         deployments = apps_v1_api.list_namespaced_deployment(namespace=user_id)
@@ -106,7 +110,7 @@ def launch_viewer(user_id: str, output_config: JsonObject) -> JsonObject:
         grace = os.environ.get("CATE_LAUNCH_GRACE", False) or 2
         time.sleep(grace)
 
-        return dict(viewerUri=f'{xcube_webapi_uri}{xcube_viewer_path}',
+        return dict(viewerUri=f'{xcube_viewer_uri}{xcube_viewer_path}',
                     serverUri=f'{xcube_webapi_uri}/{user_id}')
     except ApiException as e:
         raise api.ApiError(e.status, str(e))
