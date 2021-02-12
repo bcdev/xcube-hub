@@ -1,6 +1,6 @@
 import unittest
 
-from xcube_hub.controllers import info
+from xcube_hub_old.controllers import info
 
 
 class InfoTest(unittest.TestCase):

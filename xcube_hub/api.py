@@ -22,7 +22,7 @@
 import datetime
 from typing import Any, Tuple, Union, Optional
 
-from xcube_hub.typedefs import AnyDict, UNDEFINED, JsonObject, JsonValue
+from xcube_hub_old.typedefs import AnyDict, UNDEFINED, JsonObject, JsonValue
 
 SERVER_NAME = 'xcube-genserv'
 SERVER_DESCRIPTION = 'xcube Generation Service'
@@ -33,7 +33,7 @@ class ApiResponse:
 
     @classmethod
     def success(cls, result: Any = None) -> AnyDict:
-        response = dict(status='ok')
+        response = dict()
         if result is not None:
             response['result'] = result
         return response
@@ -44,7 +44,7 @@ class ApiResponse:
               output: Optional[Union[str, BaseException]] = None,
               traceback: Optional[Union[str, BaseException]] = None,
               status_code: int = 500) -> Tuple[AnyDict, int]:
-        response = dict(status='error')
+        response = dict()
         if error is not None:
             response['message'] = f'{error}'
 

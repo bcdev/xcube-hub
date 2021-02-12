@@ -4,10 +4,10 @@ import unittest
 from moto import mock_s3
 import boto3
 
-from xcube_hub.controllers.users import get_user_data
-from xcube_hub.controllers.users import add_processing_units
-from xcube_hub.controllers.users import subtract_processing_units
-from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
+from xcube_hub_old.controllers.users import get_user_data
+from xcube_hub_old.controllers.users import add_processing_units
+from xcube_hub_old.controllers.users import subtract_processing_units
+from xcube_hub_old.database import DEFAULT_DB_BUCKET_NAME
 
 
 class UsersTest(unittest.TestCase):

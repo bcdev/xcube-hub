@@ -1,7 +1,7 @@
 import unittest
 
-from xcube_hub.api import ApiError
-from xcube_hub.controllers.sizeandcost import get_size_and_cost
+from xcube_hub_old.api import ApiError
+from xcube_hub_old.controllers.sizeandcost import get_size_and_cost
 
 
 class CalcTest(unittest.TestCase):

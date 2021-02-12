@@ -3,9 +3,9 @@ from unittest.mock import Mock
 
 from kubernetes import client
 from kubernetes.client import ApiException, V1ObjectMeta
-from xcube_hub import api
+from xcube_hub_old import api
 
-from xcube_hub.k8s import create_pvc, create_deployment, delete_deployment, list_deployments, create_service, \
+from xcube_hub_old.k8s import create_pvc, create_deployment, delete_deployment, list_deployments, create_service, \
     delete_service, list_services, create_ingress, patch_ingress, delete_ingress, list_ingresses, list_pods
 
 

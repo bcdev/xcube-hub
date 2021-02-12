@@ -23,9 +23,10 @@
 
 
 from setuptools import setup, find_packages
-from xcube_hub.version import version
+from xcube_hub_old.version import version
 
 requirements = [
+    "connexion",
     # Use ./environment.yml for deps.
 ]
 
@@ -39,13 +40,17 @@ setup(
     license='MIT',
     author='xcube Development Team',
     packages=packages,
+    author_email="info@brockmann-consult.de",
     package_data={
+        '': ['swagger/swagger.yaml'],
         'xcube_gen.resources': ['datastores.json'],
     },
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             # xcube's CLI
             'xcube-hub = xcube_hub.cli:main',
+            'xcube_hub=xcube_hub.__main__:main'
         ],
     },
     install_requires=requirements,

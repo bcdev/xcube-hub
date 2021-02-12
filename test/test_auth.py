@@ -1,9 +1,9 @@
 import os
 import unittest
 from unittest.mock import patch
-from xcube_hub import api
-from xcube_hub.auth0 import Auth0
-from xcube_hub.service import new_app
+from xcube_hub_old import api
+from xcube_hub_old.auth0 import Auth0
+from xcube_hub_old.service import new_app
 from dotenv import load_dotenv
 from flask_testing import TestCase
 

@@ -1,6 +1,6 @@
 import os
 import unittest
-from xcube_hub.utilities import raise_for_invalid_username, load_env_by_regex
+from xcube_hub_old.utilities import raise_for_invalid_username, load_env_by_regex
 
 
 class MyTestCase(unittest.TestCase):

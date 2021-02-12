@@ -1,0 +1,987 @@
+openapi: 3.0.0
+info:
+  title: xcube Generation API
+  description: Restful API for handling xcube Services
+  contact:
+    email: info@brockmann-consult.de
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+servers:
+- url: https://xcube-gen.brockmann-consult.de/api/v2
+- url: https://stage.xcube-gen.brockmann-consult.de/api/v2
+- url: https://catehub.climate.esa.int/api/v2
+- url: https://stage.catehub.climate.esa.int/api/v2
+tags:
+- name: users
+- name: jobs
+- name: datastores
+- name: callbacks
+- name: oauth
+paths:
+  /:
+    get:
+      summary: get service info
+      description: Get service info
+      operationId: get_service_info
+      responses:
+        "200":
+          description: service information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiServiceInformationResponse'
+        "400":
+          description: api error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: service not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      x-openapi-router-controller: xcube_hub.controllers.default_controller
+  /datastores:
+    get:
+      tags:
+      - datastores
+      summary: Get a list of datastores
+      description: Get a list of datastores
+      operationId: get_data_stores
+      responses:
+        "200":
+          description: Datastore list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDatastoresResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: No datastores found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:datastores
+      x-openapi-router-controller: xcube_hub.controllers.datastores_controller
+  /datastores/{datastore_id}:
+    get:
+      tags:
+      - datastores
+      summary: Get a datastore
+      description: Get info of a datastore
+      operationId: get_data_store_by_datastore_id
+      parameters:
+      - name: datastore_id
+        in: path
+        description: Datastore ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Datastore list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDatastoresResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: No datastores found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:datastores
+      x-openapi-router-controller: xcube_hub.controllers.datastores_controller
+  /jobs/costs:
+    post:
+      tags:
+      - jobs
+      summary: Receive cost information for runnning a job
+      description: |
+        Receive cost information of using a service
+      operationId: get_costs
+      requestBody:
+        description: Cost configuration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CostConfig'
+        required: true
+      responses:
+        "200":
+          description: costs for using the service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiServiceInformationResponse'
+        "400":
+          description: api error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: no cost information found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:costs
+      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+  /users/{user_id}:
+    get:
+      tags:
+      - users
+      summary: Get users
+      description: |
+        Get user info
+      operationId: get_user_by_user_id
+      parameters:
+      - name: user_id
+        in: path
+        description: User ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found in the service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:users
+      x-openapi-router-controller: xcube_hub.controllers.users_controller
+    put:
+      tags:
+      - users
+      summary: Add user
+      description: |
+        Add user
+      operationId: add_user
+      parameters:
+      - name: user_id
+        in: path
+        description: User ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: User information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: User added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found in the service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - create:users
+      x-openapi-router-controller: xcube_hub.controllers.users_controller
+    delete:
+      tags:
+      - users
+      summary: Delete user
+      description: |
+        Remove user from a service
+      operationId: delete_user_by_user_id
+      parameters:
+      - name: user_id
+        in: path
+        description: User ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: User deleted
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - delete:users
+      x-openapi-router-controller: xcube_hub.controllers.users_controller
+    patch:
+      tags:
+      - users
+      summary: Update user
+      description: |
+        Update users in a service
+      operationId: update_user_by_user_id
+      parameters:
+      - name: user_id
+        in: path
+        description: User ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: User information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - update:users
+      x-openapi-router-controller: xcube_hub.controllers.users_controller
+  /users:
+    get:
+      tags:
+      - users
+      summary: Get all users by service name
+      description: |
+        Get all users by service name
+      operationId: get_users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUsersResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: No users found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:users
+      x-openapi-router-controller: xcube_hub.controllers.users_controller
+  /jobs:
+    get:
+      tags:
+      - jobs
+      summary: List jobs
+      description: |
+        List user jobs
+      operationId: get_jobs
+      responses:
+        "200":
+          description: List jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJobsResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:jobs
+      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+    put:
+      tags:
+      - jobs
+      summary: Create a job
+      description: |
+        Create a job
+      operationId: create_job
+      requestBody:
+        description: Job configuration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobConfig'
+        required: true
+      responses:
+        "200":
+          description: Create a job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJobResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - write:job
+      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+    delete:
+      tags:
+      - jobs
+      summary: Delete all jobs
+      description: |
+        Delete all jobs
+      operationId: delete_jobs
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - write:job
+      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+  /jobs/{job_id}:
+    get:
+      tags:
+      - jobs
+      summary: List specific job
+      description: |
+        List specific job
+      operationId: get_job
+      parameters:
+      - name: job_id
+        in: path
+        description: Job ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: User job information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJobResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:jobs
+      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+    delete:
+      tags:
+      - jobs
+      summary: Delete a job
+      description: |
+        Delete a job
+      operationId: delete_job
+      parameters:
+      - name: job_id
+        in: path
+        description: Job ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - write:jobs
+      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+  /jobs/{job_id}/callbacks:
+    get:
+      tags:
+      - callbacks
+      summary: Get list of callbacks for a job
+      description: Get list of callbacks for a job
+      operationId: get_callbacks_by_job_id
+      parameters:
+      - name: job_id
+        in: path
+        description: Job ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiCallbacksResponse'
+                x-content-type: application/json
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:callbacks
+      x-openapi-router-controller: xcube_hub.controllers.callbacks_controller
+    put:
+      tags:
+      - callbacks
+      summary: Add a callback for a job
+      description: Add a callbacks for a job
+      operationId: put_callback_by_job_id
+      parameters:
+      - name: job_id
+        in: path
+        description: Job ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Callbacks
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Callback'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCallbackResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - write:callbacks
+      x-openapi-router-controller: xcube_hub.controllers.callbacks_controller
+    delete:
+      tags:
+      - callbacks
+      summary: Clear callbacks for a job
+      description: Clear callbacks for a job
+      operationId: delete_callbacks_by_job_id
+      parameters:
+      - name: job_id
+        in: path
+        description: Job ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - write:callbacks
+      x-openapi-router-controller: xcube_hub.controllers.callbacks_controller
+  /oauth/token:
+    post:
+      tags:
+      - oauth
+      summary: Get authorization token
+      description: Get authorization token
+      operationId: oauth_token_post
+      requestBody:
+        description: OauthToken
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthToken'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOAuthResponse'
+        "400":
+          description: Api Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        "404":
+          description: Client ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+      - oAuthorization:
+        - read:oauth_token
+      x-openapi-router-controller: xcube_hub.controllers.oauth_controller
+components:
+  schemas:
+    ApiResponse:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+        output:
+          type: object
+    ApiErrorResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - type: object
+        properties:
+          traceback:
+            type: object
+    ApiJobResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            $ref: '#/components/schemas/Job'
+    ApiUserResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            $ref: '#/components/schemas/User'
+    ApiUsersResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+    ApiJobsResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            type: array
+            items:
+              $ref: '#/components/schemas/Job'
+    ApiServiceInformationResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            $ref: '#/components/schemas/ServiceInformation'
+    ApiDatastoresResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            $ref: '#/components/schemas/Datastore'
+    ApiCallbackResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            $ref: '#/components/schemas/Callback'
+    ApiCallbacksResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApiResponse'
+      - required:
+        - result
+        type: object
+        properties:
+          result:
+            type: array
+            items:
+              $ref: '#/components/schemas/Callback'
+    ApiOAuthResponse:
+      required:
+      - access_token
+      - token_type
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+      example:
+        access_token: access_token
+        token_type: token_type
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        nickname:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        given_name:
+          type: string
+        family_name:
+          type: string
+        app_metadata:
+          type: object
+        user_metadata:
+          type: object
+        connection:
+          type: string
+    ServiceInformation:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        version:
+          type: string
+        serverStartTime:
+          type: string
+          format: date-time
+        serverCurrentTime:
+          type: string
+          format: date-time
+        serverPID:
+          type: integer
+        chartVersion:
+          type: string
+        mockServices:
+          type: string
+        runLocal:
+          type: boolean
+    CostConfig:
+      type: object
+    JobConfig:
+      type: object
+    Job:
+      required:
+      - job_id
+      - status
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+    Callback:
+      required:
+      - message
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        values:
+          type: object
+        total_work:
+          type: number
+        worked:
+          type: number
+    Datastore:
+      required:
+      - datasets
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset'
+    Dataset:
+      required:
+      - id
+      - name
+      - variables
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        variables:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variable'
+    Variable:
+      required:
+      - description
+      - dtype
+      - id
+      - name
+      - spatialRes
+      - temporalRes
+      - units
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        units:
+          type: string
+        dtype:
+          type: string
+        spatialRes:
+          type: number
+        temporalRes:
+          type: string
+        description:
+          type: string
+    JobStatus:
+      required:
+      - active
+      - completion_time
+      - failed
+      - start_time
+      - succeeded
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        start_time:
+          type: string
+          format: date-time
+        failed:
+          type: boolean
+        succeeded:
+          type: boolean
+        completion_time:
+          type: string
+          format: date-time
+    OAuthToken:
+      required:
+      - audience
+      - client_id
+      - client_secret
+      - grant_type
+      type: object
+      properties:
+        client_id:
+          type: string
+        client_secret:
+          type: string
+        audience:
+          type: string
+        grant_type:
+          type: string
+  securitySchemes:
+    oAuthorization:
+      type: oauth2
+      description: This API uses OAuth 2 with the implicit grant flow.
+      flows:
+        implicit:
+          authorizationUrl: https://edc.eu.auth0.com/authorize
+          scopes:
+            read_job: Read job status and result
+            submit_job: Submit jobs to the K8s cluster
+            read_punits: Allow reading the punits level of a user
+            read_callbacks: Allow reading callbacks
+        clientCredentials:
+          tokenUrl: https://edc.eu.auth0.com/oauth/token
+          scopes:
+            read_job: Read job status and result
+            read_punits: Allow reading the punits level of a user
+            put_punits: Allow adding punits to and remove punits from a user
+            read_callbacks: Allow reading callbacks
+            put_callbacks: Allow reading callbacks
+            delete_callbacks: Allow reading callbacks
+      x-tokenInfoFunc: xcube_hub.controllers.authorization_controller.check_oAuthorization
+      x-scopeValidateFunc: xcube_hub.controllers.authorization_controller.validate_scope_oAuthorization
+

@@ -9,11 +9,11 @@ import moto
 
 from test.config import SH_CFG
 from test.setup_utils import set_env
-from xcube_hub import api
-from xcube_hub.controllers.callback import get_callback, put_callback, delete_callback
-from xcube_hub.controllers.users import add_processing_units
-from xcube_hub.keyvaluedatabase import KeyValueDatabase
-from xcube_hub.service import new_app
+from xcube_hub_old import api
+from xcube_hub_old.controllers.callback import get_callback, put_callback, delete_callback
+from xcube_hub_old.controllers.users import add_processing_units
+from xcube_hub_old.keyvaluedatabase import KeyValueDatabase
+from xcube_hub_old.service import new_app
 
 KeyValueDatabase.use_mocker = True
 

@@ -1,8 +1,8 @@
 import unittest
 import requests_mock
-from xcube_hub import api
-from xcube_hub.auth0 import AUTH0_DOMAIN
-from xcube_hub.controllers import auth
+from xcube_hub_old import api
+from xcube_hub_old.auth0 import AUTH0_DOMAIN
+from xcube_hub_old.controllers import auth
 
 
 class TestGeodb(unittest.TestCase):

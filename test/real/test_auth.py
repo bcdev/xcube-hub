@@ -5,7 +5,7 @@ import uuid
 import dotenv
 import requests
 
-from xcube_hub.controllers import auth
+from xcube_hub_old.controllers import auth
 import http.client
 
 

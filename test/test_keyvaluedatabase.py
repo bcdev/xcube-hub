@@ -1,8 +1,8 @@
 import json
 import unittest
 from unittest.mock import patch
-from xcube_hub import api
-from xcube_hub.keyvaluedatabase import KeyValueDatabase, _LevelDBKvDB, _KvDBMocker, _InMemoryKvDB, _RedisKvDB
+from xcube_hub_old import api
+from xcube_hub_old.keyvaluedatabase import KeyValueDatabase, _LevelDBKvDB, _KvDBMocker, _InMemoryKvDB, _RedisKvDB
 
 
 class TestKvDB(unittest.TestCase):

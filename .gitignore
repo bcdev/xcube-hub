@@ -130,6 +130,9 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+#Ipython Notebook
+.ipynb_checkpoints
+
 # Pyre type checker
 .pyre/
 /client_secrets.json

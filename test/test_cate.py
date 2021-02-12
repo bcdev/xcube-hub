@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 from test.config import TEST_PODS_EMPTY, TEST_PODS_RUNNING
-from xcube_hub.controllers import cate
+from xcube_hub_old.controllers import cate
 
 
 class MyTestCase(unittest.TestCase):

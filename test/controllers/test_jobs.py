@@ -4,9 +4,9 @@ from unittest.mock import patch
 
 from test.config import SH_CFG
 from test.setup_utils import set_env
-from xcube_hub import api
-from xcube_hub.controllers import jobs
-from xcube_hub.service import new_app
+from xcube_hub_old import api
+from xcube_hub_old.controllers import jobs
+from xcube_hub_old.service import new_app
 import subprocess
 
 

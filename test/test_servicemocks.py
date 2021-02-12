@@ -1,13 +1,13 @@
 import unittest
 
 import flask
-from xcube_hub.servicemocks import extend_app
-from xcube_hub.servicemocks import new_job
-from xcube_hub.servicemocks import get_job
-from xcube_hub.servicemocks import get_jobs
-from xcube_hub.servicemocks import delete_job
-from xcube_hub.servicemocks import delete_jobs
-from xcube_hub.servicemocks import JOB_ID_KEY
+from xcube_hub_old.servicemocks import extend_app
+from xcube_hub_old.servicemocks import new_job
+from xcube_hub_old.servicemocks import get_job
+from xcube_hub_old.servicemocks import get_jobs
+from xcube_hub_old.servicemocks import delete_job
+from xcube_hub_old.servicemocks import delete_jobs
+from xcube_hub_old.servicemocks import JOB_ID_KEY
 import time
 
 
