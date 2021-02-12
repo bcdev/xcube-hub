@@ -7,7 +7,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 1.0.0-oas3
+  version: 1.0.14
 servers:
   - url: https://virtserver.swaggerhub.com/dzelge/xcube-gen-api/1.0.0
   - url: https://xcube-gen.brockmann-consult.de/1.0.0
@@ -61,7 +61,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiJobsResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -106,7 +106,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiJobResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -145,7 +145,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -192,7 +192,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiJobResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -239,7 +239,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -288,7 +288,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Callback'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -342,7 +342,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -389,7 +389,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -427,7 +427,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiViewerInformationResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -464,7 +464,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiViewerInformationResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -494,7 +494,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiDatastoresResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -533,7 +533,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiPunitResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -577,7 +577,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:
@@ -607,13 +607,6 @@ paths:
           explode: false
           schema:
             type: string
-      requestBody:
-        description: Punits
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PunitConfig'
-        required: true
       responses:
         "200":
           description: Reduce punits
@@ -621,7 +614,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        "401":
+        "400":
           description: Api Error
           content:
             application/json:

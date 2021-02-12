@@ -142,9 +142,9 @@ class _RedisKvDB(KeyValueStore):
         except ImportError:
             raise api.ApiError(500, "Error: Cannot import redis. Please install first.")
 
-        host = os.getenv('XCUBE_GEN_REDIS_HOST') or host
-        port = os.getenv('XCUBE_GEN_REDIS_POST') or port
-        db = os.getenv('XCUBE_GEN_REDIS_DB') or db
+        host = os.getenv('XCUBE_HUB_REDIS_HOST') or host
+        port = os.getenv('XCUBE_HUB_REDIS_PORT') or port
+        db = os.getenv('XCUBE_HUB_REDIS_DB') or db
 
         if use_mocker is True or use_mocker == 1:
             self._db = _KvDBMocker()

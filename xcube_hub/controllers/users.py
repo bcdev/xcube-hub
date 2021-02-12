@@ -1,6 +1,9 @@
 import datetime
 from typing import Optional, Sequence
 
+import requests
+
+from xcube_hub import auth0
 from xcube_hub.api import ApiError, get_json_request_value
 from xcube_hub.database import Database
 from xcube_hub.typedefs import JsonObject
@@ -65,3 +68,57 @@ def get_role(user_id: str, token: str):
     res = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/roles", headers=headers)
     res.raise_for_status()
     return res.json()
+
+
+def add_user(user_id: str, given_name: str, family_name: str, name: str, nickname: str, password: str, email: str):
+    token = auth0.get_management_token()
+    payload = {
+        "email": email,
+        "user_metadata": {},
+        "blocked": False,
+        "email_verified": True,
+        "app_metadata": {
+            "geodb_role": f"geodb_{user_id}"
+        },
+        "given_name": given_name,
+        "family_name": family_name,
+        "name": name,
+        "nickname": nickname,
+        "username": "geodb_{user_id}",
+        "user_id": user_id,
+        "connection": "Username-Password-Authentication",
+        "password": password,
+        "verify_email": False,
+    }
+
+    headers = {'Authorization': f"Bearer {token}"}
+
+    requests.post('https://edc.eu.auth0.com/api/v2/users', payload=payload, headers=headers)
+
+
+def assign_role_to_user(user_id: str, role_id: str):
+    token = auth0.get_management_token()
+    payload = {
+        "roles": [
+            f"auth0|{user_id}"
+        ]
+    }
+    headers = {'Authorization': f"Bearer {token}"}
+    requests.post(f'https://edc.eu.auth0.com/api/v2/roles/{role_id}/users', payload=payload, headers=headers)
+
+
+def register_user_to_geodb(user_id: str, start_date: str, subscription_name: str, cells: int = 1000000):
+    token = auth0.get_management_token()
+
+    payload = [{
+        "user_name": f"geodb_{user_id}",
+        "start_date": start_date,
+        "subscription": subscription_name,
+        "cells": cells
+    }]
+
+    headers = {'Authorization': f"Bearer {token}"}
+
+    requests.post('https://xcube-geodb.brockmann-consult.de/geodb_user_info', payload=payload, headers=headers)
+
+

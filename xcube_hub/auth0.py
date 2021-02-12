@@ -1,12 +1,14 @@
 # Format error response and append status code.
 import hashlib
 import json
+import os
 from functools import wraps
 from typing import Sequence
 from urllib.request import urlopen
 import flask
 import requests
 from jose import jwt
+from requests import HTTPError
 
 from xcube_hub import api
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -146,3 +148,32 @@ def requires_auth0(audience: str = DEFAULT_API_IDENTIFIER):
 
         return decorated
     return wrapper
+
+
+def get_management_token():
+    client_id = os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_ID", None)
+    if client_id is None:
+        raise api.ApiError(400, "Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_ID")
+
+    client_secret = os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_SECRET", None)
+    if client_secret is None:
+        raise api.ApiError(400, "Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_SECRET")
+
+    payload = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "audience": "https://edc.eu.auth0.com/api/v2/",
+        "grant_type": "client_credentials"
+    }
+
+    res = requests.post("https://edc.eu.auth0.com/oauth/token", payload=payload)
+
+    try:
+        res.raise_for_status()
+    except HTTPError as e:
+        raise api.ApiError(400, str(e))
+
+    try:
+        return res.json()["access_token"]
+    except KeyError:
+        raise api.ApiError(400, "System error: Could not find key 'access_token' in auth0's response")

@@ -371,7 +371,7 @@ def new_xcube_geodb_app(app, prefix: str = ""):
         except BaseException as e:
             return api.ApiResponse.error(e)
 
-    @app.route(prefix + '/auth/role', methods=['PUT'])
+    @app.route(prefix + '/auth/role', methods=['POST'])
     @auth0.requires_auth0(audience=API_AUTH_IDENTIFIER)
     def role(user_id: str, role_id: str):
         try:
