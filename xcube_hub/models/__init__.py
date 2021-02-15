@@ -18,8 +18,8 @@ from xcube_hub.models.callback import Callback
 from xcube_hub.models.cost_config import CostConfig
 from xcube_hub.models.dataset import Dataset
 from xcube_hub.models.datastore import Datastore
-from xcube_hub.models.cubegen import CubeGen
-from xcube_hub.models.cubegen_config import CubeGenConfig
+from xcube_hub.models.cube_gen import CubeGen
+from xcube_hub.models.cube_gen_config import CubeGenConfig
 from xcube_hub.models.cubegen_status import CubeGenStatus
 from xcube_hub.models.o_auth_token import OAuthToken
 from xcube_hub.models.service_information import ServiceInformation
