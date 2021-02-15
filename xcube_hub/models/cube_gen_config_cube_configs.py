@@ -14,7 +14,9 @@ class CubeGenConfigCubeConfigs(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, variable_names: List[str]=None, crs: str=None, spatial_res: float=None, bbox: List[float]=None, time_range: List[date]=None, time_period: str=None):  # noqa: E501
+
+    def __init__(self, variable_names: List[str] = None, crs: str = None, spatial_res: float = None,
+                 bbox: List[float] = None, time_range: List[date] = None, time_period: str = None):  # noqa: E501
         """CubeGenConfigCubeConfigs - a model defined in Swagger
 
         :param variable_names: The variable_names of this CubeGenConfigCubeConfigs.  # noqa: E501

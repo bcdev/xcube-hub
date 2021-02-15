@@ -17,7 +17,10 @@ class CubeGenConfig(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, input_configs: List[CubeGenConfigInputConfigs]=None, cube_configs: CubeGenConfigCubeConfigs=None, output_config: CubeGenConfigOutputConfig=None):  # noqa: E501
+
+    def __init__(self, input_configs: List[CubeGenConfigInputConfigs] = None,
+                 cube_configs: CubeGenConfigCubeConfigs = None,
+                 output_config: CubeGenConfigOutputConfig = None):  # noqa: E501
         """CubeGenConfig - a model defined in Swagger
 
         :param input_configs: The input_configs of this CubeGenConfig.  # noqa: E501

@@ -836,7 +836,8 @@ components:
         runLocal:
           type: boolean
     CostConfig:
-      type: object
+      allOf:
+        - $ref: '#/components/schemas/CubeGenConfig'
     CubeGenConfig:
       type: object
       required:
