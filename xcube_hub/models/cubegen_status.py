@@ -14,7 +14,9 @@ class CubeGenStatus(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, logs: List[str]=None, active: bool=None, start_time: datetime=None, failed: bool=None, succeeded: bool=None, completion_time: datetime=None):  # noqa: E501
+
+    def __init__(self, logs: List[str] = None, active: bool = None, start_time: datetime = None, failed: bool = None,
+                 succeeded: bool = None, completion_time: datetime = None):  # noqa: E501
         """CubeGenStatus - a model defined in Swagger
 
         :param logs: The logs of this CubeGenStatus.  # noqa: E501

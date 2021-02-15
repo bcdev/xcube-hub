@@ -44,7 +44,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-      x-openapi-router-controller: xcube_hub.controllers.default_controller
+      x-openapi-router-controller: xcube_hub.controllers.default
   /datastores:
     get:
       tags:
@@ -74,7 +74,7 @@ paths:
       security:
       - oAuthorization:
         - read:datastores
-      x-openapi-router-controller: xcube_hub.controllers.datastores_controller
+      x-openapi-router-controller: xcube_hub.controllers.datastores
   /datastores/{datastore_id}:
     get:
       tags:
@@ -113,12 +113,12 @@ paths:
       security:
       - oAuthorization:
         - read:datastores
-      x-openapi-router-controller: xcube_hub.controllers.datastores_controller
+      x-openapi-router-controller: xcube_hub.controllers.datastores
   /cubegens/costs:
     post:
       tags:
       - cubegens
-      summary: Receive cost information for runnning a job
+      summary: Receive cost information for runnning a cubegen
       description: |
         Receive cost information of using a service
       operationId: get_costs
@@ -151,7 +151,7 @@ paths:
       security:
       - oAuthorization:
         - read:costs
-      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
   /users/{user_id}:
     get:
       tags:
@@ -191,7 +191,7 @@ paths:
       security:
       - oAuthorization:
         - read:users
-      x-openapi-router-controller: xcube_hub.controllers.users_controller
+      x-openapi-router-controller: xcube_hub.controllers.users
     put:
       tags:
       - users
@@ -236,7 +236,7 @@ paths:
       security:
       - oAuthorization:
         - create:users
-      x-openapi-router-controller: xcube_hub.controllers.users_controller
+      x-openapi-router-controller: xcube_hub.controllers.users
     delete:
       tags:
       - users
@@ -271,7 +271,7 @@ paths:
       security:
       - oAuthorization:
         - delete:users
-      x-openapi-router-controller: xcube_hub.controllers.users_controller
+      x-openapi-router-controller: xcube_hub.controllers.users
     patch:
       tags:
       - users
@@ -316,7 +316,7 @@ paths:
       security:
       - oAuthorization:
         - update:users
-      x-openapi-router-controller: xcube_hub.controllers.users_controller
+      x-openapi-router-controller: xcube_hub.controllers.users
   /users:
     get:
       tags:
@@ -347,7 +347,7 @@ paths:
       security:
       - oAuthorization:
         - read:users
-      x-openapi-router-controller: xcube_hub.controllers.users_controller
+      x-openapi-router-controller: xcube_hub.controllers.users
   /cubegens:
     get:
       tags:
@@ -378,14 +378,14 @@ paths:
       security:
       - oAuthorization:
         - read:cubegens
-      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
     put:
       tags:
       - cubegens
-      summary: Create a job
+      summary: Create a cubegen
       description: |
-        Create a job
-      operationId: create_job
+        Create a jcubegen
+      operationId: create_cubegen
       requestBody:
         description: CubeGen configuration
         content:
@@ -395,7 +395,7 @@ paths:
         required: true
       responses:
         "200":
-          description: Create a job
+          description: Create a cubegen
           content:
             application/json:
               schema:
@@ -414,8 +414,8 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
       security:
       - oAuthorization:
-        - write:job
-      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
+        - write:cubegen
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
     delete:
       tags:
       - cubegens
@@ -440,18 +440,18 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
       security:
       - oAuthorization:
-        - write:job
-      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
-  /cubegens/{job_id}:
+        - write:cubegen
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
+  /cubegens/{cubegen_id}:
     get:
       tags:
       - cubegens
-      summary: List specific job
+      summary: List specific cubegen
       description: |
-        List specific job
-      operationId: get_job
+        List specific cubegen
+      operationId: get_cubegen
       parameters:
-      - name: job_id
+      - name: cubegen_id
         in: path
         description: CubeGen ID
         required: true
@@ -461,7 +461,7 @@ paths:
           type: string
       responses:
         "200":
-          description: User job information
+          description: User cubegen information
           content:
             application/json:
               schema:
@@ -481,16 +481,16 @@ paths:
       security:
       - oAuthorization:
         - read:cubegens
-      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
     delete:
       tags:
       - cubegens
-      summary: Delete a job
+      summary: Delete a cubegen
       description: |
-        Delete a job
-      operationId: delete_job
+        Delete a cubegen
+      operationId: delete_cubegen
       parameters:
-      - name: job_id
+      - name: cubegen_id
         in: path
         description: CubeGen ID
         required: true
@@ -516,16 +516,16 @@ paths:
       security:
       - oAuthorization:
         - write:cubegens
-      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
-  /cubegens/{job_id}/callbacks:
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
+  /cubegens/{cubegen_id}/callbacks:
     get:
       tags:
       - callbacks
-      summary: Get list of callbacks for a job
-      description: Get list of callbacks for a job
-      operationId: get_callbacks_by_job_id
+      summary: Get list of callbacks for a cubegen
+      description: Get list of callbacks for a cubegen
+      operationId: get_callbacks_by_cubegen_id
       parameters:
-      - name: job_id
+      - name: cubegen_id
         in: path
         description: CubeGen ID
         required: true
@@ -558,15 +558,15 @@ paths:
       security:
       - oAuthorization:
         - read:callbacks
-      x-openapi-router-controller: xcube_hub.controllers.callbacks_controller
+      x-openapi-router-controller: xcube_hub.controllers.callbacks
     put:
       tags:
       - callbacks
-      summary: Add a callback for a job
-      description: Add a callbacks for a job
-      operationId: put_callback_by_job_id
+      summary: Add a callback for a cubegen
+      description: Add a callbacks for a cubegen
+      operationId: put_callback_by_cubegen_id
       parameters:
-      - name: job_id
+      - name: cubegen_id
         in: path
         description: CubeGen ID
         required: true
@@ -605,15 +605,15 @@ paths:
       security:
       - oAuthorization:
         - write:callbacks
-      x-openapi-router-controller: xcube_hub.controllers.callbacks_controller
+      x-openapi-router-controller: xcube_hub.controllers.callbacks
     delete:
       tags:
       - callbacks
-      summary: Clear callbacks for a job
-      description: Clear callbacks for a job
-      operationId: delete_callbacks_by_job_id
+      summary: Clear callbacks for a cubegen
+      description: Clear callbacks for a cubegen
+      operationId: delete_callbacks_by_cubegen_id
       parameters:
-      - name: job_id
+      - name: cubegen_id
         in: path
         description: CubeGen ID
         required: true
@@ -639,7 +639,7 @@ paths:
       security:
       - oAuthorization:
         - write:callbacks
-      x-openapi-router-controller: xcube_hub.controllers.callbacks_controller
+      x-openapi-router-controller: xcube_hub.controllers.callbacks
   /oauth/token:
     post:
       tags:
@@ -675,7 +675,7 @@ paths:
       security:
       - oAuthorization:
         - read:oauth_token
-      x-openapi-router-controller: xcube_hub.controllers.oauth_controller
+      x-openapi-router-controller: xcube_hub.controllers.oauth
 components:
   schemas:
     ApiResponse:
@@ -841,11 +841,11 @@ components:
       type: object
     CubeGen:
       required:
-      - job_id
+      - cubegen_id
       - status
       type: object
       properties:
-        job_id:
+        cubegen_id:
           type: string
         status:
           $ref: '#/components/schemas/CubeGenStatus'
@@ -969,19 +969,19 @@ components:
         implicit:
           authorizationUrl: https://edc.eu.auth0.com/authorize
           scopes:
-            read_job: Read job status and result
-            submit_job: Submit cubegens to the K8s cluster
+            read_cubegen: Read cubegen status and result
+            submit_cubegen: Submit cubegens to the K8s cluster
             read_punits: Allow reading the punits level of a user
             read_callbacks: Allow reading callbacks
         clientCredentials:
           tokenUrl: https://edc.eu.auth0.com/oauth/token
           scopes:
-            read_job: Read job status and result
+            read_cubegen: Read cubegen status and result
             read_punits: Allow reading the punits level of a user
             put_punits: Allow adding punits to and remove punits from a user
             read_callbacks: Allow reading callbacks
             put_callbacks: Allow reading callbacks
             delete_callbacks: Allow reading callbacks
-      x-tokenInfoFunc: xcube_hub.controllers.authorization_controller.check_oAuthorization
-      x-scopeValidateFunc: xcube_hub.controllers.authorization_controller.validate_scope_oAuthorization
+      x-tokenInfoFunc: xcube_hub.controllers.authorization.check_oAuthorization
+      x-scopeValidateFunc: xcube_hub.controllers.authorization.validate_scope_oAuthorization
 

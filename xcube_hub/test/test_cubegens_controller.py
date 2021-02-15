@@ -8,41 +8,41 @@ from xcube_hub.models.cubegen_config import CubeGenConfig  # noqa: E501
 from xcube_hub.test import BaseTestCase
 
 
-class TestJobsController(BaseTestCase):
-    """JobsController integration test stubs"""
+class TestCubeGensController(BaseTestCase):
+    """CubeGensController integration test stubs"""
 
-    def test_create_job(self):
-        """Test case for create_job
+    def test_create_cubegen(self):
+        """Test case for create_cubegen
 
-        Create a job
+        Create a cubegen
         """
         body = CubeGenConfig()
         response = self.client.open(
-            '/api/v1/jobs',
+            '/api/v1/cubegens',
             method='PUT',
             data=json.dumps(body),
             content_type='application/json')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_delete_job(self):
-        """Test case for delete_job
+    def test_delete_cubegen(self):
+        """Test case for delete_cubegen
 
-        Delete a job
+        Delete a cubegen
         """
         response = self.client.open(
-            '/api/v1/jobs/{job_id}'.format(job_id='job_id_example'),
+            '/api/v1/cubegens/{cubegen_id}'.format(cubegen_id='cubegen_id_example'),
             method='DELETE')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_delete_jobs(self):
-        """Test case for delete_jobs
+    def test_delete_cubegens(self):
+        """Test case for delete_cubegens
 
-        Delete all jobs
+        Delete all cubegens
         """
         response = self.client.open(
-            '/api/v1/jobs',
+            '/api/v1/cubegens',
             method='DELETE')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -50,35 +50,35 @@ class TestJobsController(BaseTestCase):
     def test_get_costs(self):
         """Test case for get_costs
 
-        Receive cost information for runnning a job
+        Receive cost information for runnning a cubegen
         """
         body = CostConfig()
         response = self.client.open(
-            '/api/v1/jobs/costs',
+            '/api/v1/cubegens/costs',
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_get_job(self):
-        """Test case for get_job
+    def test_get_cubegen(self):
+        """Test case for get_cubegen
 
-        List specific job
+        List specific cubegen
         """
         response = self.client.open(
-            '/api/v1/jobs/{job_id}'.format(job_id='job_id_example'),
+            '/api/v1/cubegens/{cubegen_id}'.format(cubegen_id='cubegen_id_example'),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_get_jobs(self):
-        """Test case for get_jobs
+    def test_get_cubegens(self):
+        """Test case for get_cubegens
 
-        List jobs
+        List cubegens
         """
         response = self.client.open(
-            '/api/v1/jobs',
+            '/api/v1/cubegens',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))

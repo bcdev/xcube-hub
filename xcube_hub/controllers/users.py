@@ -1,7 +1,7 @@
 import connexion
 import requests
 
-from xcube_hub import auth0, api
+from xcube_hub import api
 from xcube_hub.models.api_user_response import ApiUserResponse  # noqa: E501
 from xcube_hub.models.api_users_response import ApiUsersResponse  # noqa: E501
 from xcube_hub.models.user import User  # noqa: E501
