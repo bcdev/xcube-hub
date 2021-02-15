@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from flask import json
 from xcube_hub.models.cost_config import CostConfig  # noqa: E501
 from xcube_hub.models.cubegen_config import CubeGenConfig  # noqa: E501
-from xcube_hub.test import BaseTestCase
+from test import BaseTestCase
 
 
 class TestCubeGensController(BaseTestCase):

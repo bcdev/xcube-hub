@@ -8,7 +8,7 @@ import requests_mock
 from flask import json
 from xcube_hub import auth0
 from xcube_hub.models.user import User  # noqa: E501
-from xcube_hub.test import BaseTestCase
+from test import BaseTestCase
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
 ALGORITHMS = ["RS256"]

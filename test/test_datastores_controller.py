@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from xcube_hub.test import BaseTestCase
+from test import BaseTestCase
 
 
 class TestDatastoresController(BaseTestCase):

@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from flask import json
 from xcube_hub.models.o_auth_token import OAuthToken  # noqa: E501
-from xcube_hub.test import BaseTestCase
+from test import BaseTestCase
 
 
 class TestOauthController(BaseTestCase):
