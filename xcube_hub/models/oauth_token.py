@@ -14,7 +14,9 @@ class OAuthToken(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, client_id: str=None, client_secret: str=None, audience: str=None, grant_type: str=None):  # noqa: E501
+
+    def __init__(self, client_id: str = None, client_secret: str = None, audience: str = None,
+                 grant_type: str = None):  # noqa: E501
         """OAuthToken - a model defined in Swagger
 
         :param client_id: The client_id of this OAuthToken.  # noqa: E501

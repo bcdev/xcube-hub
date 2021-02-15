@@ -15,7 +15,8 @@ class Dataset(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, variables: List[Variable]=None):  # noqa: E501
+
+    def __init__(self, id: str = None, name: str = None, variables: List[Variable] = None):  # noqa: E501
         """Dataset - a model defined in Swagger
 
         :param id: The id of this Dataset.  # noqa: E501

@@ -362,7 +362,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiCubeGensResponse'
+                $ref: '#/components/schemas/ApiCubegensResponse'
         "400":
           description: Api Error
           content:
@@ -387,11 +387,11 @@ paths:
         Create a jcubegen
       operationId: create_cubegen
       requestBody:
-        description: CubeGen configuration
+        description: Cubegen configuration
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CubeGenConfig'
+              $ref: '#/components/schemas/CubegenConfig'
         required: true
       responses:
         "200":
@@ -399,7 +399,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiCubeGenResponse'
+                $ref: '#/components/schemas/ApiCubegenResponse'
         "400":
           description: Api Error
           content:
@@ -453,7 +453,7 @@ paths:
       parameters:
       - name: cubegen_id
         in: path
-        description: CubeGen ID
+        description: Cubegen ID
         required: true
         style: simple
         explode: false
@@ -465,7 +465,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiCubeGenResponse'
+                $ref: '#/components/schemas/ApiCubegenResponse'
         "400":
           description: Api Error
           content:
@@ -492,7 +492,7 @@ paths:
       parameters:
       - name: cubegen_id
         in: path
-        description: CubeGen ID
+        description: Cubegen ID
         required: true
         style: simple
         explode: false
@@ -527,7 +527,7 @@ paths:
       parameters:
       - name: cubegen_id
         in: path
-        description: CubeGen ID
+        description: Cubegen ID
         required: true
         style: simple
         explode: false
@@ -568,7 +568,7 @@ paths:
       parameters:
       - name: cubegen_id
         in: path
-        description: CubeGen ID
+        description: Cubegen ID
         required: true
         style: simple
         explode: false
@@ -615,7 +615,7 @@ paths:
       parameters:
       - name: cubegen_id
         in: path
-        description: CubeGen ID
+        description: Cubegen ID
         required: true
         style: simple
         explode: false
@@ -694,7 +694,7 @@ components:
         properties:
           traceback:
             type: object
-    ApiCubeGenResponse:
+    ApiCubegenResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
       - required:
@@ -702,7 +702,7 @@ components:
         type: object
         properties:
           result:
-            $ref: '#/components/schemas/CubeGen'
+            $ref: '#/components/schemas/Cubegen'
     ApiUserResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
@@ -723,7 +723,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/User'
-    ApiCubeGensResponse:
+    ApiCubegensResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
       - required:
@@ -733,7 +733,7 @@ components:
           result:
             type: array
             items:
-              $ref: '#/components/schemas/CubeGen'
+              $ref: '#/components/schemas/Cubegen'
     ApiServiceInformationResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
@@ -837,8 +837,8 @@ components:
           type: boolean
     CostConfig:
       allOf:
-        - $ref: '#/components/schemas/CubeGenConfig'
-    CubeGenConfig:
+        - $ref: '#/components/schemas/CubegenConfig'
+    CubegenConfig:
       type: object
       required:
         - input_configs
@@ -908,7 +908,7 @@ components:
               type: string
             store_params:
               type: object
-    CubeGen:
+    Cubegen:
       required:
       - cubegen_id
       - status
@@ -917,7 +917,7 @@ components:
         cubegen_id:
           type: string
         status:
-          $ref: '#/components/schemas/CubeGenStatus'
+          $ref: '#/components/schemas/CubegenStatus'
     Callback:
       required:
       - message
@@ -989,7 +989,7 @@ components:
           type: string
         description:
           type: string
-    CubeGenStatus:
+    CubegenStatus:
       required:
       - active
       - completion_time

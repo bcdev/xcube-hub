@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from flask import json
-from xcube_hub.models.o_auth_token import OAuthToken  # noqa: E501
+from xcube_hub.models.oauth_token import OAuthToken  # noqa: E501
 from test import BaseTestCase
 
 

@@ -6,7 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from xcube_hub.models.base_model_ import Model
-from xcube_hub.models.cube_gen_config_open_params import CubeGenConfigOpenParams  # noqa: F401,E501
+from xcube_hub.models.cubegen_config_open_params import CubeGenConfigOpenParams  # noqa: F401,E501
 from xcube_hub import util
 
 
@@ -15,7 +15,9 @@ class CubeGenConfigInputConfigs(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, store_id: str=None, data_id: str=None, open_params: CubeGenConfigOpenParams=None):  # noqa: E501
+
+    def __init__(self, store_id: str = None, data_id: str = None,
+                 open_params: CubeGenConfigOpenParams = None):  # noqa: E501
         """CubeGenConfigInputConfigs - a model defined in Swagger
 
         :param store_id: The store_id of this CubeGenConfigInputConfigs.  # noqa: E501

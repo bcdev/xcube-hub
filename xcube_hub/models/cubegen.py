@@ -15,7 +15,8 @@ class CubeGen(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, cubegen_id: str=None, status: CubeGenStatus=None):  # noqa: E501
+
+    def __init__(self, cubegen_id: str = None, status: CubeGenStatus = None):  # noqa: E501
         """CubeGen - a model defined in Swagger
 
         :param cubegen_id: The cubegen_id of this CubeGen.  # noqa: E501

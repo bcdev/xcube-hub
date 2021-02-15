@@ -58,7 +58,7 @@ class Model(object):
             elif isinstance(value, type(None)):
                 return 'null'
 
-        json.dumps(self.to_dict(), default = handle_datetime)
+        json.dumps(self.to_dict(), default=handle_datetime)
 
     def to_str(self):
         """Returns the string representation of the model

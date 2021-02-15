@@ -355,4 +355,3 @@ class User(Model):
         res = self.to_dict()
 
         return {k: v for k, v in res.items() if v is not None}
-

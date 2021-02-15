@@ -14,7 +14,8 @@ class CubeGenConfigOpenParams(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, tile_size: List[float]=None):  # noqa: E501
+
+    def __init__(self, tile_size: List[float] = None):  # noqa: E501
         """CubeGenConfigOpenParams - a model defined in Swagger
 
         :param tile_size: The tile_size of this CubeGenConfigOpenParams.  # noqa: E501

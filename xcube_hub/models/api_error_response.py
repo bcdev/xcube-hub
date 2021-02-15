@@ -15,7 +15,8 @@ class ApiErrorResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, message: str=None, output: object=None, traceback: object=None):  # noqa: E501
+
+    def __init__(self, message: str = None, output: object = None, traceback: object = None):  # noqa: E501
         """ApiErrorResponse - a model defined in Swagger
 
         :param message: The message of this ApiErrorResponse.  # noqa: E501

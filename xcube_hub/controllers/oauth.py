@@ -1,6 +1,6 @@
 import connexion
-from xcube_hub.models.api_o_auth_response import ApiOAuthResponse  # noqa: E501
-from xcube_hub.models.o_auth_token import OAuthToken  # noqa: E501
+from xcube_hub.models.api_oauth_response import ApiOAuthResponse  # noqa: E501
+from xcube_hub.models.oauth_token import OAuthToken  # noqa: E501
 
 
 def oauth_token_post(body=None):  # noqa: E501

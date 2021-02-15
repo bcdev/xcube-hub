@@ -14,7 +14,8 @@ class ApiOAuthResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, access_token: str=None, token_type: str=None):  # noqa: E501
+
+    def __init__(self, access_token: str = None, token_type: str = None):  # noqa: E501
         """ApiOAuthResponse - a model defined in Swagger
 
         :param access_token: The access_token of this ApiOAuthResponse.  # noqa: E501

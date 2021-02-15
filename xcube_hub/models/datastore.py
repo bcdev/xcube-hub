@@ -15,7 +15,8 @@ class Datastore(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, datasets: List[Dataset]=None):  # noqa: E501
+
+    def __init__(self, id: str = None, name: str = None, datasets: List[Dataset] = None):  # noqa: E501
         """Datastore - a model defined in Swagger
 
         :param id: The id of this Datastore.  # noqa: E501

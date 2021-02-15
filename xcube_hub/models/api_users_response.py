@@ -16,7 +16,8 @@ class ApiUsersResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, message: str=None, output: object=None, result: List[User]=None):  # noqa: E501
+
+    def __init__(self, message: str = None, output: object = None, result: List[User] = None):  # noqa: E501
         """ApiUsersResponse - a model defined in Swagger
 
         :param message: The message of this ApiUsersResponse.  # noqa: E501

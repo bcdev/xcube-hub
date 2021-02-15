@@ -14,7 +14,10 @@ class ServiceInformation(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, description: str=None, version: str=None, server_start_time: datetime=None, server_current_time: datetime=None, server_pid: int=None, chart_version: str=None, mock_services: str=None, run_local: bool=None):  # noqa: E501
+
+    def __init__(self, name: str = None, description: str = None, version: str = None,
+                 server_start_time: datetime = None, server_current_time: datetime = None, server_pid: int = None,
+                 chart_version: str = None, mock_services: str = None, run_local: bool = None):  # noqa: E501
         """ServiceInformation - a model defined in Swagger
 
         :param name: The name of this ServiceInformation.  # noqa: E501

@@ -6,10 +6,10 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from xcube_hub import util
-from xcube_hub.models.cube_gen_config import CubeGenConfig
-from xcube_hub.models.cube_gen_config_cube_configs import CubeGenConfigCubeConfigs
-from xcube_hub.models.cube_gen_config_input_configs import CubeGenConfigInputConfigs
-from xcube_hub.models.cube_gen_config_output_config import CubeGenConfigOutputConfig
+from xcube_hub.models.cubegen_config import CubeGenConfig
+from xcube_hub.models.cubegen_config_cube_configs import CubeGenConfigCubeConfigs
+from xcube_hub.models.cubegen_config_input_configs import CubeGenConfigInputConfigs
+from xcube_hub.models.cubegen_config_output_config import CubeGenConfigOutputConfig
 
 
 class CostConfig(CubeGenConfig):

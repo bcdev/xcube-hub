@@ -16,7 +16,8 @@ class ApiDatastoresResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, message: str=None, output: object=None, result: Datastore=None):  # noqa: E501
+
+    def __init__(self, message: str = None, output: object = None, result: Datastore = None):  # noqa: E501
         """ApiDatastoresResponse - a model defined in Swagger
 
         :param message: The message of this ApiDatastoresResponse.  # noqa: E501

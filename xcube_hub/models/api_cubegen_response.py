@@ -7,7 +7,7 @@ from typing import List, Dict  # noqa: F401
 
 from xcube_hub.models.base_model_ import Model
 from xcube_hub.models.api_response import ApiResponse  # noqa: F401,E501
-from xcube_hub.models.cube_gen import CubeGen  # noqa: F401,E501
+from xcube_hub.models.cubegen import CubeGen  # noqa: F401,E501
 from xcube_hub import util
 
 
@@ -16,7 +16,8 @@ class ApiCubeGenResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, message: str=None, output: object=None, result: CubeGen=None):  # noqa: E501
+
+    def __init__(self, message: str = None, output: object = None, result: CubeGen = None):  # noqa: E501
         """ApiCubeGenResponse - a model defined in Swagger
 
         :param message: The message of this ApiCubeGenResponse.  # noqa: E501

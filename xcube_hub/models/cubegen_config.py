@@ -6,9 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from xcube_hub.models.base_model_ import Model
-from xcube_hub.models.cube_gen_config_cube_configs import CubeGenConfigCubeConfigs  # noqa: F401,E501
-from xcube_hub.models.cube_gen_config_input_configs import CubeGenConfigInputConfigs  # noqa: F401,E501
-from xcube_hub.models.cube_gen_config_output_config import CubeGenConfigOutputConfig  # noqa: F401,E501
+from xcube_hub.models.cubegen_config_cube_configs import CubeGenConfigCubeConfigs  # noqa: F401,E501
+from xcube_hub.models.cubegen_config_input_configs import CubeGenConfigInputConfigs  # noqa: F401,E501
+from xcube_hub.models.cubegen_config_output_config import CubeGenConfigOutputConfig  # noqa: F401,E501
 from xcube_hub import util
 
 

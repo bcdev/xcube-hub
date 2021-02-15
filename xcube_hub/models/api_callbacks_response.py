@@ -16,7 +16,8 @@ class ApiCallbacksResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, message: str=None, output: object=None, result: List[Callback]=None):  # noqa: E501
+
+    def __init__(self, message: str = None, output: object = None, result: List[Callback] = None):  # noqa: E501
         """ApiCallbacksResponse - a model defined in Swagger
 
         :param message: The message of this ApiCallbacksResponse.  # noqa: E501

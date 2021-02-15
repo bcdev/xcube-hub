@@ -14,7 +14,9 @@ class Callback(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, status: str=None, message: str=None, values: object=None, total_work: float=None, worked: float=None):  # noqa: E501
+
+    def __init__(self, status: str = None, message: str = None, values: object = None, total_work: float = None,
+                 worked: float = None):  # noqa: E501
         """Callback - a model defined in Swagger
 
         :param status: The status of this Callback.  # noqa: E501

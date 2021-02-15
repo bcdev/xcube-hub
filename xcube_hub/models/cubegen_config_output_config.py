@@ -14,7 +14,8 @@ class CubeGenConfigOutputConfig(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, store_id: str=None, store_params: object=None):  # noqa: E501
+
+    def __init__(self, store_id: str = None, store_params: object = None):  # noqa: E501
         """CubeGenConfigOutputConfig - a model defined in Swagger
 
         :param store_id: The store_id of this CubeGenConfigOutputConfig.  # noqa: E501
