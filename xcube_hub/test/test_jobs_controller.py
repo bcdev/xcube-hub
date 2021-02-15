@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from flask import json
 from xcube_hub.models.cost_config import CostConfig  # noqa: E501
-from xcube_hub.models.job_config import JobConfig  # noqa: E501
+from xcube_hub.models.cubegen_config import CubeGenConfig  # noqa: E501
 from xcube_hub.test import BaseTestCase
 
 
@@ -16,7 +16,7 @@ class TestJobsController(BaseTestCase):
 
         Create a job
         """
-        body = JobConfig()
+        body = CubeGenConfig()
         response = self.client.open(
             '/api/v1/jobs',
             method='PUT',

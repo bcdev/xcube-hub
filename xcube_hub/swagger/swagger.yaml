@@ -15,7 +15,7 @@ servers:
 - url: https://stage.catehub.climate.esa.int/api/v2
 tags:
 - name: users
-- name: jobs
+- name: cubegens
 - name: datastores
 - name: callbacks
 - name: oauth
@@ -114,10 +114,10 @@ paths:
       - oAuthorization:
         - read:datastores
       x-openapi-router-controller: xcube_hub.controllers.datastores_controller
-  /jobs/costs:
+  /cubegens/costs:
     post:
       tags:
-      - jobs
+      - cubegens
       summary: Receive cost information for runnning a job
       description: |
         Receive cost information of using a service
@@ -151,7 +151,7 @@ paths:
       security:
       - oAuthorization:
         - read:costs
-      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
   /users/{user_id}:
     get:
       tags:
@@ -348,21 +348,21 @@ paths:
       - oAuthorization:
         - read:users
       x-openapi-router-controller: xcube_hub.controllers.users_controller
-  /jobs:
+  /cubegens:
     get:
       tags:
-      - jobs
-      summary: List jobs
+      - cubegens
+      summary: List cubegens
       description: |
-        List user jobs
-      operationId: get_jobs
+        List user cubegens
+      operationId: get_cubegens
       responses:
         "200":
-          description: List jobs
+          description: List cubegens
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiJobsResponse'
+                $ref: '#/components/schemas/ApiCubeGensResponse'
         "400":
           description: Api Error
           content:
@@ -377,21 +377,21 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
       security:
       - oAuthorization:
-        - read:jobs
-      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+        - read:cubegens
+      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
     put:
       tags:
-      - jobs
+      - cubegens
       summary: Create a job
       description: |
         Create a job
       operationId: create_job
       requestBody:
-        description: Job configuration
+        description: CubeGen configuration
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JobConfig'
+              $ref: '#/components/schemas/CubeGenConfig'
         required: true
       responses:
         "200":
@@ -399,7 +399,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiJobResponse'
+                $ref: '#/components/schemas/ApiCubeGenResponse'
         "400":
           description: Api Error
           content:
@@ -415,14 +415,14 @@ paths:
       security:
       - oAuthorization:
         - write:job
-      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
     delete:
       tags:
-      - jobs
-      summary: Delete all jobs
+      - cubegens
+      summary: Delete all cubegens
       description: |
-        Delete all jobs
-      operationId: delete_jobs
+        Delete all cubegens
+      operationId: delete_cubegens
       responses:
         "200":
           description: OK
@@ -441,11 +441,11 @@ paths:
       security:
       - oAuthorization:
         - write:job
-      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
-  /jobs/{job_id}:
+      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
+  /cubegens/{job_id}:
     get:
       tags:
-      - jobs
+      - cubegens
       summary: List specific job
       description: |
         List specific job
@@ -453,7 +453,7 @@ paths:
       parameters:
       - name: job_id
         in: path
-        description: Job ID
+        description: CubeGen ID
         required: true
         style: simple
         explode: false
@@ -465,7 +465,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiJobResponse'
+                $ref: '#/components/schemas/ApiCubeGenResponse'
         "400":
           description: Api Error
           content:
@@ -480,11 +480,11 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
       security:
       - oAuthorization:
-        - read:jobs
-      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
+        - read:cubegens
+      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
     delete:
       tags:
-      - jobs
+      - cubegens
       summary: Delete a job
       description: |
         Delete a job
@@ -492,7 +492,7 @@ paths:
       parameters:
       - name: job_id
         in: path
-        description: Job ID
+        description: CubeGen ID
         required: true
         style: simple
         explode: false
@@ -515,9 +515,9 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
       security:
       - oAuthorization:
-        - write:jobs
-      x-openapi-router-controller: xcube_hub.controllers.jobs_controller
-  /jobs/{job_id}/callbacks:
+        - write:cubegens
+      x-openapi-router-controller: xcube_hub.controllers.cubegens_controller
+  /cubegens/{job_id}/callbacks:
     get:
       tags:
       - callbacks
@@ -527,7 +527,7 @@ paths:
       parameters:
       - name: job_id
         in: path
-        description: Job ID
+        description: CubeGen ID
         required: true
         style: simple
         explode: false
@@ -568,7 +568,7 @@ paths:
       parameters:
       - name: job_id
         in: path
-        description: Job ID
+        description: CubeGen ID
         required: true
         style: simple
         explode: false
@@ -615,7 +615,7 @@ paths:
       parameters:
       - name: job_id
         in: path
-        description: Job ID
+        description: CubeGen ID
         required: true
         style: simple
         explode: false
@@ -694,7 +694,7 @@ components:
         properties:
           traceback:
             type: object
-    ApiJobResponse:
+    ApiCubeGenResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
       - required:
@@ -702,7 +702,7 @@ components:
         type: object
         properties:
           result:
-            $ref: '#/components/schemas/Job'
+            $ref: '#/components/schemas/CubeGen'
     ApiUserResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
@@ -723,7 +723,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/User'
-    ApiJobsResponse:
+    ApiCubeGensResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
       - required:
@@ -733,7 +733,7 @@ components:
           result:
             type: array
             items:
-              $ref: '#/components/schemas/Job'
+              $ref: '#/components/schemas/CubeGen'
     ApiServiceInformationResponse:
       allOf:
       - $ref: '#/components/schemas/ApiResponse'
@@ -837,9 +837,9 @@ components:
           type: boolean
     CostConfig:
       type: object
-    JobConfig:
+    CubeGenConfig:
       type: object
-    Job:
+    CubeGen:
       required:
       - job_id
       - status
@@ -848,7 +848,7 @@ components:
         job_id:
           type: string
         status:
-          $ref: '#/components/schemas/JobStatus'
+          $ref: '#/components/schemas/CubeGenStatus'
     Callback:
       required:
       - message
@@ -920,7 +920,7 @@ components:
           type: string
         description:
           type: string
-    JobStatus:
+    CubeGenStatus:
       required:
       - active
       - completion_time
@@ -970,7 +970,7 @@ components:
           authorizationUrl: https://edc.eu.auth0.com/authorize
           scopes:
             read_job: Read job status and result
-            submit_job: Submit jobs to the K8s cluster
+            submit_job: Submit cubegens to the K8s cluster
             read_punits: Allow reading the punits level of a user
             read_callbacks: Allow reading callbacks
         clientCredentials:
