@@ -14,7 +14,7 @@ class TestDatastoresController(BaseTestCase):
         Get a datastore
         """
         response = self.client.open(
-            '/api/v1/datastores/{datastore_id}'.format(datastore_id='datastore_id_example'),
+            '/api/v2/datastores/{datastore_id}'.format(datastore_id='datastore_id_example'),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -25,7 +25,7 @@ class TestDatastoresController(BaseTestCase):
         Get a list of datastores
         """
         response = self.client.open(
-            '/api/v1/datastores',
+            '/api/v2/datastores',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))

@@ -14,7 +14,7 @@ class TestDefaultController(BaseTestCase):
         get service info
         """
         response = self.client.open(
-            '/api/v1/',
+            '/api/v2/',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))

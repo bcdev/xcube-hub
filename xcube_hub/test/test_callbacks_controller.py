@@ -16,7 +16,7 @@ class TestCallbacksController(BaseTestCase):
         Clear callbacks for a job
         """
         response = self.client.open(
-            '/api/v1/jobs/{job_id}/callbacks'.format(job_id='job_id_example'),
+            '/api/v2/jobs/{job_id}/callbacks'.format(job_id='job_id_example'),
             method='DELETE')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -27,7 +27,7 @@ class TestCallbacksController(BaseTestCase):
         Get list of callbacks for a job
         """
         response = self.client.open(
-            '/api/v1/jobs/{job_id}/callbacks'.format(job_id='job_id_example'),
+            '/api/v2/jobs/{job_id}/callbacks'.format(job_id='job_id_example'),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -39,7 +39,7 @@ class TestCallbacksController(BaseTestCase):
         """
         body = [Callback()]
         response = self.client.open(
-            '/api/v1/jobs/{job_id}/callbacks'.format(job_id='job_id_example'),
+            '/api/v2/jobs/{job_id}/callbacks'.format(job_id='job_id_example'),
             method='PUT',
             data=json.dumps(body),
             content_type='application/json')

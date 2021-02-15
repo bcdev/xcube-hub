@@ -6,11 +6,11 @@ from jose import jwt
 from requests import HTTPError
 
 from xcube_hub import api
-from xcube_hub_old.keyvaluedatabase import KeyValueDatabase
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
 ALGORITHMS = ["RS256"]
-DEFAULT_API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v1/'
+DEFAULT_API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v2/'
 API_AUTH_IDENTIFIER = 'https://edc.eu.auth0.com/api/v2/'
 
 

@@ -18,7 +18,7 @@ class TestCubeGensController(BaseTestCase):
         """
         body = CubeGenConfig()
         response = self.client.open(
-            '/api/v1/cubegens',
+            '/api/v2/cubegens',
             method='PUT',
             data=json.dumps(body),
             content_type='application/json')
@@ -30,11 +30,10 @@ class TestCubeGensController(BaseTestCase):
 
         Delete a cubegen
         """
-        response = self.client.open(
-            '/api/v1/cubegens/{cubegen_id}'.format(cubegen_id='cubegen_id_example'),
-            method='DELETE')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        cubegen_id = 'cubegen_id_example'
+
+        response = self.client.open(f'/api/v2/cubegens/{cubegen_id}', method='DELETE')
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_delete_cubegens(self):
         """Test case for delete_cubegens
@@ -42,7 +41,7 @@ class TestCubeGensController(BaseTestCase):
         Delete all cubegens
         """
         response = self.client.open(
-            '/api/v1/cubegens',
+            '/api/v2/cubegens',
             method='DELETE')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -54,7 +53,7 @@ class TestCubeGensController(BaseTestCase):
         """
         body = CostConfig()
         response = self.client.open(
-            '/api/v1/cubegens/costs',
+            '/api/v2/cubegens/costs',
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
@@ -67,7 +66,7 @@ class TestCubeGensController(BaseTestCase):
         List specific cubegen
         """
         response = self.client.open(
-            '/api/v1/cubegens/{cubegen_id}'.format(cubegen_id='cubegen_id_example'),
+            '/api/v2/cubegens/{cubegen_id}'.format(cubegen_id='cubegen_id_example'),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -78,7 +77,7 @@ class TestCubeGensController(BaseTestCase):
         List cubegens
         """
         response = self.client.open(
-            '/api/v1/cubegens',
+            '/api/v2/cubegens',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))

@@ -12,7 +12,7 @@ from xcube_hub.test import BaseTestCase
 
 AUTH0_DOMAIN = 'edc.eu.auth0.com'
 ALGORITHMS = ["RS256"]
-DEFAULT_API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v1/'
+DEFAULT_API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v2/'
 API_AUTH_IDENTIFIER = 'https://edc.eu.auth0.com/api/v2/'
 
 

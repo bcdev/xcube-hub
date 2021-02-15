@@ -17,7 +17,7 @@ class TestOauthController(BaseTestCase):
         """
         body = OAuthToken()
         response = self.client.open(
-            '/api/v1/oauth/token',
+            '/api/v2/oauth/token',
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
