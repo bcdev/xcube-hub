@@ -865,7 +865,7 @@ components:
                     type: array
                     items:
                       type: number
-        cube_configs:
+        cube_config:
             type: object
             required:
               - variable_names

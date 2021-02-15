@@ -6,7 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from xcube_hub.models.base_model_ import Model
-from xcube_hub.models.cubegen_config_cube_configs import CubeGenConfigCubeConfigs  # noqa: F401,E501
+from xcube_hub.models.cubegen_config_cube_config import CubeGenConfigCubeConfig  # noqa: F401,E501
 from xcube_hub.models.cubegen_config_input_configs import CubeGenConfigInputConfigs  # noqa: F401,E501
 from xcube_hub.models.cubegen_config_output_config import CubeGenConfigOutputConfig  # noqa: F401,E501
 from xcube_hub import util
@@ -19,30 +19,30 @@ class CubeGenConfig(Model):
     """
 
     def __init__(self, input_configs: List[CubeGenConfigInputConfigs] = None,
-                 cube_configs: CubeGenConfigCubeConfigs = None,
+                 cube_config: CubeGenConfigCubeConfig = None,
                  output_config: CubeGenConfigOutputConfig = None):  # noqa: E501
         """CubeGenConfig - a model defined in Swagger
 
         :param input_configs: The input_configs of this CubeGenConfig.  # noqa: E501
         :type input_configs: List[CubeGenConfigInputConfigs]
-        :param cube_configs: The cube_configs of this CubeGenConfig.  # noqa: E501
-        :type cube_configs: CubeGenConfigCubeConfigs
+        :param cube_config: The cube_config of this CubeGenConfig.  # noqa: E501
+        :type cube_config: CubeGenConfigCubeConfig
         :param output_config: The output_config of this CubeGenConfig.  # noqa: E501
         :type output_config: CubeGenConfigOutputConfig
         """
         self.swagger_types = {
             'input_configs': List[CubeGenConfigInputConfigs],
-            'cube_configs': CubeGenConfigCubeConfigs,
+            'cube_config': CubeGenConfigCubeConfig,
             'output_config': CubeGenConfigOutputConfig
         }
 
         self.attribute_map = {
             'input_configs': 'input_configs',
-            'cube_configs': 'cube_configs',
+            'cube_config': 'cube_config',
             'output_config': 'output_config'
         }
         self._input_configs = input_configs
-        self._cube_configs = cube_configs
+        self._cube_config = cube_config
         self._output_config = output_config
 
     @classmethod
@@ -80,25 +80,25 @@ class CubeGenConfig(Model):
         self._input_configs = input_configs
 
     @property
-    def cube_configs(self) -> CubeGenConfigCubeConfigs:
-        """Gets the cube_configs of this CubeGenConfig.
+    def cube_config(self) -> CubeGenConfigCubeConfig:
+        """Gets the cube_config of this CubeGenConfig.
 
 
-        :return: The cube_configs of this CubeGenConfig.
-        :rtype: CubeGenConfigCubeConfigs
+        :return: The cube_config of this CubeGenConfig.
+        :rtype: CubeGenConfigCubeConfig
         """
-        return self._cube_configs
+        return self._cube_config
 
-    @cube_configs.setter
-    def cube_configs(self, cube_configs: CubeGenConfigCubeConfigs):
-        """Sets the cube_configs of this CubeGenConfig.
+    @cube_config.setter
+    def cube_config(self, cube_config: CubeGenConfigCubeConfig):
+        """Sets the cube_config of this CubeGenConfig.
 
 
-        :param cube_configs: The cube_configs of this CubeGenConfig.
-        :type cube_configs: CubeGenConfigCubeConfigs
+        :param cube_config: The cube_config of this CubeGenConfig.
+        :type cube_config: CubeGenConfigCubeConfig
         """
 
-        self._cube_configs = cube_configs
+        self._cube_config = cube_config
 
     @property
     def output_config(self) -> CubeGenConfigOutputConfig:
