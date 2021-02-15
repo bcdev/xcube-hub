@@ -839,6 +839,74 @@ components:
       type: object
     CubeGenConfig:
       type: object
+      required:
+        - input_configs
+        - cube_config
+        - output_config
+      properties:
+        input_configs:
+          type: array
+          items:
+            type: object
+            required:
+              - store_id
+              - data_id
+              - open_params
+            properties:
+              store_id:
+                type: string
+              data_id:
+                type: string
+              open_params:
+                type: object
+                properties:
+                  tile_size:
+                    type: array
+                    items:
+                      type: number
+        cube_configs:
+            type: object
+            required:
+              - variable_names
+              - crs
+              - spatial_res
+              - bbox
+              - time_range
+              - time_period
+            properties:
+              variable_names:
+                type: array
+                items:
+                  type: string
+              crs:
+                type: string
+              spatial_res:
+                type: number
+              bbox:
+                type: array
+                items:
+                  type: number
+                  minItems: 4
+                  maxItems: 4
+              time_range:
+                type: array
+                items:
+                  type: string
+                  format: date
+                  minItems: 1
+                  maxItems: 2
+              time_period:
+                type: string
+        output_config:
+          type: object
+          required:
+            - store_id
+            - store_params
+          properties:
+            store_id:
+              type: string
+            store_params:
+              type: object
     CubeGen:
       required:
       - cubegen_id
