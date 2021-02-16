@@ -1,15 +1,13 @@
 import connexion
-from xcube_hub.models.api_cubegen_response import ApiCubeGenResponse  # noqa: E501
-from xcube_hub.models.api_cubegens_response import ApiCubeGensResponse  # noqa: E501
-from xcube_hub.models.api_service_information_response import ApiServiceInformationResponse  # noqa: E501
-from xcube_hub.models.cost_config import CostConfig  # noqa: E501
-from xcube_hub.models.cubegen_config import CubeGenConfig  # noqa: E501
+from xcube_hub.models.api_service_information_response import ApiServiceInformationResponse
+from xcube_hub.models.cost_config import CostConfig
+from xcube_hub.models.cubegen_config import CubegenConfig
 
 
-def create_cubegen(body):  # noqa: E501
+def create_cubegen(body: CubegenConfig):
     """Create a cubegen
 
-    Create a cubegen  # noqa: E501
+    Create a cubegen
 
     :param body: CubeGen configuration
     :type body: dict | bytes
@@ -17,7 +15,7 @@ def create_cubegen(body):  # noqa: E501
     :rtype: ApiCubeGenResponse
     """
     if connexion.request.is_json:
-        body = CubeGenConfig.from_dict(connexion.request.get_json())  # noqa: E501
+        body = CubegenConfig.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

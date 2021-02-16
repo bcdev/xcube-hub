@@ -3,8 +3,8 @@ import os
 from abc import abstractmethod, ABC
 from json import JSONDecodeError
 from typing import Optional, Any
-from xcube_hub_old import api
-from xcube_hub_old.typedefs import JsonObject
+from xcube_hub import api
+from xcube_hub.typedefs import JsonObject
 
 
 class KeyValueStore(ABC):

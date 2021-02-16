@@ -1,3 +1,5 @@
+from typing import Optional
+
 import connexion
 import requests
 
@@ -68,19 +70,21 @@ def delete_user_by_user_id(user_id):  # noqa: E501
         return e.response
 
 
-def get_user_by_user_id(user_id):  # noqa: E501
+def get_user_by_user_id(user_id: str, token: Optional[str] = None):
     """Get users
 
     Get user info  # noqa: E501
 
     :param user_id: User ID
     :type user_id: str
+    :param token: Optional token
+    :type token: Optional[str]
 
     :rtype: ApiUserResponse
     """
 
     try:
-        token = connexion.request.headers["Authorization"]
+        token = token or connexion.request.headers["Authorization"]
         headers = {'Authorization': f"Bearer {token}"}
 
         r = requests.get(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', headers=headers)

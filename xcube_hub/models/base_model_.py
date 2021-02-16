@@ -1,5 +1,3 @@
-import datetime
-import json
 import pprint
 
 import six
@@ -11,9 +9,9 @@ T = typing.TypeVar('T')
 
 
 class Model(object):
-    # swaggerTypes: The key is attribute name and the
+    # openapiTypes: The key is attribute name and the
     # value is attribute type.
-    swagger_types = {}
+    openapi_types = {}
 
     # attributeMap: The key is attribute name and the
     # value is json key in definition.
@@ -31,7 +29,7 @@ class Model(object):
         """
         result = {}
 
-        for attr, _ in six.iteritems(self.swagger_types):
+        for attr, _ in six.iteritems(self.openapi_types):
             value = getattr(self, attr)
             if isinstance(value, list):
                 result[attr] = list(map(
@@ -50,15 +48,6 @@ class Model(object):
                 result[attr] = value
 
         return result
-
-    def to_json(self):
-        def handle_datetime(value: any):
-            if isinstance(value, datetime.datetime):
-                return value.__str__()
-            elif isinstance(value, type(None)):
-                return 'null'
-
-        json.dumps(self.to_dict(), default=handle_datetime)
 
     def to_str(self):
         """Returns the string representation of the model
