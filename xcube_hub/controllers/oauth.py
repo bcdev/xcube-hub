@@ -60,7 +60,7 @@ def oauth_token_post(body: OauthToken):
             }
 
             # TODO: Make secret secret
-            encoded_jwt = jwt.encode(claims, "thisisavreyspeialsecret", algorithm="HS256")
+            encoded_jwt = jwt.encode(claims, "", algorithm="HS256")
 
             return dict(access_token=encoded_jwt, token_type="bearer")
         except api.ApiError as e:
