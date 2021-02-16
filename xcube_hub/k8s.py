@@ -1,11 +1,11 @@
 from typing import Optional, Sequence, Union
 from kubernetes import client
 from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError, ApiValueError
-from xcube_hub_old.typedefs import JsonObject
+from xcube_hub.typedefs import JsonObject
 
-from xcube_hub_old import api
+from xcube_hub import api
 
-from xcube_hub_old.poller import poll_deployment_status
+from xcube_hub.poller import poll_deployment_status
 
 
 def create_pvc_object(user_id: str, storage: str = '2Gi'):

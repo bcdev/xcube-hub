@@ -27,7 +27,7 @@ setup(
     keywords=["OpenAPI", "xcube Generation API"],
     install_requires=REQUIRES,
     packages=find_packages(),
-    package_data={'': ['openapi/openapi.yaml']},
+    package_data={'': ['resources/openapi.yaml']},
     include_package_data=True,
     entry_points={
         'console_scripts': ['xcube_hub=xcube_hub.__main__:main']},

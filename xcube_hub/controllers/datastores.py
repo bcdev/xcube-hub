@@ -1,4 +1,3 @@
-from xcube_hub.models.api_datastores_response import ApiDatastoresResponse  # noqa: E501
 
 
 def get_data_store_by_datastore_id(datastore_id):  # noqa: E501

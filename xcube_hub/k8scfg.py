@@ -2,11 +2,11 @@ import os
 import threading
 
 
-class CfgError(ValueError):
+class K8sCfgError(ValueError):
     pass
 
 
-class Cfg:
+class K8sCfg:
     _config_lock = threading.Lock()
     _config_loaded = False
 

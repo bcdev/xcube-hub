@@ -10,8 +10,8 @@
 - get_datastores accepts now yaml files
 - wsgi will start a debug service if XCUBE_HUB_DEBUG is set to 1
 - sizeandcost accepts now a None enddate. Defaults to now()
-- Added a okteto service patch to allow external K8s services accessing the hub
-- Added an setup.sh to setup dependencies in okteto
+- Added an okteto service patch to allow external K8s services accessing the hub
+- Added a setup.sh to setup dependencies in okteto
 
 ### Fixes
 

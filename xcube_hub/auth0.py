@@ -1,6 +1,8 @@
 # Format error response and append status code.
 import hashlib
 import os
+
+import flask
 import requests
 from jose import jwt
 from requests import HTTPError
@@ -52,6 +54,26 @@ def raise_for_invalid_user_id(token: str, user_id: str):
         raise api.ApiError(403, "access denied: Insufficient privileges for this operation.")
 
     return True
+
+
+def get_token_auth_header():
+    """Obtains the access token from the Authorization Header
+    """
+    auth = flask.request.headers.get("Authorization", None)
+    if not auth:
+        raise api.ApiError(403, "Missing authorization header.")
+
+    parts = auth.split()
+
+    if parts[0].lower() != "bearer":
+        raise api.ApiError(401, "invalid_header: Authorization header must start with Bearer")
+    elif len(parts) == 1:
+        raise api.ApiError(401, "invalid_header: Token not found")
+    elif len(parts) > 2:
+        raise api.ApiError(401, "invalid_header: Authorization header must be Bearer token")
+
+    token = parts[1]
+    return token
 
 
 def get_management_token():

@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
+import os
 
 import connexion
 
 from xcube_hub import encoder
+from xcube_hub.k8scfg import K8sCfg
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
+
+
+app = connexion.App(__name__, specification_dir='./resources/')
 
 
 def main():
-    app = connexion.App(__name__, specification_dir='./openapi/')
+    K8sCfg.load_config_once()
+    cache_provider = os.environ.get('XCUBE_HUB_CACHE_PROVIDER', 'inmemory')
+    KeyValueDatabase.instance(provider=cache_provider)
+
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('openapi.yaml',
                 arguments={'title': 'xcube Generation API'},

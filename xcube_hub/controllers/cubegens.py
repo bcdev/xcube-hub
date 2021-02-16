@@ -1,10 +1,12 @@
 import connexion
-from xcube_hub.models.api_service_information_response import ApiServiceInformationResponse
-from xcube_hub.models.cost_config import CostConfig
-from xcube_hub.models.cubegen_config import CubegenConfig
+
+from xcube_hub import api
+from xcube_hub.controllers import costs, authorization
+from xcube_hub.k8s_controllers import cubegens
+from xcube_hub.typedefs import JsonObject
 
 
-def create_cubegen(body: CubegenConfig):
+def create_cubegen(body: JsonObject):
     """Create a cubegen
 
     Create a cubegen
@@ -14,69 +16,108 @@ def create_cubegen(body: CubegenConfig):
 
     :rtype: ApiCubeGenResponse
     """
-    if connexion.request.is_json:
-        body = CubegenConfig.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+
+    try:
+        if not connexion.request.is_json:
+            raise api.ApiError(400, "Not a json response")
+
+        user_id = authorization.get_user_id()
+
+        cubegen = cubegens.create(user_id=user_id, cfg=body)
+        return api.ApiResponse.success(cubegen)
+    except api.ApiError as e:
+        return e.response
 
 
-def delete_cubegen(cubegen_id):  # noqa: E501
+def delete_cubegen(cubegen_id):
     """Delete a cubegen
 
-    Delete a cubegen  # noqa: E501
+    Delete a cubegen
 
     :param cubegen_id: CubeGen ID
     :type cubegen_id: str
 
     :rtype: None
     """
-    return 'do some magic!'
+
+    try:
+        status = cubegens.delete_one(cubegen_id=cubegen_id)
+        return api.ApiResponse.success(status)
+    except api.ApiError as e:
+        return e.response
 
 
-def delete_cubegens():  # noqa: E501
+def delete_cubegens():
     """Delete all cubegens
 
-    Delete all cubegens  # noqa: E501
+    Delete all cubegens
 
 
     :rtype: None
     """
-    return 'do some magic!'
+
+    try:
+        user_id = authorization.get_user_id()
+        cubegens.delete_all(user_id=user_id)
+        return api.ApiResponse.success("Success")
+    except api.ApiError as e:
+        return e.response
 
 
-def get_costs(body):  # noqa: E501
+def get_costs(body):
     """Receive cost information for runnning a cubegen
 
-    Receive cost information of using a service  # noqa: E501
+    Receive cost information of using a service
 
     :param body: Cost configuration
     :type body: dict | bytes
 
     :rtype: ApiServiceInformationResponse
     """
-    if connexion.request.is_json:
-        body = CostConfig.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+
+    try:
+        if not connexion.request.is_json:
+            raise api.ApiError(400, "Not a json response")
+
+        result = costs.get_size_and_cost(processing_request=body)
+        return api.ApiResponse.success(result=result)
+    except api.ApiError as e:
+        return e.response
 
 
-def get_cubegen(cubegen_id):  # noqa: E501
+def get_cubegen(cubegen_id):
     """List specific cubegen
 
-    List specific cubegen  # noqa: E501
+    List specific cubegen
 
     :param cubegen_id: CubeGen ID
     :type cubegen_id: str
 
     :rtype: ApiCubeGenResponse
     """
-    return 'do some magic!'
+
+    try:
+        user_id = authorization.get_user_id()
+
+        res = cubegens.get(user_id=user_id, cubegen_id=cubegen_id)
+        return api.ApiResponse.success(res)
+    except api.ApiError as e:
+        return e.response
 
 
-def get_cubegens():  # noqa: E501
+def get_cubegens():
     """List cubegens
 
-    List user cubegens  # noqa: E501
+    List user cubegens
 
 
     :rtype: ApiCubeGensResponse
     """
-    return 'do some magic!'
+
+    try:
+        user_id = authorization.get_user_id()
+        res = cubegens.list(user_id=user_id)
+        return api.ApiResponse.success(res)
+    except api.ApiError as e:
+        return e.response
+

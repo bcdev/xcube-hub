@@ -1,0 +1,9 @@
+uwsgi:
+  http: 0.0.0.0:8080
+  wsgi-file: xcube_hub/__main__.py
+  callable: app
+  master: true
+  processes: 2
+  threads: 1
+  http-stats: true
+  stats: 0.0.0.0:5050

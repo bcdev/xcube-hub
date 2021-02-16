@@ -26,7 +26,7 @@ from typing import Optional
 
 import boto3
 
-from xcube_hub_old.typedefs import JsonObject
+from xcube_hub.typedefs import JsonObject
 
 DEFAULT_DB_BUCKET_NAME = 'eurodatacube'
 

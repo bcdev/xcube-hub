@@ -156,7 +156,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiServiceInformationResponse'
+                $ref: '#/components/schemas/ApiCostResponse'
           description: costs for using the service
         "400":
           content:
@@ -473,9 +473,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Client ID not found
-      security:
-      - oAuthorization:
-        - read:oauth_token
       summary: Get authorization token
       tags:
       - oauth
@@ -684,45 +681,40 @@ components:
           type: string
         output:
           type: object
-      required:
-      - message
       type: object
     ApiErrorResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiErrorResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiCubegenResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiCubegenResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiUserResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiUserResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
+    ApiCostResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+      properties:
+        result:
+            $ref: '#/components/schemas/Cost'
     ApiUsersResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiUsersResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiCubegensResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiCubegensResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiServiceInformationResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiServiceInformationResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiDatastoresResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiDatastoresResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiCallbackResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiCallbackResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiCallbacksResponse:
       allOf:
-      - $ref: '#/components/schemas/ApiResponse'
-      - $ref: '#/components/schemas/ApiCallbacksResponse_allOf'
+        - $ref: '#/components/schemas/ApiResponse'
     ApiOauthResponse:
       example:
         access_token: access_token
@@ -801,6 +793,61 @@ components:
     CostConfig:
       allOf:
       - $ref: '#/components/schemas/CubegenConfig'
+    Cost:
+      type: object
+      required:
+        - punits
+        - schema
+      properties:
+        punits:
+          type: object
+          required:
+            - total_count
+          properties:
+            input_count:
+              type: number
+            input_weight:
+              type: number
+            output_count:
+              type: number
+            output_weight:
+              type: number
+            total_count:
+              type: number
+        schema:
+          type: object
+          properties:
+            dims:
+              type: object
+              properties:
+                lat:
+                  type: number
+                lon:
+                  type: number
+                time:
+                  type: number
+            image_size:
+              type: array
+              items:
+                type: number
+                minItems: 2
+                maxItems: 2
+            num_bytes:
+              type: number
+            num_requests:
+              type: number
+            num_tiles:
+              type: array
+              items:
+                type: number
+            num_variables:
+              type: number
+            tile_size:
+              type: array
+              items:
+                type: number
+                minItems: 2
+                maxItems: 2
     CubegenConfig:
       example:
         output_config:
@@ -863,6 +910,11 @@ components:
         total_work: 0.8008281904610115
         message: message
         status: status
+      required:
+        - status
+        - total_worked
+        - worked
+      type: object
       properties:
         status:
           type: string
@@ -870,14 +922,10 @@ components:
           type: string
         values:
           type: object
-        total_work:
+        total_worked:
           type: number
         worked:
           type: number
-      required:
-      - message
-      - status
-      type: object
     Datastore:
       properties:
         id:

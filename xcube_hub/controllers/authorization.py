@@ -1,3 +1,6 @@
+import hashlib
+
+import connexion
 from jose import jwt
 
 from xcube_hub import api
@@ -33,11 +36,38 @@ def get_aud(token: str):
     return aud
 
 
+def get_email(token: str) -> str:
+    unverified_claims = jwt.get_unverified_claims(token)
+    email = unverified_claims.get("email")
+
+    if email is None:
+        raise api.ApiError(403, "access denied: No email.")
+
+    return email
+
+
+# noinspection InsecureHash
+def get_user_id() -> str:
+    if 'Authorization' not in connexion.request.headers:
+        raise api.ApiError(403, "Access denied.")
+
+    token = connexion.request.headers["Authorization"]
+    if "Bearer " in token:
+        token = token.replace("Bearer ", "")
+
+    email = get_email(token)
+
+    res = hashlib.md5(email.encode())
+
+    return 'a' + res.hexdigest()
+
+
 # noinspection PyPep8Naming
 def check_oAuthorization(token):
     permissions = get_permissions(token=token)
     aud = get_aud(token=token)
-    return {'scopes': permissions, 'aud': aud, 'uid': 'test_value'}
+    email = get_email(token=token)
+    return {'scopes': permissions, 'aud': aud, 'email': email}
 
 
 # noinspection PyPep8Naming
