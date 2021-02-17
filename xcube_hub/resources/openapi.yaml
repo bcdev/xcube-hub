@@ -136,11 +136,11 @@ paths:
       tags:
       - cubegens
       x-openapi-router-controller: xcube_hub.controllers.cubegens
-  /cubegens/info/costs:
+  /cubegens/info:
     post:
       description: |
         Receive cost information of using a service
-      operationId: get_costs
+      operationId: get_info
       requestBody:
         content:
           application/json:

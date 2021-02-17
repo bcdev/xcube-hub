@@ -59,7 +59,7 @@ def delete_cubegens():
         return e.response
 
 
-def get_costs(body):
+def get_info(body):
     """Receive cost information for runnning a cubegen
 
     Receive cost information of using a service
