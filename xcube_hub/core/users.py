@@ -6,6 +6,7 @@ from typing import Optional, Sequence
 import connexion
 import requests
 
+from xcube_hub import api
 from xcube_hub.controllers import punits
 from xcube_hub.models.user import User
 from xcube_hub.models.user_user_metadata import UserUserMetadata
@@ -19,23 +20,26 @@ def assign_role_to_user(user_name: str, role_id: str, token: Optional[str] = Non
         ]
     }
     headers = {'Authorization': f"Bearer {token}"}
-    requests.post(f'https://edc.eu.auth0.com/api/v2/roles/{role_id}/users', json=payload, headers=headers)
+    r = requests.post(f'https://edc.eu.auth0.com/api/v2/roles/{role_id}/users', json=payload, headers=headers)
+
+    if r.status_code == 404:
+        raise api.ApiError(404, "Role not found.")
+    if r.status_code < 200 or r.status_code >= 300:
+        raise api.ApiError(400, r.json())
 
 
-def get_role_by_user_id(user_id: str, token: str):
-    import requests
+def get_permissions_by_user_id(user_id: str, token: Optional[str] = None):
+    token = token or connexion.request.headers["Authorization"]
+
     headers = {'Authorization': f'Bearer {token}'}
-    res = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/roles", headers=headers)
-    res.raise_for_status()
-    return res.json()
+    r = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/permissions", headers=headers)
 
+    if r.status_code == 404:
+        raise api.ApiError(404, "User not found.")
+    if r.status_code < 200 or r.status_code >= 300:
+        raise api.ApiError(400, r.json())
 
-def get_permissions_by_user_id(user_id: str, token: str):
-    import requests
-    headers = {'Authorization': f'Bearer {token}'}
-    res = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/permissions", headers=headers)
-    res.raise_for_status()
-    return res.json()
+    return r.json()
 
 
 def get_permissions(permissions: Sequence) -> Sequence:
