@@ -7,10 +7,8 @@ import connexion
 import requests
 
 from xcube_hub import api
-from xcube_hub.controllers import punits
 from xcube_hub.core import users
 from xcube_hub.models.user import User
-from xcube_hub.models.user_user_metadata import UserUserMetadata
 
 
 def get_request_body_from_user(user: User):
@@ -45,20 +43,10 @@ def add_user(user_id, user):
 
         user = User.from_dict(connexion.request.get_json())
 
-        if user.user_metadata is None:
-            user.user_metadata = UserUserMetadata()
-
-        if user.user_metadata.punits is not None:
-            punits.add_punits(user_id=user_id,
-                              punits_request=dict(punits=dict(total_count=int(user.user_metadata.punits))))
-
-        client_id, client_secret = _create_secret()
-        user.user_metadata.client_id = client_id
-        user.user_metadata.client_secret = client_secret
+        user_dict = users.supplement_user(user_id=user_id, user=user)
 
         headers = {'Authorization': token}
 
-        user_dict = get_request_body_from_user(user=user)
         # created at and updated at not allowed in request
         r = requests.post('https://edc.eu.auth0.com/api/v2/users', json=user_dict, headers=headers)
 
