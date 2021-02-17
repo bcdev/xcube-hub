@@ -3,36 +3,35 @@
 from __future__ import absolute_import
 
 from flask import json
-from xcube_hub.models.cost_config import CostConfig  # noqa: E501
-from xcube_hub.models.cubegen_config import CubeGenConfig  # noqa: E501
+from xcube_hub.models.cost_config import CostConfig
 from test import BaseTestCase
+from xcube_hub.models.cubegen_config import CubegenConfig
 
 
 class TestCubeGensController(BaseTestCase):
     """CubeGensController integration test stubs"""
+    def setUp(self) -> None:
+        self._cubegen_id = "dfsvdsfvdv"
 
     def test_create_cubegen(self):
         """Test case for create_cubegen
 
         Create a cubegen
         """
-        body = CubeGenConfig()
+        body = CubegenConfig()
         response = self.client.open(
             '/api/v2/cubegens',
             method='PUT',
             data=json.dumps(body),
             content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_delete_cubegen(self):
         """Test case for delete_cubegen
 
         Delete a cubegen
         """
-        cubegen_id = 'cubegen_id_example'
-
-        response = self.client.open(f'/api/v2/cubegens/{cubegen_id}', method='DELETE')
+        response = self.client.open(f'/api/v2/cubegens/{self._cubegen_id}', method='DELETE')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_delete_cubegens(self):
@@ -40,16 +39,13 @@ class TestCubeGensController(BaseTestCase):
 
         Delete all cubegens
         """
-        response = self.client.open(
-            '/api/v2/cubegens',
-            method='DELETE')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open('/api/v2/cubegens', method='DELETE')
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_get_costs(self):
         """Test case for get_costs
 
-        Receive cost information for runnning a cubegen
+        Receive cost information for running a cubegen
         """
         body = CostConfig()
         response = self.client.open(
@@ -57,17 +53,14 @@ class TestCubeGensController(BaseTestCase):
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_get_cubegen(self):
         """Test case for get_cubegen
 
         List specific cubegen
         """
-        response = self.client.open(
-            '/api/v2/cubegens/{cubegen_id}'.format(cubegen_id='cubegen_id_example'),
-            method='GET')
+        response = self.client.open(f'/api/v2/cubegens/{self._cubegen_id}', method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
@@ -76,11 +69,8 @@ class TestCubeGensController(BaseTestCase):
 
         List cubegens
         """
-        response = self.client.open(
-            '/api/v2/cubegens',
-            method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open('/api/v2/cubegens', method='GET')
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
 
 if __name__ == '__main__':

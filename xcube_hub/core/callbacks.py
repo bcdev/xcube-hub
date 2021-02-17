@@ -1,6 +1,10 @@
+from typing import Optional
+
+import connexion
+
 from xcube_hub import api
 from xcube_hub.api import get_json_request_value
-from xcube_hub.auth0 import get_token_auth_header, get_user_info_from_auth0
+from xcube_hub.controllers import authorization
 from xcube_hub.controllers.costs import get_size_and_cost
 from xcube_hub.controllers.punits import subtract_punits
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -21,7 +25,7 @@ def get_callback(user_id: str, cubegen_id: str) -> JsonObject:
         raise api.ApiError(401, r.strerror)
 
 
-def put_callback(user_id: str, cubegen_id: str, value: AnyDict):
+def put_callback(user_id: str, cubegen_id: str, value: AnyDict, token: Optional[str] = None):
     if not value or 'state' not in value:
         raise api.ApiError(401, 'Callbacks need a "message" as well as a "state"')
 
@@ -45,29 +49,10 @@ def put_callback(user_id: str, cubegen_id: str, value: AnyDict):
             processing_request = kvdb.get(user_id + '__' + cubegen_id + '__cfg')
             punits_requests = get_size_and_cost(processing_request)
 
-            token = get_token_auth_header()
-            user_info = get_user_info_from_auth0(token, user_id)
-
-            try:
-                subtract_punits(user_id=user_info['name'], punits_request=punits_requests)
-            except KeyError as e:
-                raise api.ApiError(400, "System error: Could not substract processing units: " + str(e))
+            token = token or connexion.request.headers["Authorization"]
+            user_id = authorization.get_email(token=token)
+            subtract_punits(user_id=user_id, punits_request=punits_requests)
 
         return res
     except TimeoutError as e:
         raise api.ApiError(401, e.strerror)
-
-
-def delete_callback(user_id: str, cubegen_id: str):
-    try:
-        kv = KeyValueDatabase.instance()
-        res = kv.delete(user_id + '__' + cubegen_id)
-
-        if res == 0:
-            raise api.ApiError(404, 'Callback not found')
-        elif res is None:
-            raise api.ApiError(401, 'Deletion error')
-
-        return res
-    except TimeoutError as r:
-        raise api.ApiError(401, r.strerror)

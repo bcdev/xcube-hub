@@ -1,31 +1,21 @@
-from typing import Sequence
+import os
+
 
 import connexion
-import requests
 from jose import jwt
 
 from xcube_hub import auth0, api
-from xcube_hub.controllers import users
+from xcube_hub.core import users, oauth
 from xcube_hub.models.oauth_token import OauthToken
 from xcube_hub.models.user import User
 
 
-def get_user_by_credentials(token: str, client_id: str, client_secret: str) -> Sequence:
-    q = f'(app_metadata.client_id: "{client_id}") AND (app_metadata.client_secret: "{client_secret}")'
-    headers = {'Authorization': f"Bearer {token}"}
+def _maybe_raise_for_env(env_var: str):
+    env = os.environ.get(env_var, None)
+    if env is None:
+        raise api.ApiError(400, f"Env var {env_var} must be set")
 
-    r = requests.get('https://edc.eu.auth0.com/api/v2/users', params={'q': q}, headers=headers)
-
-    if r.status_code < 200 or r.status_code >= 300:
-        raise api.ApiError(400, r.json())
-
-    res = r.json()
-    if len(res) == 0:
-        raise api.ApiError(404, f"No users not found.")
-    if len(res) > 1:
-        raise api.ApiError(400, f"More than one user found.")
-
-    return res
+    return env
 
 
 def oauth_token_post(body: OauthToken):
@@ -38,30 +28,38 @@ def oauth_token_post(body: OauthToken):
 
     :rtype: ApiOAuthResponse
     """
-    if connexion.request.is_json:
-        try:
-            oauth_token = OauthToken.from_dict(body)
-            token = auth0.get_management_token()
-            res = get_user_by_credentials(token=token,
-                                          client_id=oauth_token.client_id,
-                                          client_secret=oauth_token.client_secret)
 
-            user = User.from_dict(res[0])
-            permissions = users.get_permissions_by_user_id(user.user_id, token=token)
-            permissions = users.get_permissions(permissions=permissions)
-            claims = {
-                "iss": "https://edc.eu.auth0.com/",
-                "aud": "https://xcube-gen.brockmann-consult.de/api/v1/",
-                "azp": "13eBlDZ6a4pQr5oY9gm26YZ1coRZTs3J",
-                "scope": permissions,
-                "gty": "client-credentials",
-                "email": user.email,
-                "permissions": permissions
-            }
+    try:
+        if not connexion.request.is_json:
+            raise api.ApiError(400, "System Error: Not a JSON request.")
 
-            # TODO: Make secret secret
-            encoded_jwt = jwt.encode(claims, "", algorithm="HS256")
+        aud = _maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
 
-            return dict(access_token=encoded_jwt, token_type="bearer")
-        except api.ApiError as e:
-            return e.response
+        oauth_token = OauthToken.from_dict(body)
+        token = auth0.get_management_token()
+        res = oauth.get_user_by_credentials(token=token,
+                                            client_id=oauth_token.client_id,
+                                            client_secret=oauth_token.client_secret)
+
+        user = User.from_dict(res[0])
+        permissions = users.get_permissions_by_user_id(user.user_id, token=token)
+        permissions = users.get_permissions(permissions=permissions)
+        claims = {
+            "iss": "https://edc.eu.auth0.com/",
+            "aud": aud,
+            "scope": permissions,
+            "gty": "client-credentials",
+            "email": user.email,
+            "permissions": permissions
+        }
+
+        secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
+
+        if len(secret) < 256:
+            raise api.ApiError(400, "System Error: Invalid token secret given.")
+
+        encoded_jwt = jwt.encode(claims, secret, algorithm="HS256")
+
+        return dict(access_token=encoded_jwt, token_type="bearer")
+    except api.ApiError as e:
+        return e.response

@@ -1,12 +1,17 @@
 # coding: utf-8
 
 from __future__ import absolute_import
+
+import json
 from datetime import date, datetime  # noqa: F401
 
 from typing import List, Dict  # noqa: F401
 
 from xcube_hub.models.base_model_ import Model
 from xcube_hub import util
+
+from xcube_hub.models.user_app_metadata import UserAppMetadata  # noqa: E501
+from xcube_hub.models.user_user_metadata import UserUserMetadata  # noqa: E501
 
 
 class User(Model):
@@ -35,9 +40,9 @@ class User(Model):
         :param family_name: The family_name of this User.  # noqa: E501
         :type family_name: str
         :param app_metadata: The app_metadata of this User.  # noqa: E501
-        :type app_metadata: object
+        :type app_metadata: UserAppMetadata
         :param user_metadata: The user_metadata of this User.  # noqa: E501
-        :type user_metadata: object
+        :type user_metadata: UserUserMetadata
         :param connection: The connection of this User.  # noqa: E501
         :type connection: str
         """
@@ -50,8 +55,8 @@ class User(Model):
             'updated_at': datetime,
             'given_name': str,
             'family_name': str,
-            'app_metadata': object,
-            'user_metadata': object,
+            'app_metadata': UserAppMetadata,
+            'user_metadata': UserUserMetadata,
             'connection': str
         }
 
@@ -87,10 +92,20 @@ class User(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The User of this User.  # noqa: E501
+        :return: The User of this User.
         :rtype: User
         """
         return util.deserialize_model(dikt, cls)
+
+    def to_json(self):
+        class DateTimeEncoder(json.JSONEncoder):
+            def default(self, o):
+                if isinstance(o, datetime):
+                    return o.isoformat()
+
+                return json.JSONEncoder.default(self, o)
+
+        return json.dumps(self.to_dict(), cls=DateTimeEncoder)
 
     @property
     def user_id(self):
@@ -266,7 +281,7 @@ class User(Model):
 
 
         :return: The app_metadata of this User.
-        :rtype: object
+        :rtype: UserAppMetadata
         """
         return self._app_metadata
 
@@ -276,7 +291,7 @@ class User(Model):
 
 
         :param app_metadata: The app_metadata of this User.
-        :type app_metadata: object
+        :type app_metadata: UserAppMetadata
         """
 
         self._app_metadata = app_metadata
@@ -287,7 +302,7 @@ class User(Model):
 
 
         :return: The user_metadata of this User.
-        :rtype: object
+        :rtype: UserUserMetadata
         """
         return self._user_metadata
 
@@ -297,7 +312,7 @@ class User(Model):
 
 
         :param user_metadata: The user_metadata of this User.
-        :type user_metadata: object
+        :type user_metadata: UserUserMetadata
         """
 
         self._user_metadata = user_metadata

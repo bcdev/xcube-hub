@@ -1,4 +1,5 @@
 import pprint
+from datetime import datetime
 
 import six
 import typing
@@ -44,6 +45,8 @@ class Model(object):
                     if hasattr(item[1], "to_dict") else item,
                     value.items()
                 ))
+            elif isinstance(value, datetime):
+                result[attr] = value.isoformat()
             else:
                 result[attr] = value
 

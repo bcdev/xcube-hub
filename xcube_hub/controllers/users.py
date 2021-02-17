@@ -1,23 +1,36 @@
-from typing import Optional, Sequence
+import secrets
+import uuid
+from datetime import datetime
+from typing import Optional
 
 import connexion
 import requests
 
 from xcube_hub import api
 from xcube_hub.controllers import punits
-from xcube_hub.models.user import User  # noqa: E501
+from xcube_hub.core import users
+from xcube_hub.models.user import User
+from xcube_hub.models.user_user_metadata import UserUserMetadata
 
 
 def get_request_body_from_user(user: User):
     res = user.to_dict()
+    for k, v in res.items():
+        res[k] = v.isoformat() if isinstance(v, datetime) else v
 
     return {k: v for k, v in res.items() if v is not None}
+
+
+def _create_secret(secrets_length: int = 32):
+    client_id = uuid.uuid4().hex
+    client_secret = secrets.token_urlsafe(secrets_length)
+    return client_id, client_secret
 
 
 def add_user(user_id, user):
     """Add user
 
-    Add user  # noqa: E501
+    Add user
 
     :param user_id: User ID
     :type user_id: str
@@ -27,26 +40,32 @@ def add_user(user_id, user):
     :rtype: ApiUserResponse
     """
 
-    if not connexion.request.is_json:
-        raise api.ApiError(400, "System error: body is not of type json.")
-
     try:
         token = connexion.request.headers["Authorization"]
 
-        user = User.from_dict(user)
+        user = User.from_dict(connexion.request.get_json())
 
-        punits.add_punits(user_id=user_id, punits_request={})
+        if user.user_metadata is None:
+            user.user_metadata = UserUserMetadata()
+
+        if user.user_metadata.punits is not None:
+            punits.add_punits(user_id=user_id,
+                              punits_request=dict(punits=dict(total_count=int(user.user_metadata.punits))))
+
+        client_id, client_secret = _create_secret()
+        user.user_metadata.client_id = client_id
+        user.user_metadata.client_secret = client_secret
 
         headers = {'Authorization': token}
 
-        user = get_request_body_from_user(user)
+        user_dict = get_request_body_from_user(user=user)
         # created at and updated at not allowed in request
-        r = requests.post('https://edc.eu.auth0.com/api/v2/users', json=user, headers=headers)
+        r = requests.post('https://edc.eu.auth0.com/api/v2/users', json=user_dict, headers=headers)
 
         if r.status_code < 200 or r.status_code >= 300:
             raise api.ApiError(400, r.json())
 
-        assign_role_to_user(user_name=user_id, role_id="rol_UV2cTM5brIezM6i6")
+        users.assign_role_to_user(user_name=user_id, role_id="rol_UV2cTM5brIezM6i6")
 
         return get_user_by_user_id(user_id=user_id)
     except api.ApiError as e:
@@ -153,9 +172,6 @@ def update_user_by_user_id(user_id, body=None):
 
     :rtype: ApiUserResponse
     """
-    if not connexion.request.is_json:
-        raise api.ApiError(400, "System error: body is not of type json.")
-
     try:
         token = connexion.request.headers["Authorization"]
 
@@ -167,6 +183,8 @@ def update_user_by_user_id(user_id, body=None):
 
         r = requests.patch(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', json=user, headers=headers)
 
+        if r.status_code == 404:
+            raise api.ApiError(404, "User not found.")
         if r.status_code < 200 or r.status_code >= 300:
             raise api.ApiError(400, r.json())
 
@@ -175,36 +193,55 @@ def update_user_by_user_id(user_id, body=None):
         return e.response
 
 
-def assign_role_to_user(user_name: str, role_id: str, token: Optional[str] = None):
-    token = token or connexion.request.headers["Authorization"]
-    payload = {
-        "roles": [
-            f"auth0|{user_name}"
-        ]
-    }
-    headers = {'Authorization': f"Bearer {token}"}
-    requests.post(f'https://edc.eu.auth0.com/api/v2/roles/{role_id}/users', payload=payload, headers=headers)
+def update_secrets_by_user_id(user_id: str):
+    try:
+        token = connexion.request.headers["Authorization"]
+
+        headers = {'Authorization': f"Bearer {token}"}
+        user = get_user_by_user_id(user_id=user_id, token=token)
+        user = user['result']
+
+        user_metadata = user.user_metadata or {}
+
+        client_id, client_secret = _create_secret()
+        user_metadata.client_id = client_id
+        user_metadata.client_secret = client_secret
+        body = {"user_metadata": user_metadata.to_dict()}
+
+        r = requests.patch(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', json=body, headers=headers)
+
+        if r.status_code == 404:
+            raise api.ApiError(404, "User not found.")
+        if r.status_code < 200 or r.status_code >= 300:
+            raise api.ApiError(400, r.json())
+
+        return get_user_by_user_id(user_id)
+    except api.ApiError as e:
+        return e.response
 
 
-def get_role_by_user_id(user_id: str, token: str):
-    import requests
-    headers = {'Authorization': f'Bearer {token}'}
-    res = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/roles", headers=headers)
-    res.raise_for_status()
-    return res.json()
+def delete_secrets_by_user_id(user_id: str):
+    try:
+        token = connexion.request.headers["Authorization"]
 
+        headers = {'Authorization': f"Bearer {token}"}
 
-def get_permissions_by_user_id(user_id: str, token: str):
-    import requests
-    headers = {'Authorization': f'Bearer {token}'}
-    res = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/permissions", headers=headers)
-    res.raise_for_status()
-    return res.json()
+        user = get_user_by_user_id(user_id=user_id, token=token)
+        user = user['result']
 
+        user_metadata = user.user_metadata or {}
 
-def get_permissions(permissions: Sequence) -> Sequence:
-    permissions_names = []
-    for permission in permissions:
-        permissions_names.append(permission['permission_name'])
+        user_metadata.client_id = None
+        user_metadata.client_secret = None
+        body = {"user_metadata": user_metadata.to_dict()}
 
-    return permissions_names
+        r = requests.patch(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', json=body, headers=headers)
+
+        if r.status_code == 404:
+            raise api.ApiError(404, "User not found.")
+        if r.status_code < 200 or r.status_code >= 300:
+            raise api.ApiError(400, r.json())
+
+        return get_user_by_user_id(user_id)
+    except api.ApiError as e:
+        return e.response

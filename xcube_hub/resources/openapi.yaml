@@ -11,12 +11,9 @@ info:
 servers:
 - url: https://xcube-gen.brockmann-consult.de/api/v2
 - url: https://stage.xcube-gen.brockmann-consult.de/api/v2
-- url: https://catehub.climate.esa.int/api/v2
-- url: https://stage.catehub.climate.esa.int/api/v2
 tags:
 - name: users
 - name: cubegens
-- name: datastores
 - name: callbacks
 - name: oauth
 paths:
@@ -67,7 +64,7 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - write:cubegen
+        - manage:cubegens
       summary: Delete all cubegens
       tags:
       - cubegens
@@ -97,7 +94,7 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - read:cubegens
+        - manage:cubegens
       summary: List cubegens
       tags:
       - cubegens
@@ -134,12 +131,12 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - write:cubegen
+        - manage:cubegens
       summary: Create a cubegen
       tags:
       - cubegens
       x-openapi-router-controller: xcube_hub.controllers.cubegens
-  /cubegens/costs:
+  /cubegens/info/costs:
     post:
       description: |
         Receive cost information of using a service
@@ -172,7 +169,7 @@ paths:
           description: no cost information found
       security:
       - oAuthorization:
-        - read:costs
+        - manage:cubegens
       summary: Receive cost information for runnning a cubegen
       tags:
       - cubegens
@@ -208,7 +205,7 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - write:cubegens
+        - manage:cubegens
       summary: Delete a cubegen
       tags:
       - cubegens
@@ -247,87 +244,12 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - read:cubegens
+        - manage:cubegens
       summary: List specific cubegen
       tags:
       - cubegens
       x-openapi-router-controller: xcube_hub.controllers.cubegens
   /cubegens/{cubegen_id}/callbacks:
-    delete:
-      description: Clear callbacks for a cubegen
-      operationId: delete_callbacks_by_cubegen_id
-      parameters:
-      - description: Cubegen ID
-        explode: false
-        in: path
-        name: cubegen_id
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
-      security:
-      - oAuthorization:
-        - write:callbacks
-      summary: Clear callbacks for a cubegen
-      tags:
-      - callbacks
-      x-openapi-router-controller: xcube_hub.controllers.callbacks
-    get:
-      description: Get list of callbacks for a cubegen
-      operationId: get_callbacks_by_cubegen_id
-      parameters:
-      - description: Cubegen ID
-        explode: false
-        in: path
-        name: cubegen_id
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/ApiCallbacksResponse'
-                type: array
-                x-content-type: application/json
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
-      security:
-      - oAuthorization:
-        - read:callbacks
-      summary: Get list of callbacks for a cubegen
-      tags:
-      - callbacks
-      x-openapi-router-controller: xcube_hub.controllers.callbacks
     put:
       description: Add a callbacks for a cubegen
       operationId: put_callback_by_cubegen_id
@@ -370,80 +292,11 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - write:callbacks
+        - manage:callbacks
       summary: Add a callback for a cubegen
       tags:
       - callbacks
       x-openapi-router-controller: xcube_hub.controllers.callbacks
-  /datastores:
-    get:
-      description: Get a list of datastores
-      operationId: get_data_stores
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiDatastoresResponse'
-          description: Datastore list
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: No datastores found
-      security:
-      - oAuthorization:
-        - read:datastores
-      summary: Get a list of datastores
-      tags:
-      - datastores
-      x-openapi-router-controller: xcube_hub.controllers.datastores
-  /datastores/{datastore_id}:
-    get:
-      description: Get info of a datastore
-      operationId: get_data_store_by_datastore_id
-      parameters:
-      - description: Datastore ID
-        explode: false
-        in: path
-        name: datastore_id
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiDatastoresResponse'
-          description: Datastore list
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: No datastores found
-      security:
-      - oAuthorization:
-        - read:datastores
-      summary: Get a datastore
-      tags:
-      - datastores
-      x-openapi-router-controller: xcube_hub.controllers.datastores
   /oauth/token:
     post:
       description: Get authorization token
@@ -503,7 +356,7 @@ paths:
           description: No users found
       security:
       - oAuthorization:
-        - read:users
+        - manage:users
       summary: Get all users by service name
       tags:
       - users
@@ -539,7 +392,7 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - delete:users
+        - manage:users
       summary: Delete user
       tags:
       - users
@@ -578,7 +431,7 @@ paths:
           description: User not found in the service
       security:
       - oAuthorization:
-        - read:users
+        - manage:users
       summary: Get users
       tags:
       - users
@@ -623,7 +476,7 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - update:users
+        - manage:users
       summary: Update user
       tags:
       - users
@@ -668,10 +521,85 @@ paths:
           description: User not found in the service
       security:
       - oAuthorization:
-        - create:users
+        - manage:users
       summary: Add user
       tags:
       - users
+      x-openapi-router-controller: xcube_hub.controllers.users
+  /users/{user_id}/secrets:
+    delete:
+      description: |
+        Remove secrets from a user
+      operationId: delete_secrets_by_user_id
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          description: Secrets deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+      security:
+        - oAuthorization:
+            - manage:users
+      summary: Delete user secrets
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
+    patch:
+      description: |
+        Refresh users credentials
+      operationId: update_secrets_by_user_id
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+          description: User secrets refreshed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+      security:
+        - oAuthorization:
+            - manage:users
+      summary: Update user
+      tags:
+        - users
       x-openapi-router-controller: xcube_hub.controllers.users
 components:
   schemas:
@@ -685,6 +613,12 @@ components:
     ApiErrorResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - traceback
+          properties:
+            traceback:
+              type: string
     ApiCubegenResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -706,13 +640,7 @@ components:
     ApiServiceInformationResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
-    ApiDatastoresResponse:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponse'
     ApiCallbackResponse:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponse'
-    ApiCallbacksResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
     ApiOauthResponse:
@@ -730,7 +658,7 @@ components:
       type: object
     User:
       example:
-        user_metadata: '{}'
+        user_metadata: {"client_id": "myid", "client_secret": "mysecret", "punits": 10000}
         updated_at: 2000-01-23T04:56:07.000+00:00
         user_id: user_id
         nickname: nickname
@@ -740,7 +668,7 @@ components:
         family_name: family_name
         email: email
         username: username
-        app_metadata: '{}'
+        app_metadata: {"geodb_role": "myrole"}
       properties:
         user_id:
           type: string
@@ -762,8 +690,18 @@ components:
           type: string
         app_metadata:
           type: object
+          properties:
+            geodb_role:
+              type: string
         user_metadata:
           type: object
+          properties:
+            client_id:
+              type: string
+            client_secret:
+              type: string
+            punits:
+              type: number
         connection:
           type: string
       type: object
@@ -893,16 +831,6 @@ components:
       - input_configs
       - output_config
       type: object
-    Cubegen:
-      properties:
-        cubegen_id:
-          type: string
-        status:
-          $ref: '#/components/schemas/CubegenStatus'
-      required:
-      - cubegen_id
-      - status
-      type: object
     Callback:
       example:
         worked: 6.027456183070403
@@ -926,61 +854,6 @@ components:
           type: number
         worked:
           type: number
-    Datastore:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        datasets:
-          items:
-            $ref: '#/components/schemas/Dataset'
-          type: array
-      required:
-      - datasets
-      - id
-      - name
-      type: object
-    Dataset:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        variables:
-          items:
-            $ref: '#/components/schemas/Variable'
-          type: array
-      required:
-      - id
-      - name
-      - variables
-      type: object
-    Variable:
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        units:
-          type: string
-        dtype:
-          type: string
-        spatialRes:
-          type: number
-        temporalRes:
-          type: string
-        description:
-          type: string
-      required:
-      - description
-      - dtype
-      - id
-      - name
-      - spatialRes
-      - temporalRes
-      - units
-      type: object
     CubegenStatus:
       properties:
         logs:
@@ -1029,73 +902,6 @@ components:
       - client_secret
       - grant_type
       - user_name
-      type: object
-    ApiErrorResponse_allOf:
-      properties:
-        traceback:
-          type: object
-      type: object
-    ApiCubegenResponse_allOf:
-      properties:
-        result:
-          $ref: '#/components/schemas/Cubegen'
-      required:
-      - result
-      type: object
-    ApiUserResponse_allOf:
-      properties:
-        result:
-          $ref: '#/components/schemas/User'
-      required:
-      - result
-      type: object
-    ApiUsersResponse_allOf:
-      properties:
-        result:
-          items:
-            $ref: '#/components/schemas/User'
-          type: array
-      required:
-      - result
-      type: object
-    ApiCubegensResponse_allOf:
-      properties:
-        result:
-          items:
-            $ref: '#/components/schemas/Cubegen'
-          type: array
-      required:
-      - result
-      type: object
-    ApiServiceInformationResponse_allOf:
-      properties:
-        result:
-          $ref: '#/components/schemas/ServiceInformation'
-      required:
-      - result
-      type: object
-    ApiDatastoresResponse_allOf:
-      properties:
-        result:
-          $ref: '#/components/schemas/Datastore'
-      required:
-      - result
-      type: object
-    ApiCallbackResponse_allOf:
-      properties:
-        result:
-          $ref: '#/components/schemas/Callback'
-      required:
-      - result
-      type: object
-    ApiCallbacksResponse_allOf:
-      properties:
-        result:
-          items:
-            $ref: '#/components/schemas/Callback'
-          type: array
-      required:
-      - result
       type: object
     CubegenConfig_open_params:
       example:

@@ -16,8 +16,7 @@ class TestDefaultController(BaseTestCase):
         response = self.client.open(
             '/api/v2/',
             method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
 
 if __name__ == '__main__':

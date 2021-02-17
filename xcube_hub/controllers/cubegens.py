@@ -1,8 +1,6 @@
-import connexion
-
 from xcube_hub import api
 from xcube_hub.controllers import costs, authorization
-from xcube_hub.k8s_controllers import cubegens
+from xcube_hub.core import cubegens
 from xcube_hub.typedefs import JsonObject
 
 
@@ -18,9 +16,6 @@ def create_cubegen(body: JsonObject):
     """
 
     try:
-        if not connexion.request.is_json:
-            raise api.ApiError(400, "Not a json response")
-
         user_id = authorization.get_user_id()
 
         cubegen = cubegens.create(user_id=user_id, cfg=body)
@@ -76,9 +71,6 @@ def get_costs(body):
     """
 
     try:
-        if not connexion.request.is_json:
-            raise api.ApiError(400, "Not a json response")
-
         result = costs.get_size_and_cost(processing_request=body)
         return api.ApiResponse.success(result=result)
     except api.ApiError as e:
@@ -98,7 +90,6 @@ def get_cubegen(cubegen_id):
 
     try:
         user_id = authorization.get_user_id()
-
         res = cubegens.get(user_id=user_id, cubegen_id=cubegen_id)
         return api.ApiResponse.success(res)
     except api.ApiError as e:

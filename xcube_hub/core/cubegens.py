@@ -10,7 +10,7 @@ from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api
 from xcube_hub.auth0 import get_token_auth_header
-from xcube_hub.k8s_controllers import user_namespaces
+from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error
 
