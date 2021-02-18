@@ -33,6 +33,9 @@ def put_callback(user_id: str, cubegen_id: str, value: AnyDict, token: Optional[
         print(f"Calling progress for {cubegen_id}.")
         kvdb = KeyValueDatabase.instance()
         kv = kvdb.get(user_id + '__' + cubegen_id)
+        if not kv:
+            kvdb.set(user_id + '__' + cubegen_id, value)
+
         if kv and 'progress' in kv:
             kv['progress'].append(value)
         if kv and 'progress' not in kv:

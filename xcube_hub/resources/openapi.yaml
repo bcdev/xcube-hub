@@ -292,7 +292,7 @@ paths:
           description: User not found
       security:
       - oAuthorization:
-        - manage:callbacks
+        - manage:cubegens
       summary: Add a callback for a cubegen
       tags:
       - callbacks

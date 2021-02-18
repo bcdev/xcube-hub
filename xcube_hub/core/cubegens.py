@@ -114,7 +114,7 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[Any
 
         job_id = f"{user_id}-{str(uuid.uuid4())[:18]}"
 
-        cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{user_id}/{job_id}/callback',
+        cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{job_id}/callbacks',
                                       access_token=token or get_token_auth_header())
 
         cfg['output_config']['data_id'] = job_id + '.zarr'
