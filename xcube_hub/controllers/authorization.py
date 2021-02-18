@@ -1,10 +1,11 @@
 import hashlib
 
 import connexion
-from jose import jwt
+from jose import jwt, ExpiredSignatureError
+from jwt import InvalidAlgorithmError
 
 from xcube_hub import api
-
+from xcube_hub.controllers.oauth import _maybe_raise_for_env
 
 """
 controller generated to handled auth operation described at:
@@ -64,6 +65,12 @@ def get_user_id() -> str:
 
 # noinspection PyPep8Naming
 def check_oAuthorization(token):
+    try:
+        secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
+        jwt.decode(token, secret)
+    except (InvalidAlgorithmError, ExpiredSignatureError):
+        return {'scopes': []}
+
     permissions = get_permissions(token=token)
     aud = get_aud(token=token)
     email = get_email(token=token)

@@ -894,14 +894,11 @@ components:
           type: string
         grant_type:
           type: string
-        user_name:
-          type: string
       required:
       - audience
       - client_id
       - client_secret
       - grant_type
-      - user_name
       type: object
     CubegenConfig_open_params:
       example:

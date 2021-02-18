@@ -1,5 +1,6 @@
+import datetime
 import os
-
+from typing import Dict
 
 import connexion
 from jose import jwt
@@ -16,6 +17,19 @@ def _maybe_raise_for_env(env_var: str):
         raise api.ApiError(400, f"Env var {env_var} must be set")
 
     return env
+
+
+def _create_token(claims: Dict, days_valid: int = 90):
+    secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
+
+    if len(secret) < 256:
+        raise api.ApiError(400, "System Error: Invalid token secret given.")
+
+    exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+
+    claims['exp'] = exp
+
+    return jwt.encode(claims, secret, algorithm="HS256")
 
 
 def oauth_token_post(body: OauthToken):
@@ -53,12 +67,7 @@ def oauth_token_post(body: OauthToken):
             "permissions": permissions
         }
 
-        secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
-
-        if len(secret) < 256:
-            raise api.ApiError(400, "System Error: Invalid token secret given.")
-
-        encoded_jwt = jwt.encode(claims, secret, algorithm="HS256")
+        encoded_jwt = _create_token(claims)
 
         return dict(access_token=encoded_jwt, token_type="bearer")
     except api.ApiError as e:

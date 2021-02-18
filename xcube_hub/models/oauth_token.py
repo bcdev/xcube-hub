@@ -15,7 +15,7 @@ class OauthToken(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, client_id=None, client_secret=None, audience=None, grant_type=None, user_name=None):  # noqa: E501
+    def __init__(self, client_id=None, client_secret=None, audience=None, grant_type=None):
         """OauthToken - a model defined in OpenAPI
 
         :param client_id: The client_id of this OauthToken.  # noqa: E501
@@ -26,15 +26,12 @@ class OauthToken(Model):
         :type audience: str
         :param grant_type: The grant_type of this OauthToken.  # noqa: E501
         :type grant_type: str
-        :param user_name: The user_name of this OauthToken.  # noqa: E501
-        :type user_name: str
         """
         self.openapi_types = {
             'client_id': str,
             'client_secret': str,
             'audience': str,
             'grant_type': str,
-            'user_name': str
         }
 
         self.attribute_map = {
@@ -42,14 +39,12 @@ class OauthToken(Model):
             'client_secret': 'client_secret',
             'audience': 'audience',
             'grant_type': 'grant_type',
-            'user_name': 'user_name'
         }
 
         self._client_id = client_id
         self._client_secret = client_secret
         self._audience = audience
         self._grant_type = grant_type
-        self._user_name = user_name
 
     @classmethod
     def from_dict(cls, dikt) -> 'OauthToken':
@@ -153,26 +148,3 @@ class OauthToken(Model):
             raise ValueError("Invalid value for `grant_type`, must not be `None`")  # noqa: E501
 
         self._grant_type = grant_type
-
-    @property
-    def user_name(self):
-        """Gets the user_name of this OauthToken.
-
-
-        :return: The user_name of this OauthToken.
-        :rtype: str
-        """
-        return self._user_name
-
-    @user_name.setter
-    def user_name(self, user_name):
-        """Sets the user_name of this OauthToken.
-
-
-        :param user_name: The user_name of this OauthToken.
-        :type user_name: str
-        """
-        if user_name is None:
-            raise ValueError("Invalid value for `user_name`, must not be `None`")  # noqa: E501
-
-        self._user_name = user_name

@@ -30,7 +30,7 @@ setup(
     package_data={'': ['resources/openapi.yaml']},
     include_package_data=True,
     entry_points={
-        'console_scripts': ['openapi_server=xcube_hub.__main__:main']},
+        'console_scripts': ['xcube-hub=xcube_hub.__main__:main']},
     long_description="""\
     Restful API for handling xcube Services
     """

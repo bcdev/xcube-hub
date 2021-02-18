@@ -35,7 +35,7 @@ class TestOauthController(BaseTestCase):
         m.get('https://edc.eu.auth0.com/api/v2/users', json=[{'user_id': 'auth0fred', 'email': 'bla'}])
         m.get(f"https://edc.eu.auth0.com/api/v2/users/auth0fred/permissions", json=[{'permission_name': 'test_1'}, ])
 
-        body = OauthToken(client_id='abc', client_secret='def', audience='https://test', user_name='df',
+        body = OauthToken(client_id='abc', client_secret='def', audience='https://test',
                           grant_type='client-credentials')
 
         response = self.client.open('/api/v2/oauth/token', method='POST', data=json.dumps(body),
@@ -53,6 +53,15 @@ class TestOauthController(BaseTestCase):
         data = response.json
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual("Env var XCUBE_HUB_OAUTH_AUD must be set", data['message'])
+
+        os.environ['XCUBE_HUB_OAUTH_AUD'] = 'https://test'
+        os.environ['XCUBE_HUB_TOKEN_SECRET'] = 'sdfvgd'
+        response = self.client.open('/api/v2/oauth/token', method='POST', data=json.dumps(body),
+                                    content_type='application/json')
+
+        data = response.json
+        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
+        self.assertEqual("System Error: Invalid token secret given.", data['message'])
 
 
 if __name__ == '__main__':
