@@ -2,7 +2,7 @@ import json
 import os
 import uuid
 from pprint import pprint
-from typing import Union, Sequence
+from typing import Union, Sequence, Optional
 
 from kubernetes import client
 from kubernetes.client import ApiException
@@ -100,18 +100,22 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict) -> client.V1Job:
     return cubegen
 
 
-def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
+def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[AnyDict, Error]:
     try:
+        if 'input_config' not in cfg and 'input_configs' not in cfg:
+            raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")
+
         xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
         user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
         callback_uri = os.getenv('XCUBE_HUB_CALLBACK_URL', False)
+
         if callback_uri is False:
             raise api.ApiError(400, "XCUBE_HUB_CALLBACK_URL must be given")
 
         job_id = f"{user_id}-{str(uuid.uuid4())[:18]}"
 
-        cfg['callback_config'] = dict(api_uri=callback_uri + f'/jobs/{user_id}/{job_id}/callback',
-                                      access_token=get_token_auth_header())
+        cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{user_id}/{job_id}/callback',
+                                      access_token=token or get_token_auth_header())
 
         cfg['output_config']['data_id'] = job_id + '.zarr'
 
@@ -124,7 +128,7 @@ def create(user_id: str, cfg: AnyDict) -> Union[AnyDict, Error]:
 
         return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
     except (ApiException, MaxRetryError) as e:
-        raise api.ApiError(400, str(e))
+        raise api.ApiError(400, message=str(e))
 
 
 # noinspection PyShadowingBuiltins
@@ -201,7 +205,7 @@ def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
 def delete_all(user_id: str) -> Union[AnyDict, Error]:
     try:
         jobs = list(user_id=user_id)
-        for job in jobs:
+        for job in jobs['result']:
             delete_one(job['cubegen_id'])
         return api.ApiResponse.success("SUCCESS")
     except (ApiException, MaxRetryError) as e:

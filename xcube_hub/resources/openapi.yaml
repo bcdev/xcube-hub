@@ -330,6 +330,33 @@ paths:
       tags:
       - oauth
       x-openapi-router-controller: xcube_hub.controllers.oauth
+  /stores:
+    get:
+      description: Get stores
+      operationId: get_stores
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiStoresResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: No stores found
+      summary: Get stores
+      tags:
+        - stores
+      x-openapi-router-controller: xcube_hub.controllers.stores
   /users:
     get:
       description: |
@@ -643,6 +670,15 @@ components:
     ApiCallbackResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
+    ApiStoresResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - result
+          properties:
+            result:
+              $ref: '#/components/schemas/Stores'
     ApiOauthResponse:
       example:
         access_token: access_token
@@ -727,6 +763,8 @@ components:
           type: string
         runLocal:
           type: boolean
+      type: object
+    Stores:
       type: object
     CostConfig:
       allOf:
@@ -820,31 +858,35 @@ components:
       properties:
         input_configs:
           items:
-            $ref: '#/components/schemas/CubegenConfig_input_configs'
+            $ref: '#/components/schemas/CubegenConfigInputConfig'
           type: array
+        input_config:
+          $ref: '#/components/schemas/CubegenConfigInputConfig'
         cube_config:
-          $ref: '#/components/schemas/CubegenConfig_cube_config'
+          $ref: '#/components/schemas/CubegenConfigCubeConfig'
         output_config:
-          $ref: '#/components/schemas/CubegenConfig_output_config'
+          $ref: '#/components/schemas/CubegenConfigOutputConfig'
       required:
-      - cube_config
-      - input_configs
-      - output_config
+        - cube_config
+        - output_config
       type: object
     Callback:
       example:
         worked: 6.027456183070403
         values: '{}'
-        total_work: 0.8008281904610115
+        total_worked: 0.8008281904610115
         message: message
-        status: status
+        state: status
       required:
-        - status
+        - state
+        - sender
         - total_worked
         - worked
       type: object
       properties:
-        status:
+        state:
+          type: object
+        sender:
           type: string
         message:
           type: string
@@ -900,7 +942,7 @@ components:
       - client_secret
       - grant_type
       type: object
-    CubegenConfig_open_params:
+    CubegenConfigOpenParams:
       example:
         tile_size:
         - 0.8008281904610115
@@ -911,27 +953,27 @@ components:
             type: number
           type: array
       type: object
-    CubegenConfig_input_configs:
+    CubegenConfigInputConfig:
       example:
         store_id: store_id
         data_id: data_id
         open_params:
           tile_size:
-          - 0.8008281904610115
-          - 0.8008281904610115
+            - 0.8008281904610115
+            - 0.8008281904610115
       properties:
         store_id:
           type: string
         data_id:
           type: string
         open_params:
-          $ref: '#/components/schemas/CubegenConfig_open_params'
+          $ref: '#/components/schemas/CubegenConfigOpenParams'
       required:
-      - data_id
-      - open_params
-      - store_id
+        - data_id
+        - open_params
+        - store_id
       type: object
-    CubegenConfig_cube_config:
+    CubegenConfigCubeConfig:
       example:
         spatial_res: 6.027456183070403
         crs: crs
@@ -977,7 +1019,7 @@ components:
       - time_range
       - variable_names
       type: object
-    CubegenConfig_output_config:
+    CubegenConfigOutputConfig:
       example:
         store_id: store_id
         store_params: '{}'

@@ -4,10 +4,14 @@ from __future__ import absolute_import
 
 import datetime
 
+import boto3
 import requests_mock
 from flask import json
-from jose import jwt
+from moto import mock_s3
 
+from test.controllers.utils import create_test_token
+from xcube_hub.controllers.punits import add_punits
+from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
 from xcube_hub.models.user import User
 from test import BaseTestCase
 from xcube_hub.models.user_app_metadata import UserAppMetadata
@@ -19,24 +23,12 @@ DEFAULT_API_IDENTIFIER = 'https://xcube-gen.brockmann-consult.de/api/v2/'
 API_AUTH_IDENTIFIER = 'https://edc.eu.auth0.com/api/v2/'
 
 
-def _generate_token():
-    claims = {
-        "iss": "https://testiss/",
-        "aud": 'https://test',
-        "scope": ["manage:users", ],
-        "gty": "client-credentials",
-        "email": "bla@gmail.com",
-        "permissions": ["manage:users", ]
-    }
-
-    return jwt.encode(claims, "lkvnsdfvnsdfövndsfvnsdfvndsvnsdflvndf", algorithm="HS256")
-
-
 class TestUsersController(BaseTestCase):
     """UsersController integration test stubs"""
 
     def setUp(self):
-        self._token = _generate_token()
+        self._claims, self._token = create_test_token()
+
         self._user = User(
             user_id='auth0|kalleblomquist',
             email='kalleblomquist@gmail.com',
@@ -51,12 +43,21 @@ class TestUsersController(BaseTestCase):
             connection="Init",
         )
 
+    @mock_s3
     @requests_mock.Mocker()
     def test_add_user(self, m):
         """Test case for add_user
 
         Add user
         """
+        s3 = boto3.client('s3')
+        s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
+        punits_request_1 = dict(punits=dict(total_count=50000,
+                                            user_name='heinrich@gmail.com',
+                                            price_amount=200,
+                                            price_currency='€'))
+        add_punits('heinrich@gmail.com', punits_request_1)
+
         m.post(f'https://edc.eu.auth0.com/api/v2/roles/rol_UV2cTM5brIezM6i6/users', json={})
         body = self._user
         m.post("https://edc.eu.auth0.com/oauth/token", json={'access_token': 'sdfvdfv'})

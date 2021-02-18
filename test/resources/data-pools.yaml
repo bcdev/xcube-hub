@@ -1,0 +1,9 @@
+cds:
+  title: C3S Climate Data Store (CDS)
+  description: Selected datasets from the Copernicus CDS API
+  store_id: cds
+
+cciodp:
+  title: ESA Climate Change Initiative (CCI)
+  description: Data from the ESA CCI Open Data Portal API
+  store_id: cciodp

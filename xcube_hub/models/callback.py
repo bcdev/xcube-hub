@@ -15,40 +15,45 @@ class Callback(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, status=None, message=None, values=None, total_work=None, worked=None):  # noqa: E501
+    def __init__(self, state=None, sender=None, message=None, values=None, total_worked=None, worked=None):  # noqa: E501
         """Callback - a model defined in OpenAPI
 
-        :param status: The status of this Callback.  # noqa: E501
-        :type status: str
+        :param state: The state of this Callback.  # noqa: E501
+        :type state: object
+        :param sender: The state of this Callback.  # noqa: E501
+        :type sender: str
         :param message: The message of this Callback.  # noqa: E501
         :type message: str
         :param values: The values of this Callback.  # noqa: E501
         :type values: object
-        :param total_work: The total_work of this Callback.  # noqa: E501
-        :type total_work: float
+        :param total_worked: The total_work of this Callback.  # noqa: E501
+        :type total_worked: float
         :param worked: The worked of this Callback.  # noqa: E501
         :type worked: float
         """
         self.openapi_types = {
-            'status': str,
+            'state': object,
+            'sender': str,
             'message': str,
             'values': object,
-            'total_work': float,
+            'total_worked': float,
             'worked': float
         }
 
         self.attribute_map = {
-            'status': 'status',
+            'state': 'state',
+            'sender': 'sender',
             'message': 'message',
             'values': 'values',
-            'total_work': 'total_work',
+            'total_worked': 'total_worked',
             'worked': 'worked'
         }
 
-        self._status = status
+        self._state = state
+        self._sender = sender
         self._message = message
         self._values = values
-        self._total_work = total_work
+        self._total_worked = total_worked
         self._worked = worked
 
     @classmethod
@@ -63,27 +68,50 @@ class Callback(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def status(self):
-        """Gets the status of this Callback.
+    def state(self):
+        """Gets the state of this Callback.
 
 
-        :return: The status of this Callback.
+        :return: The state of this Callback.
+        :rtype: object
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        """Sets the state of this Callback.
+
+
+        :param state: The state of this Callback.
+        :type state: object
+        """
+        if state is None:
+            raise ValueError("Invalid value for `state`, must not be `None`")  # noqa: E501
+
+        self._state = state
+
+    @property
+    def sender(self):
+        """Gets the state of this Callback.
+
+
+        :return: The state of this Callback.
         :rtype: str
         """
-        return self._status
+        return self._sender
 
-    @status.setter
-    def status(self, status):
-        """Sets the status of this Callback.
+    @sender.setter
+    def sender(self, sender):
+        """Sets the state of this Callback.
 
 
-        :param status: The status of this Callback.
-        :type status: str
+        :param sender: The state of this Callback.
+        :type sender: str
         """
-        if status is None:
-            raise ValueError("Invalid value for `status`, must not be `None`")  # noqa: E501
+        if sender is None:
+            raise ValueError("Invalid value for `sender`, must not be `None`")  # noqa: E501
 
-        self._status = status
+        self._sender = sender
 
     @property
     def message(self):
@@ -130,25 +158,25 @@ class Callback(Model):
         self._values = values
 
     @property
-    def total_work(self):
+    def total_worked(self):
         """Gets the total_work of this Callback.
 
 
         :return: The total_work of this Callback.
         :rtype: float
         """
-        return self._total_work
+        return self._total_worked
 
-    @total_work.setter
-    def total_work(self, total_work):
+    @total_worked.setter
+    def total_worked(self, total_worked):
         """Sets the total_work of this Callback.
 
 
-        :param total_work: The total_work of this Callback.
-        :type total_work: float
+        :param total_worked: The total_work of this Callback.
+        :type total_worked: float
         """
 
-        self._total_work = total_work
+        self._total_worked = total_worked
 
     @property
     def worked(self):

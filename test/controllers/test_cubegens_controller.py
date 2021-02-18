@@ -2,27 +2,90 @@
 
 from __future__ import absolute_import
 
-from flask import json
-from xcube_hub.models.cost_config import CostConfig
+from dotenv import load_dotenv
+
+from test.controllers.utils import create_test_token
 from test import BaseTestCase
+from xcube_hub.core import cubegens
+from xcube_hub.core.validations import validate_env
+from xcube_hub.k8scfg import K8sCfg
 from xcube_hub.models.cubegen_config import CubegenConfig
+
+
+CUBEGEN_TEST = {
+    "input_configs": [
+        {
+            "store_id": "@sentinelhub_codede",
+            "data_id": "S3OLCI",
+            "open_params": {
+                "tile_size": [
+                    1000,
+                    1000
+                ]
+            }
+        }
+    ],
+    "cube_config": {
+        "variable_names": [
+            "B01"
+        ],
+        "crs": "http://www.opengis.net/def/crs/EPSG/0/4326",
+        "spatial_res": 0.01,
+        "bbox": [
+            -180,
+            -85,
+            180,
+            85
+        ],
+        "time_range": [
+            "2016-04-17",
+            "2016-04-20"
+        ],
+        "time_period": "1D"
+    },
+    "output_config": {
+        "store_id": "s3",
+        "store_params": {
+            "bucket_name": "eurodatacube-test",
+        }
+    }
+}
+
+TEST_CLAIMS = {
+    "iss": "https://edc.eu.auth0.com/",
+    "aud": 'https://test',
+    "scope": ['manage:callbacks', ],
+    "gty": "client-credentials",
+    "email": 'heinrich@gmail.com',
+    "permissions": ['manage:callbacks', ]
+}
 
 
 class TestCubeGensController(BaseTestCase):
     """CubeGensController integration test stubs"""
-    def setUp(self) -> None:
-        self._cubegen_id = "dfsvdsfvdv"
 
+    def setUp(self) -> None:
+        self._user_id = "a97dfebf4098c0f5c16bca61e2b76c373"
+        self._claims, self._token = create_test_token()
+        self._cube_config = CubegenConfig.from_dict(CUBEGEN_TEST)
+        load_dotenv()
+        validate_env()
+        K8sCfg.load_config_once()
+
+    def tearDown(self) -> None:
+        cubegens.delete_all(self._user_id)
+        
     def test_create_cubegen(self):
         """Test case for create_cubegen
 
         Create a cubegen
         """
-        body = CubegenConfig()
+
         response = self.client.open(
             '/api/v2/cubegens',
             method='PUT',
-            data=json.dumps(body),
+            json=self._cube_config.to_dict(),
+            headers={'Authorization': f"Bearer {self._token}"},
             content_type='application/json')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
@@ -31,7 +94,10 @@ class TestCubeGensController(BaseTestCase):
 
         Delete a cubegen
         """
-        response = self.client.open(f'/api/v2/cubegens/{self._cubegen_id}', method='DELETE')
+
+        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        response = self.client.open(f'/api/v2/cubegens/{res["cubegen_id"]}',
+                                    headers={'Authorization': f"Bearer {self._token}"}, method='DELETE')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_delete_cubegens(self):
@@ -39,7 +105,9 @@ class TestCubeGensController(BaseTestCase):
 
         Delete all cubegens
         """
-        response = self.client.open('/api/v2/cubegens', method='DELETE')
+        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        response = self.client.open('/api/v2/cubegens', headers={'Authorization': f"Bearer {self._token}"},
+                                    method='DELETE')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     def test_get_costs(self):
@@ -47,11 +115,11 @@ class TestCubeGensController(BaseTestCase):
 
         Receive cost information for running a cubegen
         """
-        body = CostConfig()
         response = self.client.open(
-            '/api/v2/cubegens/costs',
+            '/api/v2/cubegens/info',
             method='POST',
-            data=json.dumps(body),
+            json=CUBEGEN_TEST,
+            headers={'Authorization': f"Bearer {self._token}"},
             content_type='application/json')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
@@ -60,7 +128,9 @@ class TestCubeGensController(BaseTestCase):
 
         List specific cubegen
         """
-        response = self.client.open(f'/api/v2/cubegens/{self._cubegen_id}', method='GET')
+        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        response = self.client.open(f'/api/v2/cubegens/{res["cubegen_id"]}',
+                                    headers={'Authorization': f"Bearer {self._token}"}, method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
@@ -69,10 +139,13 @@ class TestCubeGensController(BaseTestCase):
 
         List cubegens
         """
-        response = self.client.open('/api/v2/cubegens', method='GET')
+        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        response = self.client.open('/api/v2/cubegens', headers={'Authorization': f"Bearer {self._token}"},
+                                    method='GET')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
 
 if __name__ == '__main__':
     import unittest
+
     unittest.main()

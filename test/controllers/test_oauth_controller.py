@@ -52,7 +52,7 @@ class TestOauthController(BaseTestCase):
 
         data = response.json
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
-        self.assertEqual("Env var XCUBE_HUB_OAUTH_AUD must be set", data['message'])
+        self.assertEqual("Environment Variable XCUBE_HUB_OAUTH_AUD must be given.", data['message'])
 
         os.environ['XCUBE_HUB_OAUTH_AUD'] = 'https://test'
         os.environ['XCUBE_HUB_TOKEN_SECRET'] = 'sdfvgd'

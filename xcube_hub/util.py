@@ -1,7 +1,12 @@
 import datetime
+import os
+import re
+from typing import Optional, Sequence
 
 import six
-from xcube_hub import typing_utils
+from kubernetes import client
+
+from xcube_hub import typing_utils, api
 
 
 def _deserialize(data, klass):
@@ -139,3 +144,32 @@ def _deserialize_dict(data, boxed_type):
     """
     return {k: _deserialize(v, boxed_type)
             for k, v in six.iteritems(data)}
+
+
+def maybe_raise_for_env(env_var: str):
+    val = os.getenv(env_var, None)
+    if val is None:
+        raise api.ApiError(400, f"Environment Variable {env_var} must be given.")
+
+    return val
+
+
+def raise_for_invalid_username(username: str) -> bool:
+    valid = True
+    if len(username) > 63:
+        valid = False
+
+    pattern = re.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?")
+    if not pattern.fullmatch(username):
+        valid = False
+
+    if not valid:
+        raise ValueError("Invalid user name.")
+
+    return valid
+
+
+def load_env_by_regex(regex: Optional[str] = None) -> Sequence[client.V1EnvVar]:
+    p = re.compile(regex or '')
+
+    return [client.V1EnvVar(name=k, value=v) for k, v in os.environ.items() if regex is None or p.match(k)]

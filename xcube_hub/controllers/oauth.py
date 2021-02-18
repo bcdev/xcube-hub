@@ -1,31 +1,22 @@
 import datetime
-import os
 from typing import Dict
 
-import connexion
 from jose import jwt
 
 from xcube_hub import auth0, api
 from xcube_hub.core import users, oauth
 from xcube_hub.models.oauth_token import OauthToken
 from xcube_hub.models.user import User
+from xcube_hub.util import maybe_raise_for_env
 
 
-def _maybe_raise_for_env(env_var: str):
-    env = os.environ.get(env_var, None)
-    if env is None:
-        raise api.ApiError(400, f"Env var {env_var} must be set")
-
-    return env
-
-
-def _create_token(claims: Dict, days_valid: int = 90):
-    secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
+def create_token(claims: Dict, days_valid: int = 90):
+    secret = maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
 
     if len(secret) < 256:
         raise api.ApiError(400, "System Error: Invalid token secret given.")
 
-    exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+    exp = datetime.datetime.utcnow() + datetime.timedelta(days=days_valid)
 
     claims['exp'] = exp
 
@@ -44,10 +35,7 @@ def oauth_token_post(body: OauthToken):
     """
 
     try:
-        if not connexion.request.is_json:
-            raise api.ApiError(400, "System Error: Not a JSON request.")
-
-        aud = _maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
+        aud = maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
 
         oauth_token = OauthToken.from_dict(body)
         token = auth0.get_management_token()
@@ -60,14 +48,14 @@ def oauth_token_post(body: OauthToken):
         permissions = users.get_permissions(permissions=permissions)
         claims = {
             "iss": "https://edc.eu.auth0.com/",
-            "aud": aud,
+            "aud": [aud],
             "scope": permissions,
             "gty": "client-credentials",
             "email": user.email,
             "permissions": permissions
         }
 
-        encoded_jwt = _create_token(claims)
+        encoded_jwt = create_token(claims)
 
         return dict(access_token=encoded_jwt, token_type="bearer")
     except api.ApiError as e:

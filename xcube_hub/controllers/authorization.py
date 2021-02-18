@@ -1,40 +1,19 @@
 import hashlib
+import os
+from typing import Dict
 
 import connexion
-from jose import jwt, ExpiredSignatureError
+from jose import jwt, ExpiredSignatureError, JWTError
 from jwt import InvalidAlgorithmError
+from werkzeug.exceptions import Forbidden, HTTPException
 
 from xcube_hub import api
-from xcube_hub.controllers.oauth import _maybe_raise_for_env
+
 
 """
 controller generated to handled auth operation described at:
 https://connexion.readthedocs.io/en/latest/security.html
 """
-
-
-def get_permissions(token: str):
-    unverified_claims = jwt.get_unverified_claims(token)
-    permissions = []
-    if 'permissions' in unverified_claims:
-        permissions = unverified_claims.get("permissions")
-    elif 'scope' in unverified_claims:
-        permissions = unverified_claims.get("scope").split(' ')
-
-    if permissions is None:
-        raise api.ApiError(403, "access denied: Insufficient permissions.")
-
-    return permissions
-
-
-def get_aud(token: str):
-    unverified_claims = jwt.get_unverified_claims(token)
-    aud = unverified_claims.get("aud")
-
-    if aud is None:
-        raise api.ApiError(403, "access denied: No audience.")
-
-    return aud
 
 
 def get_email(token: str) -> str:
@@ -45,6 +24,19 @@ def get_email(token: str) -> str:
         raise api.ApiError(403, "access denied: No email.")
 
     return email
+
+
+def get_permissions(claims: Dict):
+    permissions = []
+    if 'permissions' in claims:
+        permissions = claims.get("permissions")
+    elif 'scope' in claims:
+        permissions = claims.get("scope").split(' ')
+
+    if permissions is None:
+        raise api.ApiError(403, "access denied: Insufficient permissions.")
+
+    return permissions
 
 
 # noinspection InsecureHash
@@ -63,18 +55,31 @@ def get_user_id() -> str:
     return 'a' + res.hexdigest()
 
 
+class ApiEnvError(HTTPException):
+    code = 500
+    description = "System error. Env var {env_var} must be given."
+
+
+def _maybe_raise_for_env(env_var: str):
+    env = os.environ.get(env_var, None)
+    if env is None:
+        raise ApiEnvError(description=f"System error. Env var {env_var} must be given.")
+
+    return env
+
+
 # noinspection PyPep8Naming
 def check_oAuthorization(token):
     try:
         secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
-        jwt.decode(token, secret)
-    except (InvalidAlgorithmError, ExpiredSignatureError):
-        return {'scopes': []}
+        aud = _maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
+        claims = jwt.decode(token, secret, audience=aud)
+    except (JWTError, InvalidAlgorithmError, ExpiredSignatureError) as e:
+        raise Forbidden(description=str(e))
 
-    permissions = get_permissions(token=token)
-    aud = get_aud(token=token)
-    email = get_email(token=token)
-    return {'scopes': permissions, 'aud': aud, 'email': email}
+    permissions = get_permissions(claims=claims)
+    email = claims['email']
+    return {'scopes': permissions, 'email': email}
 
 
 # noinspection PyPep8Naming
