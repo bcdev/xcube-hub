@@ -22,12 +22,10 @@ def put_callback_by_cubegen_id(body, cubegen_id):
         if not connexion.request.is_json:
             raise api.ApiError(400, "Not a json request.")
 
-        callbks = [Callback.from_dict(d) for d in body]
+        callback = Callback.from_dict(body)
         user_id = authorization.get_user_id()
 
-        result = []
-        for callback in callbks:
-            result.append(callbacks.put_callback(user_id=user_id, cubegen_id=cubegen_id, value=callback.to_dict()))
+        result = callbacks.put_callback(user_id=user_id, cubegen_id=cubegen_id, value=callback.to_dict())
 
         return api.ApiResponse.success(result=result)
     except api.ApiError as e:

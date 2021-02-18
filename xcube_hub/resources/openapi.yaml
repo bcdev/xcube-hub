@@ -266,9 +266,7 @@ paths:
         content:
           application/json:
             schema:
-              items:
-                $ref: '#/components/schemas/Callback'
-              type: array
+              $ref: '#/components/schemas/Callback'
         description: Callbacks
         required: true
       responses:
@@ -880,22 +878,25 @@ components:
       required:
         - state
         - sender
-        - total_worked
-        - worked
       type: object
       properties:
         state:
           type: object
+          properties:
+            label:
+              type: string
+            total_work:
+              type: number
+            error:
+              oneOf:
+                - type: string
+                - type: boolean
+            progress:
+              type: number
+            elapsed:
+              type: number
         sender:
           type: string
-        message:
-          type: string
-        values:
-          type: object
-        total_worked:
-          type: number
-        worked:
-          type: number
     CubegenStatus:
       properties:
         logs:

@@ -48,13 +48,14 @@ def put_callback(user_id: str, cubegen_id: str, value: AnyDict, token: Optional[
         sender = get_json_request_value(value, "sender", str)
         state = get_json_request_value(value, 'state', dict)
 
-        if sender == 'on_end' and not state['error']:
-            processing_request = kvdb.get(user_id + '__' + cubegen_id + '__cfg')
-            punits_requests = get_size_and_cost(processing_request)
+        if sender == 'on_end':
+            if 'error' not in state:
+                processing_request = kvdb.get(user_id + '__' + cubegen_id + '__cfg')
+                punits_requests = get_size_and_cost(processing_request)
 
-            token = token or connexion.request.headers["Authorization"]
-            user_id = authorization.get_email(token=token)
-            subtract_punits(user_id=user_id, punits_request=punits_requests)
+                token = token or connexion.request.headers["Authorization"]
+                user_id = authorization.get_email(token=token)
+                subtract_punits(user_id=user_id, punits_request=punits_requests)
 
         return res
     except TimeoutError as e:

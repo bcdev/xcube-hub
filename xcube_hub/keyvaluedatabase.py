@@ -157,11 +157,12 @@ class _RedisKvDB(KeyValueStore):
         :param key:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        # try:
-        val = self._db.get(key)
-        # except redis.exceptions.ConnectionError:
-        #     raise api.ApiError(400, "System Error: redis cache not ready.")
+
+        from redis.exceptions import ConnectionError as RedisConnectionError
+        try:
+            val = self._db.get(key)
+        except RedisConnectionError:
+            raise api.ApiError(400, "System Error: redis cache not ready.")
         if isinstance(val, bytes):
             val = val.decode('utf-8')
         return val
@@ -174,10 +175,11 @@ class _RedisKvDB(KeyValueStore):
         :return:
         """
 
-        # noinspection PyUnresolvedReferences
-        return self._db.set(key, value)
-        # except redis.exceptions.ConnectionError:
-        #     raise api.ApiError(400, "System Error: redis cache not ready.")
+        from redis.exceptions import ConnectionError as RedisConnectionError
+        try:
+            return self._db.set(key, value)
+        except RedisConnectionError:
+            raise api.ApiError(400, "System Error: redis cache not ready.")
 
     def delete(self, key):
         """
@@ -186,10 +188,10 @@ class _RedisKvDB(KeyValueStore):
         :return:
         """
 
-        # noinspection PyUnresolvedReferences
+        from redis.exceptions import ConnectionError as RedisConnectionError
         try:
             return self._db.delete(key)
-        except redis.exceptions.ConnectionError:
+        except RedisConnectionError:
             raise api.ApiError(400, "System Error: redis cache not ready.")
 
 
