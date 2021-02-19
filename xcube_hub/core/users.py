@@ -5,22 +5,24 @@ from typing import Optional, Sequence
 
 import connexion
 import requests
+from requests import HTTPError
 
 from xcube_hub import api
 from xcube_hub.controllers import punits
+from xcube_hub.controllers.users import _get_token
 from xcube_hub.models.user import User
 from xcube_hub.models.user_user_metadata import UserUserMetadata
 
 
-def assign_role_to_user(user_name: str, role_id: str, token: Optional[str] = None):
-    token = token or connexion.request.headers["Authorization"]
+def assign_role_to_user(user_id: str, role_id: str, token: Optional[str] = None):
+    token = token or _get_token()
     payload = {
         "roles": [
-            f"auth0|{user_name}"
+            f"{role_id}"
         ]
     }
     headers = {'Authorization': f"Bearer {token}"}
-    r = requests.post(f'https://edc.eu.auth0.com/api/v2/roles/{role_id}/users', json=payload, headers=headers)
+    r = requests.post(f'https://edc.eu.auth0.com/api/v2/users/auth0|{user_id}/roles', json=payload, headers=headers)
 
     if r.status_code == 404:
         raise api.ApiError(404, "Role not found.")
@@ -28,11 +30,11 @@ def assign_role_to_user(user_name: str, role_id: str, token: Optional[str] = Non
         raise api.ApiError(400, r.json())
 
 
-def get_permissions_by_user_id(user_id: str, token: Optional[str] = None):
+def get_permissions_by_user_id(auth_user_id: str, token: Optional[str] = None):
     token = token or connexion.request.headers["Authorization"]
 
     headers = {'Authorization': f'Bearer {token}'}
-    r = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{user_id}/permissions", headers=headers)
+    r = requests.get(f"https://edc.eu.auth0.com/api/v2/users/{auth_user_id}/permissions", headers=headers)
 
     if r.status_code == 404:
         raise api.ApiError(404, "User not found.")
@@ -40,6 +42,26 @@ def get_permissions_by_user_id(user_id: str, token: Optional[str] = None):
         raise api.ApiError(400, r.json())
 
     return r.json()
+
+
+def get_user_by_user_id(token: str, user_id: str) -> User:
+    headers = {'Authorization': f"Bearer {token}"}
+
+    r = requests.get('https://edc.eu.auth0.com/api/v2/users/auth0|' + user_id, headers=headers)
+
+    try:
+        r.raise_for_status()
+    except HTTPError as e:
+        raise api.ApiError(r.status_code, r.json())
+
+    res = r.json()
+
+    user = User.from_dict(res)
+
+    if 'identities' in res and len(res['identities']) > 0:
+        user.connection = res['identities'][0]['connection']
+
+    return user
 
 
 def get_permissions(permissions: Sequence) -> Sequence:
@@ -75,5 +97,6 @@ def supplement_user(user_id: str, user: User):
     client_id, client_secret = _create_secret()
     user.user_metadata.client_id = client_id
     user.user_metadata.client_secret = client_secret
+    user.user_metadata.xcube_user_id = user_id
 
     return _get_request_body_from_user(user=user)

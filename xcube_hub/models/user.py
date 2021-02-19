@@ -20,7 +20,9 @@ class User(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, user_id=None, email=None, username=None, nickname=None, created_at=None, updated_at=None, given_name=None, family_name=None, app_metadata=None, user_metadata=None, connection=None):  # noqa: E501
+    def __init__(self, user_id=None, email=None, username=None, nickname=None, created_at=None, updated_at=None,
+                 given_name=None, family_name=None, app_metadata=None, user_metadata=None, password=None,
+                 connection=None):  # noqa: E501
         """User - a model defined in OpenAPI
 
         :param user_id: The user_id of this User.  # noqa: E501
@@ -45,6 +47,8 @@ class User(Model):
         :type user_metadata: UserUserMetadata
         :param connection: The connection of this User.  # noqa: E501
         :type connection: str
+        :param password: The password of this User.  # noqa: E501
+        :type password: str
         """
         self.openapi_types = {
             'user_id': str,
@@ -57,7 +61,8 @@ class User(Model):
             'family_name': str,
             'app_metadata': UserAppMetadata,
             'user_metadata': UserUserMetadata,
-            'connection': str
+            'connection': str,
+            'password': str
         }
 
         self.attribute_map = {
@@ -71,7 +76,8 @@ class User(Model):
             'family_name': 'family_name',
             'app_metadata': 'app_metadata',
             'user_metadata': 'user_metadata',
-            'connection': 'connection'
+            'connection': 'connection',
+            'password': 'password'
         }
 
         self._user_id = user_id
@@ -85,6 +91,7 @@ class User(Model):
         self._app_metadata = app_metadata
         self._user_metadata = user_metadata
         self._connection = connection
+        self._password = password
 
     @classmethod
     def from_dict(cls, dikt) -> 'User':
@@ -337,3 +344,24 @@ class User(Model):
         """
 
         self._connection = connection
+
+    @property
+    def password(self):
+        """Gets the password of this User.
+
+
+        :return: The password of this User.
+        :rtype: str
+        """
+        return self._password
+
+    @password.setter
+    def password(self, password):
+        """Sets the user_id of this User.
+
+
+        :param password: The user_id of this User.
+        :type password: str
+        """
+
+        self._password = password

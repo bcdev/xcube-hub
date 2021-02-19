@@ -21,3 +21,4 @@ def get_user_by_credentials(token: str, client_id: str, client_secret: str) -> S
         raise api.ApiError(400, f"More than one user found.")
 
     return res
+

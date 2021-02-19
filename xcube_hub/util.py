@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import os
 import re
 from typing import Optional, Sequence
@@ -173,3 +174,9 @@ def load_env_by_regex(regex: Optional[str] = None) -> Sequence[client.V1EnvVar]:
     p = re.compile(regex or '')
 
     return [client.V1EnvVar(name=k, value=v) for k, v in os.environ.items() if regex is None or p.match(k)]
+
+
+# noinspection InsecureHash
+def create_user_id_from_email(email: str):
+    res = hashlib.md5(email.encode())
+    return 'a' + res.hexdigest()

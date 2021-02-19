@@ -9,6 +9,7 @@ import requests
 from xcube_hub import api
 from xcube_hub.core import users
 from xcube_hub.models.user import User
+from xcube_hub.util import create_user_id_from_email
 
 
 def get_request_body_from_user(user: User):
@@ -29,13 +30,11 @@ def _get_token():
     return connexion.request.headers["Authorization"].replace("Bearer ", "")
 
 
-def add_user(user_id, user):
+def add_user(user):
     """Add user
 
     Add user
 
-    :param user_id: User ID
-    :type user_id: str
     :param user: User information
     :type user: dict | bytes
 
@@ -46,10 +45,12 @@ def add_user(user_id, user):
         token = _get_token()
 
         user = User.from_dict(connexion.request.get_json())
+        user_id = create_user_id_from_email(user.email)
+        user.user_id = user_id
 
         user_dict = users.supplement_user(user_id=user_id, user=user)
 
-        headers = {'Authorization': token}
+        headers = {'Authorization': f"Bearer {token}"}
 
         # created at and updated at not allowed in request
         r = requests.post('https://edc.eu.auth0.com/api/v2/users', json=user_dict, headers=headers)
@@ -57,7 +58,7 @@ def add_user(user_id, user):
         if r.status_code < 200 or r.status_code >= 300:
             raise api.ApiError(400, r.json())
 
-        users.assign_role_to_user(user_name=user_id, role_id="rol_UV2cTM5brIezM6i6")
+        users.assign_role_to_user(user_id=user_id, role_id="rol_UV2cTM5brIezM6i6")
 
         return get_user_by_user_id(user_id=user_id)
     except api.ApiError as e:
@@ -78,7 +79,9 @@ def delete_user_by_user_id(user_id):
         token = _get_token()
         headers = {'Authorization': f"Bearer {token}"}
 
-        r = requests.delete(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', headers=headers)
+        user = users.get_user_by_user_id(user_id=user_id, token=token)
+
+        r = requests.delete(f'https://edc.eu.auth0.com/api/v2/users/{user.user_id}', headers=headers)
 
         if r.status_code == 404:
             raise api.ApiError(404, f"User {user_id} not found.")
@@ -106,20 +109,8 @@ def get_user_by_user_id(user_id: str, token: Optional[str] = None):
 
     try:
         token = token or _get_token()
-        headers = {'Authorization': f"Bearer {token}"}
 
-        r = requests.get(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', headers=headers)
-
-        if r.status_code == 404:
-            raise api.ApiError(404, f"User {user_id} not found.")
-        if r.status_code < 200 or r.status_code >= 300:
-            raise api.ApiError(400, r.json())
-
-        res = r.json()
-
-        user = User.from_dict(res)
-        if 'identities' in res and len(res['identities']) > 0:
-            user.connection = res['identities'][0]['connection']
+        user = users.get_user_by_user_id(user_id=user_id, token=token)
 
         return api.ApiResponse.success(result=user)
     except api.ApiError as e:

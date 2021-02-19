@@ -386,6 +386,42 @@ paths:
       tags:
       - users
       x-openapi-router-controller: xcube_hub.controllers.users
+    put:
+      description: |
+        Add user
+      operationId: add_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: User information
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+          description: User added
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found in the service
+      security:
+        - oAuthorization:
+            - create:users
+      summary: Add user
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
   /users/{user_id}:
     delete:
       description: |
@@ -503,51 +539,6 @@ paths:
       - oAuthorization:
         - manage:users
       summary: Update user
-      tags:
-      - users
-      x-openapi-router-controller: xcube_hub.controllers.users
-    put:
-      description: |
-        Add user
-      operationId: add_user
-      parameters:
-      - description: User ID
-        explode: false
-        in: path
-        name: user_id
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-        description: User information
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiUserResponse'
-          description: User added
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found in the service
-      security:
-      - oAuthorization:
-        - manage:users
-      summary: Add user
       tags:
       - users
       x-openapi-router-controller: xcube_hub.controllers.users
