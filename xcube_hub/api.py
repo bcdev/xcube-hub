@@ -24,8 +24,8 @@ from typing import Any, Tuple, Union, Optional
 
 from xcube_hub.typedefs import AnyDict, UNDEFINED, JsonObject, JsonValue
 
-SERVER_NAME = 'xcube-genserv'
-SERVER_DESCRIPTION = 'xcube Generation Service'
+SERVER_NAME = 'xcube-gen-api'
+SERVER_DESCRIPTION = 'xcube Generator Service'
 SERVER_START_TIME = datetime.datetime.now().isoformat()
 
 

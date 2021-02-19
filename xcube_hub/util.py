@@ -2,8 +2,11 @@ import datetime
 import hashlib
 import os
 import re
+import secrets
+import uuid
 from typing import Optional, Sequence
 
+import connexion
 import six
 from kubernetes import client
 
@@ -180,3 +183,13 @@ def load_env_by_regex(regex: Optional[str] = None) -> Sequence[client.V1EnvVar]:
 def create_user_id_from_email(email: str):
     res = hashlib.md5(email.encode())
     return 'a' + res.hexdigest()
+
+
+def create_secret(secrets_length: int = 32):
+    client_id = uuid.uuid4().hex
+    client_secret = secrets.token_urlsafe(secrets_length)
+    return client_id, client_secret
+
+
+def strap_token():
+    return connexion.request.headers["Authorization"].replace("Bearer ", "")

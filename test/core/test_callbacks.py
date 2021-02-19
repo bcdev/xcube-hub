@@ -10,6 +10,7 @@ from xcube_hub.core.callbacks import get_callback, put_callback
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
+
 CUBEGEN_TEST = {
     "input_configs": [
         {

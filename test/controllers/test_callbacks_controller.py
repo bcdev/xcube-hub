@@ -2,10 +2,10 @@
 
 from __future__ import absolute_import
 
-from flask import json
+import os
 
 from test.controllers.utils import create_test_token
-from xcube_hub.models.callback import Callback  # noqa: E501
+from xcube_hub.models.callback import Callback
 from test import BaseTestCase
 
 
@@ -13,21 +13,24 @@ class TestCallbacksController(BaseTestCase):
     """CallbacksController integration test stubs"""
 
     def setUp(self) -> None:
-        self._claims, self._token = create_test_token(['manage:callbacks'])
+        self._claims, self._token = create_test_token(['manage:cubegens'])
+        os.environ["XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD"] = "https://test"
+        os.environ["XCUBE_HUB_OAUTH_AUD"] = "https://xcube-gen.brockmann-consult.de/api/v2/"
 
     def test_put_callback_by_job_id(self):
         """Test case for put_callback_by_job_id
 
         Add a callback for a job
         """
-        body = [Callback(state={'error': 'dasds'}, sender='on_end', message="sdfv", values={"dfv": 'ff'}, total_worked=90.,
-                         worked=80.), ]
+        callback = Callback(state={'error': 'dasds'}, sender='on_end')
+        job_id = 'job_id_example'
         response = self.client.open(
-            '/api/v2/cubegens/{job_id}/callbacks'.format(job_id='job_id_example'),
+            f'/api/v2/cubegens/{job_id}/callbacks',
             method='PUT',
             headers={'Authorization': f'Bearer {self._token}'},
-            data=json.dumps(body),
+            json=callback.to_dict(),
             content_type='application/json')
+
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
 

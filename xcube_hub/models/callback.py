@@ -15,46 +15,26 @@ class Callback(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, state=None, sender=None, message=None, values=None, total_worked=None, worked=None):  # noqa: E501
+    def __init__(self, state=None, sender=None):
         """Callback - a model defined in OpenAPI
 
         :param state: The state of this Callback.  # noqa: E501
         :type state: object
         :param sender: The state of this Callback.  # noqa: E501
         :type sender: str
-        :param message: The message of this Callback.  # noqa: E501
-        :type message: str
-        :param values: The values of this Callback.  # noqa: E501
-        :type values: object
-        :param total_worked: The total_work of this Callback.  # noqa: E501
-        :type total_worked: float
-        :param worked: The worked of this Callback.  # noqa: E501
-        :type worked: float
         """
         self.openapi_types = {
             'state': object,
             'sender': str,
-            'message': str,
-            'values': object,
-            'total_worked': float,
-            'worked': float
         }
 
         self.attribute_map = {
             'state': 'state',
             'sender': 'sender',
-            'message': 'message',
-            'values': 'values',
-            'total_worked': 'total_worked',
-            'worked': 'worked'
         }
 
         self._state = state
         self._sender = sender
-        self._message = message
-        self._values = values
-        self._total_worked = total_worked
-        self._worked = worked
 
     @classmethod
     def from_dict(cls, dikt) -> 'Callback':
@@ -112,89 +92,3 @@ class Callback(Model):
             raise ValueError("Invalid value for `sender`, must not be `None`")  # noqa: E501
 
         self._sender = sender
-
-    @property
-    def message(self):
-        """Gets the message of this Callback.
-
-
-        :return: The message of this Callback.
-        :rtype: str
-        """
-        return self._message
-
-    @message.setter
-    def message(self, message):
-        """Sets the message of this Callback.
-
-
-        :param message: The message of this Callback.
-        :type message: str
-        """
-        if message is None:
-            raise ValueError("Invalid value for `message`, must not be `None`")  # noqa: E501
-
-        self._message = message
-
-    @property
-    def values(self):
-        """Gets the values of this Callback.
-
-
-        :return: The values of this Callback.
-        :rtype: object
-        """
-        return self._values
-
-    @values.setter
-    def values(self, values):
-        """Sets the values of this Callback.
-
-
-        :param values: The values of this Callback.
-        :type values: object
-        """
-
-        self._values = values
-
-    @property
-    def total_worked(self):
-        """Gets the total_work of this Callback.
-
-
-        :return: The total_work of this Callback.
-        :rtype: float
-        """
-        return self._total_worked
-
-    @total_worked.setter
-    def total_worked(self, total_worked):
-        """Sets the total_work of this Callback.
-
-
-        :param total_worked: The total_work of this Callback.
-        :type total_worked: float
-        """
-
-        self._total_worked = total_worked
-
-    @property
-    def worked(self):
-        """Gets the worked of this Callback.
-
-
-        :return: The worked of this Callback.
-        :rtype: float
-        """
-        return self._worked
-
-    @worked.setter
-    def worked(self, worked):
-        """Sets the worked of this Callback.
-
-
-        :param worked: The worked of this Callback.
-        :type worked: float
-        """
-
-        self._worked = worked

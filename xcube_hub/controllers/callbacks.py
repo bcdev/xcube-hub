@@ -1,5 +1,3 @@
-import connexion
-
 from xcube_hub import api
 from xcube_hub.controllers import authorization
 from xcube_hub.core import callbacks
@@ -19,9 +17,6 @@ def put_callback_by_cubegen_id(body, cubegen_id):
     :rtype: ApiCallbackResponse
     """
     try:
-        if not connexion.request.is_json:
-            raise api.ApiError(400, "Not a json request.")
-
         callback = Callback.from_dict(body)
         user_id = authorization.get_user_id()
 
