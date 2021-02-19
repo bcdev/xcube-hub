@@ -1,6 +1,12 @@
 ## Changes in v2.0.0.dev0
 
+### New Features
 
+- The OpenApi definition has been overhauled to follow best practices in defining path patterns
+- xcube-hub can now issue HS256 tokens using client credentials using an oauth/token route
+- xcube-hub provides now much smaller data-pools information
+- The hub uses now an openapi flask stub to simplify server configuration
+- Changed the CI from travis to appveyor
 
 ## Changes in v1.0.14
 ### New Features

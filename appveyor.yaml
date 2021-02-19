@@ -1,0 +1,38 @@
+#
+# This is a basic build configuration for Travis CI.
+# See http://conda.pydata.org/docs/travis.html for more info.
+#
+
+image: Ubuntu
+
+install:
+  - export UNITTEST_WITH_K8S=true
+  - export XCUBE_HUB_CALLBACK_URL=https://ci.xcube-gen.brockmann-consult.de
+  - if [[ "${UNITTEST_WITH_K8S}" == "true" ]];
+    then
+    sudo apt-get -y update;
+    sudo apt-get install  -y conntrack;
+    curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/;
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
+    unzip awscliv2.zip;
+    sudo ./aws/install;
+    aws eks --region eu-central-1 update-kubeconfig --name xcube-webapis-stage --alias xcube-webapis-stage;
+    kubectl config use-context xcube-webapis-stage;
+    fi;
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda;
+  - export PATH="$HOME/miniconda/bin:$PATH";
+  - conda install -y -c conda-forge mamba;
+  - conda info -a
+  - mamba env create
+  - source activate xcube-hub
+  - python setup.py install
+  - pip install Flask-Testing
+  - pip install codecov
+
+before_script:
+  - mv ci/ci.env .env
+
+script:
+  - py.test -v --cov=xcube_hub
+  - codecov --env TRAVIS_PYTHON_VERSION
