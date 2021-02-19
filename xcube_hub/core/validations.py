@@ -30,3 +30,5 @@ def validate_env():
         val = os.getenv(var, None)
         if val is None:
             raise api.ApiError(500, f"Env var {var} required.")
+
+    return True

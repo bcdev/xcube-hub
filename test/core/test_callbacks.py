@@ -90,7 +90,12 @@ class TestCallbacks(unittest.TestCase):
                                             price_currency='€'))
         add_punits('heinrich@gmail.com', punits_request_1)
 
-        cfg = {'state': {'error': ''}, 'sender': 'on_end'}
+        cfg = {'state': {'error': 'Error'}, 'sender': 'on_end'}
+        put_callback('heinrich', 'cubegen', cfg, token=self._token)
+        user_data = get_user_data('heinrich@gmail.com', dataset_name='punits')
+        self.assertEqual(50000, user_data['count'])
+
+        cfg = {'state': {}, 'sender': 'on_end'}
         put_callback('heinrich', 'cubegen', cfg, token=self._token)
         user_data = get_user_data('heinrich@gmail.com', dataset_name='punits')
         self.assertEqual(40660, user_data['count'])
