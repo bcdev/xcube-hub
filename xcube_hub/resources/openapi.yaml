@@ -191,6 +191,10 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCubegenResponse'
         "400":
           content:
             application/json:
@@ -591,39 +595,49 @@ components:
         sender:
           type: string
     CubegenStatus:
-      properties:
-        logs:
-          items:
-            type: string
-          type: array
-        active:
-          oneOf:
-            - type: integer
-            - type: boolean
-          nullable: true
-        start_time:
-          format: date-time
-          type: string
-        failed:
-          oneOf:
-            - type: integer
-            - type: boolean
-          nullable: true
-        succeeded:
-          oneOf:
-            - type: integer
-            - type: boolean
-          nullable: true
-        completion_time:
-          format: date-time
-          type: string
-      required:
-      - active
-      - completion_time
-      - failed
-      - start_time
-      - succeeded
       type: object
+      required:
+        - cubegen_id
+        - status
+      properties:
+        cubegen_id:
+          type: string
+        progress:
+          $ref: '#/components/schemas/Callback'
+        status:
+          type: object
+          required:
+            - active
+            - completion_time
+            - failed
+            - start_time
+            - succeeded
+          properties:
+            logs:
+              items:
+                type: string
+              type: array
+            active:
+              oneOf:
+                - type: integer
+                - type: boolean
+              nullable: true
+            start_time:
+              format: date-time
+              type: string
+            failed:
+              oneOf:
+                - type: integer
+                - type: boolean
+              nullable: true
+            succeeded:
+              oneOf:
+                - type: integer
+                - type: boolean
+              nullable: true
+            completion_time:
+              format: date-time
+              type: string
     OauthToken:
       example:
         audience: audience

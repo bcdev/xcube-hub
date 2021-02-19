@@ -10,6 +10,7 @@ from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api
 from xcube_hub.auth0 import get_token_auth_header
+from xcube_hub.core import callbacks
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error
@@ -19,13 +20,14 @@ def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
     try:
         output = logs(user_id=user_id, job_id=cubegen_id)
         stat = status(user_id=user_id, job_id=cubegen_id)
+        progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
 
         if 'failed' in stat and stat['failed']:
             raise api.ApiError(400, message=f"Cubegen {cubegen_id} failed", output='\n'.join(output))
         if not stat:
             raise api.ApiError(404, message=f"Cubegen {cubegen_id} not found")
 
-        return {'cubegen_id': cubegen_id, 'status': stat, 'output': output}
+        return {'cubegen_id': cubegen_id, 'status': stat, 'output': output, 'progress': progress}
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 

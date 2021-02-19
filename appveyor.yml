@@ -16,19 +16,19 @@ platform:
 
 install:
   - sh: export UNITTEST_WITH_K8S=true
-#  - sh: bash ci/install.sh
-#  - sh: wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-#  - sh: bash miniconda.sh -b -p $HOME/miniconda
-#  - sh: export PATH="$HOME/miniconda/bin:$PATH"
-#  - sh: conda install -y -c conda-forge mamba
-#  - sh: conda info -a
-#  - sh: mamba env create
-#  - sh: source activate xcube-hub
-#  - sh: python setup.py install
-#  - sh: pip install Flask-Testing
-#  - sh: pip install codecov
-#  - sh: mv ci/ci.env .env
-#
-#build_script:
-#  - sh: py.test -v --cov=xcube_hub
-#  - sh: codecov --env TRAVIS_PYTHON_VERSION
+  - sh: bash ci/install.sh
+  - sh: wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - sh: bash miniconda.sh -b -p $HOME/miniconda
+  - sh: export PATH="$HOME/miniconda/bin:$PATH"
+  - sh: conda install -y -c conda-forge mamba
+  - sh: conda info -a
+  - sh: mamba env create
+  - sh: source activate xcube-hub
+  - sh: python setup.py install
+  - sh: pip install Flask-Testing
+  - sh: pip install codecov
+  - sh: mv ci/ci.env .env
+
+build_script:
+  - sh: py.test -v --cov=xcube_hub
+  - sh: codecov --env TRAVIS_PYTHON_VERSION

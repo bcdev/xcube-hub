@@ -2,11 +2,17 @@
 
 ### New Features
 
-- The OpenApi definition has been overhauled to follow best practices in defining path patterns
-- xcube-hub can now issue HS256 tokens using client credentials using an oauth/token route
-- xcube-hub provides now much smaller data-pools information
 - The hub uses now an openapi flask stub to simplify server configuration
+- The OpenApi definition has been overhauled to follow best practices in defining path patterns
+- xcube-hub can now issue HS256 tokens via client credentials using an `/oauth/token` handler
+- The `/datastores` handler has been replaced by a cubegens info handler   
+- The `/cubegens/info` handler provides now much smaller data-pools information for better performance
 - Changed the CI from travis to appveyor
+- Progress Information is now returned by the `GET /cubegens/{cubegen_id}` handler
+- `/callbacks` handlers have been reduced to allow PUT only
+- The main function has been moved to `__main__.py` to simplify launching the hub inside docker containers
+- The Docker command has been simplified by using the python executable directly
+- The authorization flow allows not to use both xcube-hub as well as auth0 issued tokens
 
 ## Changes in v1.0.14
 ### New Features
