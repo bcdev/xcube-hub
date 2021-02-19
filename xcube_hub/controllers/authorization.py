@@ -97,8 +97,7 @@ def verify_local_token(token: str, audience: str):
         raise Forbidden(description=str(e))
 
 
-# noinspection PyPep8Naming
-def check_oAuthorization(token):
+def check_oauthorization(token):
     aud = _maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
     iss = get_issuer(token=token)
     tgt_aud = get_aud(token=token)
@@ -117,8 +116,7 @@ def check_oAuthorization(token):
     return {'scopes': permissions}
 
 
-# noinspection PyPep8Naming
-def validate_scope_oAuthorization(required_scopes, token_scopes):
+def validate_scope_oauthorization(required_scopes, token_scopes):
     return set(required_scopes).issubset(set(token_scopes))
 
 
