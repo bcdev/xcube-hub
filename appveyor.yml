@@ -29,10 +29,9 @@ install:
   - python setup.py install
   - pip install Flask-Testing
   - pip install codecov
-
-before_script:
   - mv ci/ci.env .env
 
-script:
+
+build_script:
   - py.test -v --cov=xcube_hub
   - codecov --env TRAVIS_PYTHON_VERSION
