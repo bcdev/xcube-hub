@@ -47,9 +47,9 @@ def oauth_token_post(body: OauthToken):
         permissions = users.get_permissions_by_user_id(user.user_id, token=token)
         permissions = users.get_permissions(permissions=permissions)
         claims = {
-            "iss": "https://edc.eu.auth0.com/",
+            "iss": "https://xcube-gen.brockmann-consult.de/",
             "aud": [aud],
-            "scope": permissions,
+            "scope": " ".join(permissions),
             "gty": "client-credentials",
             "email": user.email,
             "permissions": permissions

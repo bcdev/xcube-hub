@@ -1,11 +1,15 @@
 # Format error response and append status code.
 import hashlib
+import json
 import os
+from typing import Sequence, Union
+from urllib.request import urlopen
 
 import flask
 import requests
 from jose import jwt
 from requests import HTTPError
+from werkzeug.exceptions import Forbidden, Unauthorized
 
 from xcube_hub import api
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -61,16 +65,16 @@ def get_token_auth_header():
     """
     auth = flask.request.headers.get("Authorization", None)
     if not auth:
-        raise api.ApiError(403, "Missing authorization header.")
+        raise Forbidden(description="Missing authorization header.")
 
     parts = auth.split()
 
     if parts[0].lower() != "bearer":
-        raise api.ApiError(401, "invalid_header: Authorization header must start with Bearer")
+        raise Unauthorized(description="invalid_header: Authorization header must start with Bearer")
     elif len(parts) == 1:
-        raise api.ApiError(401, "invalid_header: Token not found")
+        raise Unauthorized(description="invalid_header: Token not found")
     elif len(parts) > 2:
-        raise api.ApiError(401, "invalid_header: Authorization header must be Bearer token")
+        raise Unauthorized(description="invalid_header: Authorization header must be Bearer token")
 
     token = parts[1]
     return token
@@ -79,11 +83,11 @@ def get_token_auth_header():
 def get_management_token():
     client_id = os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_ID", None)
     if client_id is None:
-        raise api.ApiError(400, "Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_ID")
+        raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_ID")
 
     client_secret = os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_SECRET", None)
     if client_secret is None:
-        raise api.ApiError(400, "Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_SECRET")
+        raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_SECRET")
 
     payload = {
         "client_id": client_id,
@@ -97,9 +101,53 @@ def get_management_token():
     try:
         res.raise_for_status()
     except HTTPError as e:
-        raise api.ApiError(400, str(e))
+        raise Unauthorized(description=str(e))
 
     try:
         return res.json()["access_token"]
     except KeyError:
-        raise api.ApiError(400, "System error: Could not find key 'access_token' in auth0's response")
+        raise Unauthorized(description="System error: Could not find key 'access_token' in auth0's response")
+
+
+def verify_token(token: str, audience: Union[str, Sequence]):
+    json_url = urlopen("https://" + AUTH0_DOMAIN + "/.well-known/jwks.json")
+    jwks = json.loads(json_url.read())
+
+    try:
+        unverified_header = jwt.get_unverified_header(token)
+    except jwt.JWTError:
+        raise Unauthorized(description="invalid_header: Invalid header. Use an RS256 signed JWT Access Token")
+    if unverified_header["alg"] == "HS256":
+        raise Unauthorized(description="invalid_header: Invalid header. Use an RS256 signed JWT Access Token")
+    rsa_key = {}
+    for key in jwks["keys"]:
+        if key["kid"] == unverified_header["kid"]:
+            rsa_key = {
+                "kty": key["kty"],
+                "kid": key["kid"],
+                "use": key["use"],
+                "n": key["n"],
+                "e": key["e"]
+            }
+    if rsa_key:
+        try:
+            payload = jwt.decode(
+                token,
+                rsa_key,
+                algorithms=ALGORITHMS,
+                audience=audience,
+                issuer="https://" + AUTH0_DOMAIN + "/"
+            )
+        except jwt.ExpiredSignatureError:
+            raise Forbidden(description="access denied: token is expired")
+        except jwt.JWTClaimsError:
+            raise Unauthorized(description="invalid_claims: please check the audience and issuer")
+        except Exception:
+            raise Unauthorized(description="invalid_header: Unable to parse authentication")
+
+        # noinspection PyProtectedMember
+        flask._request_ctx_stack.top.current_user = payload
+
+        return payload
+
+    raise Unauthorized(description="invalid_header: Unable to find appropriate key")

@@ -4,11 +4,12 @@ from typing import Dict
 
 import connexion
 from jose import jwt, ExpiredSignatureError, JWTError
+from jose.exceptions import JWKError
 from jwt import InvalidAlgorithmError
 from werkzeug.exceptions import Forbidden, HTTPException
 
 from xcube_hub import api
-
+from xcube_hub.auth0 import verify_token
 
 """
 controller generated to handled auth operation described at:
@@ -24,6 +25,26 @@ def get_email(token: str) -> str:
         raise api.ApiError(403, "access denied: No email.")
 
     return email
+
+
+def get_aud(token: str) -> str:
+    unverified_claims = jwt.get_unverified_claims(token)
+    aud = unverified_claims.get("aud")
+
+    if aud is None:
+        raise api.ApiError(403, "access denied: No email.")
+
+    return aud
+
+
+def get_issuer(token: str):
+    unverified_claims = jwt.get_unverified_claims(token)
+    iss = unverified_claims.get("iss")
+
+    if iss is None:
+        raise api.ApiError(403, "access denied: No email.")
+
+    return iss
 
 
 def get_permissions(claims: Dict):
@@ -68,18 +89,32 @@ def _maybe_raise_for_env(env_var: str):
     return env
 
 
-# noinspection PyPep8Naming
-def check_oAuthorization(token):
+def verify_local_token(token: str, audience: str):
     try:
         secret = _maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
-        aud = _maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
-        claims = jwt.decode(token, secret, audience=aud)
-    except (JWTError, InvalidAlgorithmError, ExpiredSignatureError) as e:
+        return jwt.decode(token, secret, audience=audience)
+    except (JWKError, JWTError, InvalidAlgorithmError, ExpiredSignatureError) as e:
         raise Forbidden(description=str(e))
 
+
+# noinspection PyPep8Naming
+def check_oAuthorization(token):
+    aud = _maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
+    iss = get_issuer(token=token)
+    tgt_aud = get_aud(token=token)
+    if iss == "https://xcube-gen.brockmann-consult.de/":
+        claims = verify_local_token(token=token, audience=aud)
+    elif iss == "https://edc.eu.auth0.com/":
+        aud_um = _maybe_raise_for_env("XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD")
+        if tgt_aud == aud_um:
+            aud = aud_um
+
+        claims = verify_token(token=token, audience=aud)
+    else:
+        raise api.ApiError(401, "Access denied. Issuer unknown.")
+
     permissions = get_permissions(claims=claims)
-    email = claims['email']
-    return {'scopes': permissions, 'email': email}
+    return {'scopes': permissions}
 
 
 # noinspection PyPep8Naming

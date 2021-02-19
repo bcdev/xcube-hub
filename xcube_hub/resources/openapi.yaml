@@ -456,7 +456,7 @@ paths:
           description: User not found in the service
       security:
       - oAuthorization:
-        - manage:users
+        - read:users
       summary: Get users
       tags:
       - users

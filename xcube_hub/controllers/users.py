@@ -25,6 +25,10 @@ def _create_secret(secrets_length: int = 32):
     return client_id, client_secret
 
 
+def _get_token():
+    return connexion.request.headers["Authorization"].replace("Bearer ", "")
+
+
 def add_user(user_id, user):
     """Add user
 
@@ -39,7 +43,7 @@ def add_user(user_id, user):
     """
 
     try:
-        token = connexion.request.headers["Authorization"]
+        token = _get_token()
 
         user = User.from_dict(connexion.request.get_json())
 
@@ -71,7 +75,7 @@ def delete_user_by_user_id(user_id):
     :rtype: None
     """
     try:
-        token = connexion.request.headers["Authorization"]
+        token = _get_token()
         headers = {'Authorization': f"Bearer {token}"}
 
         r = requests.delete(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', headers=headers)
@@ -101,7 +105,7 @@ def get_user_by_user_id(user_id: str, token: Optional[str] = None):
     """
 
     try:
-        token = token or connexion.request.headers["Authorization"]
+        token = token or _get_token()
         headers = {'Authorization': f"Bearer {token}"}
 
         r = requests.get(f'https://edc.eu.auth0.com/api/v2/users/{user_id}', headers=headers)
@@ -131,7 +135,7 @@ def get_users():
     :rtype: ApiUsersResponse
     """
     try:
-        token = connexion.request.headers["Authorization"]
+        token = _get_token()
         headers = {'Authorization': f"Bearer {token}"}
 
         r = requests.get('https://edc.eu.auth0.com/api/v2/users', headers=headers)
@@ -161,7 +165,7 @@ def update_user_by_user_id(user_id, body=None):
     :rtype: ApiUserResponse
     """
     try:
-        token = connexion.request.headers["Authorization"]
+        token = _get_token()
 
         user = User.from_dict(body)
         headers = {'Authorization': f"Bearer {token}"}
@@ -183,7 +187,7 @@ def update_user_by_user_id(user_id, body=None):
 
 def update_secrets_by_user_id(user_id: str):
     try:
-        token = connexion.request.headers["Authorization"]
+        token = _get_token()
 
         headers = {'Authorization': f"Bearer {token}"}
         user = get_user_by_user_id(user_id=user_id, token=token)
@@ -210,7 +214,7 @@ def update_secrets_by_user_id(user_id: str):
 
 def delete_secrets_by_user_id(user_id: str):
     try:
-        token = connexion.request.headers["Authorization"]
+        token = _get_token()
 
         headers = {'Authorization': f"Bearer {token}"}
 
