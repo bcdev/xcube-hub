@@ -29,7 +29,6 @@ install:
   - pip install codecov
   - mv ci/ci.env .env
 
-
 build_script:
   - py.test -v --cov=xcube_hub
   - codecov --env TRAVIS_PYTHON_VERSION
