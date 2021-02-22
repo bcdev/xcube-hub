@@ -12,7 +12,7 @@ https://connexion.readthedocs.io/en/latest/security.html
 """
 
 
-def get_claim(token: str, tgt: str):
+def _get_claim_from_token(token: str, tgt: str):
     unverified_claims = jwt.get_unverified_claims(token)
     tgt = unverified_claims.get(tgt)
 
@@ -23,11 +23,11 @@ def get_claim(token: str, tgt: str):
 
 
 def check_oauthorization(token):
-    iss = get_claim(token=token, tgt='iss')
+    iss = _get_claim_from_token(token=token, tgt='iss')
 
     # Set audience to auth0 user management audience if token claims to be a user management client token.
     # Otherwise audience wil be None and defined by environment variables
-    aud = get_claim(token=token, tgt='aud')
+    aud = _get_claim_from_token(token=token, tgt='aud')
     user_management_aud = os.getenv("XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD", None)
     audience = user_management_aud if user_management_aud == aud else None
 
