@@ -23,8 +23,6 @@ def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
 
         progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
 
-        if 'failed' in stat and stat['failed']:
-            raise api.ApiError(400, message=f"Cubegen {cubegen_id} failed", output='\n'.join(output))
         if not stat:
             raise api.ApiError(404, message=f"Cubegen {cubegen_id} not found")
 

@@ -6,11 +6,9 @@ from typing import Optional, Any, Dict
 from urllib.request import urlopen
 
 import flask
-import requests
 from jose import jwt
 from jose.exceptions import JWKError, JWTError, ExpiredSignatureError
 from jwt import InvalidAlgorithmError
-from requests import HTTPError
 from werkzeug.exceptions import Unauthorized, Forbidden
 
 from xcube_hub import api
@@ -58,13 +56,6 @@ class AuthProvider(ABC):
         :return:
         """
 
-    @abstractmethod
-    def get_management_token(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
-        """
-        Get a key value
-        :return:
-        """
-
 
 class Auth(AuthProvider):
     f"""
@@ -96,9 +87,6 @@ class Auth(AuthProvider):
         self._claims = claims
         self._token = token
         return claims
-
-    def get_management_token(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
-        return self._provider.get_management_token(client_id=client_id, client_secret=client_secret)
 
     @property
     def permissions(self):
@@ -253,34 +241,6 @@ class _Auth0(AuthProvider):
 
         raise Unauthorized(description="invalid_header: Unable to find appropriate key")
 
-    def get_management_token(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
-        client_id = client_id or os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_ID", None)
-        if client_id is None:
-            raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_ID")
-
-        client_secret = client_secret or os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_SECRET", None)
-        if client_secret is None:
-            raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_SECRET")
-
-        payload = {
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "audience": self._audience,
-            "grant_type": "client_credentials"
-        }
-
-        res = requests.post("https://edc.eu.auth0.com/oauth/token", json=payload)
-
-        try:
-            res.raise_for_status()
-        except HTTPError as e:
-            raise Unauthorized(description=str(e))
-
-        try:
-            return res.json()["access_token"]
-        except KeyError:
-            raise Unauthorized(description="System error: Could not find key 'access_token' in auth0's response")
-
 
 class _AuthXcube(AuthProvider):
     f"""
@@ -309,9 +269,6 @@ class _AuthXcube(AuthProvider):
             return claims['email']
         except KeyError:
             raise Unauthorized("Access denied. Cannot get email from token.")
-
-    def get_management_token(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
-        raise NotImplementedError("Management token do not exist for _AuthXcube")
 
     def verify_token(self, token: str) -> Dict:
         """
