@@ -19,9 +19,14 @@ OUTPUT_PUNITS_WEIGHT = 1.0
 
 
 def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
-    input_configs = get_json_request_value(processing_request, 'input_configs',
-                                           value_type=list)
-    input_config = input_configs[0]
+    try:
+        input_configs = get_json_request_value(processing_request, 'input_configs',
+                                               value_type=list)
+        input_config = input_configs[0]
+    except api.ApiError:
+        input_config = get_json_request_value(processing_request, 'input_config',
+                                              value_type=dict)
+
     datastore_id = get_json_request_value(input_config, 'store_id',
                                           value_type=str,
                                           key_path='input_configs')

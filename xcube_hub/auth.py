@@ -22,11 +22,33 @@ _ISS_TO_PROVIDER = {
 
 
 class AuthProvider(ABC):
+    _claims = {}
+
+    @property
+    def permissions(self) -> Dict:
+        raise NotImplementedError("Needs to be implemented by an Auth class")
+
+    @property
+    def user_id(self) -> str:
+        raise NotImplementedError("Needs to be implemented by an Auth class")
+
+    @property
+    def email(self) -> str:
+        raise NotImplementedError("Needs to be implemented by an Auth class")
+
     @abstractmethod
-    def verify_token(self, key):
+    def verify_token(self, token):
         """
         Get a key value
-        :param key:
+        :param token:
+        :return:
+        """
+
+    @abstractmethod
+    def get_email(self, claims):
+        """
+        Get a key value
+        :param claims:
         :return:
         """
 
@@ -84,6 +106,14 @@ class Auth(AuthProvider):
         res = hashlib.md5(email.encode())
 
         return 'a' + res.hexdigest()
+
+    @property
+    def email(self):
+        return self.get_email(self._claims)
+
+    def get_email(self, claims: Optional[Dict]):
+        claims = claims or self._claims
+        return self._provider.get_email(claims)
 
     def _new_auth_provider(self, audience: str, provider: Optional[str] = None, **kwargs) -> "AuthProvider":
         """
@@ -146,6 +176,12 @@ class _Auth0(AuthProvider):
             'AUTH0_USER_MANAGEMENT_CLIENT_SECRET') or user_management_client_secret
         self._algorithms = ["RS256"]
 
+    def get_email(self, claims):
+        try:
+            return claims['https://xcube-gen.brockmann-consult.de/user_email']
+        except KeyError:
+            raise Unauthorized("Access denied. Cannot get email from token.")
+
     def verify_token(self, token: str) -> Dict:
         """
         Get a key value
@@ -190,7 +226,7 @@ class _Auth0(AuthProvider):
 
             # noinspection PyProtectedMember
             flask._request_ctx_stack.top.current_user = payload
-
+            self._claims = payload
             return payload
 
         raise Unauthorized(description="invalid_header: Unable to find appropriate key")
@@ -217,6 +253,12 @@ class _AuthXcube(AuthProvider):
         self._audience = os.getenv('XCUBE_HUB_OAUTH_AUD') or audience
         self._secret = os.getenv('XCUBE_HUB_TOKEN_SECRET') or secret
         self._algorithms = ["HS256"]
+
+    def get_email(self, claims):
+        try:
+            return claims['email']
+        except KeyError:
+            raise Unauthorized("Access denied. Cannot get email from token.")
 
     def verify_token(self, token: str) -> Dict:
         """

@@ -20,6 +20,7 @@ def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
     try:
         output = logs(user_id=user_id, job_id=cubegen_id)
         stat = status(user_id=user_id, job_id=cubegen_id)
+
         progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
 
         if 'failed' in stat and stat['failed']:
@@ -127,7 +128,7 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[Any
 
         kvdb = KeyValueDatabase.instance()
         kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
-        kvdb.set(user_id + '__' + job_id, {'progress': {}})
+        kvdb.set(user_id + '__' + job_id, {'progress': []})
 
         return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
     except (ApiException, MaxRetryError) as e:
@@ -144,16 +145,9 @@ def list(user_id: str) -> Union[AnyDict, Error]:
         res = []
         for job in api_response.items:
             if user_id in job.metadata.name:
-                lgs = logs(user_id=user_id, job_id=job.metadata.name)
-                res.append({'cubegen_id': job.metadata.name,
-                            'status': {
-                                'active': job.status.active,
-                                'start_time': job.status.start_time,
-                                'failed': job.status.failed,
-                                'succeeded': job.status.succeeded,
-                                'completion_time': job.status.completion_time,
-                                'output': lgs,
-                            }})
+                job = get(user_id=user_id, cubegen_id=job.metadata.name)
+
+                res.append(job)
 
         return api.ApiResponse.success(res)
     except (ApiException, MaxRetryError) as e:
