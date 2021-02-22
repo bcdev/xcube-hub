@@ -13,6 +13,13 @@
 - The main function has been moved to `__main__.py` to simplify launching the hub inside docker containers
 - The Docker command has been simplified by using the python executable directly
 - The authorization flow allows not to use both xcube-hub as well as auth0 issued tokens
+- Added an Auth class that handles the creation of
+  authorization class instances as singletons to handle different authorization issuers
+- Ensured that controllers that need the user_id and/or email will
+  get it passed using the token_info function parameter.
+- The token_info is now set during the token verification process
+- The HttpRequest response for the route `/cubegens/{cubegen_id}` includes now progress information
+- put_callback now receives the user's email address to be used in setting the punits for a user
 
 ## Changes in v1.0.14
 ### New Features
