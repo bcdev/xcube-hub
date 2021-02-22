@@ -4,13 +4,14 @@ from typing import Sequence, Optional
 from xcube_hub.controllers.oauth import create_token
 
 
-def create_test_token(permissions: Optional[Sequence] = None):
+def create_test_token(permissions: Optional[Sequence] = None,
+                      audience: Optional[str] = "https://xcube-gen.brockmann-consult.de/api/v2/"):
     if permissions is None:
         permissions = ["manage:users", "manage:cubegens"]
 
     claims = {
         "iss": "https://xcube-gen.brockmann-consult.de/",
-        "aud": ["https://xcube-gen.brockmann-consult.de/api/v2/"],
+        "aud": [audience],
         "scope": permissions,
         "gty": "client-credentials",
         "email": "test@mail.com",

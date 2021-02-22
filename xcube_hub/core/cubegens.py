@@ -127,6 +127,7 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[Any
 
         kvdb = KeyValueDatabase.instance()
         kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
+        kvdb.set(user_id + '__' + job_id, {'progress': {}})
 
         return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
     except (ApiException, MaxRetryError) as e:
