@@ -588,7 +588,7 @@ components:
               oneOf:
                 - type: string
                 - type: boolean
-            progress:
+            worked:
               type: number
             elapsed:
               type: number

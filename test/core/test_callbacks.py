@@ -4,9 +4,8 @@ import boto3
 from jose import jwt
 from moto import mock_s3
 
-from xcube_hub import api
-from xcube_hub.controllers.punits import add_punits, get_user_data
-from xcube_hub.core.callbacks import get_callback, put_callback
+from xcube_hub.core.punits import add_punits, get_user_data
+from xcube_hub.core.callbacks import put_callback
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
@@ -69,17 +68,6 @@ class TestCallbacks(unittest.TestCase):
         self._cache.set('heinrich__cubegen__cfg', CUBEGEN_TEST)
         self._token = jwt.encode(TEST_CLAIMS, "ysdfvdfvdsvfdsvfdvs", algorithm="HS256")
 
-    def test_get_callback(self):
-        res = get_callback('heinrich', 'cubegen')
-
-        self.assertDictEqual({'value_key': 'value'}, res)
-
-        with self.assertRaises(api.ApiError) as e:
-            get_callback('heinrich', 'cubegen2')
-
-        self.assertEqual(404, e.exception.status_code)
-        self.assertEqual("Could not find any callback entries for that key.", str(e.exception))
-
     @mock_s3
     def test_put_callback(self):
         s3 = boto3.client('s3')
@@ -91,12 +79,12 @@ class TestCallbacks(unittest.TestCase):
         add_punits('heinrich@gmail.com', punits_request_1)
 
         cfg = {'state': {'error': 'Error'}, 'sender': 'on_end'}
-        put_callback('heinrich', 'cubegen', cfg, token=self._token)
+        put_callback(user_id='heinrich', cubegen_id='cubegen', email='heinrich@gmail.com', value=cfg)
         user_data = get_user_data('heinrich@gmail.com', dataset_name='punits')
         self.assertEqual(50000, user_data['count'])
 
         cfg = {'state': {}, 'sender': 'on_end'}
-        put_callback('heinrich', 'cubegen', cfg, token=self._token)
+        put_callback(user_id='heinrich', cubegen_id='cubegen', email='heinrich@gmail.com', value=cfg)
         user_data = get_user_data('heinrich@gmail.com', dataset_name='punits')
         self.assertEqual(40660, user_data['count'])
 

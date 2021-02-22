@@ -8,7 +8,7 @@ import requests
 from requests import HTTPError
 
 from xcube_hub import api
-from xcube_hub.controllers import punits
+from xcube_hub.core import punits
 from xcube_hub.models.user import User
 from xcube_hub.models.user_user_metadata import UserUserMetadata
 from xcube_hub.util import strap_token

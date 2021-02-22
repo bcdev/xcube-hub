@@ -1,22 +1,25 @@
+from typing import Dict
+
 from xcube_hub import api
-from xcube_hub.controllers import costs, authorization
-from xcube_hub.core import cubegens
+from xcube_hub.core import cubegens, costs
 from xcube_hub.typedefs import JsonObject
 
 
-def create_cubegen(body: JsonObject):
+def create_cubegen(body: JsonObject, token_info: Dict):
     """Create a cubegen
 
     Create a cubegen
 
     :param body: CubeGen configuration
     :type body: dict | bytes
+    :param token_info: Token claims
+    :type token_info: Dict
 
     :rtype: ApiCubeGenResponse
     """
 
     try:
-        user_id = authorization.get_user_id()
+        user_id = token_info['user_id']
 
         cubegen = cubegens.create(user_id=user_id, cfg=body)
         return api.ApiResponse.success(cubegen)
@@ -42,7 +45,7 @@ def delete_cubegen(cubegen_id):
         return e.response
 
 
-def delete_cubegens():
+def delete_cubegens(token_info):
     """Delete all cubegens
 
     Delete all cubegens
@@ -52,7 +55,7 @@ def delete_cubegens():
     """
 
     try:
-        user_id = authorization.get_user_id()
+        user_id = token_info['user_id']
         cubegens.delete_all(user_id=user_id)
         return api.ApiResponse.success("Success")
     except api.ApiError as e:
@@ -77,36 +80,40 @@ def get_info(body):
         return e.response
 
 
-def get_cubegen(cubegen_id):
+def get_cubegen(cubegen_id, token_info):
     """List specific cubegen
 
     List specific cubegen
 
     :param cubegen_id: CubeGen ID
     :type cubegen_id: str
+    :param token_info: Token claims
+    :type token_info: Dict
 
     :rtype: ApiCubeGenResponse
     """
 
     try:
-        user_id = authorization.get_user_id()
+        user_id = token_info['user_id']
         res = cubegens.get(user_id=user_id, cubegen_id=cubegen_id)
         return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response
 
 
-def get_cubegens():
+def get_cubegens(token_info):
     """List cubegens
 
     List user cubegens
 
+    :param token_info: Token claims
+    :type token_info: Dict
 
     :rtype: ApiCubeGensResponse
     """
 
     try:
-        user_id = authorization.get_user_id()
+        user_id = token_info['user_id']
         res = cubegens.list(user_id=user_id)
         return api.ApiResponse.success(res)
     except api.ApiError as e:
