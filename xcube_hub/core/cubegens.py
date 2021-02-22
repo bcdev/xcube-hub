@@ -9,7 +9,7 @@ from kubernetes.client import ApiException
 from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api
-from xcube_hub.auth0 import get_token_auth_header
+from xcube_hub.auth import Auth
 from xcube_hub.core import callbacks
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -108,6 +108,8 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[Any
         if 'input_config' not in cfg and 'input_configs' not in cfg:
             raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")
 
+        token = token or Auth.instance().token
+
         xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
         user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
         callback_uri = os.getenv('XCUBE_HUB_CALLBACK_URL', False)
@@ -118,7 +120,7 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[Any
         job_id = f"{user_id}-{str(uuid.uuid4())[:18]}"
 
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{job_id}/callbacks',
-                                      access_token=token or get_token_auth_header())
+                                      access_token=token)
 
         cfg['output_config']['data_id'] = job_id + '.zarr'
 

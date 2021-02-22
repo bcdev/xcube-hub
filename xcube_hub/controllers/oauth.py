@@ -3,7 +3,8 @@ from typing import Dict
 
 from jose import jwt
 
-from xcube_hub import auth0, api
+from xcube_hub import api
+from xcube_hub.auth import Auth
 from xcube_hub.core import users, oauth
 from xcube_hub.models.oauth_token import OauthToken
 from xcube_hub.models.user import User
@@ -35,10 +36,11 @@ def oauth_token_post(body: OauthToken):
     """
 
     try:
+        auth = Auth.instance()
         aud = maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
 
         oauth_token = OauthToken.from_dict(body)
-        token = auth0.get_management_token()
+        token = auth.get_management_token()
         res = oauth.get_user_by_credentials(token=token,
                                             client_id=oauth_token.client_id,
                                             client_secret=oauth_token.client_secret)
