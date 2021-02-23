@@ -567,7 +567,7 @@ components:
       type: object
     Callback:
       example:
-        worked: 6.027456183070403
+        progress: 6.027456183070403
         values: '{}'
         total_worked: 0.8008281904610115
         message: message
@@ -588,7 +588,7 @@ components:
               oneOf:
                 - type: string
                 - type: boolean
-            worked:
+            progress:
               type: number
             elapsed:
               type: number
