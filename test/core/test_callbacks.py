@@ -4,7 +4,6 @@ import boto3
 from jose import jwt
 from moto import mock_s3
 
-from xcube_hub import api
 from xcube_hub.core.punits import add_punits, get_user_data
 from xcube_hub.core.callbacks import put_callback, get_callback
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
@@ -74,11 +73,9 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertDictEqual({'value_key': 'value'}, res)
 
-        with self.assertRaises(api.ApiError) as e:
-            get_callback('heinrich', 'cubegen2')
+        res = get_callback('heinrich', 'cubegen2')
 
-        self.assertEqual(404, e.exception.status_code)
-        self.assertEqual("Could not find any callback entries for that key.", str(e.exception))
+        self.assertDictEqual({}, res)
 
     @mock_s3
     def test_put_callback(self):

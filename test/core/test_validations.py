@@ -1,14 +1,15 @@
 import os
 
+from dotenv import load_dotenv
+
 from test import BaseTestCase
 from xcube_hub import api
-from xcube_hub.core.validations import validate_env, REQUIRED_ENV_VARS
+from xcube_hub.core.validations import validate_env
 
 
 class TestOauthController(BaseTestCase):
     def setUp(self):
-        for env in REQUIRED_ENV_VARS:
-            os.environ[env] = "dsfg"
+        load_dotenv()
 
     def test_validations(self):
         res = validate_env()

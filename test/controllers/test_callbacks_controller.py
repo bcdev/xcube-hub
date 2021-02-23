@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-import os
+from dotenv import load_dotenv
 
 from test.controllers.utils import create_test_token
 from xcube_hub.models.callback import Callback
@@ -14,8 +14,7 @@ class TestCallbacksController(BaseTestCase):
 
     def setUp(self) -> None:
         self._claims, self._token = create_test_token(['manage:cubegens'])
-        os.environ["XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD"] = "https://test"
-        os.environ["XCUBE_HUB_OAUTH_AUD"] = "https://xcube-gen.brockmann-consult.de/api/v2/"
+        load_dotenv()
 
     def test_put_callback_by_job_id(self):
         """Test case for put_callback_by_job_id

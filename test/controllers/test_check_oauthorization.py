@@ -1,6 +1,6 @@
 import unittest
 
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Unauthorized
 
 from test.controllers.utils import create_test_token
 from xcube_hub.controllers.authorization import check_oauthorization, validate_scope_oauthorization
@@ -21,18 +21,18 @@ class TestOauthorization(unittest.TestCase):
 
         token = create_token(claims=self._claims, days_valid=-1)
 
-        with self.assertRaises(Forbidden) as e:
+        with self.assertRaises(Unauthorized) as e:
             check_oauthorization(token)
 
-        self.assertEqual(403, e.exception.code)
-        self.assertEqual("403 Forbidden: Signature has expired.", str(e.exception))
+        self.assertEqual(401, e.exception.code)
+        self.assertEqual("401 Unauthorized: Signature has expired.", str(e.exception))
 
         claims, token = create_test_token(["manage:users", "manage:cubegens"], "https://test/api/v3")
-        with self.assertRaises(Forbidden) as e:
+        with self.assertRaises(Unauthorized) as e:
             check_oauthorization(token)
 
-        self.assertEqual(403, e.exception.code)
-        self.assertEqual("403 Forbidden: Invalid audience", str(e.exception))
+        self.assertEqual(401, e.exception.code)
+        self.assertEqual("401 Unauthorized: Invalid audience", str(e.exception))
 
     def test_validate_scope_oauthorization(self):
         required_scopes = ['a', ]

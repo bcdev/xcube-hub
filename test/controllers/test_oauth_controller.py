@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import os
 
 import requests_mock
+from dotenv import load_dotenv
 from flask import json
 from xcube_hub.models.oauth_token import OauthToken
 from test import BaseTestCase
@@ -15,16 +16,7 @@ class TestOauthController(BaseTestCase):
     """OauthController integration test stubs"""
 
     def setUp(self):
-        os.environ['XCUBE_HUB_OAUTH_AUD'] = 'https://test'
-        os.environ['AUTH0_USER_MANAGEMENT_CLIENT_ID'] = 'asdc'
-        os.environ['AUTH0_USER_MANAGEMENT_CLIENT_SECRET'] = 'asdc'
-        os.environ['XCUBE_HUB_TOKEN_SECRET'] = '+k5kLdMEX1o0pfYZlieAIjKeqAW0wh+5l9PfReyoKyZqYndb2MeYH' \
-                                               'XGqqZ2Uh1zZATCHMwgyIirYSVDAi9N6izWBYAG/GGfS3VJFA2FEg+' \
-                                               'YMQSHbhCTdG+/7p7XvltFyO8MPLhU5LFDWLc2rZCOliSBocfnYrM5A' \
-                                               'aHD7JsjUqR+Ej3vVcfWAHPAyp66m/1TaD6svCuDcdXN09I0UJ+10Q/P' \
-                                               's2Vz9qHKhK6oW8gqXHjG8+jZvjjeH29LLkPdYHM5nofyDMumJYRrHBu' \
-                                               'RcnCt4EtDUJurH4LizPCvrAbMarc/03w1+vu+LEpRR67O7N7zda' \
-                                               'XBkPc4VRwF5aLCh5MLeEg=='
+        load_dotenv()
 
     def test_oauth_token_post(self, m):
         """Test case for oauth_token_post
@@ -46,6 +38,7 @@ class TestOauthController(BaseTestCase):
                                     content_type='application/csv')
         self.assert_status(response, 415, 'Response body is : ' + response.data.decode('utf-8'))
 
+        aud = os.environ['XCUBE_HUB_OAUTH_AUD']
         del os.environ['XCUBE_HUB_OAUTH_AUD']
         response = self.client.open('/api/v2/oauth/token', method='POST', data=json.dumps(body),
                                     content_type='application/json')
@@ -54,11 +47,13 @@ class TestOauthController(BaseTestCase):
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual("Environment Variable XCUBE_HUB_OAUTH_AUD must be given.", data['message'])
 
-        os.environ['XCUBE_HUB_OAUTH_AUD'] = 'https://test'
+        os.environ['XCUBE_HUB_OAUTH_AUD'] = aud
+        secret = os.environ['XCUBE_HUB_TOKEN_SECRET']
         os.environ['XCUBE_HUB_TOKEN_SECRET'] = 'sdfvgd'
         response = self.client.open('/api/v2/oauth/token', method='POST', data=json.dumps(body),
                                     content_type='application/json')
 
+        os.environ['XCUBE_HUB_TOKEN_SECRET'] = secret
         data = response.json
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual("System Error: Invalid token secret given.", data['message'])

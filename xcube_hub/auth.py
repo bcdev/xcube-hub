@@ -11,34 +11,18 @@ from jose.exceptions import JWKError, JWTError, ExpiredSignatureError
 from jwt import InvalidAlgorithmError
 from werkzeug.exceptions import Unauthorized, Forbidden
 
-from xcube_hub import api
 from xcube_hub.typedefs import JsonObject
 
 
 _ISS_TO_PROVIDER = {
     "https://xcube-gen.brockmann-consult.de/": 'xcube',
     "https://edc.eu.auth0.com/": 'auth0',
+    "https://test/": 'mocker',
 }
 
 
 class AuthProvider(ABC):
     _claims = {}
-
-    @property
-    def permissions(self) -> Dict:
-        raise NotImplementedError("Needs to be implemented by an Auth class")
-
-    @property
-    def user_id(self) -> str:
-        raise NotImplementedError("Needs to be implemented by an Auth class")
-
-    @property
-    def email(self) -> str:
-        raise NotImplementedError("Needs to be implemented by an Auth class")
-
-    @property
-    def token(self) -> str:
-        raise NotImplementedError("Needs to be implemented by an Auth class")
 
     @abstractmethod
     def verify_token(self, token):
@@ -67,7 +51,7 @@ class Auth(AuthProvider):
 
     _instance = None
 
-    def __init__(self, provider: str, audience: str, **kwargs):
+    def __init__(self, provider: str, audience: Optional[str] = None, **kwargs):
         self._provider = self._new_auth_provider(audience=audience, provider=provider, **kwargs)
         self._claims = dict()
         self._token = ""
@@ -82,7 +66,7 @@ class Auth(AuthProvider):
         claims = self._provider.verify_token(token)
 
         if not claims:
-            raise Forbidden()
+            raise Forbidden(description="Access denied. Invalid claims.")
 
         self._claims = claims
         self._token = token
@@ -96,18 +80,12 @@ class Auth(AuthProvider):
         elif 'scope' in self._claims:
             permissions = self._claims.get("scope").split(' ')
 
-        if permissions is None:
-            raise api.ApiError(403, "access denied: Insufficient permissions.")
-
         return permissions
 
     # noinspection InsecureHash
     @property
     def user_id(self) -> str:
-        try:
-            email = self._claims['email']
-        except KeyError:
-            raise Unauthorized(description="This claim does not contain an email address.")
+        email = self.email
 
         res = hashlib.md5(email.encode())
 
@@ -134,27 +112,24 @@ class Auth(AuthProvider):
         """
 
         if provider == 'auth0':
-            return _Auth0(audience, **kwargs)
+            return _Auth0(audience=audience, **kwargs)
         elif provider == 'xcube':
-            return _AuthXcube(audience, **kwargs)
+            return _AuthXcube(audience=audience, **kwargs)
+        elif provider == 'mocker':
+            return _AuthMocker()
         else:
             raise Unauthorized(description=f"Provider {provider} unknown.")
 
     @classmethod
-    def instance(cls, iss: Optional[str] = None, refresh: bool = False, use_mocker: bool = False, **kwargs) \
+    def instance(cls, iss: Optional[str] = None, audience: Optional[str] = None, refresh: bool = False, **kwargs) \
             -> "Auth":
         refresh = refresh or cls._instance is None
         if refresh:
-            if use_mocker:
-                cls._instance = _AuthMocker
-            else:
-                provider = None
-                try:
-                    provider = _ISS_TO_PROVIDER.get(iss)
-                except KeyError as e:
-                    Unauthorized(description=f"Issuer {iss} unknown.")
+            provider = _ISS_TO_PROVIDER.get(iss)
+            if provider is None:
+                raise Unauthorized(description=f"Issuer {iss} unknown.")
 
-                cls._instance = Auth(provider=provider, **kwargs)
+            cls._instance = Auth(provider=provider, audience=audience, **kwargs)
 
         return cls._instance
 
@@ -173,24 +148,25 @@ class _Auth0(AuthProvider):
     """
 
     def __init__(self,
-                 domain: str,
-                 audience: str,
-                 user_management_client_id: Optional[str] = None,
-                 user_management_client_secret: Optional[str] = None):
+                 domain: Optional[str] = None,
+                 audience: Optional[str] = None):
 
         super().__init__()
-        self._domain = os.getenv('AUTH0_DOMAIN') or domain
-        self._audience = os.getenv('XCUBE_HUB_OAUTH_AUD') or audience
-        self._user_management_client_id = os.getenv('AUTH0_USER_MANAGEMENT_CLIENT_ID') or user_management_client_id
-        self._user_management_client_secret = os.getenv(
-            'AUTH0_USER_MANAGEMENT_CLIENT_SECRET') or user_management_client_secret
+        self._domain = domain or os.getenv('AUTH0_DOMAIN')
+        self._audience = audience or os.getenv('XCUBE_HUB_OAUTH_AUD')
         self._algorithms = ["RS256"]
+
+        if self._domain is None:
+            raise Unauthorized(description="Auth0 error: Domain not set")
+
+        if self._audience is None:
+            raise Unauthorized(description="Auth0 error: Audience not set")
 
     def get_email(self, claims):
         try:
             return claims['https://xcube-gen.brockmann-consult.de/user_email']
         except KeyError:
-            raise Unauthorized("Access denied. Cannot get email from token.")
+            raise Unauthorized("Access denied. Cannot get email.")
 
     def verify_token(self, token: str) -> Dict:
         """
@@ -198,7 +174,6 @@ class _Auth0(AuthProvider):
         :param token:
         :return:
         """
-
         json_url = urlopen("https://" + self._domain + "/.well-known/jwks.json")
         jwks = json.loads(json_url.read())
 
@@ -279,14 +254,20 @@ class _AuthXcube(AuthProvider):
         try:
             return jwt.decode(token, self._secret, audience=self._audience)
         except (JWKError, JWTError, InvalidAlgorithmError, ExpiredSignatureError) as e:
-            raise Forbidden(description=str(e))
+            raise Unauthorized(description=str(e))
 
 
-class _AuthMocker:
+class _AuthMocker(AuthProvider):
     """
     Mocker for unittests
     """
     return_value: Optional[Any] = None
 
+    def __init__(self):
+        super().__init__()
+
     def verify_token(self, token: str) -> Dict:
         return self.return_value
+
+    def get_email(self, claims):
+        return "mocker@mail.nz"

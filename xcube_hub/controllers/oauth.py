@@ -72,9 +72,8 @@ def oauth_token_post(body: OauthToken):
     """
 
     try:
-        audience = os.getenv("XCUBE_HUB_OAUTH_AUD", None)
-        aud = maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
 
+        aud = maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
         oauth_token = OauthToken.from_dict(body)
         token = _get_management_token()
         res = oauth.get_user_by_credentials(token=token,
