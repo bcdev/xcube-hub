@@ -18,8 +18,8 @@ from xcube_hub.typedefs import AnyDict, Error
 
 def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
     try:
-        output = logs(user_id=user_id, job_id=cubegen_id)
-        stat = status(user_id=user_id, job_id=cubegen_id)
+        output = logs(job_id=cubegen_id)
+        stat = status(job_id=cubegen_id)
 
         progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
 
@@ -31,7 +31,7 @@ def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
         raise api.ApiError(400, str(e))
 
 
-def create_cubegen_object(cubegen_id: str, cfg: AnyDict) -> client.V1Job:
+def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False) -> client.V1Job:
     # Configure Pod template container
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
@@ -48,8 +48,10 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict) -> client.V1Job:
     if not cfg:
         raise api.ApiError(400, "create_gen_cubegen_object needs a config dict.")
 
+    info_flag = " -i " if info_only else ""
+
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube --traceback gen2 -v --store-conf /etc/xcube/data-pools.yaml"]
+                              f"| xcube --traceback gen2 {info_flag} -v --store-conf /etc/xcube/data-pools.yaml"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -101,7 +103,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict) -> client.V1Job:
     return cubegen
 
 
-def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[AnyDict, Error]:
+def create(user_id: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = None) -> Union[AnyDict, Error]:
     try:
         if 'input_config' not in cfg and 'input_configs' not in cfg:
             raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")
@@ -122,7 +124,7 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None) -> Union[Any
 
         cfg['output_config']['data_id'] = job_id + '.zarr'
 
-        job = create_cubegen_object(job_id, cfg=cfg)
+        job = create_cubegen_object(job_id, cfg=cfg, info_only=info_only)
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=xcube_hub_namespace)
 
@@ -154,7 +156,7 @@ def list(user_id: str) -> Union[AnyDict, Error]:
         raise api.ApiError(400, str(e))
 
 
-def logs(user_id: str, job_id: str) -> Sequence:
+def logs(job_id: str) -> Sequence:
     xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     api_pod_instance = client.CoreV1Api()
 
@@ -174,7 +176,7 @@ def logs(user_id: str, job_id: str) -> Sequence:
     return lgs
 
 
-def status(user_id: str, job_id: str) -> AnyDict:
+def status(job_id: str) -> AnyDict:
     xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     api_instance = client.BatchV1Api()
     try:

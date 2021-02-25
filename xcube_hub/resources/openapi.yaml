@@ -687,7 +687,6 @@ components:
           $ref: '#/components/schemas/CubegenConfigOpenParams'
       required:
         - data_id
-        - open_params
         - store_id
       type: object
     CubegenConfigCubeConfig:

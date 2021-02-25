@@ -20,6 +20,7 @@
 - The token_info is now set during the token verification process
 - The HttpRequest response for the route `/cubegens/{cubegen_id}` includes now progress information
 - put_callback now receives the user's email address to be used in setting the punits for a user
+- Changed `worked` to `progress` for Callbacks in openapi rest definition
 
 ## Changes in v1.0.14
 ### New Features

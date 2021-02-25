@@ -1,6 +1,8 @@
 from typing import Dict
 
-from xcube_hub import api
+from kubernetes import client
+
+from xcube_hub import api, poller
 from xcube_hub.core import cubegens, costs
 from xcube_hub.typedefs import JsonObject
 
@@ -62,7 +64,7 @@ def delete_cubegens(token_info):
         return e.response
 
 
-def get_info(body):
+def get_info(body, token_info: Dict):
     """Receive cost information for runnning a cubegen
 
     Receive cost information of using a service
@@ -74,6 +76,13 @@ def get_info(body):
     """
 
     try:
+        user_id = token_info['user_id']
+        job = cubegens.create(user_id=user_id, cfg=body)
+        apps_v1_api = client.BatchV1Api()
+        poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace="xcube-gen-stage",
+                               name=job['cubegen_id'])
+        status = cubegens.get(user_id=user_id, cubegen_id=job['cubegen_id'])
+        res = status['output'][0]
         result = costs.get_size_and_cost(processing_request=body)
         return api.ApiResponse.success(result=result)
     except api.ApiError as e:
@@ -118,4 +127,3 @@ def get_cubegens(token_info):
         return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response
-
