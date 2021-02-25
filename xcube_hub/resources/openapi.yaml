@@ -42,6 +42,230 @@ paths:
           description: service not found
       summary: get service info
       x-openapi-router-controller: xcube_hub.controllers.default
+  /users:
+    put:
+      description: |
+        Create a user
+      operationId: put_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: User configuration
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+          description: User created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+      security:
+        - oAuthorization:
+          - write:users
+      summary: Create a user
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
+  /users/{user_id}:
+    get:
+      description: |
+        Get info of a user
+      operationId: get_user
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ApiUserResponse'
+          description: User created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+      tags:
+        - users
+      security:
+         - oAuthorization:
+           - read:users
+      x-openapi-router-controller: xcube_hub.controllers.users
+  /users/{user_id}/apps:
+    get:
+      description: |
+        Get user's apps
+      operationId: get_user_apps
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: User added
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+  /users/{user_id}/apps/{app_id}:
+    put:
+      description: |
+        Add user to app
+      operationId: put_user_to_app
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: App ID
+          explode: false
+          in: path
+          name: app_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: User added
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+    delete:
+      description: |
+        Remove a user from app
+      operationId: delete_user_from_app
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: App ID
+          explode: false
+          in: path
+          name: app_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: User deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+      tags:
+        - users
+      security:
+        - oAuthorization:
+            - update:users
+            - delete:role_members
+            - read:roles
+            - create:role_members
+            - read:role_members
+            - read:users
+      x-openapi-router-controller: xcube_hub.controllers.users
+  /users/credentials:
+    get:
+      description: |
+        Get info of a user
+      operationId: get_user_credentials
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCredentialsResponse'
+          description: Credentials returned
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+      security:
+        - oAuthorization:
+            - read:users
+      x-openapi-router-controller: xcube_hub.controllers.users
   /cubegens:
     delete:
       description: |
@@ -377,6 +601,20 @@ components:
           properties:
             traceback:
               type: string
+    ApiUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            result:
+              $ref: '#/components/schemas/User'
+    ApiCredentialsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            result:
+              $ref: '#/components/schemas/UserMetaData'
     ApiCubegenResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -748,6 +986,86 @@ components:
       - store_id
       - store_params
       type: object
+    UserMetaData:
+      type: object
+      properties:
+        client_id:
+          type: string
+        client_secret:
+          type: string
+          format: password
+      additionalProperties: true
+    AppMetaData:
+      type: object
+      properties:
+        geodb_role:
+          type: string
+      additionalProperties: true
+    Identity:
+      type: object
+      properties:
+        connection:
+          type: string
+        user_id:
+          type: string
+        provider:
+          type: string
+        isSocial:
+          type: boolean
+    User:
+      type: object
+      required:
+        - email
+        - username
+        - given_name
+        - family_name
+        - user_metadata
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        email_verified:
+          type: boolean
+        username:
+          type: string
+        created_at:
+          type: string
+          format: 'date-time'
+        updated_at:
+          type: string
+          format: 'date-time'
+        identities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identity'
+        app_metadata:
+          $ref: '#/components/schemas/AppMetaData'
+        user_metadata:
+          $ref: '#/components/schemas/UserMetaData'
+        picture:
+          type: string
+        name:
+          type: string
+        nickname:
+          type: string
+        multifactor:
+          type: array
+          items:
+            type: object
+        last_ip:
+          type: string
+        last_login:
+          type: string
+        logins_count:
+          type: integer
+        blocked:
+          type: boolean
+        given_name:
+          type: string
+        family_name:
+          type: string
   securitySchemes:
     oAuthorization:
       description: This API uses Oauth 2 with the implicit grant flow.

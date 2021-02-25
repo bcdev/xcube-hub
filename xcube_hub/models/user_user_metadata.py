@@ -14,7 +14,7 @@ class UserUserMetadata(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, client_id=None, client_secret=None, punits=None, xcube_user_id=None):  # noqa: E501
+    def __init__(self, client_id=None, client_secret=None, punits=None):
         """UserUserMetadata - a model defined in OpenAPI
         :param client_id: The client_id of this UserUserMetadata.  # noqa: E501
         :type client_id: str
@@ -22,27 +22,22 @@ class UserUserMetadata(Model):
         :type client_secret: str
         :param punits: The punits of this UserUserMetadata.  # noqa: E501
         :type punits: float
-        :param xcube_user_id: The punits of this UserUserMetadata.  # noqa: E501
-        :type xcube_user_id: str
         """
         self.openapi_types = {
             'client_id': str,
             'client_secret': str,
             'punits': float,
-            'xcube_user_id': str
         }
 
         self.attribute_map = {
             'client_id': 'client_id',
             'client_secret': 'client_secret',
             'punits': 'punits',
-            'xcube_user_id': 'xcube_user_id'
         }
 
         self._client_id = client_id
         self._client_secret = client_secret
         self._punits = punits
-        self._xcube_user_id = xcube_user_id
 
     @classmethod
     def from_dict(cls, dikt) -> 'UserUserMetadata':
@@ -104,20 +99,3 @@ class UserUserMetadata(Model):
         """
 
         self._punits = punits
-
-    @property
-    def xcube_user_id(self):
-        """Gets the xcube_user_id of this UserUserMetadata.
-        :return: The xcube_user_id of this UserUserMetadata.
-        :rtype: str
-        """
-        return self._xcube_user_id
-
-    @xcube_user_id.setter
-    def xcube_user_id(self, xcube_user_id):
-        """Sets the client_id of this UserUserMetadata.
-        :param xcube_user_id: The xcube_user_id of this UserUserMetadata.
-        :type xcube_user_id: str
-        """
-
-        self._xcube_user_id = xcube_user_id
