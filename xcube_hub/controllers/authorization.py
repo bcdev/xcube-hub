@@ -32,7 +32,7 @@ def check_oauthorization(token):
     audience = user_management_aud if user_management_aud == aud else None
 
     # The auth provider is instantiated as a singleton.
-    auth = Auth.instance(iss=iss, audience=audience)
+    auth = Auth(iss=iss, audience=audience)
 
     auth.verify_token(token=token)
 

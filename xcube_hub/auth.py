@@ -51,7 +51,11 @@ class Auth(AuthProvider):
 
     _instance = None
 
-    def __init__(self, provider: str, audience: Optional[str] = None, **kwargs):
+    def __init__(self, iss: str, audience: Optional[str] = None, **kwargs):
+        provider = _ISS_TO_PROVIDER.get(iss)
+        if provider is None:
+            raise Unauthorized(description=f"Issuer {iss} unknown.")
+
         self._provider = self._new_auth_provider(audience=audience, provider=provider, **kwargs)
         self._claims = dict()
         self._token = ""
@@ -125,11 +129,7 @@ class Auth(AuthProvider):
             -> "Auth":
         refresh = refresh or cls._instance is None
         if refresh:
-            provider = _ISS_TO_PROVIDER.get(iss)
-            if provider is None:
-                raise Unauthorized(description=f"Issuer {iss} unknown.")
-
-            cls._instance = Auth(provider=provider, audience=audience, **kwargs)
+            cls._instance = Auth(iss=iss, audience=audience, **kwargs)
 
         return cls._instance
 
@@ -163,10 +163,9 @@ class _Auth0(AuthProvider):
             raise Unauthorized(description="Auth0 error: Audience not set")
 
     def get_email(self, claims):
-        try:
-            return claims['https://xcube-gen.brockmann-consult.de/user_email']
-        except KeyError:
-            raise Unauthorized("Access denied. Cannot get email.")
+        if 'https://xcube-gen.brockmann-consult.de/user_email' not in claims:
+            return "no email"
+        return claims['https://xcube-gen.brockmann-consult.de/user_email']
 
     def verify_token(self, token: str) -> Dict:
         """

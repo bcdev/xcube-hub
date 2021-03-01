@@ -75,7 +75,7 @@ paths:
           description: User not found
       security:
         - oAuthorization:
-          - write:users
+          - create:users
       summary: Create a user
       tags:
         - users
@@ -84,7 +84,7 @@ paths:
     get:
       description: |
         Get info of a user
-      operationId: get_user
+      operationId: get_user_by_user_id
       parameters:
         - description: User ID
           explode: false
@@ -152,10 +152,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: User not found
+      tags:
+        - users
+      security:
+        - oAuthorization:
+            - read:users
+            - read:roles
+            - read:role_members
+      x-openapi-router-controller: xcube_hub.controllers.users
   /users/{user_id}/apps/{app_id}:
     put:
-      description: |
-        Add user to app
+      description: Add user to app
       operationId: put_user_to_app
       parameters:
         - description: User ID
@@ -193,6 +200,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: User not found
+      tags:
+        - users
+      security:
+        - oAuthorization:
+            - update:users
+            - read:roles
+            - create:role_members
+      x-openapi-router-controller: xcube_hub.controllers.users
     delete:
       description: |
         Remove a user from app
@@ -239,10 +254,6 @@ paths:
         - oAuthorization:
             - update:users
             - delete:role_members
-            - read:roles
-            - create:role_members
-            - read:role_members
-            - read:users
       x-openapi-router-controller: xcube_hub.controllers.users
   /users/credentials:
     get:
@@ -1036,6 +1047,8 @@ components:
         updated_at:
           type: string
           format: 'date-time'
+        connection:
+          type: string
         identities:
           type: array
           items:

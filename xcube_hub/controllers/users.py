@@ -16,6 +16,14 @@ _APP_TO_ROLE = {
 }
 
 
+def get_user_by_user_id(user_id: str, token_info: Dict):
+    try:
+        user = users.get_user_by_user_id(user_id=user_id, token=token_info['token'])
+        return api.ApiResponse.success(user.to_dict())
+    except api.ApiError as e:
+        return e.response
+
+
 def put_user(user: Dict, token_info: Dict):
     try:
         user = User.from_dict(user)
@@ -104,5 +112,13 @@ def get_user_apps(user_id: str, token_info: Dict):
         apps = [_APP_TO_ROLE[role['id']] for role in res if role['id'] in _APP_TO_ROLE]
 
         return api.ApiResponse.success(apps)
+    except api.ApiError as e:
+        return e.response
+
+
+def get_user_credentials():
+    try:
+        client_id, client_secret = users.create_secret()
+        return api.ApiResponse.success(dict(client_id=client_id, client_secret=client_secret))
     except api.ApiError as e:
         return e.response

@@ -23,7 +23,7 @@ class User(Model):
     def __init__(self, user_id=None, email=None, email_verified=None, username=None, created_at=None, updated_at=None,
                  identities=None, app_metadata=None, user_metadata=None, picture=None, name=None, nickname=None,
                  multifactor=None, last_ip=None, last_login=None, logins_count=None, blocked=None, given_name=None,
-                 family_name=None):  
+                 family_name=None, connection = None):
         """User - a model defined in OpenAPI
 
         :param user_id: The user_id of this User.  
@@ -64,6 +64,8 @@ class User(Model):
         :type given_name: str
         :param family_name: The family_name of this User.  
         :type family_name: str
+        :param connection: The auth connection of this User.
+        :type connection: str
         """
         self.openapi_types = {
             'user_id': str,
@@ -84,7 +86,8 @@ class User(Model):
             'logins_count': int,
             'blocked': bool,
             'given_name': str,
-            'family_name': str
+            'family_name': str,
+            'connection': str
         }
 
         self.attribute_map = {
@@ -106,7 +109,8 @@ class User(Model):
             'logins_count': 'logins_count',
             'blocked': 'blocked',
             'given_name': 'given_name',
-            'family_name': 'family_name'
+            'family_name': 'family_name',
+            'connection': 'connection'
         }
 
         self._user_id = user_id
@@ -128,6 +132,7 @@ class User(Model):
         self._blocked = blocked
         self._given_name = given_name
         self._family_name = family_name
+        self._connection = connection
 
     @classmethod
     def from_dict(cls, dikt) -> 'User':
@@ -548,3 +553,26 @@ class User(Model):
             raise ValueError("Invalid value for `family_name`, must not be `None`")  
 
         self._family_name = family_name
+
+    @property
+    def connection(self):
+        """Gets the connection of this User.
+
+
+        :return: The connection of this User.
+        :rtype: str
+        """
+        return self._connection
+
+    @connection.setter
+    def connection(self, connection):
+        """Sets the family_name of this User.
+
+
+        :param connection: The family_name of this User.
+        :type connection: str
+        """
+        if connection is None:
+            raise ValueError("Invalid value for `connection`, must not be `None`")
+
+        self._connection = connection
