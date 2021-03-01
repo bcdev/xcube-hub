@@ -122,7 +122,8 @@ def create(user_id: str, cfg: AnyDict, token: Optional[str] = None, info_only: b
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{job_id}/callbacks',
                                       access_token=token)
 
-        cfg['output_config']['data_id'] = job_id + '.zarr'
+        if not cfg['output_config'].get('data_id'):
+            cfg['output_config']['data_id'] = job_id + '.zarr'
 
         job = create_cubegen_object(job_id, cfg=cfg, info_only=info_only)
         api_instance = client.BatchV1Api()
