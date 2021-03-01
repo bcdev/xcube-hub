@@ -21,6 +21,7 @@
 - The HttpRequest response for the route `/cubegens/{cubegen_id}` includes now progress information
 - put_callback now receives the user's email address to be used in setting the punits for a user
 - Changed `worked` to `progress` for Callbacks in openapi rest definition
+- The output data_id is now only set to teh `job_id` if the `data_id` is not given
 
 ## Changes in v1.0.14
 ### New Features
