@@ -801,14 +801,20 @@ components:
           properties:
             input_pixels_per_unit:
               type: integer
+              minimum: 1
             input_punits_weight:
               type: number
               default: 1.0
+              minimum: 0.0
+              exclusiveMinimum: true
             output_pixels_per_punit:
               type: integer
+              minimum: 1
             output_punits_weight:
               type: number
               default: 1.0
+              minimum: 0.0
+              exclusiveMinimum: true
         store_params:
           type: object
           properties:
