@@ -22,6 +22,8 @@
 - put_callback now receives the user's email address to be used in setting the punits for a user
 - Changed `worked` to `progress` for Callbacks in openapi rest definition
 - The output data_id is now only set to teh `job_id` if the `data_id` is not given
+- The `/cubegens/info` process has changed it now receives any necessary data for teh punits calculation from
+  xcube gen2 via a xcube gen2 job
 
 ## Changes in v1.0.14
 ### New Features

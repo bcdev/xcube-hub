@@ -51,7 +51,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     info_flag = " -i " if info_only else ""
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube --traceback gen2 {info_flag} -v --store-conf /etc/xcube/data-pools.yaml"]
+                              f"| xcube --traceback gen2 {info_flag} -v --stores /etc/xcube/data-pools.yaml"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -103,7 +103,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     return cubegen
 
 
-def create(user_id: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = None) -> Union[AnyDict, Error]:
+def create(user_id: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = False) -> Union[AnyDict, Error]:
     try:
         if 'input_config' not in cfg and 'input_configs' not in cfg:
             raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")

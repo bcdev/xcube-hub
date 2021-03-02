@@ -9,7 +9,6 @@ from xcube_hub.core.validations import validate_env
 from xcube_hub.k8scfg import K8sCfg
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
-
 app = connexion.App(__name__, specification_dir='./resources/')
 
 

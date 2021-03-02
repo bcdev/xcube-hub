@@ -7,6 +7,8 @@ Error = Tuple[AnyDict, int]
 JsonValue = Union[str, int, float, bool, type(None), Tuple, List, Dict]
 JsonObject = Dict[str, JsonValue]
 
+Number = (int, float)
+
 
 class Undefined:
     def __repr__(self):

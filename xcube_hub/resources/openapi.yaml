@@ -153,7 +153,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiCostResponse'
+                $ref: '#/components/schemas/ApiCubegenInfoResponse'
           description: costs for using the service
         "400":
           content:
@@ -305,7 +305,8 @@ paths:
       operationId: oauth_token_post
       requestBody:
         content:
-          application/json:
+#          application/json:
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/OauthToken'
         description: OauthToken
@@ -384,13 +385,13 @@ components:
           properties:
             result:
               $ref: '#/components/schemas/CubegenStatus'
-    ApiCostResponse:
+    ApiCubegenInfoResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
         - type: object
           properties:
             result:
-                $ref: '#/components/schemas/Cost'
+                $ref: '#/components/schemas/CubegenInfo'
     ApiCubegensResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -464,61 +465,17 @@ components:
     CostConfig:
       allOf:
       - $ref: '#/components/schemas/CubegenConfig'
-    Cost:
+    CubegenInfo:
       type: object
-      required:
-        - punits
-        - schema
       properties:
+        dataset_descriptor:
+          $ref: '#/components/schemas/DatasetDescriptor'
+        size_estimation:
+          $ref: '#/components/schemas/SizeEstimation'
+        data_store:
+          $ref: '#/components/schemas/DataStore'
         punits:
-          type: object
-          required:
-            - total_count
-          properties:
-            input_count:
-              type: number
-            input_weight:
-              type: number
-            output_count:
-              type: number
-            output_weight:
-              type: number
-            total_count:
-              type: number
-        schema:
-          type: object
-          properties:
-            dims:
-              type: object
-              properties:
-                lat:
-                  type: number
-                lon:
-                  type: number
-                time:
-                  type: number
-            image_size:
-              type: array
-              items:
-                type: number
-                minItems: 2
-                maxItems: 2
-            num_bytes:
-              type: number
-            num_requests:
-              type: number
-            num_tiles:
-              type: array
-              items:
-                type: number
-            num_variables:
-              type: number
-            tile_size:
-              type: array
-              items:
-                type: number
-                minItems: 2
-                maxItems: 2
+          $ref: '#/components/schemas/PUnits'
     CubegenConfig:
       example:
         output_config:
@@ -657,7 +614,6 @@ components:
       - audience
       - client_id
       - client_secret
-      - grant_type
       type: object
     CubegenConfigOpenParams:
       example:
@@ -748,26 +704,125 @@ components:
       - store_id
       - store_params
       type: object
+    PUnits:
+      type: object
+      properties:
+        input_count:
+          type: integer
+        input_weight:
+          type: number
+          format: float
+        output_count:
+          type: integer
+        output_weight:
+          type: number
+          format: float
+        total_count:
+          type: integer
+    SizeEstimation:
+      type: object
+      properties:
+        image_size:
+          type: array
+          items:
+            type: integer
+        tile_size:
+          type: array
+          items:
+            type: integer
+        num_tiles:
+          type: array
+          items:
+            type: integer
+        num_variables:
+          type: integer
+        num_requests:
+          type: integer
+        num_bytes:
+          type: integer
+    DatasetDescriptor:
+      type: object
+      properties:
+        type_specifier:
+          type: string
+        data_id:
+          type: string
+        crs:
+          type: string
+        bbox:
+          type: array
+          items:
+            type: number
+            format: int32
+        time_range:
+          type: string
+          format: date
+        time_period:
+          type: string
+        data_vars:
+          type: object
+        spatial_res:
+          type: number
+          format: float
+        dims:
+          type: object
+          properties:
+            time:
+              type: integer
+            lat:
+              type: number
+              format: float
+            lon:
+              type: number
+              format: float
+            x:
+              type: number
+              format: float
+            y:
+              type: number
+              format: float
+    DataStore:
+      type: object
+      required:
+        - title
+        - store_id
+        - cost_params
+        - store_params
+      properties:
+        title:
+          type: string
+        store_id:
+          type: string
+        cost_params:
+          type: object
+          required:
+            - input_pixels_per_unit
+            - input_punits_weight
+            - output_pixels_per_punit
+            - output_punits_weight
+          properties:
+            input_pixels_per_unit:
+              type: integer
+            input_punits_weight:
+              type: number
+            output_pixels_per_punit:
+              type: integer
+            output_punits_weight:
+              type: number
+        store_params:
+          type: object
+          properties:
+            api_url:
+              type: string
+              format: url
   securitySchemes:
     oAuthorization:
       description: This API uses Oauth 2 with the implicit grant flow.
       flows:
         clientCredentials:
           scopes:
-            read_cubegen: Read cubegen status and result
-            read_punits: Allow reading the punits level of a user
-            put_punits: Allow adding punits to and remove punits from a user
-            read_callbacks: Allow reading callbacks
-            put_callbacks: Allow reading callbacks
-            delete_callbacks: Allow reading callbacks
-          tokenUrl: https://edc.eu.auth0.com/oauth/token
-        implicit:
-          authorizationUrl: https://edc.eu.auth0.com/authorize
-          scopes:
-            read_cubegen: Read cubegen status and result
-            submit_cubegen: Submit cubegens to the K8s cluster
-            read_punits: Allow reading the punits level of a user
-            read_callbacks: Allow reading callbacks
+            manage_cubegens: Read cubegen status and result
+          tokenUrl: http://localhost:8080/api/v2/oauth/token
       type: oauth2
       x-tokenInfoFunc: xcube_hub.controllers.authorization.check_oauthorization
       x-scopeValidateFunc: xcube_hub.controllers.authorization.validate_scope_oauthorization
