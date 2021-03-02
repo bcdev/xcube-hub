@@ -73,7 +73,8 @@ def get_size_and_cost(processing_request: JsonObject, datastore: JsonObject) -> 
     _check_lower_bound(input_pixels_per_punit, 0)
 
     input_punits_weight = get_json_request_value(cost_params, 'input_punits_weight',
-                                                 value_type=float)
+                                                 value_type=float,
+                                                 default_value=1.0)
 
     _check_lower_bound(input_punits_weight, 0)
 
@@ -83,7 +84,8 @@ def get_size_and_cost(processing_request: JsonObject, datastore: JsonObject) -> 
     _check_lower_bound(output_pixels_per_punit, 0)
 
     output_punits_weight = get_json_request_value(cost_params, 'output_punits_weight',
-                                                  value_type=float)
+                                                  value_type=float,
+                                                  default_value=1.0)
 
     _check_lower_bound(output_punits_weight, 0)
 

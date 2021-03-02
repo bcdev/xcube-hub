@@ -176,20 +176,6 @@ class TestCosts(unittest.TestCase):
         res = costs.get_size_and_cost(_CFG, self._datastore.to_dict())
         self.assertDictEqual(_EXP, res)
 
-        datastore = DataStore(
-            title="SENTINEL Hub (CODE-DE)",
-            store_id="sentinelhub",
-            cost_params=DataStoreCostParams(
-                input_pixels_per_punit=262144,
-                input_punits_weight=1.0,
-                output_pixels_per_punit=262144,
-                output_punits_weight=1.0
-            ),
-            store_params=DataStoreStoreParams(
-                api_url="https://code-de.sentinel-hub.com"
-            )
-        )
-
         datastore = {}
 
         with self.assertRaises(api.ApiError) as e:
@@ -210,13 +196,6 @@ class TestCosts(unittest.TestCase):
             res = costs.get_size_and_cost(_CFG, datastore)
 
         self.assertEqual('Value must be greater than 0', str(e.exception))
-
-        datastore = {"cost_params": {"input_pixels_per_punit": 10}}
-
-        with self.assertRaises(api.ApiError) as e:
-            res = costs.get_size_and_cost(_CFG, datastore)
-
-        self.assertEqual('missing request key "input_punits_weight"', str(e.exception))
 
         datastore = {"cost_params": {"input_pixels_per_punit": 10, "input_punits_weight": 0.0}}
 
@@ -242,17 +221,6 @@ class TestCosts(unittest.TestCase):
             res = costs.get_size_and_cost(_CFG, datastore)
 
         self.assertEqual('Value must be greater than 0', str(e.exception))
-
-        datastore = {"cost_params": {
-            "input_pixels_per_punit": 10,
-            "input_punits_weight": 10.0,
-            "output_pixels_per_punit": 10
-        }}
-
-        with self.assertRaises(api.ApiError) as e:
-            res = costs.get_size_and_cost(_CFG, datastore)
-
-        self.assertEqual('missing request key "output_punits_weight"', str(e.exception))
 
         datastore = {"cost_params": {
             "input_pixels_per_punit": 10,

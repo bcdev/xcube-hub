@@ -305,8 +305,8 @@ paths:
       operationId: oauth_token_post
       requestBody:
         content:
-#          application/json:
-          application/x-www-form-urlencoded:
+          application/json:
+#          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/OauthToken'
         description: OauthToken
@@ -797,18 +797,18 @@ components:
           type: object
           required:
             - input_pixels_per_unit
-            - input_punits_weight
             - output_pixels_per_punit
-            - output_punits_weight
           properties:
             input_pixels_per_unit:
               type: integer
             input_punits_weight:
               type: number
+              default: 1.0
             output_pixels_per_punit:
               type: integer
             output_punits_weight:
               type: number
+              default: 1.0
         store_params:
           type: object
           properties:
