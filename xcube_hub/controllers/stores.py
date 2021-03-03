@@ -13,6 +13,7 @@ def get_stores():
 
     try:
         stores = get_stores_from_file()
+
         return api.ApiResponse.success(result=stores)
     except api.ApiError as e:
         return e.response

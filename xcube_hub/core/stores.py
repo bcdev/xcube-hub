@@ -11,7 +11,12 @@ def get_stores_from_file():
 
     try:
         with open(store_fn, 'r') as f:
-            return yaml.safe_load(f)
+            stores = yaml.safe_load(f)
+
+            stores = {k: {'title': v['title'], 'store_id': v['store_id'],
+                          'description': v['description'] if 'description' in v else ''} for k, v in stores.items()}
+
+            return stores
+
     except (TypeError, FileNotFoundError, ParserError, ScannerError) as e:
         raise api.ApiError(400, str(e))
-

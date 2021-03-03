@@ -67,7 +67,7 @@ def delete_cubegens(token_info):
         return e.response
 
 
-def get_info(body, token_info: Dict):
+def get_cubegen_info(body, token_info: Dict):
     """Receive cost information for runnning a cubegen
 
     Receive cost information of using a service

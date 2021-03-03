@@ -140,7 +140,7 @@ paths:
     post:
       description: |
         Receive cost information of using a service
-      operationId: get_info
+      operationId: get_cubegen_info
       requestBody:
         content:
           application/json:
