@@ -10,7 +10,7 @@ from xcube_hub.auth import Auth, _AuthXcube, _Auth0, _AuthMocker
 
 class TestAuth(unittest.TestCase):
     def setUp(self):
-        load_dotenv()
+        load_dotenv(dotenv_path='test/.env')
 
     def test_auth(self):
         auth = Auth(provider='xcube')

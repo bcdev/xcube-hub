@@ -9,7 +9,7 @@ from xcube_hub.core.validations import validate_env
 
 class TestOauthController(BaseTestCase):
     def setUp(self):
-        load_dotenv()
+        load_dotenv(dotenv_path='test/.env')
 
     def test_validations(self):
         res = validate_env()

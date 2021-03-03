@@ -68,7 +68,7 @@ class TestCubeGensController(BaseTestCase):
         self._user_id = "a97dfebf4098c0f5c16bca61e2b76c373"
         self._claims, self._token = create_test_token()
         self._cube_config = CubegenConfig.from_dict(CUBEGEN_TEST)
-        load_dotenv()
+        load_dotenv(dotenv_path='test/.env')
         validate_env()
         K8sCfg.load_config_once()
 

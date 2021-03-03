@@ -4,16 +4,18 @@ import uuid
 from pprint import pprint
 from typing import Union, Sequence, Optional
 
+import yaml
 from kubernetes import client
 from kubernetes.client import ApiException
 from urllib3.exceptions import MaxRetryError
 
-from xcube_hub import api
+from xcube_hub import api, poller
+from xcube_hub.api import get_json_request_value
 from xcube_hub.auth import Auth
-from xcube_hub.core import callbacks
+from xcube_hub.core import callbacks, costs
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
-from xcube_hub.typedefs import AnyDict, Error
+from xcube_hub.typedefs import AnyDict, Error, JsonObject
 
 
 def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
@@ -81,7 +83,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         volume_mounts=volume_mounts,
         image_pull_policy=gen_container_pull_policy,
         env=sh_envs)
-    # Create and configurate a spec section
+    # Create and configure a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": "xcube-gen"}),
         spec=client.V1PodSpec(
@@ -210,3 +212,42 @@ def delete_all(user_id: str) -> Union[AnyDict, Error]:
         return api.ApiResponse.success("SUCCESS")
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
+
+
+def info(user_id: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
+    data_pools_cfg_file = os.getenv("XCUBE_GEN_DATA_POOLS_PATH", None)
+    if data_pools_cfg_file is None:
+        raise api.ApiError(400, "XCUBE_GEN_DATA_POOLS_PATH is not configured.")
+
+    try:
+        with open(data_pools_cfg_file, 'r') as f:
+            data_pools = yaml.safe_load(f)
+    except FileNotFoundError as e:
+        raise api.ApiError(400, f"Datapools file {data_pools_cfg_file} not found. " + str(e))
+
+    job = create(user_id=user_id, cfg=body, info_only=True, token=token)
+    apps_v1_api = client.BatchV1Api()
+    poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace="xcube-gen-stage",
+                           name=job['cubegen_id'])
+    state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
+    res = state['output'][0]
+    res = res.replace("Awaiting generator configuration JSON from TTY...", "")
+    res = res.replace("Cube generator configuration loaded from TTY.", "")
+    processing_request = json.loads(res)
+    input_config = get_json_request_value(body, 'input_config',
+                                          value_type=dict,
+                                          item_type=dict,
+                                          default_value={})
+
+    store_id = get_json_request_value(input_config, 'store_id',
+                                      value_type=str,
+                                      default_value="")
+
+    store_id = store_id.replace('@', '')
+    try:
+        data_store = data_pools[store_id]
+
+    except KeyError:
+        raise api.ApiError(400, f'unsupported "input_config/datastore_id" entry: "{store_id}"')
+
+    return costs.get_size_and_cost(processing_request=processing_request, datastore=data_store)
