@@ -1,6 +1,7 @@
 ## Changes in v2.0.0.dev1
 
 - `/stores` is now only returning 'title', 'description', and 'store_id' to protect private information
+- CDS credentials are now passed to teh xcube-gen container via env vars
 
 ## Changes in v2.0.0.dev0
 

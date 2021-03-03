@@ -40,6 +40,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     sh_instance_id = os.environ.get("SH_INSTANCE_ID")
     gen_image = os.environ.get("XCUBE_DOCKER_IMG")
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
+    cdsapi_url = os.getenv("CDSAPI_URL")
+    cdsapi_key = os.getenv("CDSAPI_KEY")
 
     if not gen_image:
         raise api.ApiError(400, "Could not find any xcube-sh docker image.")
@@ -59,6 +61,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
         client.V1EnvVar(name="SH_CLIENT_SECRET", value=sh_client_secret),
         client.V1EnvVar(name="SH_INSTANCE_ID", value=sh_instance_id),
+        client.V1EnvVar(name="CDSAPI_URL", value=cdsapi_url),
+        client.V1EnvVar(name="CDSAPI_KEY", value=cdsapi_key),
     ]
 
     volume_mounts = [
