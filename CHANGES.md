@@ -1,3 +1,11 @@
+## Changes in v2.0.0.dev6
+
+- cubgen info returns now teh limit as integer
+
+## Changes in v2.0.0.dev5
+
+- api Responses do not have a result key anymore
+
 ## Changes in v2.0.0.dev4
 
 - Receiving the users punits is now using email instead of user id
