@@ -2,11 +2,11 @@
 
 - cubgen info returns now teh limit as integer
 
-## Changes in v2.0.0.dev5
+## Changes in v2.0.0.dev6
 
 - api Responses do not have a result key anymore
 
-## Changes in v2.0.0.dev6
+## Changes in v2.0.0.dev5
 
 - Fixed error when may punits limit is string when coming from env var
 
