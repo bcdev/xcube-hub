@@ -462,6 +462,13 @@ components:
       type: object
     Stores:
       type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        store_id:
+          type: string
     CostConfig:
       allOf:
       - $ref: '#/components/schemas/CubegenConfig'
@@ -702,7 +709,6 @@ components:
           type: object
       required:
       - store_id
-      - store_params
       type: object
     PUnits:
       type: object

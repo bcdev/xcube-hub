@@ -1,3 +1,7 @@
+## Changes in v2.0.0.dev3
+
+- `store_params` it not required anymore for `output_configs`
+
 ## Changes in v2.0.0.dev2
 
 - CDS credentials are now passed to the xcube-gen container via env vars
