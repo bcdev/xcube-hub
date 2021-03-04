@@ -33,14 +33,14 @@ class ApiResponse:
 
     @classmethod
     def success(cls, result: Optional[Any] = None, message: Optional[str] = None) -> AnyDict:
-        response = dict()
-        if result is not None:
-            response['result'] = result
-
-        if message is not None:
-            response['message'] = message
-
-        return response
+        # response = dict()
+        # if result is not None:
+        #     response['result'] = result
+        #
+        # if message is not None:
+        #     response['message'] = message
+        #
+        return result
 
     @classmethod
     def error(cls,
