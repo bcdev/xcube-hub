@@ -363,11 +363,6 @@ paths:
 components:
   schemas:
     ApiResponse:
-      properties:
-        message:
-          type: string
-        output:
-          type: object
       type: object
     ApiErrorResponse:
       allOf:
@@ -381,17 +376,11 @@ components:
     ApiCubegenResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          properties:
-            result:
-              $ref: '#/components/schemas/CubegenStatus'
+        - $ref: '#/components/schemas/CubegenStatus'
     ApiCubegenInfoResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          properties:
-            result:
-                $ref: '#/components/schemas/CubegenInfo'
+        - $ref: '#/components/schemas/CubegenInfo'
     ApiCubegensResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -479,10 +468,8 @@ components:
           $ref: '#/components/schemas/DatasetDescriptor'
         size_estimation:
           $ref: '#/components/schemas/SizeEstimation'
-        data_store:
-          $ref: '#/components/schemas/DataStore'
-        punits:
-          $ref: '#/components/schemas/PUnits'
+        cost_estimation:
+          $ref: '#/components/schemas/CostEstimation'
     CubegenConfig:
       example:
         output_config:
@@ -530,12 +517,6 @@ components:
         - output_config
       type: object
     Callback:
-      example:
-        progress: 6.027456183070403
-        values: '{}'
-        total_worked: 0.8008281904610115
-        message: message
-        state: status
       required:
         - state
         - sender
@@ -699,9 +680,6 @@ components:
       - variable_names
       type: object
     CubegenConfigOutputConfig:
-      example:
-        store_id: store_id
-        store_params: '{}'
       properties:
         store_id:
           type: string
@@ -710,21 +688,18 @@ components:
       required:
       - store_id
       type: object
-    PUnits:
+    CostEstimation:
       type: object
       properties:
-        input_count:
+        required:
           type: integer
-        input_weight:
-          type: number
-          format: float
-        output_count:
+          default: 1
+        available:
           type: integer
-        output_weight:
-          type: number
-          format: float
-        total_count:
+          default: 1
+        limit:
           type: integer
+          default: 1
     SizeEstimation:
       type: object
       properties:
@@ -760,21 +735,28 @@ components:
           items:
             type: number
             format: int32
+            default: [0, 0, 0, 0]
         time_range:
-          type: string
-          format: date
+          type: array
+          items:
+            type: string
+            format: date
+          default: ["2020-01-01", "2020-01-15"]
         time_period:
           type: string
+          default: "1D"
         data_vars:
           type: object
         spatial_res:
           type: number
           format: float
+          default: 0.01
         dims:
           type: object
           properties:
             time:
               type: integer
+              default: 1
             lat:
               type: number
               format: float

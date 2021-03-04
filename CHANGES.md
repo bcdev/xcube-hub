@@ -1,3 +1,9 @@
+## Changes in v2.0.0.dev4
+
+- Receiving the users punits is now using email instead of user id
+- cubegens return the correct schemas
+- create cubegens is now raising if punits are not sufficient
+
 ## Changes in v2.0.0.dev3
 
 - `store_params` it not required anymore for `output_configs`

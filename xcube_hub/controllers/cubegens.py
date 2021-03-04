@@ -20,8 +20,9 @@ def create_cubegen(body: JsonObject, token_info: Dict):
 
     try:
         user_id = token_info['user_id']
+        email = token_info['email']
 
-        cubegen = cubegens.create(user_id=user_id, cfg=body)
+        cubegen = cubegens.create(user_id=user_id, email=email, cfg=body)
         return api.ApiResponse.success(cubegen)
     except api.ApiError as e:
         return e.response
@@ -76,8 +77,9 @@ def get_cubegen_info(body, token_info: Dict):
 
     try:
         user_id = token_info['user_id']
+        email = token_info['email']
 
-        result = cubegens.info(user_id=user_id, body=body)
+        result = cubegens.info(user_id=user_id, email=email, body=body)
 
         return api.ApiResponse.success(result=result)
     except api.ApiError as e:

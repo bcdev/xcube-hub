@@ -47,7 +47,7 @@ def put_callback(user_id: str, cubegen_id: str, value: AnyDict, email: str):
         if sender == 'on_end':
             if 'error' not in state:
                 processing_request = kvdb.get(user_id + '__' + cubegen_id + '__cfg')
-                punits_requests = get_size_and_cost(processing_request)
+                punits_requests = get_size_and_cost(processing_request=processing_request)
 
                 subtract_punits(user_id=email, punits_request=punits_requests)
 
