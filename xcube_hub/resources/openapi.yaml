@@ -634,19 +634,6 @@ components:
         - store_id
       type: object
     CubegenConfigCubeConfig:
-      example:
-        spatial_res: 6.027456183070403
-        crs: crs
-        time_range:
-        - 2000-01-23
-        - 2000-01-23
-        bbox:
-        - 1.4658129805029452
-        - 1.4658129805029452
-        variable_names:
-        - variable_names
-        - variable_names
-        time_period: time_period
       properties:
         variable_names:
           items:
