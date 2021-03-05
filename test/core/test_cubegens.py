@@ -46,7 +46,7 @@ class TestCubeGens(unittest.TestCase):
         os.environ["XCUBE_HUB_RUN_LOCAL"] = "1"
 
     def test_info(self):
-        res = cubegens.info(user_id='helge', body=_CFG, token=self._token)
+        res = cubegens.info(user_id='helge', email="helge@mail.com", body=_CFG, token=self._token)
         self.assertEqual(True, False)
 
 
