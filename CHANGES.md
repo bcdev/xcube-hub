@@ -1,11 +1,9 @@
 ## Changes in v2.0.0
 
-- cubgen info returns now teh limit as integer
+### New Features 
+
 - api Responses do not have a result key anymore
-- Fixed error when may punits limit is string when coming from env var
-- Receiving the users punits is now using email instead of user id
-- cubegens return the correct schemas
-- create cubegens is now raising if punits are not sufficient
+- create cubegens now raises an error if no sufficient punits are available
 - `store_params` it not required anymore for `output_configs`
 - CDS credentials are now passed to the xcube-gen container via env vars
 - `/stores` is now only returning 'title', 'description', and 'store_id' to protect private information
@@ -15,22 +13,27 @@
 - The `/datastores` handler has been replaced by a cubegens info handler   
 - The `/cubegens/info` handler provides now much smaller data-pools information for better performance
 - Changed the CI from travis to appveyor
-- Progress Information is now returned by the `GET /cubegens/{cubegen_id}` handler
-- `/callbacks` handlers have been reduced to allow PUT only
+- The progress information is now returned by the `GET /cubegens/{cubegen_id}` handler
+- `/callbacks` handlers only allow PUT request. Any progress information is now handled by `GET /cubgens/{cubgen_id}`
 - The main function has been moved to `__main__.py` to simplify launching the hub inside docker containers
 - The Docker command has been simplified by using the python executable directly
-- The authorization flow allows not to use both xcube-hub as well as auth0 issued tokens
-- Added an Auth class that handles the creation of
-  authorization class instances as singletons to handle different authorization issuers
+- The authorization flow allows now to use both xcube-hub as well as auth0 issued tokens
+- Added an Auth class that handles the creation of authorization class instances to 
+  handle different authorization issuers.
 - Ensured that controllers that need the user_id and/or email will
   get it passed using the token_info function parameter.
-- The token_info is now set during the token verification process
-- The HttpRequest response for the route `/cubegens/{cubegen_id}` includes now progress information
+- The token_info is now set during the token verification process and contains the user_id and email
 - put_callback now receives the user's email address to be used in setting the punits for a user
 - Changed `worked` to `progress` for Callbacks in openapi rest definition
-- The output data_id is now only set to teh `job_id` if the `data_id` is not given
-- The `/cubegens/info` process has changed it now receives any necessary data for teh punits calculation from
+- The output data_id is now only set to the `job_id` if the `data_id` is not given
+- The `/cubegens/info` process has changed it now receives any necessary data for the punits calculation from
   xcube gen2 via a xcube gen2 job
+
+### Fixes
+
+- The cubegen info returns now the limit as an integer instead of a string
+- Fixed error when may punits limit is string when coming from env var
+- Receiving the users punits is now using email instead of user id
 
 ## Changes in v1.0.14
 ### New Features
@@ -47,9 +50,9 @@
 
 - The location of data-pools.yaml is changed to /etc/xcube
 - use jobs are now spawned in the xcube-gen namespace instead of a namespace for each user
-- The user_info in auth0 is now accepting checking whether the userinfo from teh kv store is string
+- The user_info in auth0 is now accepting checking whether the userinfo from the kv store is string
 - The redis kv store converts bytes to string in the method 'get'
-- Fixed user_info error which was causing the  hub to frequently accessing the auth0 user_info api. That caused 429 errors from teh auth0 api. 
+- Fixed user_info error which was causing the  hub to frequently accessing the auth0 user_info api. That caused 429 errors from the auth0 api. 
 
 
 ## Changes in v1.0.13
