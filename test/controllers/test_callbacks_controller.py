@@ -14,7 +14,7 @@ class TestCallbacksController(BaseTestCase):
 
     def setUp(self) -> None:
         self._claims, self._token = create_test_token(['manage:cubegens'])
-        load_dotenv()
+        load_dotenv(dotenv_path='test/.env')
 
     def test_put_callback_by_job_id(self):
         """Test case for put_callback_by_job_id

@@ -1,8 +1,8 @@
-from datetime import date
+from typing import Dict
 
 from xcube_hub import api
 from xcube_hub.api import get_json_request_value
-from xcube_hub.typedefs import JsonObject
+from xcube_hub.typedefs import JsonObject, Number
 
 
 def _square(x: int) -> int:
@@ -18,117 +18,85 @@ CCI_INPUT_PUNITS_WEIGHT = 1.0
 OUTPUT_PUNITS_WEIGHT = 1.0
 
 
-def get_size_and_cost(processing_request: JsonObject) -> JsonObject:
+def _get_dim(dims: Dict, tgt: str, tgt_alt: str):
     try:
-        input_configs = get_json_request_value(processing_request, 'input_configs',
-                                               value_type=list)
-        input_config = input_configs[0]
+        res = get_json_request_value(dims, tgt,
+                                     value_type=Number)
     except api.ApiError:
-        input_config = get_json_request_value(processing_request, 'input_config',
-                                              value_type=dict)
+        try:
+            res = get_json_request_value(dims, tgt_alt, value_type=Number)
+        except api.ApiError:
+            raise api.ApiError(400, "Cannot find a valid spatial dimension.")
 
-    datastore_id = get_json_request_value(input_config, 'store_id',
-                                          value_type=str,
-                                          key_path='input_configs')
-    open_params = get_json_request_value(input_config, 'open_params',
+    return res
+
+
+def _check_lower_bound(value: Number, bound: Number = 0):
+    if value <= bound:
+        raise api.ApiError(400, f'Value must be greater than {bound}')
+
+
+def get_size_and_cost(processing_request: JsonObject, datastore: JsonObject) -> JsonObject:
+    dataset_descriptor = get_json_request_value(processing_request, 'dataset_descriptor',
+                                                value_type=dict,
+                                                item_type=dict)
+
+    data_vars = get_json_request_value(dataset_descriptor, 'data_vars',
+                                       value_type=dict,
+                                       item_type=dict)
+
+    num_variables = len(data_vars.keys())
+    if num_variables == 0:
+        raise api.ApiError(400, "Number of variables must be greater than 0.")
+
+    dims = get_json_request_value(dataset_descriptor, 'dims',
+                                  value_type=dict,
+                                  item_type=dict)
+
+    time = get_json_request_value(dims, 'time',
+                                  value_type=int)
+
+    lat = _get_dim(dims, 'lat', 'y')
+    lon = _get_dim(dims, 'lon', 'x')
+
+    size_estimation = get_json_request_value(processing_request, 'size_estimation',
+                                             value_type=dict,
+                                             item_type=dict)
+
+    cost_params = get_json_request_value(datastore, 'cost_params',
                                          value_type=dict,
-                                         item_count=2,
                                          item_type=dict)
-    if 'tile_size' in open_params:
-        tile_width, tile_height = get_json_request_value(open_params, 'tile_size',
-                                                         value_type=list,
-                                                         item_count=2,
-                                                         item_type=int)
-    else:
-        tile_width = 1
-        tile_height = 1
 
-    cube_config = get_json_request_value(processing_request, 'cube_config',
-                                         value_type=dict)
-    x1, y1, x2, y2 = get_json_request_value(cube_config, 'bbox',
-                                            value_type=list,
-                                            item_count=4,
-                                            item_type=(int, float),
-                                            key_path='cube_config')
-    crs = get_json_request_value(cube_config, 'crs',
-                                 value_type=str,
-                                 key_path='cube_config')
-    spatial_res = get_json_request_value(cube_config, 'spatial_res',
-                                         value_type=(int, float),
-                                         key_path='cube_config')
-    start_date, end_date = get_json_request_value(cube_config, 'time_range',
-                                                  value_type=list,
-                                                  item_count=2,
-                                                  item_type=(str, type(None)),
-                                                  key_path='cube_config')
-    time_period = get_json_request_value(cube_config, 'time_period',
-                                         value_type=str,
-                                         default_value='1D')
-    variable_names = get_json_request_value(cube_config, 'variable_names',
-                                            value_type=list,
-                                            item_type=str,
-                                            default_value=[])
+    input_pixels_per_punit = get_json_request_value(cost_params, 'input_pixels_per_punit',
+                                                    value_type=int)
 
-    is_geo_crs = crs.lower() == 'epsg:4326' or crs.endswith('/4326') or crs.endswith('/WGS84')
+    _check_lower_bound(input_pixels_per_punit, 0)
 
-    width = round((x2 - x1) / spatial_res)
-    if width < 1.5 * tile_width:
-        num_tiles_x = 1
-        tile_width = width
-    else:
-        num_tiles_x = _idiv(width, tile_width)
-        width = num_tiles_x * tile_width
+    input_punits_weight = get_json_request_value(cost_params, 'input_punits_weight',
+                                                 value_type=float,
+                                                 default_value=1.0)
 
-    height = round((y2 - y1) / spatial_res)
-    if height < 1.5 * tile_height:
-        num_tiles_y = 1
-        tile_height = height
-    else:
-        num_tiles_y = _idiv(height, tile_height)
-        height = num_tiles_y * tile_height
+    _check_lower_bound(input_punits_weight, 0)
 
-    import pandas as pd
-    try:
-        end_date = end_date or date.today().strftime("%Y-%m-%d")
-        date_range = pd.date_range(start=start_date, end=end_date, freq=time_period)
-    except ValueError as e:
-        raise api.ApiError(400, str(e))
+    output_pixels_per_punit = get_json_request_value(cost_params, 'output_pixels_per_punit',
+                                                     value_type=int)
 
-    num_times = len(date_range)
-    num_variables = len(variable_names)
-    num_requests = num_variables * num_times * num_tiles_x * num_tiles_y
-    num_bytes_per_pixel = 4  # float32 for all variables for time being
-    num_bytes = num_variables * num_times * (height * width * num_bytes_per_pixel)
+    _check_lower_bound(output_pixels_per_punit, 0)
 
-    if 'sentinelhub' in datastore_id:
-        input_pixels_per_punit = SH_INPUT_PIXELS_PER_PUNIT
-        input_punits_weight = SH_INPUT_PUNITS_WEIGHT
-    elif 'cciodp' in datastore_id:
-        input_pixels_per_punit = CCI_INPUT_PIXELS_PER_PUNIT
-        input_punits_weight = CCI_INPUT_PUNITS_WEIGHT
-    elif 'cds' in datastore_id:
-        input_pixels_per_punit = CCI_INPUT_PIXELS_PER_PUNIT
-        input_punits_weight = CCI_INPUT_PUNITS_WEIGHT
-    else:
-        raise api.ApiError(400, f'unsupported "input_config/datastore_id" entry: "{datastore_id}"')
+    output_punits_weight = get_json_request_value(cost_params, 'output_punits_weight',
+                                                  value_type=float,
+                                                  default_value=1.0)
 
-    output_pixels_per_punit = OUTPUT_PIXELS_PER_PUNIT
-    output_punits_weight = OUTPUT_PUNITS_WEIGHT
+    _check_lower_bound(output_punits_weight, 0)
 
-    input_punits_count = _punits(width, height, num_times, num_variables, input_pixels_per_punit)
-    output_punits_count = _punits(width, height, num_times, num_variables, output_pixels_per_punit)
+    input_punits_count = _punits(lat, lon, time, num_variables, input_pixels_per_punit)
+    output_punits_count = _punits(lat, lon, time, num_variables, output_pixels_per_punit)
     total_punits_count = round(max(input_punits_weight * input_punits_count,
                                    output_punits_weight * output_punits_count))
 
-    x_name, y_name = ('lon', 'lat') if is_geo_crs else ('x', 'y')
-
-    return dict(schema=dict(dims={'time': num_times, y_name: height, x_name: width},
-                            image_size=[width, height],
-                            tile_size=[tile_width, tile_height],
-                            num_variables=num_variables,
-                            num_tiles=[num_tiles_x, num_tiles_y],
-                            num_requests=num_requests,
-                            num_bytes=num_bytes),
+    return dict(dataset_descriptor=dataset_descriptor,
+                size_estimation=size_estimation,
+                data_store=datastore,
                 punits=dict(input_count=input_punits_count,
                             input_weight=input_punits_weight,
                             output_count=output_punits_count,

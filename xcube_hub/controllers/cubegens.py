@@ -1,9 +1,7 @@
 from typing import Dict
 
-from kubernetes import client
-
-from xcube_hub import api, poller
-from xcube_hub.core import cubegens, costs
+from xcube_hub import api
+from xcube_hub.core import cubegens
 from xcube_hub.typedefs import JsonObject
 
 
@@ -22,8 +20,9 @@ def create_cubegen(body: JsonObject, token_info: Dict):
 
     try:
         user_id = token_info['user_id']
+        email = token_info['email']
 
-        cubegen = cubegens.create(user_id=user_id, cfg=body)
+        cubegen = cubegens.create(user_id=user_id, email=email, cfg=body)
         return api.ApiResponse.success(cubegen)
     except api.ApiError as e:
         return e.response
@@ -64,11 +63,12 @@ def delete_cubegens(token_info):
         return e.response
 
 
-def get_info(body, token_info: Dict):
+def get_cubegen_info(body, token_info: Dict):
     """Receive cost information for runnning a cubegen
 
     Receive cost information of using a service
 
+    :param token_info:
     :param body: Cost configuration
     :type body: dict | bytes
 
@@ -77,13 +77,10 @@ def get_info(body, token_info: Dict):
 
     try:
         user_id = token_info['user_id']
-        job = cubegens.create(user_id=user_id, cfg=body)
-        apps_v1_api = client.BatchV1Api()
-        poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace="xcube-gen-stage",
-                               name=job['cubegen_id'])
-        status = cubegens.get(user_id=user_id, cubegen_id=job['cubegen_id'])
-        res = status['output'][0]
-        result = costs.get_size_and_cost(processing_request=body)
+        email = token_info['email']
+
+        result = cubegens.info(user_id=user_id, email=email, body=body)
+
         return api.ApiResponse.success(result=result)
     except api.ApiError as e:
         return e.response

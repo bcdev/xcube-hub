@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/l77x6qbx0hslwqfd/branch/master?svg=true)](https://ci.appveyor.com/project/bcdev/xcube-geodb/branch/master)
+
 # OpenAPI generated server
 
 ## Overview

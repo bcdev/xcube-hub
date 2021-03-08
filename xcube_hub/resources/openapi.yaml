@@ -375,7 +375,7 @@ paths:
     post:
       description: |
         Receive cost information of using a service
-      operationId: get_info
+      operationId: get_cubegen_info
       requestBody:
         content:
           application/json:
@@ -388,7 +388,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiCostResponse'
+                $ref: '#/components/schemas/ApiCubegenInfoResponse'
           description: costs for using the service
         "400":
           content:
@@ -541,6 +541,7 @@ paths:
       requestBody:
         content:
           application/json:
+#          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/OauthToken'
         description: OauthToken
@@ -597,11 +598,6 @@ paths:
 components:
   schemas:
     ApiResponse:
-      properties:
-        message:
-          type: string
-        output:
-          type: object
       type: object
     ApiErrorResponse:
       allOf:
@@ -629,17 +625,11 @@ components:
     ApiCubegenResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          properties:
-            result:
-              $ref: '#/components/schemas/CubegenStatus'
-    ApiCostResponse:
+        - $ref: '#/components/schemas/CubegenStatus'
+    ApiCubegenInfoResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          properties:
-            result:
-                $ref: '#/components/schemas/Cost'
+        - $ref: '#/components/schemas/CubegenInfo'
     ApiCubegensResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -710,64 +700,25 @@ components:
       type: object
     Stores:
       type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        store_id:
+          type: string
     CostConfig:
       allOf:
       - $ref: '#/components/schemas/CubegenConfig'
-    Cost:
+    CubegenInfo:
       type: object
-      required:
-        - punits
-        - schema
       properties:
-        punits:
-          type: object
-          required:
-            - total_count
-          properties:
-            input_count:
-              type: number
-            input_weight:
-              type: number
-            output_count:
-              type: number
-            output_weight:
-              type: number
-            total_count:
-              type: number
-        schema:
-          type: object
-          properties:
-            dims:
-              type: object
-              properties:
-                lat:
-                  type: number
-                lon:
-                  type: number
-                time:
-                  type: number
-            image_size:
-              type: array
-              items:
-                type: number
-                minItems: 2
-                maxItems: 2
-            num_bytes:
-              type: number
-            num_requests:
-              type: number
-            num_tiles:
-              type: array
-              items:
-                type: number
-            num_variables:
-              type: number
-            tile_size:
-              type: array
-              items:
-                type: number
-                minItems: 2
-                maxItems: 2
+        dataset_descriptor:
+          $ref: '#/components/schemas/DatasetDescriptor'
+        size_estimation:
+          $ref: '#/components/schemas/SizeEstimation'
+        cost_estimation:
+          $ref: '#/components/schemas/CostEstimation'
     CubegenConfig:
       example:
         output_config:
@@ -815,12 +766,6 @@ components:
         - output_config
       type: object
     Callback:
-      example:
-        progress: 6.027456183070403
-        values: '{}'
-        total_worked: 0.8008281904610115
-        message: message
-        state: status
       required:
         - state
         - sender
@@ -906,7 +851,6 @@ components:
       - audience
       - client_id
       - client_secret
-      - grant_type
       type: object
     CubegenConfigOpenParams:
       example:
@@ -939,19 +883,6 @@ components:
         - store_id
       type: object
     CubegenConfigCubeConfig:
-      example:
-        spatial_res: 6.027456183070403
-        crs: crs
-        time_range:
-        - 2000-01-23
-        - 2000-01-23
-        bbox:
-        - 1.4658129805029452
-        - 1.4658129805029452
-        variable_names:
-        - variable_names
-        - variable_names
-        time_period: time_period
       properties:
         variable_names:
           items:
@@ -985,9 +916,6 @@ components:
       - variable_names
       type: object
     CubegenConfigOutputConfig:
-      example:
-        store_id: store_id
-        store_params: '{}'
       properties:
         store_id:
           type: string
@@ -995,6 +923,128 @@ components:
           type: object
       required:
       - store_id
+      type: object
+    CostEstimation:
+      type: object
+      properties:
+        required:
+          type: integer
+          default: 1
+        available:
+          type: integer
+          default: 1
+        limit:
+          type: integer
+          default: 1
+    SizeEstimation:
+      type: object
+      properties:
+        image_size:
+          type: array
+          items:
+            type: integer
+        tile_size:
+          type: array
+          items:
+            type: integer
+        num_tiles:
+          type: array
+          items:
+            type: integer
+        num_variables:
+          type: integer
+        num_requests:
+          type: integer
+        num_bytes:
+          type: integer
+    DatasetDescriptor:
+      type: object
+      properties:
+        type_specifier:
+          type: string
+        data_id:
+          type: string
+        crs:
+          type: string
+        bbox:
+          type: array
+          items:
+            type: number
+            format: int32
+            default: [0, 0, 0, 0]
+        time_range:
+          type: array
+          items:
+            type: string
+            format: date
+          default: ["2020-01-01", "2020-01-15"]
+        time_period:
+          type: string
+          default: "1D"
+        data_vars:
+          type: object
+        spatial_res:
+          type: number
+          format: float
+          default: 0.01
+        dims:
+          type: object
+          properties:
+            time:
+              type: integer
+              default: 1
+            lat:
+              type: number
+              format: float
+            lon:
+              type: number
+              format: float
+            x:
+              type: number
+              format: float
+            y:
+              type: number
+              format: float
+    DataStore:
+      type: object
+      required:
+        - title
+        - store_id
+        - cost_params
+        - store_params
+      properties:
+        title:
+          type: string
+        store_id:
+          type: string
+        cost_params:
+          type: object
+          required:
+            - input_pixels_per_unit
+            - output_pixels_per_punit
+          properties:
+            input_pixels_per_unit:
+              type: integer
+              minimum: 1
+            input_punits_weight:
+              type: number
+              default: 1.0
+              minimum: 0.0
+              exclusiveMinimum: true
+            output_pixels_per_punit:
+              type: integer
+              minimum: 1
+            output_punits_weight:
+              type: number
+              default: 1.0
+              minimum: 0.0
+              exclusiveMinimum: true
+        store_params:
+          type: object
+          properties:
+            api_url:
+              type: string
+              format: url
       - store_params
       type: object
     UserMetaData:
@@ -1085,20 +1135,8 @@ components:
       flows:
         clientCredentials:
           scopes:
-            read_cubegen: Read cubegen status and result
-            read_punits: Allow reading the punits level of a user
-            put_punits: Allow adding punits to and remove punits from a user
-            read_callbacks: Allow reading callbacks
-            put_callbacks: Allow reading callbacks
-            delete_callbacks: Allow reading callbacks
-          tokenUrl: https://edc.eu.auth0.com/oauth/token
-        implicit:
-          authorizationUrl: https://edc.eu.auth0.com/authorize
-          scopes:
-            read_cubegen: Read cubegen status and result
-            submit_cubegen: Submit cubegens to the K8s cluster
-            read_punits: Allow reading the punits level of a user
-            read_callbacks: Allow reading callbacks
+            manage_cubegens: Read cubegen status and result
+          tokenUrl: http://localhost:8080/api/v2/oauth/token
       type: oauth2
       x-tokenInfoFunc: xcube_hub.controllers.authorization.check_oauthorization
       x-scopeValidateFunc: xcube_hub.controllers.authorization.validate_scope_oauthorization

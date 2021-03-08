@@ -16,7 +16,7 @@ class TestOauthController(BaseTestCase):
     """OauthController integration test stubs"""
 
     def setUp(self):
-        load_dotenv()
+        load_dotenv(dotenv_path='test/.env')
 
     def test_oauth_token_post(self, m):
         """Test case for oauth_token_post
