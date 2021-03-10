@@ -123,6 +123,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Api Error
+        "415":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
         "404":
           content:
             application/json:
