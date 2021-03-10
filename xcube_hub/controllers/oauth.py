@@ -92,6 +92,9 @@ def oauth_token_post(body: OauthToken):
             "permissions": permissions
         }
 
+        if user.app_metadata and user.app_metadata.geodb_role:
+            claims["https://geodb.brockmann-consult.de/dbrole"] = user.app_metadata.geodb_role
+
         encoded_jwt = create_token(claims)
 
         return dict(access_token=encoded_jwt, token_type="bearer")

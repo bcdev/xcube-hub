@@ -36,7 +36,8 @@ def check_oauthorization(token):
 
     auth.verify_token(token=token)
 
-    return {'scopes': auth.permissions, 'user_id': auth.user_id, 'email': auth.email, 'token': token}
+    return {'scopes': auth.permissions, 'user_id': auth.user_id, 'email': auth.email, 'token': token,
+            'sub': _get_claim_from_token(token=token, tgt='sub')}
 
 
 def validate_scope_oauthorization(required_scopes, token_scopes):

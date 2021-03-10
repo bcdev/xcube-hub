@@ -273,6 +273,9 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
 
     available = punits.get_punits(user_id=email)
 
+    if 'count' not in available:
+        raise api.ApiError(400, "Error. Cannot handle punit data. Entry 'count' is missing.")
+
     cost_est = costs.get_size_and_cost(processing_request=processing_request, datastore=data_store)
     required = cost_est['punits']['total_count']
 

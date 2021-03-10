@@ -42,6 +42,32 @@ paths:
           description: service not found
       summary: get service info
       x-openapi-router-controller: xcube_hub.controllers.default
+  /users/get-by-email/{email}:
+    get:
+      operationId: get_user_by_email
+      parameters:
+        - description: Email
+          explode: false
+          in: path
+          name: email
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+          description: User created
+      security:
+        - oAuthorization:
+            - read:users
+      summary: List a user by email
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
   /users:
     put:
       description: |
@@ -721,9 +747,6 @@ components:
           $ref: '#/components/schemas/CostEstimation'
     CubegenConfig:
       example:
-        output_config:
-          store_id: store_id
-          store_params: '{}'
         cube_config:
           spatial_res: 6.027456183070403
           crs: crs
@@ -1005,48 +1028,6 @@ components:
             y:
               type: number
               format: float
-    DataStore:
-      type: object
-      required:
-        - title
-        - store_id
-        - cost_params
-        - store_params
-      properties:
-        title:
-          type: string
-        store_id:
-          type: string
-        cost_params:
-          type: object
-          required:
-            - input_pixels_per_unit
-            - output_pixels_per_punit
-          properties:
-            input_pixels_per_unit:
-              type: integer
-              minimum: 1
-            input_punits_weight:
-              type: number
-              default: 1.0
-              minimum: 0.0
-              exclusiveMinimum: true
-            output_pixels_per_punit:
-              type: integer
-              minimum: 1
-            output_punits_weight:
-              type: number
-              default: 1.0
-              minimum: 0.0
-              exclusiveMinimum: true
-        store_params:
-          type: object
-          properties:
-            api_url:
-              type: string
-              format: url
-      - store_params
-      type: object
     UserMetaData:
       type: object
       properties:
@@ -1077,10 +1058,8 @@ components:
       type: object
       required:
         - email
-        - username
         - given_name
         - family_name
-        - user_metadata
       properties:
         user_id:
           type: string
@@ -1097,6 +1076,9 @@ components:
         updated_at:
           type: string
           format: 'date-time'
+        password:
+          type: string
+          format: password
         connection:
           type: string
         identities:

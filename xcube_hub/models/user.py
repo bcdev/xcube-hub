@@ -23,7 +23,7 @@ class User(Model):
     def __init__(self, user_id=None, email=None, email_verified=None, username=None, created_at=None, updated_at=None,
                  identities=None, app_metadata=None, user_metadata=None, picture=None, name=None, nickname=None,
                  multifactor=None, last_ip=None, last_login=None, logins_count=None, blocked=None, given_name=None,
-                 family_name=None, connection = None):
+                 family_name=None, password=None, connection=None):
         """User - a model defined in OpenAPI
 
         :param user_id: The user_id of this User.  
@@ -64,6 +64,8 @@ class User(Model):
         :type given_name: str
         :param family_name: The family_name of this User.  
         :type family_name: str
+        :param password: The password of this User.
+        :type password: str
         :param connection: The auth connection of this User.
         :type connection: str
         """
@@ -87,6 +89,7 @@ class User(Model):
             'blocked': bool,
             'given_name': str,
             'family_name': str,
+            'password': str,
             'connection': str
         }
 
@@ -110,6 +113,7 @@ class User(Model):
             'blocked': 'blocked',
             'given_name': 'given_name',
             'family_name': 'family_name',
+            'password': 'password',
             'connection': 'connection'
         }
 
@@ -132,6 +136,7 @@ class User(Model):
         self._blocked = blocked
         self._given_name = given_name
         self._family_name = family_name
+        self._password = password
         self._connection = connection
 
     @classmethod
@@ -553,6 +558,29 @@ class User(Model):
             raise ValueError("Invalid value for `family_name`, must not be `None`")  
 
         self._family_name = family_name
+
+    @property
+    def password(self):
+        """Gets the password of this User.
+
+
+        :return: The password of this User.
+        :rtype: str
+        """
+        return self._password
+
+    @password.setter
+    def password(self, password):
+        """Sets the password of this User.
+
+
+        :param password: The family_name of this User.
+        :type password: str
+        """
+        if password is None:
+            raise ValueError("Invalid value for `password`, must not be `None`")
+
+        self._password = password
 
     @property
     def connection(self):

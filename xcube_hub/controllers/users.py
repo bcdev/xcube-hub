@@ -9,7 +9,6 @@ from xcube_hub.models.user import User
 from xcube_hub.models.user_user_metadata import UserUserMetadata
 from xcube_hub.util import create_user_id_from_email, create_secret
 
-
 _APP_TO_ROLE = {
     "xcube-gen": "rol_UV2cTM5brIezM6i6",
     "xcube-geodb": "rol_nF3PSuWkOJLk1mkm"
@@ -24,9 +23,9 @@ def get_user_by_user_id(user_id: str, token_info: Dict):
         return e.response
 
 
-def put_user(user: Dict, token_info: Dict):
+def put_user(body: Dict, token_info: Dict):
     try:
-        user = User.from_dict(user)
+        user = User.from_dict(body)
         user.user_id = create_user_id_from_email(user.email)
         user = users.supplement_user(user=user)
         headers = {'Authorization': f"Bearer {token_info['token']}"}
@@ -47,7 +46,7 @@ def patch_user(user_id: str, user: Dict, token_info: Dict):
         headers = {'Authorization': f"Bearer {token_info['token']}"}
         user_dict = users.get_request_body_from_user(user)
 
-        r = requests.patch(f"https://edc.eu.auth0.com/api/v2/users/auth0|{user_id}", json=user_dict, headers=headers)
+        r = requests.patch(f"https://edc.eu.auth0.com/api/v2/users/{user_id}", json=user_dict, headers=headers)
         try:
             r.raise_for_status()
         except HTTPError as e:
@@ -63,7 +62,7 @@ def patch_user_credentials(user_id: str, token_info: Dict):
         client_id, client_secret = create_secret()
         user_metadata = UserUserMetadata(client_id=client_id, client_secret=client_secret)
 
-        r = requests.patch(f"https://edc.eu.auth0.com/api/v2/users/auth0|{user_id}",
+        r = requests.patch(f"https://edc.eu.auth0.com/api/v2/users/{user_id}",
                            json={'user_metadata': user_metadata.to_dict()},
                            headers=headers)
 
@@ -71,6 +70,24 @@ def patch_user_credentials(user_id: str, token_info: Dict):
             r.raise_for_status()
         except HTTPError as e:
             raise api.ApiError(r.status_code, str(e))
+    except api.ApiError as e:
+        return e.response
+
+
+def get_user_by_email(email: str, token_info: Dict):
+    try:
+        headers = {'Authorization': f"Bearer {token_info['token']}"}
+
+        r = requests.get(f"https://edc.eu.auth0.com/api/v2/users-by-email?email={email}",
+                         headers=headers)
+
+        try:
+            r.raise_for_status()
+        except HTTPError as e:
+            raise api.ApiError(r.status_code, str(e))
+
+        return api.ApiResponse.success(r.json())
+
     except api.ApiError as e:
         return e.response
 
@@ -106,7 +123,7 @@ def get_user_apps(user_id: str, token_info: Dict):
             r.raise_for_status()
         except HTTPError as e:
             raise api.ApiError(r.status_code, str(e))
-        
+
         res = r.json()
 
         apps = [_APP_TO_ROLE[role['id']] for role in res if role['id'] in _APP_TO_ROLE]

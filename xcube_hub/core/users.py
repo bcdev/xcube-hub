@@ -20,7 +20,7 @@ def assign_role_to_user(user_id: str, role_id: str, token: Optional[str] = None)
         ]
     }
     headers = {'Authorization': f"Bearer {token}"}
-    r = requests.post(f'https://edc.eu.auth0.com/api/v2/users/auth0|{user_id}/roles', json=payload, headers=headers)
+    r = requests.post(f'https://edc.eu.auth0.com/api/v2/users/{user_id}/roles', json=payload, headers=headers)
 
     if r.status_code == 404:
         raise api.ApiError(404, "Role not found.")
@@ -62,7 +62,7 @@ def get_permissions_by_user_id(auth_user_id: str, token: Optional[str] = None):
 def get_user_by_user_id(token: str, user_id: str) -> User:
     headers = {'Authorization': f"Bearer {token}"}
 
-    r = requests.get('https://edc.eu.auth0.com/api/v2/users/auth0|' + user_id, headers=headers)
+    r = requests.get('https://edc.eu.auth0.com/api/v2/users/' + user_id, headers=headers)
 
     try:
         r.raise_for_status()

@@ -19,7 +19,7 @@ def attach():
 
 
 def main():
-    attach()
+    # attach()
     load_dotenv()
     validate_env()
     K8sCfg.load_config_once()
