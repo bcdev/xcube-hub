@@ -68,6 +68,42 @@ paths:
       tags:
         - users
       x-openapi-router-controller: xcube_hub.controllers.users
+  /apps/{app_id}/users:
+    put:
+      description: |
+        Add a user to an application
+      operationId: put_user_to_app
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: Add user to an application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Application not found
+      security:
+        - oAuthorization:
+            - manage:apps
+        summary: Manage subscriptions
+        tags:
+          - apps
+        x-openapi-router-controller: xcube_hub.controllers.subscriptions
   /users:
     put:
       description: |
@@ -188,7 +224,7 @@ paths:
       x-openapi-router-controller: xcube_hub.controllers.users
   /users/{user_id}/apps/{app_id}:
     put:
-      description: Add user to app
+      description: Add user to an xcube app
       operationId: put_user_to_app
       parameters:
         - description: User ID
