@@ -116,10 +116,10 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
     cost_estimation = infos['cost_estimation']
 
     if cost_estimation['required'] > int(limit):
-        raise api.ApiError(400, f"Number of required punits ({cost_estimation['required']}) is greater than the absolute limit of {limit}")
+        raise api.ApiError(413, f"Number of required punits ({cost_estimation['required']}) is greater than the absolute limit of {limit}")
 
     if cost_estimation['required'] > cost_estimation['available']:
-        raise api.ApiError(400, f"Number of required punits ({cost_estimation['required']}) "
+        raise api.ApiError(413, f"Number of required punits ({cost_estimation['required']}) "
                                 f"is greater than the available {cost_estimation['available']}")
 
 
