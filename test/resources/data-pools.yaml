@@ -1,9 +1,11 @@
-cds:
-  title: C3S Climate Data Store (CDS)
-  description: Selected datasets from the Copernicus CDS API
-  store_id: cds
-
-cciodp:
-  title: ESA Climate Change Initiative (CCI)
-  description: Data from the ESA CCI Open Data Portal API
-  store_id: cciodp
+sentinelhub_eu:
+  title: SENTINEL Hub (Central Europe)
+  store_id: sentinelhub
+  cost_params:
+    scheme: punits
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://services.sentinel-hub.com

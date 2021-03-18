@@ -9,13 +9,14 @@ info:
   title: xcube Generator API
   version: 2.0.0
 servers:
-- url: https://xcube-gen.brockmann-consult.de/api/v2
-- url: https://stage.xcube-gen.brockmann-consult.de/api/v2
+  - url: https://xcube-gen.brockmann-consult.de/api/v2
+  - url: https://stage.xcube-gen.brockmann-consult.de/api/v2
 tags:
-- name: users
-- name: cubegens
-- name: callbacks
-- name: oauth
+  - name: users
+  - name: cubegens
+  - name: callbacks
+  - name: oauth
+  - name: services
 paths:
   /:
     get:
@@ -42,14 +43,16 @@ paths:
           description: service not found
       summary: get service info
       x-openapi-router-controller: xcube_hub.controllers.default
-  /users/get-by-email/{email}:
+  /services/{service_id}:
     get:
-      operationId: get_user_by_email
+      operationId: get_service
+      tags:
+        - services
       parameters:
-        - description: Email
+        - description: Service ID
           explode: false
           in: path
-          name: email
+          name: service_id
           required: true
           schema:
             type: string
@@ -59,25 +62,71 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiUserResponse'
-          description: User created
+                $ref: '#/components/schemas/ApiServiceResponse'
+          description: Service
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Service not found
+      x-openapi-router-controller: xcube_hub.controllers.services
+  /services:
+    get:
+      description: |
+        get a list of services
+      operationId: get_apps
+      responses:
+        "200":
+          description: Get a list of services
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiServicesResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Application not found
       security:
         - oAuthorization:
-            - read:users
-      summary: List a user by email
+            - manage:apps
+      summary: Manage subscriptions
       tags:
-        - users
-      x-openapi-router-controller: xcube_hub.controllers.users
-  /apps/{app_id}/users:
+        - apps
+      x-openapi-router-controller: xcube_hub.controllers.subscriptions
+  /services/{service_id}/subscriptions:
     put:
       description: |
-        Add a user to an application
-      operationId: put_user_to_app
+        Register a subscription to a service
+      operationId: put_subscription_to_service
+      parameters:
+        - description: Application ID
+          explode: false
+          in: path
+          name: service_id
+          required: true
+          schema:
+            type: string
+          style: simple
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/Subscription'
       responses:
         "200":
           description: Add user to an application
@@ -100,29 +149,39 @@ paths:
       security:
         - oAuthorization:
             - manage:apps
-        summary: Manage subscriptions
-        tags:
-          - apps
-        x-openapi-router-controller: xcube_hub.controllers.subscriptions
-  /users:
-    put:
+      summary: Manage subscriptions
+      tags:
+        - apps
+      x-openapi-router-controller: xcube_hub.controllers.subscriptions
+  /services/{service_id}/subscriptions/{subscription_id}:
+    get:
       description: |
-        Create a user
-      operationId: put_user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-        description: User configuration
-        required: true
+        Get info about a subscription
+      operationId: get_subscription_from_service
+      parameters:
+        - description: Application ID
+          explode: false
+          in: path
+          name: service_id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: User ID
+          explode: false
+          in: path
+          name: subscription_id
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
+          description: User to an application
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserResponse'
-          description: User created
         "400":
           content:
             application/json:
@@ -134,170 +193,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
+          description: Application not found
       security:
         - oAuthorization:
-          - create:users
-      summary: Create a user
+            - manage:services
+      summary: Manage subscriptions
       tags:
-        - users
-      x-openapi-router-controller: xcube_hub.controllers.users
-  /users/{user_id}:
-    get:
-      description: |
-        Get info of a user
-      operationId: get_user_by_user_id
-      parameters:
-        - description: User ID
-          explode: false
-          in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-          style: simple
-      responses:
-        "200":
-          content:
-             application/json:
-               schema:
-                 $ref: '#/components/schemas/ApiUserResponse'
-          description: User created
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
-      tags:
-        - users
-      security:
-         - oAuthorization:
-           - read:users
-      x-openapi-router-controller: xcube_hub.controllers.users
-  /users/{user_id}/apps:
-    get:
-      description: |
-        Get user's apps
-      operationId: get_user_apps
-      parameters:
-        - description: User ID
-          explode: false
-          in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-          style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: string
-          description: User added
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
-      tags:
-        - users
-      security:
-        - oAuthorization:
-            - read:users
-            - read:roles
-            - read:role_members
-      x-openapi-router-controller: xcube_hub.controllers.users
-  /users/{user_id}/apps/{app_id}:
-    put:
-      description: Add user to an xcube app
-      operationId: put_user_to_app
-      parameters:
-        - description: User ID
-          explode: false
-          in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: App ID
-          explode: false
-          in: path
-          name: app_id
-          required: true
-          schema:
-            type: string
-          style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: string
-          description: User added
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
-      tags:
-        - users
-      security:
-        - oAuthorization:
-            - update:users
-            - read:roles
-            - create:role_members
-      x-openapi-router-controller: xcube_hub.controllers.users
+        - apps
+      x-openapi-router-controller: xcube_hub.controllers.subscriptions
     delete:
       description: |
-        Remove a user from app
-      operationId: delete_user_from_app
+        Delete a subscription
+      operationId: delete_subscription_from_service
       parameters:
-        - description: User ID
+        - description: Application ID
           explode: false
           in: path
-          name: user_id
+          name: service_id
           required: true
           schema:
             type: string
           style: simple
-        - description: App ID
+        - description: User ID
           explode: false
           in: path
-          name: app_id
+          name: subscription_id
           required: true
           schema:
             type: string
           style: simple
       responses:
         "200":
+          description: Subscription removed
           content:
             application/json:
               schema:
-                type: string
-          description: User deleted
+                $ref: '#/components/schemas/ApiUserResponse'
         "400":
           content:
             application/json:
@@ -309,36 +240,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-          description: User not found
+          description: Application not found
+      security:
+        - oAuthorization:
+            - manage:subscriptions
+      summary: Manage subscriptions
       tags:
-        - users
-      security:
-        - oAuthorization:
-            - update:users
-            - delete:role_members
-      x-openapi-router-controller: xcube_hub.controllers.users
-  /users/credentials:
-    get:
-      description: |
-        Get info of a user
-      operationId: get_user_credentials
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiCredentialsResponse'
-          description: Credentials returned
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-      security:
-        - oAuthorization:
-            - read:users
-      x-openapi-router-controller: xcube_hub.controllers.users
+        - subscriptions
+      x-openapi-router-controller: xcube_hub.controllers.subscriptions
   /cubegens:
     delete:
       description: |
@@ -676,14 +585,20 @@ components:
         - type: object
           properties:
             result:
-              $ref: '#/components/schemas/User'
-    ApiCredentialsResponse:
+              $ref: '#/components/schemas/Subscription'
+    ApiServiceResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
         - type: object
           properties:
             result:
-              $ref: '#/components/schemas/UserMetaData'
+              $ref: '#/components/schemas/Service'
+    ApiServicesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: array
+          items:
+            $ref: '#/components/schemas/Service'
     ApiCubegenResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -782,33 +697,6 @@ components:
         cost_estimation:
           $ref: '#/components/schemas/CostEstimation'
     CubegenConfig:
-      example:
-        cube_config:
-          spatial_res: 6.027456183070403
-          crs: crs
-          time_range:
-          - 2000-01-23
-          - 2000-01-23
-          bbox:
-          - 1.4658129805029452
-          - 1.4658129805029452
-          variable_names:
-          - variable_names
-          - variable_names
-          time_period: time_period
-        input_configs:
-        - store_id: store_id
-          data_id: data_id
-          open_params:
-            tile_size:
-            - 0.8008281904610115
-            - 0.8008281904610115
-        - store_id: store_id
-          data_id: data_id
-          open_params:
-            tile_size:
-            - 0.8008281904610115
-            - 0.8008281904610115
       properties:
         input_configs:
           items:
@@ -912,10 +800,6 @@ components:
       - client_secret
       type: object
     CubegenConfigOpenParams:
-      example:
-        tile_size:
-        - 0.8008281904610115
-        - 0.8008281904610115
       properties:
         tile_size:
           items:
@@ -923,13 +807,6 @@ components:
           type: array
       type: object
     CubegenConfigInputConfig:
-      example:
-        store_id: store_id
-        data_id: data_id
-        open_params:
-          tile_size:
-            - 0.8008281904610115
-            - 0.8008281904610115
       properties:
         store_id:
           type: string
@@ -1064,89 +941,59 @@ components:
             y:
               type: number
               format: float
-    UserMetaData:
+    Service:
+      type: object
+      required:
+        - name
+        - status
+        - message
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          default: "Ready"
+          enum:
+            - "Ready"
+            - "Suspended"
+            - "Error"
+        message:
+          type: string
+          default: "Service OK"
+    Subscription:
       type: object
       properties:
+        scheme:
+          type: string
         client_id:
           type: string
         client_secret:
           type: string
           format: password
-      additionalProperties: true
-    AppMetaData:
+        subscription:
+          oneOf:
+            - $ref: '#/components/schemas/SubscriptionXcubeGen'
+            - $ref: '#/components/schemas/SubscriptionXcubeGeoDB'
+    SubscriptionXcubeGeoDB:
       type: object
       properties:
-        geodb_role:
-          type: string
-      additionalProperties: true
-    Identity:
-      type: object
-      properties:
-        connection:
-          type: string
-        user_id:
-          type: string
-        provider:
-          type: string
-        isSocial:
-          type: boolean
-    User:
-      type: object
-      required:
-        - email
-        - given_name
-        - family_name
-      properties:
-        user_id:
-          type: string
-        email:
-          type: string
-          format: email
-        email_verified:
-          type: boolean
-        username:
-          type: string
-        created_at:
-          type: string
-          format: 'date-time'
-        updated_at:
-          type: string
-          format: 'date-time'
-        password:
-          type: string
-          format: password
-        connection:
-          type: string
-        identities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Identity'
-        app_metadata:
-          $ref: '#/components/schemas/AppMetaData'
-        user_metadata:
-          $ref: '#/components/schemas/UserMetaData'
-        picture:
-          type: string
         name:
           type: string
-        nickname:
+          default: "free"
+        geodb_role:
           type: string
-        multifactor:
-          type: array
-          items:
-            type: object
-        last_ip:
-          type: string
-        last_login:
-          type: string
-        logins_count:
+        cells:
           type: integer
-        blocked:
-          type: boolean
-        given_name:
+          default: 0
+    SubscriptionXcubeGen:
+      type: object
+      properties:
+        name:
           type: string
-        family_name:
-          type: string
+          default: "free"
+        punits:
+          type: integer
+          default: 0
   securitySchemes:
     oAuthorization:
       description: This API uses Oauth 2 with the implicit grant flow.
@@ -1154,7 +1001,7 @@ components:
         clientCredentials:
           scopes:
             manage_cubegens: Read cubegen status and result
-          tokenUrl: http://localhost:8080/api/v2/oauth/token
+          tokenUrl: http://xcube-users.brockmann-consult.de/oauth/token
       type: oauth2
       x-tokenInfoFunc: xcube_hub.controllers.authorization.check_oauthorization
       x-scopeValidateFunc: xcube_hub.controllers.authorization.validate_scope_oauthorization

@@ -150,8 +150,8 @@ def _deserialize_dict(data, boxed_type):
             for k, v in six.iteritems(data)}
 
 
-def maybe_raise_for_env(env_var: str):
-    val = os.getenv(env_var, None)
+def maybe_raise_for_env(env_var: str, default=Optional[type(None)]):
+    val = os.getenv(env_var, default=default)
     if val is None:
         raise api.ApiError(400, f"Environment Variable {env_var} must be given.")
 

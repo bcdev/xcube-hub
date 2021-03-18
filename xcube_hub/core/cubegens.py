@@ -4,7 +4,6 @@ import uuid
 from pprint import pprint
 from typing import Union, Sequence, Optional
 
-import yaml
 from kubernetes import client
 from kubernetes.client import ApiException
 from urllib3.exceptions import MaxRetryError
@@ -12,6 +11,7 @@ from urllib3.exceptions import MaxRetryError
 from xcube_hub import api, poller
 from xcube_hub.api import get_json_request_value
 from xcube_hub.auth import Auth
+from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -236,16 +236,6 @@ def delete_all(user_id: str) -> Union[AnyDict, Error]:
 
 
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
-    data_pools_cfg_file = os.getenv("XCUBE_GEN_DATA_POOLS_PATH", None)
-    if data_pools_cfg_file is None:
-        raise api.ApiError(400, "XCUBE_GEN_DATA_POOLS_PATH is not configured.")
-
-    try:
-        with open(data_pools_cfg_file, 'r') as f:
-            data_pools = yaml.safe_load(f)
-    except FileNotFoundError as e:
-        raise api.ApiError(400, f"Datapools file {data_pools_cfg_file} not found. " + str(e))
-
     job = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
     apps_v1_api = client.BatchV1Api()
     poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace="xcube-gen-stage",
@@ -265,11 +255,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
                                       default_value="")
 
     store_id = store_id.replace('@', '')
-    try:
-        data_store = data_pools[store_id]
-
-    except KeyError:
-        raise api.ApiError(400, f'unsupported "input_config/datastore_id" entry: "{store_id}"')
+    data_store = Cfg.get(store_id)
 
     available = punits.get_punits(user_id=email)
 
