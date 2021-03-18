@@ -1,3 +1,16 @@
+## Changes in v2.0.2.dev0 (in development)
+
+### New Features
+
+- Added a validation for datapools config files
+- Added a services operation to get info about the status of a running service
+- Added subscriptions operations to handle service subscriptions
+- Added a Cfg class to handle data pools configs
+- Added the json schema for data pools
+- Added a default value to mayberaise_for_env
+
+### Fixes
+
 ## Changes in v2.0.0
 
 ### New Features 
