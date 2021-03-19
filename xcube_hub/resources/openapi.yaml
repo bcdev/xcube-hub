@@ -11,9 +11,14 @@ info:
 servers:
   - url: https://xcube-gen.brockmann-consult.de/api/v2
   - url: https://stage.xcube-gen.brockmann-consult.de/api/v2
+  - url: https://xcube-geodb.brockmann-consult.de/api/v2
+  - url: https://stage.xcube-geodb.brockmann-consult.de/api/v2
+  - url: https://cate.climate.esa.int/api/v2
+  - url: https://stage.cate.climate.esa.int/api/v2
 tags:
-  - name: users
   - name: cubegens
+  - name: webapis
+  - name: users
   - name: callbacks
   - name: oauth
   - name: services
@@ -81,7 +86,7 @@ paths:
     get:
       description: |
         get a list of services
-      operationId: get_apps
+      operationId: get_services
       responses:
         "200":
           description: Get a list of services
@@ -103,18 +108,18 @@ paths:
           description: Application not found
       security:
         - oAuthorization:
-            - manage:apps
+            - manage:services
       summary: Manage subscriptions
       tags:
-        - apps
-      x-openapi-router-controller: xcube_hub.controllers.subscriptions
+        - services
+      x-openapi-router-controller: xcube_hub.controllers.services
   /services/{service_id}/subscriptions:
     put:
       description: |
         Register a subscription to a service
       operationId: put_subscription_to_service
       parameters:
-        - description: Application ID
+        - description: Service ID
           explode: false
           in: path
           name: service_id
@@ -129,11 +134,11 @@ paths:
               $ref: '#/components/schemas/Subscription'
       responses:
         "200":
-          description: Add user to an application
+          description: Register a subscription to a service
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiUserResponse'
+                $ref: '#/components/schemas/ApiSubscriptionResponse'
         "400":
           content:
             application/json:
@@ -145,21 +150,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-          description: Application not found
+          description: Service not found
       security:
         - oAuthorization:
-            - manage:apps
-      summary: Manage subscriptions
+            - manage:services
+      summary: Manage subscriptions for serices
       tags:
-        - apps
-      x-openapi-router-controller: xcube_hub.controllers.subscriptions
+        - services
+      x-openapi-router-controller: xcube_hub.controllers.services
   /services/{service_id}/subscriptions/{subscription_id}:
     get:
       description: |
-        Get info about a subscription
+        Get info about a subscription of a service
       operationId: get_subscription_from_service
       parameters:
-        - description: Application ID
+        - description: Service ID
           explode: false
           in: path
           name: service_id
@@ -167,7 +172,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: User ID
+        - description: Subscription ID
           explode: false
           in: path
           name: subscription_id
@@ -181,7 +186,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiUserResponse'
+                $ref: '#/components/schemas/ApiSubscriptionResponse'
         "400":
           content:
             application/json:
@@ -199,8 +204,8 @@ paths:
             - manage:services
       summary: Manage subscriptions
       tags:
-        - apps
-      x-openapi-router-controller: xcube_hub.controllers.subscriptions
+        - services
+      x-openapi-router-controller: xcube_hub.controllers.services
     delete:
       description: |
         Delete a subscription
@@ -228,7 +233,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiUserResponse'
+                $ref: '#/components/schemas/ApiSubscriptionResponse'
         "400":
           content:
             application/json:
@@ -240,14 +245,163 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-          description: Application not found
+          description: Service not found
       security:
         - oAuthorization:
-            - manage:subscriptions
-      summary: Manage subscriptions
+            - manage:services
+      summary: Delete a subscription from a service
       tags:
-        - subscriptions
-      x-openapi-router-controller: xcube_hub.controllers.subscriptions
+        - services
+      x-openapi-router-controller: xcube_hub.controllers.services
+  /webapis:
+    get:
+      description:
+        Get running webapis
+      operationId: get_webapis
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Create a cubegen
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Service not found
+#      security:
+#        - oAuthorization:
+#            - manage:webapis
+      summary: Create a cate service instance
+      tags:
+        - webapis
+      x-openapi-router-controller: xcube_hub.controllers.webapis
+  /users/{user_id}/webapis:
+    get:
+      description: |
+        Get webapi information
+      operationId: get_user_webapi
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Create a cubegen
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Service not found
+      security:
+        - oAuthorization:
+            - manage:users
+      summary: Create a cate service instance
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
+    post:
+      description: |
+        Create a webapi
+      operationId: put_user_webapi
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Create a webapi
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Too many webapis running
+      security:
+        - oAuthorization:
+            - manage:users
+      summary: Create a cate service instance
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
+    delete:
+      description: |
+        Delete a webapi
+      operationId: delete_user_webapi
+      parameters:
+        - description: User ID
+          explode: false
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Create a cubegen
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Service not found
+      security:
+        - oAuthorization:
+            - manage:users
+      summary: Create a webapi instance
+      tags:
+        - users
+      x-openapi-router-controller: xcube_hub.controllers.users
   /cubegens:
     delete:
       description: |
@@ -585,7 +739,7 @@ components:
           properties:
             traceback:
               type: string
-    ApiUserResponse:
+    ApiSubscriptionResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
         - type: object
@@ -971,6 +1125,7 @@ components:
       properties:
         scheme:
           type: string
+
         client_id:
           type: string
         client_secret:
@@ -1007,7 +1162,7 @@ components:
         clientCredentials:
           scopes:
             manage_cubegens: Read cubegen status and result
-          tokenUrl: http://xcube-users.brockmann-consult.de/oauth/token
+          tokenUrl: https://xcube-users.brockmann-consult.de/realms/xcube/protocol/openid-connect/token
       type: oauth2
       x-tokenInfoFunc: xcube_hub.controllers.authorization.check_oauthorization
       x-scopeValidateFunc: xcube_hub.controllers.authorization.validate_scope_oauthorization

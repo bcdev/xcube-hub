@@ -24,8 +24,8 @@ class TestOauthController(BaseTestCase):
         Get authorization token
         """
         m.post("https://edc.eu.auth0.com/oauth/token", json={'access_token': 'sdfvdfv'})
-        m.get('https://edc.eu.auth0.com/api/v2/users', json=[{'user_id': 'auth0fred', 'email': 'bla'}])
-        m.get(f"https://edc.eu.auth0.com/api/v2/users/auth0fred/permissions", json=[{'permission_name': 'test_1'}, ])
+        m.get_datastore('https://edc.eu.auth0.com/api/v2/users', json=[{'user_id': 'auth0fred', 'email': 'bla'}])
+        m.get_datastore(f"https://edc.eu.auth0.com/api/v2/users/auth0fred/permissions", json=[{'permission_name': 'test_1'}, ])
 
         body = OauthToken(client_id='abc', client_secret='def', audience='https://test',
                           grant_type='client-credentials')

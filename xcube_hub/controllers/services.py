@@ -1,6 +1,13 @@
 from xcube_hub import api
 from xcube_hub.core import services
-from xcube_hub.typedefs import JsonObject
+
+
+def get_services():
+    try:
+        svcs = services.get_services()
+        return api.ApiResponse.success(svcs)
+    except api.ApiError as e:
+        return e.response
 
 
 def get_service(service_id: str):
@@ -12,10 +19,17 @@ def get_service(service_id: str):
         return e.response
 
 
-def patch_service(service_id: str, body: JsonObject, token_info: JsonObject):
-    try:
-        svcs = services.patch_service(service_id=service_id, body=body)
-        return api.ApiResponse.success(svcs)
+def put_subscription_to_service(service_id: str, user: str):
+    # create User
+    # create client
+    # register to service if necessary
+    # gather into and return
+    pass
 
-    except api.ApiError as e:
-        return e.response
+
+def get_subscription_from_service(service_id: str, user: str):
+    pass
+
+
+def delete_subscription_from_service(service_id: str, user: str):
+    pass

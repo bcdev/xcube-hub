@@ -4,7 +4,7 @@ import os
 import re
 import secrets
 import uuid
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Any
 
 import connexion
 import six
@@ -150,10 +150,16 @@ def _deserialize_dict(data, boxed_type):
             for k, v in six.iteritems(data)}
 
 
-def maybe_raise_for_env(env_var: str, default=Optional[type(None)]):
+def maybe_raise_for_env(env_var: str, default: Optional[Any] = None, typ=str) -> Any:
     val = os.getenv(env_var, default=default)
+
     if val is None:
-        raise api.ApiError(400, f"Environment Variable {env_var} must be given.")
+        raise api.ApiError(400, f"Environment Variable {env_var} does not exist.")
+
+    try:
+        val = typ(val)
+    except (TypeError, ValueError) as e:
+        raise api.ApiError(400, str(e))
 
     return val
 

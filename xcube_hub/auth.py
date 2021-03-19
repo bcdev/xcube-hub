@@ -9,15 +9,16 @@ import flask
 from jose import jwt
 from jose.exceptions import JWKError, JWTError, ExpiredSignatureError
 from jwt import InvalidAlgorithmError
+from keycloak import KeycloakOpenID, KeycloakGetError
 from werkzeug.exceptions import Unauthorized, Forbidden
 
 from xcube_hub.typedefs import JsonObject
-
 
 _ISS_TO_PROVIDER = {
     "https://xcube-gen.brockmann-consult.de/": 'xcube',
     "https://edc.eu.auth0.com/": 'auth0',
     "https://test/": 'mocker',
+    "https://192-171-139-82.sslip.io/auth/realms/cate": "jasmin"
 }
 
 
@@ -119,6 +120,8 @@ class Auth(AuthProvider):
             return _Auth0(audience=audience, **kwargs)
         elif provider == 'xcube':
             return _AuthXcube(audience=audience, **kwargs)
+        elif provider == 'jasmin':
+            return _Keycloak(audience='cate', **kwargs)
         elif provider == 'mocker':
             return _AuthMocker()
         else:
@@ -173,6 +176,7 @@ class _Auth0(AuthProvider):
         :param token:
         :return:
         """
+
         json_url = urlopen("https://" + self._domain + "/.well-known/jwks.json")
         jwks = json.loads(json_url.read())
 
@@ -214,6 +218,76 @@ class _Auth0(AuthProvider):
             return payload
 
         raise Unauthorized(description="invalid_header: Unable to find appropriate key")
+
+
+class _Keycloak(AuthProvider):
+    f"""
+    Redis key-value pair database implementation of KeyValueStore
+    
+    Defines methods for getting, deleting and putting key value pairs
+    
+    :param host, port, db (see also `https://github.com/andymccurdy/redis-py)`
+    Example:
+    ```
+        db = KeyValueDatabase.instance(provider='redis', host='localhost', port=6379, db=0)
+    ```
+    """
+
+    def __init__(self,
+                 domain: Optional[str] = None,
+                 audience: Optional[str] = None):
+
+        super().__init__()
+        self._domain = domain or os.getenv('KEYCLOAK_DOMAIN')
+        self._audience = audience or os.getenv('XCUBE_HUB_OAUTH_AUD')
+        self._algorithms = ["RS256"]
+
+        if self._domain is None:
+            raise Unauthorized(description="Keycloak error: Domain not set")
+
+        if self._audience is None:
+            raise Unauthorized(description="Keycloak error: Audience not set")
+
+        self._keycloak_openid = KeycloakOpenID(server_url=f"https://{self._domain}/auth/",
+                                               client_id="cate",
+                                               realm_name="cate",
+                                               client_secret_key="eb305b23-252d-44c6-8efb-f6d714b87166",
+                                               verify=True)
+
+    def get_email(self, claims):
+        if 'email' not in claims:
+            return "no email"
+        return claims['email']
+
+    def verify_token(self, token: str) -> Dict:
+        """
+        Get a key value
+        :param token:
+        :return:
+        """
+
+        try:
+            self._keycloak_openid.introspect(token)
+        except KeycloakGetError as e:
+            raise Unauthorized(description="invalid token: " + str(e))
+
+        certs = self._keycloak_openid.certs()
+        rsa_key = {}
+        for key in certs["keys"]:
+            rsa_key = {
+                "kty": key["kty"],
+                "kid": key["kid"],
+                "use": key["use"],
+                "n": key["n"],
+                "e": key["e"]
+            }
+
+        try:
+            self._claims = self._keycloak_openid.decode_token(token=token, key=rsa_key)
+        except Exception as e:
+            raise Unauthorized(description=str(e))
+
+        return self._claims
 
 
 class _AuthXcube(AuthProvider):

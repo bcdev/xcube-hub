@@ -32,8 +32,9 @@ SERVER_START_TIME = datetime.datetime.now().isoformat()
 class ApiResponse:
 
     @classmethod
-    def success(cls, result: Optional[Any] = None, message: Optional[str] = None) -> AnyDict:
-        return result
+    def success(cls, result: Optional[Any] = None, status_code: int = 200, message: Optional[str] = None) -> \
+            Tuple[AnyDict, int]:
+        return result, status_code
 
     @classmethod
     def error(cls,

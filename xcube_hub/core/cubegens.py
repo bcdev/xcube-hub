@@ -145,7 +145,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{job_id}/callbacks',
                                       access_token=token)
 
-        if not cfg['output_config'].get('data_id'):
+        if not cfg['output_config'].get_datastore('data_id'):
             cfg['output_config']['data_id'] = job_id + '.zarr'
 
         job = create_cubegen_object(job_id, cfg=cfg, info_only=info_only)
@@ -255,7 +255,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
                                       default_value="")
 
     store_id = store_id.replace('@', '')
-    data_store = Cfg.get(store_id)
+    data_store = Cfg.get_datastore(store_id)
 
     available = punits.get_punits(user_id=email)
 

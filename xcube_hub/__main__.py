@@ -2,6 +2,7 @@
 import os
 
 import connexion
+import flask_cors
 from dotenv import load_dotenv
 
 from xcube_hub import encoder
@@ -27,18 +28,20 @@ app = create_app()
 
 
 def attach():
-    if os.environ.get('WERKZEUG_RUN_MAIN') and os.environ.get('XCUBE_HUB_DEBUG'):
+    werkzeug_run_main = os.getenv('WERKZEUG_RUN_MAIN', "0")
+    xcube_hub_debug = os.getenv('XCUBE_HUB_DEBUG', "0")
+    if int(werkzeug_run_main) and int(xcube_hub_debug):
         import pydevd_pycharm
         pydevd_pycharm.settrace('0.0.0.0', port=9000, stdoutToServer=True, stderrToServer=True)
 
 
 def main():
-    # attach()
+    attach()
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('openapi.yaml',
                 arguments={'title': 'xcube Generation API'},
                 pythonic_params=True)
-
+    flask_cors.CORS(app.app)
     app.run(port=8080)
 
 

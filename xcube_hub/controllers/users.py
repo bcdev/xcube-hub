@@ -4,7 +4,8 @@ import requests
 from requests import HTTPError
 
 from xcube_hub import api
-from xcube_hub.core import users
+from xcube_hub.auth_api import AuthApi
+from xcube_hub.core import users, cate
 from xcube_hub.models.user import User
 from xcube_hub.models.user_user_metadata import UserUserMetadata
 from xcube_hub.util import create_user_id_from_email, create_secret
@@ -31,11 +32,8 @@ def put_user(body: Dict, token_info: Dict):
         headers = {'Authorization': f"Bearer {token_info['token']}"}
         user_dict = users.get_request_body_from_user(user)
 
-        r = requests.post("https://edc.eu.auth0.com/api/v2/users", json=user_dict, headers=headers)
-        try:
-            r.raise_for_status()
-        except HTTPError as e:
-            raise api.ApiError(r.status_code, str(e))
+        auth_api = AuthApi.instance()
+        auth_api.add_user(payload=user_dict)
     except api.ApiError as e:
         return e.response
 
@@ -137,5 +135,29 @@ def get_user_credentials():
     try:
         client_id, client_secret = users.create_secret()
         return api.ApiResponse.success(dict(client_id=client_id, client_secret=client_secret))
+    except api.ApiError as e:
+        return e.response
+
+
+def put_user_webapi(user_id: str):
+    try:
+        res = cate.launch_cate(user_id=user_id)
+        return api.ApiResponse.success(res)
+    except api.ApiError as e:
+        return e.response
+
+
+def get_user_webapi(user_id: str):
+    try:
+        res = cate.get_status(user_id=user_id)
+        return api.ApiResponse.success(res)
+    except api.ApiError as e:
+        return e.response
+
+
+def delete_user_webapi(user_id: str):
+    try:
+        res = cate.delete_cate(user_id=user_id)
+        return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response
