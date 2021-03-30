@@ -19,7 +19,7 @@ class Cfg:
     def get_datastore(cls, datastore: str):
         try:
             return cls._datapools_cfg[datastore]
-        except KeyError as e:
+        except (TypeError, KeyError) as e:
             raise api.ApiError(400,
                                f"Error: Could not load datastore configuration. Datastore {datastore} not in config.")
 
@@ -105,5 +105,5 @@ class Cfg:
     @classmethod
     def load_config(cls):
         cls._load_datastores()
-        cls._load_services()
+        # cls._load_services()
 

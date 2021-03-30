@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 NAME = "xcube-hub"
-VERSION = "2.0.0"
+VERSION = "2.1.0.dev1"
 
 # To install the library, run the following
 #

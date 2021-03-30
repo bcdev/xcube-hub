@@ -4,18 +4,11 @@ import unittest
 from xcube_hub import api
 from xcube_hub.core.stores import get_stores_from_file
 
-TEST_POOLS = {
-    "cds": {
-        "title": "C3S Climate Data Store (CDS)",
-        "description": "Selected datasets from the Copernicus CDS API",
-        "store_id": "cds"
-    },
-    "cciodp": {
-        "title": "ESA Climate Change Initiative (CCI)",
-        "description": "Data from the ESA CCI Open Data Portal API",
-        "store_id": "cciodp"
-    }
-}
+TEST_POOLS = {'sentinelhub_codede': {'title': 'SENTINEL Hub (Central Europe)', 'store_id': 'sentinelhub',
+                                     'cost_params': {'scheme': 'punits', 'input_pixels_per_punit': 262144,
+                                                     'input_punits_weight': 1.0, 'output_pixels_per_punit': 262144,
+                                                     'output_punits_weight': 1.0},
+                                     'store_params': {'api_url': 'https://services.sentinel-hub.com'}}}
 
 
 class TestStores(unittest.TestCase):
@@ -25,13 +18,6 @@ class TestStores(unittest.TestCase):
     def test_get_stores(self):
         res = get_stores_from_file()
         self.assertDictEqual(TEST_POOLS, res)
-
-        os.environ['XCUBE_GEN_DATA_POOLS_PATH'] = 'test/resources/data-pools-invalid.yaml'
-        with self.assertRaises(api.ApiError) as e:
-            get_stores_from_file()
-
-        self.assertEqual(400, e.exception.status_code)
-        self.assertIn("while parsing a block collection", str(e.exception))
 
         os.environ['XCUBE_GEN_DATA_POOLS_PATH'] = "fff"
         with self.assertRaises(api.ApiError) as e:
@@ -45,7 +31,7 @@ class TestStores(unittest.TestCase):
             get_stores_from_file()
 
         self.assertEqual(400, e.exception.status_code)
-        self.assertEqual("Environment Variable XCUBE_GEN_DATA_POOLS_PATH must be given.", str(e.exception))
+        self.assertEqual("Environment Variable XCUBE_GEN_DATA_POOLS_PATH does not exist.", str(e.exception))
 
 
 if __name__ == '__main__':

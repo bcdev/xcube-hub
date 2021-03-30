@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import Unauthorized, Forbidden
 
 # noinspection PyProtectedMember
+from xcube_hub import api
 from xcube_hub.auth import Auth, _AuthXcube, _Auth0, _AuthMocker
 
 
@@ -13,19 +14,19 @@ class TestAuth(unittest.TestCase):
         load_dotenv(dotenv_path='test/.env')
 
     def test_auth(self):
-        auth = Auth(provider='xcube')
+        auth = Auth(iss="https://xcube-gen.brockmann-consult.de/")
         self.assertIsInstance(auth._provider, _AuthXcube)
 
-        auth = Auth(provider='auth0')
+        auth = Auth(iss="https://edc.eu.auth0.com/", domain="dfv", audience='degbv')
         self.assertIsInstance(auth._provider, _Auth0)
 
-        auth = Auth(provider='mocker')
+        auth = Auth(iss="https://test/")
         self.assertIsInstance(auth._provider, _AuthMocker)
 
         with self.assertRaises(Unauthorized) as e:
-            Auth(provider='auth')
+            Auth(iss="https://test2/")
 
-        self.assertEqual("401 Unauthorized: Provider auth unknown.", str(e.exception))
+        self.assertEqual("401 Unauthorized: Issuer https://test2/ unknown.", str(e.exception))
 
     def test_instance(self):
         auth = Auth.instance(iss="https://xcube-gen.brockmann-consult.de/", refresh=True)
@@ -37,7 +38,7 @@ class TestAuth(unittest.TestCase):
         self.assertIsInstance(auth._provider, _AuthXcube)
 
         Auth._instance = None
-        auth = Auth.instance(iss="https://edc.eu.auth0.com/")
+        auth = Auth.instance(iss="https://edc.eu.auth0.com/", domain="dfv", audience='degbv')
         self.assertIsInstance(auth, Auth)
         self.assertIsInstance(auth._provider, _Auth0)
 
@@ -88,17 +89,18 @@ class TestAuth(unittest.TestCase):
         self.assertEqual("afc97cfc3e4dc541495e84bbb78804dfc", user_id)
 
     def test_auth0(self):
-        auth = Auth.instance(iss="https://edc.eu.auth0.com/", refresh=True)
+        auth = Auth.instance(iss="https://edc.eu.auth0.com/", refresh=True, domain="edc.eu.auth0.com",
+                             audience='https://xcube-gen.brockmann-consult.de/api/v2/')
         self.assertEqual('edc.eu.auth0.com', auth._provider._domain)
         self.assertEqual("https://xcube-gen.brockmann-consult.de/api/v2/", auth._provider._audience)
         self.assertEqual(["RS256"], auth._provider._algorithms)
 
         domain = os.getenv('AUTH0_DOMAIN')
         del os.environ['AUTH0_DOMAIN']
-        with self.assertRaises(Unauthorized) as e:
+        with self.assertRaises(api.ApiError) as e:
             auth = Auth.instance(iss="https://edc.eu.auth0.com/", refresh=True)
 
-        self.assertEqual("401 Unauthorized: Auth0 error: Domain not set", str(e.exception))
+        self.assertEqual("Environment Variable AUTH0_DOMAIN does not exist.", str(e.exception))
 
         os.environ['AUTH0_DOMAIN'] = domain
 
@@ -121,9 +123,8 @@ class TestAuth(unittest.TestCase):
 
         auth._claims = {'https://xcube-gen.brockmann-consult.de/mail': 'mock@mail.nz'}
 
-        with self.assertRaises(Unauthorized) as e:
-            email = auth.email
-        self.assertEqual('401 Unauthorized: Access denied. Cannot get email.', str(e.exception))
+        email = auth.email
+        self.assertEqual('no email', email)
 
     def test_xcube_email(self):
         auth = Auth.instance(iss="https://xcube-gen.brockmann-consult.de/", refresh=True)

@@ -2,10 +2,13 @@
 
 from __future__ import absolute_import
 
+import os
+
 from dotenv import load_dotenv
 
 from test.controllers.utils import create_test_token
 from test import BaseTestCase
+import unittest
 from xcube_hub.core import cubegens
 from xcube_hub.core.validations import validate_env
 from xcube_hub.k8scfg import K8sCfg
@@ -61,6 +64,7 @@ TEST_CLAIMS = {
 }
 
 
+@unittest.skipIf(os.getenv("UNITTESTS_SKIP_K8s", "0") == "1", "Kubernetes skipped")
 class TestCubeGensController(BaseTestCase):
     """CubeGensController integration test stubs"""
 
@@ -74,7 +78,7 @@ class TestCubeGensController(BaseTestCase):
 
     def tearDown(self) -> None:
         cubegens.delete_all(self._user_id)
-        
+
     def test_create_cubegen(self):
         """Test case for create_cubegen
 
@@ -95,7 +99,7 @@ class TestCubeGensController(BaseTestCase):
         Delete a cubegen
         """
 
-        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
         response = self.client.open(f'/api/v2/cubegens/{res["cubegen_id"]}',
                                     headers={'Authorization': f"Bearer {self._token}"}, method='DELETE')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -105,7 +109,7 @@ class TestCubeGensController(BaseTestCase):
 
         Delete all cubegens
         """
-        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
         response = self.client.open('/api/v2/cubegens', headers={'Authorization': f"Bearer {self._token}"},
                                     method='DELETE')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -128,7 +132,7 @@ class TestCubeGensController(BaseTestCase):
 
         List specific cubegen
         """
-        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
         response = self.client.open(f'/api/v2/cubegens/{res["cubegen_id"]}',
                                     headers={'Authorization': f"Bearer {self._token}"}, method='GET')
         self.assert200(response,
@@ -139,7 +143,7 @@ class TestCubeGensController(BaseTestCase):
 
         List cubegens
         """
-        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", CUBEGEN_TEST, token=self._token)
+        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
         response = self.client.open('/api/v2/cubegens', headers={'Authorization': f"Bearer {self._token}"},
                                     method='GET')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))

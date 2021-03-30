@@ -30,7 +30,7 @@ from xcube_hub.core import user_namespaces
 from xcube_hub.core.k8s import create_deployment_object, create_service_object, \
     delete_deployment, delete_service, list_services, get_pod, \
     create_deployment_if_not_exists, create_service_if_not_exists, count_pods, \
-    add_cate_path_to_ingress, get_deployment
+    get_deployment, get_ingress, create_ingress_object, create_ingress
 from xcube_hub.poller import poll_pod_phase
 from xcube_hub.typedefs import JsonObject
 from xcube_hub.util import raise_for_invalid_username
@@ -53,19 +53,14 @@ def delete_cate(user_id: str, prune: bool = False) -> bool:
         if service_name in services:
             delete_service(name=service_name, namespace=cate_namespace)
 
-        # ingresses = list_ingress(namespace=cate_namespace)
-        # ingresses = [ingress.metadata.name for ingress in ingresses.items]
-        # if len(ingresses) > 0:
-        #     delete_ingress(name=user_id + '-cate', namespace=cate_namespace)
-
     return True
 
 
 def launch_cate(user_id: str) -> JsonObject:
     try:
-        max_pods = util.maybe_raise_for_env("CATE_MAX_WEBAPIS", default=50)
+        max_pods = util.maybe_raise_for_env("CATE_MAX_WEBAPIS", default=50, typ=int)
 
-        grace = util.maybe_raise_for_env("CATE_LAUNCH_GRACE", default=2)
+        grace = util.maybe_raise_for_env("CATE_LAUNCH_GRACE", default=2, typ=int)
 
         raise_for_invalid_username(user_id)
 
@@ -78,6 +73,7 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_env_activate_command = os.environ.get("CATE_ENV_ACTIVATE_COMMAND", False)
         cate_webapi_uri = os.environ.get("CATE_WEBAPI_URI")
         cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate")
+        cate_stores_config_path = os.environ.get("CATE_STORES_CONFIG_PATH")
 
         user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
@@ -95,6 +91,7 @@ def launch_cate(user_id: str) -> JsonObject:
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
         envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate/workspace"),
+                client.V1EnvVar(name='CATE_STORES_CONFIG_PATH', value="/etc/cate/stores.yaml"),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
 
         volume_mounts = [
@@ -173,12 +170,23 @@ def launch_cate(user_id: str) -> JsonObject:
 
         host_uri = os.environ.get("CATE_WEBAPI_URI")
 
-        add_cate_path_to_ingress(
-            name='xcubehub-cate',
-            namespace=cate_namespace,
-            user_id=user_id,
-            host_uri=host_uri
-        )
+        service_name = user_id + '-cate'
+
+        ingress = get_ingress(namespace=cate_namespace, name=service_name)
+        if not ingress:
+            ingress = create_ingress_object(name=service_name,
+                                            service_name=service_name,
+                                            service_port=4000,
+                                            user_id=user_id,
+                                            host_uri=host_uri)
+            create_ingress(ingress, namespace=cate_namespace)
+
+        # add_cate_path_to_ingress(
+        #     name='xcubehub-cate',
+        #     namespace=cate_namespace,
+        #     user_id=user_id,
+        #     host_uri=host_uri
+        # )
 
         poll_pod_phase(get_pod, namespace=cate_namespace, prefix=user_id)
 

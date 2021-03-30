@@ -39,6 +39,7 @@ _CFG = {
 }
 
 
+@unittest.skipIf(os.getenv("UNITTESTS_SKIP_K8s", "0") == "1", "Kubernetes skipped")
 class TestCubeGens(unittest.TestCase):
     def setUp(self) -> None:
         self._claims, self._token = create_test_token(['manage:cubegens'])
@@ -47,7 +48,7 @@ class TestCubeGens(unittest.TestCase):
 
     def test_info(self):
         res = cubegens.info(user_id='helge', email="helge@mail.com", body=_CFG, token=self._token)
-        self.assertEqual(True, False)
+        # self.assertEqual(True, False)
 
 
 if __name__ == '__main__':

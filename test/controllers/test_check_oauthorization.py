@@ -13,10 +13,26 @@ class TestOauthorization(unittest.TestCase):
 
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
 
+    def test_get_claim_from_token(self):
+        claims = {
+            "scope": "user:manage",
+            "gty": "client-credentials",
+            "email": "test@mail.com",
+            "sub": "test@mail.com",
+            "permissions": "user:manage"
+        }
+        claims, token = create_test_token(["manage:users", "manage:cubegens"], claims=claims)
+
+        with self.assertRaises(Unauthorized) as e:
+            check_oauthorization(token)
+
+        self.assertEqual("401 Unauthorized: Access denied: No iss.", str(e.exception))
+
     def test_check_oauthorization(self):
-        expected = {'scopes': ['manage:users', 'manage:cubegens'], 'user_id': 'a97dfebf4098c0f5c16bca61e2b76c373',
-                    'email': 'test@mail.com'}
+        expected = {'scopes': ['manage:users', 'manage:cubegens'], 'sub': 'test@mail.com',
+                    'user_id': 'a97dfebf4098c0f5c16bca61e2b76c373', 'email': 'test@mail.com'}
         res = check_oauthorization(self._token)
+        del res['token']
         self.assertDictEqual(expected, res)
 
         token = create_token(claims=self._claims, days_valid=-1)

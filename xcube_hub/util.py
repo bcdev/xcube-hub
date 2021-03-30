@@ -191,9 +191,13 @@ def create_user_id_from_email(email: str):
     return 'a' + res.hexdigest()
 
 
+def generate_temp_password(secrets_length: int = 32):
+    return secrets.token_urlsafe(secrets_length)
+
+
 def create_secret(secrets_length: int = 32):
     client_id = uuid.uuid4().hex
-    client_secret = secrets.token_urlsafe(secrets_length)
+    client_secret = generate_temp_password(secrets_length)
     return client_id, client_secret
 
 

@@ -7,10 +7,11 @@ import os
 import requests_mock
 from test import BaseTestCase
 
-TEST_POOLS = {'result': {'cciodp': {'description': 'Data from the ESA CCI Open Data Portal API', 'store_id': 'cciodp',
-                                    'title': 'ESA Climate Change Initiative (CCI)'},
-                         'cds': {'description': 'Selected datasets from the Copernicus CDS API', 'store_id': 'cds',
-                                 'title': 'C3S Climate Data Store (CDS)'}}}
+TEST_POOLS = {'sentinelhub_codede': {'title': 'SENTINEL Hub (Central Europe)', 'store_id': 'sentinelhub',
+                                     'cost_params': {'scheme': 'punits', 'input_pixels_per_punit': 262144,
+                                                     'input_punits_weight': 1.0, 'output_pixels_per_punit': 262144,
+                                                     'output_punits_weight': 1.0},
+                                     'store_params': {'api_url': 'https://services.sentinel-hub.com'}}}
 
 
 @requests_mock.Mocker()

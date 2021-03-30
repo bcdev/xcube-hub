@@ -5,10 +5,8 @@ import connexion
 import requests
 from requests import HTTPError
 
-from xcube_hub import api
-from xcube_hub.core import punits
+from xcube_hub import api, util
 from xcube_hub.models.user import User
-from xcube_hub.models.user_user_metadata import UserUserMetadata
 from xcube_hub.util import strap_token, create_user_id_from_email, create_secret
 
 
@@ -98,15 +96,9 @@ def get_request_body_from_user(user: User):
 def supplement_user(user: User):
     user.user_id = create_user_id_from_email(user.email)
 
-    if user.user_metadata is None:
-        user.user_metadata = UserUserMetadata()
-
-    if user.user_metadata.punits is not None:
-        punits.add_punits(user_id=user.email,
-                          punits_request=dict(punits=dict(total_count=int(user.user_metadata.punits))))
-
     client_id, client_secret = create_secret()
     user.user_metadata.client_id = client_id
     user.user_metadata.client_secret = client_secret
+    user.password = util.generate_temp_password()
 
     return user

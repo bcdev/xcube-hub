@@ -1,9 +1,11 @@
 import unittest
 
 import boto3
+from dotenv import load_dotenv
 from jose import jwt
 from moto import mock_s3
 
+from xcube_hub.cfg import Cfg
 from xcube_hub.core.punits import add_punits, get_user_data
 from xcube_hub.core.callbacks import put_callback, get_callback
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
@@ -67,6 +69,8 @@ class TestCallbacks(unittest.TestCase):
         self._cache.set('heinrich__cubegen', {'value_key': 'value'})
         self._cache.set('heinrich__cubegen__cfg', CUBEGEN_TEST)
         self._token = jwt.encode(TEST_CLAIMS, "ysdfvdfvdsvfdsvfdvs", algorithm="HS256")
+        load_dotenv(dotenv_path='test/.env')
+        Cfg.load_config()
 
     def test_get_callback(self):
         res = get_callback('heinrich', 'cubegen')

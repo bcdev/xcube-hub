@@ -7,6 +7,7 @@ from typing import List, Dict  # noqa: F401
 
 from xcube_hub.models.base_model_ import Model
 from xcube_hub import util
+from xcube_hub.models.subscription import Subscription
 
 
 class UserUserMetadata(Model):
@@ -14,30 +15,28 @@ class UserUserMetadata(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, client_id=None, client_secret=None, punits=None):
+    def __init__(self, client_id=None, client_secret=None, subscriptions=None):
         """UserUserMetadata - a model defined in OpenAPI
         :param client_id: The client_id of this UserUserMetadata.  # noqa: E501
         :type client_id: str
         :param client_secret: The client_secret of this UserUserMetadata.  # noqa: E501
         :type client_secret: str
-        :param punits: The punits of this UserUserMetadata.  # noqa: E501
-        :type punits: float
         """
         self.openapi_types = {
             'client_id': str,
             'client_secret': str,
-            'punits': float,
+            'subscriptions': Dict[str, Subscription]
         }
 
         self.attribute_map = {
             'client_id': 'client_id',
             'client_secret': 'client_secret',
-            'punits': 'punits',
+            'subscriptions': 'subscriptions',
         }
 
         self._client_id = client_id
         self._client_secret = client_secret
-        self._punits = punits
+        self._subscriptions = subscriptions
 
     @classmethod
     def from_dict(cls, dikt) -> 'UserUserMetadata':
@@ -84,18 +83,18 @@ class UserUserMetadata(Model):
         self._client_secret = client_secret
 
     @property
-    def punits(self):
-        """Gets the punits of this UserUserMetadata.
-        :return: The punits of this UserUserMetadata.
+    def subscriptions(self):
+        """Gets the subscriptions of this UserUserMetadata.
+        :return: The subscriptions of this UserUserMetadata.
         :rtype: float
         """
-        return self._punits
+        return self._subscriptions
 
-    @punits.setter
-    def punits(self, punits):
-        """Sets the punits of this UserUserMetadata.
-        :param punits: The punits of this UserUserMetadata.
-        :type punits: float
+    @subscriptions.setter
+    def subscriptions(self, subscriptions):
+        """Sets the subscriptions of this UserUserMetadata.
+        :param subscriptions: The punits of this UserUserMetadata.
+        :type subscriptions: float
         """
 
-        self._punits = punits
+        self._subscriptions = subscriptions

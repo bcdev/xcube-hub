@@ -12,6 +12,7 @@ from jwt import InvalidAlgorithmError
 from keycloak import KeycloakOpenID, KeycloakGetError
 from werkzeug.exceptions import Unauthorized, Forbidden
 
+from xcube_hub import util
 from xcube_hub.typedefs import JsonObject
 
 _ISS_TO_PROVIDER = {
@@ -52,7 +53,11 @@ class Auth(AuthProvider):
 
     _instance = None
 
-    def __init__(self, iss: str, audience: Optional[str] = None, **kwargs):
+    def __init__(self, iss: Optional[str] = None, audience: Optional[str] = None, **kwargs):
+        auth0_domain = util.maybe_raise_for_env("AUTH0_DOMAIN")
+
+        iss = iss or f"https://{auth0_domain}/"
+
         provider = _ISS_TO_PROVIDER.get(iss)
         if provider is None:
             raise Unauthorized(description=f"Issuer {iss} unknown.")
@@ -131,6 +136,7 @@ class Auth(AuthProvider):
     def instance(cls, iss: Optional[str] = None, audience: Optional[str] = None, refresh: bool = False, **kwargs) \
             -> "Auth":
         refresh = refresh or cls._instance is None
+
         if refresh:
             cls._instance = Auth(iss=iss, audience=audience, **kwargs)
 

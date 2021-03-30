@@ -375,14 +375,32 @@ def add_cate_path_to_ingress(name: str,
                              namespace: str,
                              user_id: str,
                              host_uri: str) -> Optional[bool]:
+
+    service_name = user_id + '-cate'
     ingress = get_ingress(namespace=namespace, name=name)
     if not ingress:
         ingress = create_ingress_object(name=name,
-                                        service_name=user_id + '-cate',
+                                        service_name=service_name,
                                         service_port=4000,
                                         user_id=user_id,
                                         host_uri=host_uri)
         create_ingress(ingress, namespace=namespace)
+
+    websocket_services = ingress.metadata.annotations["nginx.ingress.kubernetes.io/websocket-services"]
+    if service_name not in websocket_services:
+        websocket_services += ',' + service_name
+
+    annotations = {
+        "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
+        "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
+        "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",
+        "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
+        "nginx.ingress.kubernetes.io/send-timeout": "86400",
+        "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
+        "nginx.ingress.kubernetes.io/enable-cors": "true",
+        "nginx.org/websocket-services": "ws-svc",
+        "nginx.ingress.kubernetes.io/websocket-services": websocket_services
+    }
 
     webapi_host = host_uri
     if host_uri.startswith('https://'):
@@ -411,6 +429,7 @@ def add_cate_path_to_ingress(name: str,
         )
 
         ingress.spec.rules.append(new_rule)
+        ingress.metadata.annotations = annotations
         patch_ingress(name=name, namespace=namespace, body=ingress)
 
     return True

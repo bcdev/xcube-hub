@@ -1,11 +1,7 @@
 import secrets
 import unittest
-
-import requests_mock
 from dotenv import load_dotenv
-
 from test import BaseTestCase
-from xcube_hub.controllers.oauth import _get_management_token
 
 
 class TestUsers(BaseTestCase):
@@ -19,14 +15,6 @@ class TestUsers(BaseTestCase):
             "connection": "Username-Password-Xcube",
             "password": secrets.token_urlsafe(256)
         }
-
-    def test_get_user_by_user_id(self):
-        token = _get_management_token()
-
-        response = self.client.open('/api/v2/users', method='PUT',
-                                    json=self._user,
-                                    headers={'Authorization': f'Bearer {token}'})
-        self.assertEqual(True, True)
 
 
 if __name__ == '__main__':

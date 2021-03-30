@@ -19,6 +19,7 @@ def create_app():
     Cfg.load_config()
     K8sCfg.load_config_once()
     cache_provider = os.environ.get('XCUBE_HUB_CACHE_PROVIDER', 'inmemory')
+    # specification_dir = maybe_raise_for_env("XCUBE_HUB_CFG_DIR", './resources/')
     KeyValueDatabase.instance(provider=cache_provider)
 
     return connexion.App(__name__, specification_dir='./resources/')
@@ -27,16 +28,15 @@ def create_app():
 app = create_app()
 
 
-def attach():
-    werkzeug_run_main = os.getenv('WERKZEUG_RUN_MAIN', "0")
+def attach_debugger():
     xcube_hub_debug = os.getenv('XCUBE_HUB_DEBUG', "0")
-    if int(werkzeug_run_main) and int(xcube_hub_debug):
+    if xcube_hub_debug == "1":
         import pydevd_pycharm
         pydevd_pycharm.settrace('0.0.0.0', port=9000, stdoutToServer=True, stderrToServer=True)
 
 
 def main():
-    attach()
+    attach_debugger()
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('openapi.yaml',
                 arguments={'title': 'xcube Generation API'},

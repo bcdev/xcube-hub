@@ -48,7 +48,7 @@ class TestValidations(BaseTestCase):
         with self.assertRaises(api.ApiError) as e:
             res = validate_datapools()
 
-        self.assertEqual('XCUBE_HUB_CFG_DATAPOOLS or XCUBE_HUB_CFG_DIR is not configured.', str(e.exception))
+        self.assertEqual('Environment Variable XCUBE_HUB_CFG_DATAPOOLS does not exist.', str(e.exception))
 
 
 if __name__ == '__main__':

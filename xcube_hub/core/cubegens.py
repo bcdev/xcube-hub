@@ -123,7 +123,8 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
                                 f"is greater than the available {cost_estimation['available']}")
 
 
-def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = False) -> Union[AnyDict, Error]:
+def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = False) -> \
+        Union[AnyDict, Error]:
     try:
         if 'input_config' not in cfg and 'input_configs' not in cfg:
             raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")
@@ -145,7 +146,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         cfg['callback_config'] = dict(api_uri=callback_uri + f'/cubegens/{job_id}/callbacks',
                                       access_token=token)
 
-        if not cfg['output_config'].get_datastore('data_id'):
+        if 'data_id' not in cfg['output_config']:
             cfg['output_config']['data_id'] = job_id + '.zarr'
 
         job = create_cubegen_object(job_id, cfg=cfg, info_only=info_only)
@@ -162,7 +163,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
 
 
 # noinspection PyShadowingBuiltins
-def list(user_id: str) -> Union[AnyDict, Error]:
+def list(user_id: str):
     api_instance = client.BatchV1Api()
     xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
     try:
@@ -175,7 +176,7 @@ def list(user_id: str) -> Union[AnyDict, Error]:
 
                 res.append(job)
 
-        return api.ApiResponse.success(res)
+        return res
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 
@@ -228,7 +229,7 @@ def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
 def delete_all(user_id: str) -> Union[AnyDict, Error]:
     try:
         jobs = list(user_id=user_id)
-        for job in jobs['result']:
+        for job in jobs:
             delete_one(job['cubegen_id'])
         return api.ApiResponse.success("SUCCESS")
     except (ApiException, MaxRetryError) as e:

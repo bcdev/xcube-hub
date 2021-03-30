@@ -12,12 +12,12 @@ https://connexion.readthedocs.io/en/latest/security.html
 
 def _get_claim_from_token(token: str, tgt: str):
     unverified_claims = jwt.get_unverified_claims(token)
-    tgt = unverified_claims.get(tgt)
+    claim = unverified_claims.get(tgt)
 
-    if tgt is None:
+    if claim is None:
         raise Unauthorized(description=f"Access denied: No {tgt}.")
 
-    return tgt
+    return claim
 
 
 def check_oauthorization(token):
