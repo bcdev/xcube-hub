@@ -5,7 +5,7 @@ from xcube_hub.core import cubegens
 from xcube_hub.typedefs import JsonObject
 
 
-def create_cubegen(body: JsonObject, token_info: Dict):
+def create_cubegen(body: JsonObject, token_info: Dict, mck=True):
     """Create a cubegen
 
     Create a cubegen

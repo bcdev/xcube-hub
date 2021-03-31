@@ -61,6 +61,8 @@ def poll_job_status(poller: Any, status='ready', **kwargs):
             for st in job.status.conditions:
                 if st.type == 'Complete':
                     return True
+                if st.type == "Failed":
+                    return True
 
         return False
 

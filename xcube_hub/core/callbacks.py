@@ -28,7 +28,7 @@ def get_callback(user_id: str, cubegen_id: str) -> JsonObject:
 
 def put_callback(user_id: str, cubegen_id: str, value: AnyDict, email: str):
     if not value or 'state' not in value:
-        raise api.ApiError(401, 'Callbacks need a "message" as well as a "state"')
+        raise api.ApiError(401, 'Callbacks need a "state"')
 
     try:
         print(f"Calling progress for {cubegen_id}.")
@@ -48,13 +48,19 @@ def put_callback(user_id: str, cubegen_id: str, value: AnyDict, email: str):
         if sender == 'on_end':
             if 'error' not in state:
                 processing_request = kvdb.get(user_id + '__' + cubegen_id + '__cfg')
-                input_config = processing_request['input_configs']
+                cube_config = processing_request['cube_config']
 
-                store_id = input_config[0]['store_id']
+                if 'input_configs' in processing_request:
+                    input_config = processing_request['input_configs'][0]
+                elif 'input_config' in processing_request:
+                    input_config = processing_request['input_config']
+                else:
+                    raise api.ApiError(400, "Error in callbacks. Invalid input configuration.")
 
-                store_id = store_id.replace('@', '')
+                store_id = input_config['store_id'].replace('@', '')
+
                 datastore = Cfg.get_datastore(store_id)
-                punits_requests = get_size_and_cost(processing_request=processing_request, datastore=datastore)
+                punits_requests = get_size_and_cost(processing_request=cube_config, datastore=datastore)
 
                 subtract_punits(user_id=email, punits_request=punits_requests)
 

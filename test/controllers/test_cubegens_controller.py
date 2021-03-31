@@ -3,16 +3,26 @@
 from __future__ import absolute_import
 
 import os
+from typing import Dict
+from unittest import mock
 
 from dotenv import load_dotenv
 
 from test.controllers.utils import create_test_token
 from test import BaseTestCase
 import unittest
+
+from xcube_hub import api
 from xcube_hub.core import cubegens
 from xcube_hub.core.validations import validate_env
 from xcube_hub.k8scfg import K8sCfg
 from xcube_hub.models.cubegen_config import CubegenConfig
+from xcube_hub.typedefs import JsonObject
+
+
+def create_cubegen2s(body: JsonObject, token_info: Dict):
+    print("Hello")
+    raise api.ApiError(400, "")
 
 
 CUBEGEN_TEST = {
@@ -79,12 +89,12 @@ class TestCubeGensController(BaseTestCase):
     def tearDown(self) -> None:
         cubegens.delete_all(self._user_id)
 
-    def test_create_cubegen(self):
+    @mock.patch('xcube_hub.controllers.cubegens.create_cubegen', side_effect=create_cubegen2s)
+    def test_create_cubegen(self, m):
         """Test case for create_cubegen
 
         Create a cubegen
         """
-
         response = self.client.open(
             '/api/v2/cubegens',
             method='PUT',
