@@ -1,5 +1,7 @@
+from typing import Dict
+
 from xcube_hub import api
-from xcube_hub.auth_api import AuthApi
+from xcube_hub.auth_api import SubscriptionApi
 from xcube_hub.core import services
 from xcube_hub.models.subscription import Subscription
 from xcube_hub.typedefs import JsonObject
@@ -22,26 +24,29 @@ def get_service(service_id: str):
         return e.response
 
 
-def put_subscription_to_service(service_id: str, subscription: JsonObject) -> Subscription:
+def put_subscription_to_service(service_id: str, body: JsonObject, token_info: Dict):
     try:
-        auth_api = AuthApi.instance()
-        subscription = Subscription.from_dict(subscription)
-        return auth_api.add_subscription(service_id=service_id, subscription=subscription)
+        auth_api = SubscriptionApi.instance(iss=token_info['iss'], token=token_info['token'])
+        subscription = Subscription.from_dict(body)
+        res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
+        return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response
 
 
-def get_subscription_from_service(service_id: str, subscription_id):
+def get_subscription_from_service(service_id: str, subscription_id, token_info: Dict):
     try:
-        auth_api = AuthApi.instance()
-        auth_api.get_subscription(service_id=service_id, subscription_id=subscription_id)
+        auth_api = SubscriptionApi.instance(iss=token_info['iss'], token=token_info['token'])
+        subscription = auth_api.get_subscription(service_id=service_id, subscription_id=subscription_id)
+        return api.ApiResponse.success(subscription.to_dict())
     except api.ApiError as e:
         return e.response
 
 
-def delete_subscription_from_service(service_id: str, subscription_id):
+def delete_subscription_from_service(service_id: str, subscription_id, token_info: Dict):
     try:
-        auth_api = AuthApi.instance()
-        auth_api.delete_subscription(service_id=service_id, subscription_id=subscription_id)
+        auth_api = SubscriptionApi.instance(iss=token_info['iss'], token=token_info['token'])
+        res = auth_api.delete_subscription(service_id=service_id, subscription_id=subscription_id)
+        return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response

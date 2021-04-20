@@ -22,7 +22,8 @@ class K8sCfg:
     @classmethod
     def _load_config(cls):
         from kubernetes import config
-        if os.environ.get('XCUBE_HUB_RUN_LOCAL'):
+
+        if os.environ.get('XCUBE_HUB_RUN_LOCAL', '0') == '1':
             print("Kubernetes configured to run locally.")
             config.load_kube_config()
         else:

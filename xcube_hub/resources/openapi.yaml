@@ -210,8 +210,8 @@ paths:
           schema:
             type: string
             enum:
-              - xcube-gen
-              - xcube-geodb
+              - xcube_gen
+              - xcube_geodb
           style: simple
       responses:
         "200":
@@ -232,6 +232,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Service not found
+      security:
+        - oAuthorization:
+            - manage:subscriptions
       x-openapi-router-controller: xcube_hub.controllers.services
   /services:
     get:
@@ -261,7 +264,7 @@ paths:
           description: Application not found
       security:
         - oAuthorization:
-            - manage:services
+            - manage:subscriptions
       summary: Manage subscriptions
       tags:
         - services
@@ -282,8 +285,8 @@ paths:
           schema:
             type: string
             enum:
-              - xcube-gen
-              - xcube-geodb
+              - xcube_gen
+              - xcube_geodb
           style: simple
       requestBody:
         content:
@@ -317,7 +320,8 @@ paths:
           description: Subscription exists
       security:
         - oAuthorization:
-            - manage:services
+            - read:users
+            - create:users
       summary: Manage subscriptions for serices
       tags:
         - services
@@ -338,8 +342,8 @@ paths:
           schema:
             type: string
             enum:
-              - xcube-gen
-              - xcube-geodb
+              - xcube_gen
+              - xcube_geodb
           style: simple
         - description: Subscription ID
           explode: false
@@ -370,7 +374,8 @@ paths:
           description: Application not found
       security:
         - oAuthorization:
-            - manage:services
+            - read:users
+            - create:users
       summary: Manage subscriptions
       tags:
         - services
@@ -390,8 +395,8 @@ paths:
           schema:
             type: string
             enum:
-              - xcube-gen
-              - xcube-geodb
+              - xcube_gen
+              - xcube_geodb
           style: simple
         - description: User ID
           explode: false
@@ -422,7 +427,8 @@ paths:
           description: Service not found
       security:
         - oAuthorization:
-            - manage:services
+            - read:users
+            - create:users
       summary: Delete a subscription from a service
       tags:
         - services

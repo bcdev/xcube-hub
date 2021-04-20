@@ -42,7 +42,7 @@ def main():
                 arguments={'title': 'xcube Generation API'},
                 pythonic_params=True)
     flask_cors.CORS(app.app)
-    app.run(port=8080)
+    app.run(port=8080, debug=False, use_reloader=False)
 
 
 if __name__ == '__main__':

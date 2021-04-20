@@ -9,7 +9,7 @@ from test.controllers.utils import create_test_token
 
 from xcube_hub import api
 # noinspection PyProtectedMember
-from xcube_hub.auth_api import AuthApi, _MockerApi, _ISS_TO_PROVIDER, _KeycloakApi, _Auth0Api
+from xcube_hub.auth_api import SubscriptionApi, _SubscriptionMockApi, _ISS_TO_PROVIDER, _SubscriptionKeycloakApi, _SubscriptionAuth0Api
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
 from xcube_hub.models.subscription import Subscription
 from xcube_hub.models.user import User
@@ -24,16 +24,16 @@ class TestAuthApi(unittest.TestCase):
 
     def test_auth_api(self):
         for k, v in _ISS_TO_PROVIDER.items():
-            api = AuthApi(iss=k, token=self._token)
+            api = SubscriptionApi(iss=k, token=self._token)
             if v == 'mocker':
-                self.assertIsInstance(api._provider, _MockerApi)
+                self.assertIsInstance(api._provider, _SubscriptionMockApi)
             elif v == 'keycloak':
-                self.assertIsInstance(api._provider, _KeycloakApi)
+                self.assertIsInstance(api._provider, _SubscriptionKeycloakApi)
             elif v == 'auth0':
-                self.assertIsInstance(api._provider, _Auth0Api)
+                self.assertIsInstance(api._provider, _SubscriptionAuth0Api)
 
         with self.assertRaises(Unauthorized) as e:
-            api = AuthApi(iss='ff', token=self._token)
+            api = SubscriptionApi(iss='ff', token=self._token)
 
         self.assertEqual('401 Unauthorized: Issuer ff unknown.', str(e.exception))
 
@@ -77,7 +77,7 @@ class TestAuth0Api(unittest.TestCase):
 
         service_id = "xcube_gen"
         subscription_id = "ab123"
-        auth_api = AuthApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
         res = auth_api.get_subscription(service_id=service_id, subscription_id=subscription_id)
         self.assertDictEqual(subscription.to_dict(), res.to_dict())
 
@@ -121,7 +121,7 @@ class TestAuth0Api(unittest.TestCase):
 
         service_id = "xcube_gen"
 
-        auth_api = AuthApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
         res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
         self.assertDictEqual(subscription.to_dict(), res.to_dict())
 
@@ -200,7 +200,7 @@ class TestAuth0Api(unittest.TestCase):
         )
 
         service_id = "xcube_geodb"
-        auth_api = AuthApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
 
         m.post(f"https://{self._domain}/users", json=user.to_dict(), headers=self._headers)
         m.post("https://xcube-geodb.brockmann-consult.de/geodb_user_info", headers=self._headers)
@@ -236,7 +236,7 @@ class TestAuth0Api(unittest.TestCase):
               headers=self._headers)
 
         service_id = "xcube_gen"
-        auth_api = AuthApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
         res = auth_api.delete_subscription(service_id=service_id, subscription_id="a91f5082900b0803aa28b4679b00e93fa")
         self.assertEqual("a91f5082900b0803aa28b4679b00e93fa", res)
 
@@ -268,7 +268,7 @@ class TestMockApi(unittest.TestCase):
             start_date="2000-01-01",
         )
 
-        auth_api = _MockerApi()
+        auth_api = _SubscriptionMockApi()
         res = auth_api.get_subscription(service_id='', subscription_id='')
         self.assertDictEqual(subscription.to_dict(), res.to_dict())
 

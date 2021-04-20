@@ -1,3 +1,4 @@
+import datetime
 import os
 from abc import abstractmethod, ABC
 from typing import Optional
@@ -13,8 +14,10 @@ from urllib.parse import urlparse
 from xcube_hub import api, util
 from xcube_hub.core import users, punits
 from xcube_hub.core.geodb import register_user
+from xcube_hub.core.users import get_request_body_from_user
 from xcube_hub.models.subscription import Subscription
 from xcube_hub.models.user import User
+from xcube_hub.models.user_app_metadata import UserAppMetadata
 from xcube_hub.models.user_user_metadata import UserUserMetadata
 
 _ISS_TO_PROVIDER = {
@@ -26,7 +29,7 @@ _ISS_TO_PROVIDER = {
 }
 
 
-class AuthApiProvider(ABC):
+class SubscriptionApiProvider(ABC):
     @abstractmethod
     def add_subscription(self, service_id: str, subscription: Subscription):
         """
@@ -55,7 +58,7 @@ class AuthApiProvider(ABC):
         """
 
 
-class AuthApi(ABC):
+class SubscriptionApi(ABC):
     f"""
     A key-value pair database interface connector class (e.g. to redis)
     
@@ -70,7 +73,7 @@ class AuthApi(ABC):
         self._token = token
         self._headers = {'Authorization': f'Bearer {token}'}
 
-        self._provider = AuthApi._new_auth_api_provider(iss=iss, token=token)
+        self._provider = SubscriptionApi._new_auth_api_provider(iss=iss, token=token)
 
     def add_subscription(self, service_id: str, subscription: Subscription):
         return self._provider.add_subscription(service_id=service_id, subscription=subscription)
@@ -82,7 +85,7 @@ class AuthApi(ABC):
         return self._provider.delete_subscription(service_id=service_id, subscription_id=subscription_id)
 
     @classmethod
-    def _new_auth_api_provider(cls, iss: str, token: str, **kwargs) -> "AuthApiProvider":
+    def _new_auth_api_provider(cls, iss: str, token: str, **kwargs) -> "SubscriptionApiProvider":
         """
         Return a new database instance.
 
@@ -93,60 +96,78 @@ class AuthApi(ABC):
         if provider is None:
             raise Unauthorized(description=f"Issuer {iss} unknown.")
 
-        domain = urlparse(iss).netloc
+        domain = urlparse(iss).netloc + "/api/v2"
 
         if provider == 'auth0':
-            return _Auth0Api(token=token, domain=domain)
+            return _SubscriptionAuth0Api(token=token, domain=domain)
         elif provider == 'keycloak':
-            return _KeycloakApi(token=token, **kwargs)
-        else: # provider == 'mocker'
-            return _MockerApi()
+            return _SubscriptionKeycloakApi(token=token, **kwargs)
+        else:  # provider == 'mocker'
+            return _SubscriptionMockApi()
 
     @classmethod
     def instance(cls, iss: Optional[str] = None, token: Optional[str] = None, refresh: bool = False) \
-            -> "AuthApi":
+            -> "SubscriptionApi":
         refresh = refresh or cls._instance is None
         if refresh:
-            cls._instance = AuthApi(iss=iss, token=token)
+            cls._instance = SubscriptionApi(iss=iss, token=token)
 
         return cls._instance
 
 
-class _Auth0Api(AuthApiProvider):
+class _SubscriptionAuth0Api(SubscriptionApiProvider):
     def __init__(self, token: str, domain: Optional[str] = None):
         self._domain = domain
         self._headers = {'Authorization': f'Bearer {token}'}
 
     def add_subscription(self, service_id: str, subscription: Subscription):
-        user = self._get_user(user_id=subscription.subscription_id, raising=False)
-
+        user_id = util.create_user_id_from_email(subscription.email)
+        user = self._get_user(user_id=user_id, raising=False)
+        new_user = False
         if user is None:
+            new_user = True
             user = User()
             user.user_id = util.create_user_id_from_email(subscription.email)
+            user.username = util.create_user_id_from_email(subscription.email)
             user.email = subscription.email
             user.first_name = subscription.first_name
             user.last_name = subscription.last_name
             user.user_metadata = UserUserMetadata(subscriptions={})
             user = users.supplement_user(user=user)
+            user.blocked = False
+            user.email_verified = True
+            user.connection = "Username-Password-Xcube"
 
-        subscription.subscription_id = user.user_id
+        subscription.subscription_id = user.username
         subscription.client_id = user.user_metadata.client_id
         subscription.client_secret = user.user_metadata.client_secret
+        if subscription.start_date is None:
+            subscription.start_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
         if service_id in user.user_metadata.subscriptions:
             raise api.ApiError(409, f"The subscription {subscription.subscription_id} exists for service {service_id}.")
 
-        user.user_metadata.subscriptions[service_id] = subscription
-
         if service_id == "xcube_geodb":
-            user.app_metadata.geodb_role = "geodb_" + subscription.guid
-            register_user(user_id=user.user_id, subscription=subscription, headers=self._headers)
+            if subscription.unit != "cells":
+                raise api.ApiError(400, "Wrong unit for a geodb subscription")
+            user.app_metadata = UserAppMetadata(geodb_role="geodb_" + subscription.guid)
+            res = register_user(user_id=user.username, subscription=subscription, headers=self._headers, raising=False)
 
         if service_id == "xcube_gen":
+            if subscription.unit != "punits":
+                raise api.ApiError(400, "Wrong unit for a xcube gen subscription")  #
+
             punits.add_punits(user_id=user.email,
                               punits_request=dict(punits=dict(total_count=int(subscription.units))))
 
-        r = requests.post(f"https://{self._domain}/users", json=user.to_dict(), headers=self._headers)
+        if new_user:
+            user_dict = get_request_body_from_user(user)
+            user.user_metadata.subscriptions[service_id] = subscription
+            r = requests.post(f"https://{self._domain}/users", json=user_dict, headers=self._headers)
+        else:
+            user.user_metadata.subscriptions[service_id] = subscription
+            user_dict = dict(user_metadata=user.user_metadata.to_dict(), app_metadata=user.app_metadata.to_dict())
+            r = requests.patch(f"https://{self._domain}/users/{user.user_id}", json=user_dict, headers=self._headers)
 
         try:
             r.raise_for_status()
@@ -156,7 +177,7 @@ class _Auth0Api(AuthApiProvider):
         return subscription
 
     def get_subscription(self, service_id: str, subscription_id: str):
-        r = requests.get(f"https://{self._domain}/users/{subscription_id}", headers=self._headers)
+        r = requests.get(f"https://{self._domain}/users/auth0|{subscription_id}", headers=self._headers)
 
         try:
             r.raise_for_status()
@@ -165,17 +186,24 @@ class _Auth0Api(AuthApiProvider):
 
         user = User.from_dict(r.json())
 
+        if service_id not in user.user_metadata.subscriptions:
+            raise api.ApiError(404, f"Subscription {subscription_id} not found in service {service_id}")
+
         return user.user_metadata.subscriptions[service_id]
 
     def delete_subscription(self, service_id: str, subscription_id: str):
         user = self._get_user(user_id=subscription_id)
 
         user_metadata = user.user_metadata
+
+        if service_id not in user_metadata.subscriptions:
+            raise api.ApiError(404, f"Subscription {subscription_id} not in service {service_id}.")
+
         del user_metadata.subscriptions[service_id]
 
         payload = dict(user_metadata=user_metadata.to_dict())
 
-        r = requests.patch(f"https://{self._domain}/users/{subscription_id}", json=payload, headers=self._headers)
+        r = requests.patch(f"https://{self._domain}/users/auth0|{subscription_id}", json=payload, headers=self._headers)
 
         try:
             r.raise_for_status()
@@ -185,7 +213,7 @@ class _Auth0Api(AuthApiProvider):
         return subscription_id
 
     def _get_user(self, user_id, raising=True) -> Optional[User]:
-        r = requests.get(f"https://{self._domain}/users/{user_id}", headers=self._headers)
+        r = requests.get(f"https://{self._domain}/users/auth0|{user_id}", headers=self._headers)
 
         try:
             r.raise_for_status()
@@ -198,7 +226,8 @@ class _Auth0Api(AuthApiProvider):
         return User.from_dict(r.json())
 
 
-class _KeycloakApi(AuthApiProvider):
+# Not yet used
+class _SubscriptionKeycloakApi(SubscriptionApiProvider):
     _payload_client = {
         "clientId": "helge2",
         "enabled": True,
@@ -258,23 +287,25 @@ class _KeycloakApi(AuthApiProvider):
             raise api.ApiError(e.response_code, str(e))
 
     def add_subscription(self, service_id: str, subscription: Subscription):
-        try:
-            geodb_role = f"geodb_{subscription.guid}"
-
-            self.admin_client.create_user({
-                "subscription_id": subscription.guid,
-                "email": subscription.email,
-                "username": subscription.email,
-                "enabled": True,
-                "firstName": subscription.first_name,
-                "lastName": subscription.last_name,
-                "attributes": {
-                    "geodb_role": geodb_role
-                }
-            })
-
-        except KeycloakGetError as e:
-            raise api.ApiError(e.response_code, str(e))
+        raise NotImplemented("Error: The method _KeycloakApi.get_subscription has not been implemented")
+        # Method deleted but may be reintroduced when switching from auth0 to keycloak
+        # try:
+        #     geodb_role = f"geodb_{subscription.guid}"
+        #
+        #     self.admin_client.create_user({
+        #         "subscription_id": subscription.guid,
+        #         "email": subscription.email,
+        #         "username": subscription.email,
+        #         "enabled": True,
+        #         "firstName": subscription.first_name,
+        #         "lastName": subscription.last_name,
+        #         "attributes": {
+        #             "geodb_role": geodb_role
+        #         }
+        #     })
+        #
+        # except KeycloakGetError as e:
+        #     raise api.ApiError(e.response_code, str(e))
 
     def get_subscription(self, service_id: str, subscription_id: str):
         raise NotImplemented("Error: The method _KeycloakApi.get_subscription has not been implemented")
@@ -288,6 +319,7 @@ class _KeycloakApi(AuthApiProvider):
         except KeycloakGetError as e:
             raise api.ApiError(e.response_code, str(e))
 
+    # Method deleted but may be reintroduced when switching from auth0 to keycloak
     # def add_client_from_subscription(self, service_id: str, subscription: Subscription):
     #     try:
     #         redirect_uris = []
@@ -328,7 +360,7 @@ class _KeycloakApi(AuthApiProvider):
     #
 
 
-class _MockerApi(AuthApiProvider):
+class _SubscriptionMockApi(SubscriptionApiProvider):
     def add_subscription(self, service_id: str, subscription: Subscription):
         return Subscription(
             subscription_id='ab123',

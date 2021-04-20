@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: xcube-gen-dev
+  labels:
+    app.kubernetes.io/name: xcube-gen
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /api/v2/$1
+    nginx.ingress.kubernetes.io/proxy-body-size: 2000m
+spec:
+  rules:
+    - host: "stage.xcube-gen.brockmann-consult.de"
+      http:
+        paths:
+          - path: /dev/api/v2/(.*)
+            backend:
+              serviceName: xcube-gen-dev
+              servicePort: 8080

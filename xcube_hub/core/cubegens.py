@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+from json.decoder import JSONDecodeError
 from pprint import pprint
 from typing import Union, Sequence, Optional
 
@@ -10,12 +11,12 @@ from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api, poller
 from xcube_hub.api import get_json_request_value
-from xcube_hub.auth import Auth
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error, JsonObject
+from xcube_hub.util import maybe_raise_for_env
 
 
 def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
@@ -116,7 +117,8 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
     cost_estimation = infos['cost_estimation']
 
     if cost_estimation['required'] > int(limit):
-        raise api.ApiError(413, f"Number of required punits ({cost_estimation['required']}) is greater than the absolute limit of {limit}")
+        raise api.ApiError(413,
+                           f"Number of required punits ({cost_estimation['required']}) is greater than the absolute limit of {limit}")
 
     if cost_estimation['required'] > cost_estimation['available']:
         raise api.ApiError(413, f"Number of required punits ({cost_estimation['required']}) "
@@ -129,10 +131,8 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         if 'input_config' not in cfg and 'input_configs' not in cfg:
             raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")
 
-        token = token or Auth.instance().token
-
         if not info_only:
-            _raise_for_invalid_punits(user_id=user_id, email=email, cfg=cfg, token=token)
+            _raise_for_invalid_punits(user_id=user_id, token=token, email=email, cfg=cfg)
 
         xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
         user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
@@ -159,6 +159,8 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
 
         return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
     except (ApiException, MaxRetryError) as e:
+        raise api.ApiError(400, message=str(e))
+    except Exception as e:
         raise api.ApiError(400, message=str(e))
 
 
@@ -239,17 +241,24 @@ def delete_all(user_id: str) -> Union[AnyDict, Error]:
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
     job = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
     apps_v1_api = client.BatchV1Api()
-    poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace="xcube-gen-stage",
+    xcube_hub_namespace = maybe_raise_for_env("K8S_NAMESPACE", "xc-gen")
+    poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
                            name=job['cubegen_id'])
     state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
     res = state['output'][0]
     res = res.replace("Awaiting generator configuration JSON from TTY...", "")
     res = res.replace("Cube generator configuration loaded from TTY.", "")
-    processing_request = json.loads(res)
-    input_config = get_json_request_value(body, 'input_config',
-                                          value_type=dict,
-                                          item_type=dict,
-                                          default_value={})
+    try:
+        processing_request = json.loads(res)
+    except JSONDecodeError as e:
+        raise api.ApiError(400, res)
+
+    if 'input_configs' in body:
+        input_config = body['input_configs'][0]
+    elif 'input_config' in body:
+        input_config = body['input_config']
+    else:
+        raise api.ApiError(400, "Error in callbacks. Invalid input configuration.")
 
     store_id = get_json_request_value(input_config, 'store_id',
                                       value_type=str,

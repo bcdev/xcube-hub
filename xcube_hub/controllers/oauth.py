@@ -72,9 +72,14 @@ def oauth_token_post(body: OauthToken):
     """
 
     try:
+        user_client_id = maybe_raise_for_env("AUTH0_USER_MANAGEMENT_CLIENT_ID")
+        oauth_token = OauthToken.from_dict(body)
+
+        if oauth_token.client_id == user_client_id:
+            token = _get_management_token(client_id=oauth_token.client_id, client_secret=oauth_token.client_secret)
+            return dict(access_token=token, token_type="bearer")
 
         aud = maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
-        oauth_token = OauthToken.from_dict(body)
         token = _get_management_token()
         res = oauth.get_user_by_credentials(token=token,
                                             client_id=oauth_token.client_id,
@@ -89,6 +94,7 @@ def oauth_token_post(body: OauthToken):
             "scope": " ".join(permissions),
             "gty": "client-credentials",
             "email": user.email,
+            "sub": users.create_user_id_from_email(user.email),
             "permissions": permissions
         }
 
