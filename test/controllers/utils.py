@@ -1,7 +1,7 @@
 import os
 from typing import Sequence, Optional, Dict
 
-from xcube_hub.controllers.oauth import create_token
+from xcube_hub.core.oauth import create_token
 
 
 def create_test_token(permissions: Optional[Sequence] = None,

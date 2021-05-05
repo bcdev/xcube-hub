@@ -1,10 +1,11 @@
 import unittest
 
+from dotenv import load_dotenv
 from werkzeug.exceptions import Unauthorized
 
 from test.controllers.utils import create_test_token
 from xcube_hub.controllers.authorization import check_oauthorization, validate_scope_oauthorization
-from xcube_hub.controllers.oauth import create_token
+from xcube_hub.core.oauth import create_token
 
 
 class TestOauthorization(unittest.TestCase):
@@ -12,6 +13,7 @@ class TestOauthorization(unittest.TestCase):
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
 
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
+        load_dotenv(dotenv_path='test/.env')
 
     def test_get_claim_from_token(self):
         claims = {
@@ -30,7 +32,8 @@ class TestOauthorization(unittest.TestCase):
 
     def test_check_oauthorization(self):
         expected = {'scopes': ['manage:users', 'manage:cubegens'], 'sub': 'test@mail.com',
-                    'user_id': 'a97dfebf4098c0f5c16bca61e2b76c373', 'email': 'test@mail.com'}
+                    'user_id': 'a97dfebf4098c0f5c16bca61e2b76c373', 'email': 'test@mail.com',
+                    'iss': 'https://xcube-gen.brockmann-consult.de/'}
         res = check_oauthorization(self._token)
         del res['token']
         self.assertDictEqual(expected, res)

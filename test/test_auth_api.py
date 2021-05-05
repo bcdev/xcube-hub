@@ -2,6 +2,7 @@ import unittest
 
 import boto3
 import requests_mock
+from dotenv import load_dotenv
 from moto import mock_s3
 from werkzeug.exceptions import Unauthorized
 
@@ -21,6 +22,7 @@ from xcube_hub.models.user_user_metadata import UserUserMetadata
 class TestAuthApi(unittest.TestCase):
     def setUp(self) -> None:
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
+        load_dotenv(dotenv_path='test/.env')
 
     def test_auth_api(self):
         for k, v in _ISS_TO_PROVIDER.items():
@@ -44,6 +46,7 @@ class TestAuth0Api(unittest.TestCase):
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
         self._headers = {'Authorization': f'Bearer {self._token}'}
         self._domain = "edc.eu.auth0.com"
+        load_dotenv(dotenv_path='test/.env')
 
     def test_get_subscription(self, m):
         subscription = Subscription(
