@@ -144,8 +144,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
             user.app_metadata = UserAppMetadata()
 
         subscription.subscription_id = user.username
-        subscription.client_id = user.user_metadata.client_id
-        subscription.client_secret = user.user_metadata.client_secret
+        subscription.client_id = subscription.client_id or user.user_metadata.client_id
+        subscription.client_secret = subscription.client_secret or user.user_metadata.client_secret
         if subscription.start_date is None:
             subscription.start_date = datetime.datetime.now().strftime("%Y-%m-%d")
 

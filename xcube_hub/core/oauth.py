@@ -84,7 +84,7 @@ def get_token(body: JsonObject):
 
     if oauth_token.client_id == user_client_id:
         token = _get_management_token(client_id=oauth_token.client_id, client_secret=oauth_token.client_secret)
-        return dict(access_token=token, token_type="bearer")
+        return token
 
     aud = util.maybe_raise_for_env("XCUBE_HUB_OAUTH_AUD")
     token = _get_management_token()
