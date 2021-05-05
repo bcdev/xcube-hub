@@ -1,4 +1,4 @@
-## Changes in v2.0.2.dev0 (in development)
+## Changes in v2.0.2
 
 ### New Features
 
@@ -8,6 +8,8 @@
 - Added a Cfg class to handle data pools configs
 - Added the json schema for data pools
 - Added a default value to mayberaise_for_env
+- The xcube docker image is now shown in the service info
+- When adding Subscription the client secrets can now be overridden 
 
 ### Fixes
 

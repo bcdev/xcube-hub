@@ -4,6 +4,7 @@ from abc import abstractmethod, ABC
 from typing import Optional
 
 import requests
+from botocore.exceptions import ClientError
 from keycloak import KeycloakGetError
 from keycloak.exceptions import KeycloakError
 from keycloak.keycloak_admin import KeycloakAdmin
@@ -12,9 +13,9 @@ from werkzeug.exceptions import Unauthorized
 from urllib.parse import urlparse
 
 from xcube_hub import api, util
-from xcube_hub.core import users, punits
-from xcube_hub.core.geodb import register_user
+from xcube_hub.core import users, punits, geodb, geoserver
 from xcube_hub.core.users import get_request_body_from_user
+from xcube_hub.database import DatabaseError
 from xcube_hub.models.subscription import Subscription
 from xcube_hub.models.user import User
 from xcube_hub.models.user_app_metadata import UserAppMetadata
@@ -120,7 +121,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         self._domain = domain
         self._headers = {'Authorization': f'Bearer {token}'}
 
-    def add_subscription(self, service_id: str, subscription: Subscription):
+    def add_subscription(self, service_id: str, subscription: Subscription,
+                         prefer: str = "resolution=merge-duplicates"):
         user_id = util.create_user_id_from_email(subscription.email)
         user = self._get_user(user_id=user_id, raising=False)
         new_user = False
@@ -133,10 +135,13 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
             user.first_name = subscription.first_name
             user.last_name = subscription.last_name
             user.user_metadata = UserUserMetadata(subscriptions={})
-            user = users.supplement_user(user=user)
+            user = users.supplement_user(user=user, subscription=subscription)
             user.blocked = False
             user.email_verified = True
             user.connection = "Username-Password-Xcube"
+
+        if user.app_metadata is None:
+            user.app_metadata = UserAppMetadata()
 
         subscription.subscription_id = user.username
         subscription.client_id = user.user_metadata.client_id
@@ -144,30 +149,49 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         if subscription.start_date is None:
             subscription.start_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
-        if service_id in user.user_metadata.subscriptions:
-            raise api.ApiError(409, f"The subscription {subscription.subscription_id} exists for service {service_id}.")
+        # EOX requires idempotent adding. However, we should think about reintroducing that as returning 409 would
+        # if service_id in user.user_metadata.subscriptions:
+        #     raise api.ApiError(409, f"The subscription {subscription.subscription_id} exists for service {service_id}.")
 
+        role = None
         if service_id == "xcube_geodb":
             if subscription.unit != "cells":
                 raise api.ApiError(400, "Wrong unit for a geodb subscription")
+
+            role = {"roles": ["rol_nF3PSuWkOJLk1mkm"]}
             user.app_metadata = UserAppMetadata(geodb_role="geodb_" + subscription.guid)
-            res = register_user(user_id=user.username, subscription=subscription, headers=self._headers, raising=False)
+            geodb.register(user_id=user.username, subscription=subscription, headers=self._headers, raise_on_exist=False)
 
         if service_id == "xcube_gen":
             if subscription.unit != "punits":
-                raise api.ApiError(400, "Wrong unit for a xcube gen subscription")  #
+                raise api.ApiError(400, "Wrong unit for a xcube gen subscription")
 
-            punits.add_punits(user_id=user.email,
-                              punits_request=dict(punits=dict(total_count=int(subscription.units))))
+            role = {"roles": ["rol_UV2cTM5brIezM6i6"]}
+            try:
+                punits.override_punits(user_id=user.email,
+                                       punits_request=dict(punits=dict(total_count=int(subscription.units))))
+            except (DatabaseError, ClientError) as e:
+                raise api.ApiError(400, str(e))
+
+        if service_id == "xcube_geoserver":
+            geoserver.register(user_id=user.username, subscription=subscription, headers=self._headers, raising=False)
 
         if new_user:
-            user_dict = get_request_body_from_user(user)
             user.user_metadata.subscriptions[service_id] = subscription
+            user_dict = get_request_body_from_user(user)
             r = requests.post(f"https://{self._domain}/users", json=user_dict, headers=self._headers)
         else:
             user.user_metadata.subscriptions[service_id] = subscription
             user_dict = dict(user_metadata=user.user_metadata.to_dict(), app_metadata=user.app_metadata.to_dict())
             r = requests.patch(f"https://{self._domain}/users/{user.user_id}", json=user_dict, headers=self._headers)
+
+        try:
+            r.raise_for_status()
+        except HTTPError as e:
+            raise api.ApiError(r.status_code, str(e))
+
+        if new_user:
+            r = requests.post(f"https://{self._domain}/users/auth0|{user.user_id}/roles", json=role, headers=self._headers)
 
         try:
             r.raise_for_status()

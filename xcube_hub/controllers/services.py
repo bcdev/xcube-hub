@@ -1,7 +1,7 @@
 from typing import Dict
 
 from xcube_hub import api
-from xcube_hub.auth_api import SubscriptionApi
+from xcube_hub.subscription_api import SubscriptionApi
 from xcube_hub.core import services
 from xcube_hub.models.subscription import Subscription
 from xcube_hub.typedefs import JsonObject

@@ -1045,14 +1045,15 @@ components:
             maxItems: 2
             minItems: 1
             type: string
+            nullable: true
           type: array
         time_period:
           type: string
+          nullable: true
       required:
         - bbox
         - crs
         - spatial_res
-        - time_period
         - time_range
         - variable_names
       type: object
@@ -1188,7 +1189,7 @@ components:
         client_secret:
           type: string
           format: password
-        start_data:
+        start_date:
           type: string
           format: 'date'
         units:
@@ -1200,6 +1201,7 @@ components:
           enum:
             - 'punits'
             - 'cells'
+            - 'n/a'
           default: 'punits'
   securitySchemes:
     oAuthorization:

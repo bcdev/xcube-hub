@@ -5,6 +5,7 @@ import connexion
 import requests
 
 from xcube_hub import api, util
+from xcube_hub.models.subscription import Subscription
 from xcube_hub.models.user import User
 from xcube_hub.util import create_user_id_from_email, create_secret
 
@@ -39,12 +40,12 @@ def get_request_body_from_user(user: User):
     return {k: v for k, v in res.items() if v is not None}
 
 
-def supplement_user(user: User):
+def supplement_user(user: User, subscription: Subscription):
     user.user_id = create_user_id_from_email(user.email)
 
     client_id, client_secret = create_secret()
-    user.user_metadata.client_id = client_id
-    user.user_metadata.client_secret = client_secret
+    user.user_metadata.client_id = subscription.client_id or client_id
+    user.user_metadata.client_secret = subscription.client_secret or client_secret
     user.password = util.generate_temp_password()
 
     return user

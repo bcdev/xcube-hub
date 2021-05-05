@@ -14,7 +14,6 @@ from xcube_hub.api import get_json_request_value
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
-from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error, JsonObject
 from xcube_hub.util import maybe_raise_for_env
 
@@ -77,7 +76,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         {
             'name': 'xcube-datapools',
             'configMap': {
-                'name': 'xcube-datapools'
+                'name': 'xcube-datapools-cfg'
             }
         }, ]
 
@@ -153,9 +152,9 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=xcube_hub_namespace)
 
-        kvdb = KeyValueDatabase.instance()
-        kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
-        kvdb.set(user_id + '__' + job_id, {'progress': []})
+        # kvdb = KeyValueDatabase.instance()
+        # kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
+        # kvdb.set(user_id + '__' + job_id, {'progress': []})
 
         return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
     except (ApiException, MaxRetryError) as e:

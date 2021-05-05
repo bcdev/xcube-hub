@@ -22,6 +22,10 @@ def subtract_punits(user_id: str, punits_request: JsonObject):
     _update_punits(user_id, punits_request, 'sub')
 
 
+def override_punits(user_id: str, punits_request: JsonObject):
+    _update_punits(user_id, punits_request, 'override')
+
+
 def _update_punits(user_id: str, punits_request: JsonObject, op: str):
     update_punits = get_json_request_value(punits_request, 'punits', value_type=dict)
     update_count = get_json_request_value(update_punits, 'total_count', value_type=int)
@@ -30,7 +34,14 @@ def _update_punits(user_id: str, punits_request: JsonObject, op: str):
     punits_data_old = get_user_data(user_id, dataset_name='punits') or dict()
     count_old = punits_data_old.get('count', 0)
     history_old = punits_data_old.get('history', [])
-    count_new = (count_old + update_count) if op == 'add' else (count_old - update_count)
+
+    if op == 'add':
+        count_new = (count_old + update_count)
+    elif op == "sub":
+        count_new = (count_old - update_count)
+    else:
+        count_new = update_count
+
     if count_new < 0:
         raise api.ApiError(400, 'Out of processing units.')
     history_new = [[datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), op, punits_request]] + history_old

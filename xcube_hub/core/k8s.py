@@ -151,8 +151,12 @@ def create_goofys_daemonset_if_not_exists(namespace: str, daemonset: client.V1Da
         create_goofys_daemonset(daemonset=daemonset, namespace=namespace)
 
 
-def create_deployment_object(name: str, user_id: str, container_name: str, image: str, container_port: int,
-                             command: Union[str, Sequence[str]], envs: Optional[Sequence] = None,
+def create_deployment_object(name: str, user_id: str,
+                             container_name: str,
+                             image: str,
+                             container_port: int,
+                             command: Optional[Union[str, Sequence[str]]] = None,
+                             envs: Optional[Sequence] = None,
                              volume_mounts: Optional[Sequence] = None,
                              volumes: Optional[Sequence] = None,
                              init_containers: Optional[Sequence] = None):
