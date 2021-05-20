@@ -10,10 +10,8 @@ from xcube_hub.core.oauth import create_token
 
 class TestOauthorization(unittest.TestCase):
     def setUp(self):
-        self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
-
-        self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
         load_dotenv(dotenv_path='test/.env')
+        self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
 
     def test_get_claim_from_token(self):
         claims = {

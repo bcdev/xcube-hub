@@ -10,6 +10,7 @@ from test.controllers.utils import create_test_token
 
 from xcube_hub import api
 # noinspection PyProtectedMember
+from xcube_hub.core.oauth import _get_management_token
 from xcube_hub.subscription_api import SubscriptionApi, _SubscriptionMockApi, _ISS_TO_PROVIDER, _SubscriptionKeycloakApi, \
     _SubscriptionAuth0Api
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
@@ -40,13 +41,14 @@ class TestAuthApi(unittest.TestCase):
         self.assertEqual('401 Unauthorized: Issuer ff unknown.', str(e.exception))
 
 
-@requests_mock.Mocker()
+@requests_mock.Mocker(real_http=True)
 class TestAuth0Api(unittest.TestCase):
     def setUp(self) -> None:
+        load_dotenv(dotenv_path='test/.env')
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
         self._headers = {'Authorization': f'Bearer {self._token}'}
         self._domain = "edc.eu.auth0.com"
-        load_dotenv(dotenv_path='test/.env')
+        self._auth_token = _get_management_token(aud="https://edc.eu.auth0.com/api/v2/")
 
     def test_get_subscription(self, m):
         subscription = Subscription(
@@ -228,7 +230,7 @@ class TestAuth0Api(unittest.TestCase):
         m.patch("https://edc.eu.auth0.com/api/v2/users/a91f508290%200b0803aa28b4679b00e93fa", json=user.to_dict(),
                 headers=self._headers)
 
-        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._auth_token)
 
         m.post(f"https://{self._domain}/users", json=user.to_dict(), headers=self._headers)
         m.post("https://xcube-geodb.brockmann-consult.de/geodb_user_info", headers=self._headers)
@@ -250,7 +252,7 @@ class TestAuth0Api(unittest.TestCase):
                reason="ERROR")
 
         res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
-        self.assertEqual(1,1 )
+        self.assertEqual(1,1)
 
 
 def test_delete_subscription(self, m):

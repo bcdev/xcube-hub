@@ -13,8 +13,8 @@ class TestCallbacksController(BaseTestCase):
     """CallbacksController integration test stubs"""
 
     def setUp(self) -> None:
-        self._claims, self._token = create_test_token(['manage:cubegens'])
         load_dotenv(dotenv_path='test/.env')
+        self._claims, self._token = create_test_token(['manage:cubegens'])
 
     def test_put_callback_by_job_id(self):
         """Test case for put_callback_by_job_id

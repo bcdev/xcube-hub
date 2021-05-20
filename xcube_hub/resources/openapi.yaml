@@ -943,6 +943,10 @@ components:
           type: string
         progress:
           $ref: '#/components/schemas/Callback'
+        output:
+          items:
+            type: string
+          type: array
         status:
           type: object
           required:
@@ -952,10 +956,6 @@ components:
             - start_time
             - succeeded
           properties:
-            logs:
-              items:
-                type: string
-              type: array
             active:
               oneOf:
                 - type: integer

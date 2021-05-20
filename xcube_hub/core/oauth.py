@@ -32,7 +32,8 @@ def get_user_by_credentials(token: str, client_id: str, client_secret: str) -> S
     return res
 
 
-def _get_management_token(client_id: Optional[str] = None, client_secret: Optional[str] = None):
+def _get_management_token(client_id: Optional[str] = None, client_secret: Optional[str] = None,
+                          aud: Optional[str] = None):
     client_id = client_id or os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_ID", None)
     if client_id is None:
         raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_ID")
@@ -41,7 +42,7 @@ def _get_management_token(client_id: Optional[str] = None, client_secret: Option
     if client_secret is None:
         raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_SECRET")
 
-    audience = os.getenv("XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD", None)
+    audience = aud or os.getenv("XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD", None)
     if audience is None:
         raise api.ApiError(401, "Unauthorized. System needs XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD")
 
