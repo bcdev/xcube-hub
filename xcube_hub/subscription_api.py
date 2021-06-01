@@ -153,20 +153,34 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         # if service_id in user.user_metadata.subscriptions:
         #     raise api.ApiError(409, f"The subscription {subscription.subscription_id} exists for service {service_id}.")
 
-        role = None
+        role_id_manage = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_MANAGE")
+        role_id_free = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_FREE")
+        role_id_user = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_USER")
+
+        role_id = None
         if service_id == "xcube_geodb":
             if subscription.unit != "cells":
                 raise api.ApiError(400, "Wrong unit for a geodb subscription")
 
-            role = {"roles": ["rol_nF3PSuWkOJLk1mkm"]}
+            if subscription.plan == "manage":
+                role_id = role_id_manage
+            elif subscription.plan == "freetrial":
+                role_id = role_id_free
+            else:
+                role_id = role_id_user
+
             user.app_metadata = UserAppMetadata(geodb_role="geodb_" + subscription.guid)
             geodb.register(user_id=user.username, subscription=subscription, headers=self._headers, raise_on_exist=False)
+            roles = {"roles": [role_id_manage, role_id_free, role_id_user]}
+
+            r = requests.delete(f"https://{self._domain}/users/auth0|{user_id}/roles", json=roles,
+                                headers=self._headers)
 
         if service_id == "xcube_gen":
             if subscription.unit != "punits":
                 raise api.ApiError(400, "Wrong unit for a xcube gen subscription")
 
-            role = {"roles": ["rol_UV2cTM5brIezM6i6"]}
+            role_id = util.maybe_raise_for_env("XCUBE_GEN_ROLE_ID")
             try:
                 punits.override_punits(user_id=user.email,
                                        punits_request=dict(punits=dict(total_count=int(subscription.units))))
@@ -191,7 +205,13 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
             raise api.ApiError(r.status_code, str(e))
 
         if new_user:
-            r = requests.post(f"https://{self._domain}/users/auth0|{user.user_id}/roles", json=role, headers=self._headers)
+            role = {"roles": [role_id]}
+            r = requests.post(f"https://{self._domain}/users/auth0|{user.user_id}/roles", json=role,
+                              headers=self._headers)
+        else:
+            role = {"roles": [role_id]}
+            r = requests.post(f"https://{self._domain}/users/auth0|{user.user_id}/roles", json=role,
+                              headers=self._headers)
 
         try:
             r.raise_for_status()

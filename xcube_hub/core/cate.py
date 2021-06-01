@@ -67,13 +67,13 @@ def launch_cate(user_id: str) -> JsonObject:
         if count_pods(label_selector="purpose=cate-webapi") > max_pods:
             raise api.ApiError(413, "Too many pods running.")
 
-        cate_image = os.environ.get("CATE_IMG")
-        cate_version = os.environ.get("CATE_VERSION")
-        cate_command = os.environ.get("CATE_COMMAND", False)
-        cate_env_activate_command = os.environ.get("CATE_ENV_ACTIVATE_COMMAND", False)
-        cate_webapi_uri = os.environ.get("CATE_WEBAPI_URI")
-        cate_namespace = os.environ.get("CATE_WEBAPI_NAMESPACE", "cate")
-        cate_stores_config_path = os.environ.get("CATE_STORES_CONFIG_PATH")
+        cate_image = util.maybe_raise_for_env("CATE_IMG")
+        cate_version = util.maybe_raise_for_env("CATE_VERSION")
+        cate_command = util.maybe_raise_for_env("CATE_COMMAND", False)
+        cate_env_activate_command = util.maybe_raise_for_env("CATE_ENV_ACTIVATE_COMMAND", False)
+        cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
+        cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", "cate")
+        cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH")
 
         user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 

@@ -158,7 +158,7 @@ class TestAuth0Api(unittest.TestCase):
         m.get(f"https://{self._domain}/services/{service_id}/subscriptions/a91f5082900b0803aa28b4679b00e93fa",
               json=user.to_dict(),
               headers=self._headers)
-        m.post(f"https://{self._domain}/services/{service_id}/subscriptions", json=user.to_dict(),
+        m.post(f"https://{self._domain}/services/{service_id}/subscriptions", json=subscription.to_dict(),
                headers=self._headers)
 
         service_id = "xcube_gen"

@@ -14,6 +14,7 @@ from xcube_hub.api import get_json_request_value
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
+from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.typedefs import AnyDict, Error, JsonObject
 from xcube_hub.util import maybe_raise_for_env
 
@@ -133,7 +134,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         if not info_only:
             _raise_for_invalid_punits(user_id=user_id, token=token, email=email, cfg=cfg)
 
-        xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
+        xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
         user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
         callback_uri = os.getenv('XCUBE_HUB_CALLBACK_URL', False)
 
@@ -155,6 +156,10 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         # kvdb = KeyValueDatabase.instance()
         # kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
         # kvdb.set(user_id + '__' + job_id, {'progress': []})
+        kvdb = KeyValueDatabase.instance()
+
+        kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
+        kvdb.set(user_id + '__' + job_id, {'progress': []})
 
         return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
     except (ApiException, MaxRetryError) as e:
@@ -166,7 +171,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
 # noinspection PyShadowingBuiltins
 def list(user_id: str):
     api_instance = client.BatchV1Api()
-    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
+    xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
     try:
         api_response = api_instance.list_namespaced_job(namespace=xcube_hub_namespace)
 
@@ -183,7 +188,7 @@ def list(user_id: str):
 
 
 def logs(job_id: str) -> Sequence:
-    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
+    xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
     api_pod_instance = client.CoreV1Api()
 
     lgs = []
@@ -203,7 +208,7 @@ def logs(job_id: str) -> Sequence:
 
 
 def status(job_id: str) -> AnyDict:
-    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
+    xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
     api_instance = client.BatchV1Api()
     try:
         api_response = api_instance.read_namespaced_job_status(namespace=xcube_hub_namespace, name=job_id)
@@ -216,7 +221,7 @@ def status(job_id: str) -> AnyDict:
 
 def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
     api_instance = client.BatchV1Api()
-    xcube_hub_namespace = os.getenv("K8S_NAMESPACE", "xcube-gen-dev")
+    xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
     try:
         api_response = api_instance.delete_namespaced_job(
             name=cubegen_id,
@@ -240,7 +245,7 @@ def delete_all(user_id: str) -> Union[AnyDict, Error]:
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
     job = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
     apps_v1_api = client.BatchV1Api()
-    xcube_hub_namespace = maybe_raise_for_env("K8S_NAMESPACE", "xc-gen")
+    xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
     poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
                            name=job['cubegen_id'])
     state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
