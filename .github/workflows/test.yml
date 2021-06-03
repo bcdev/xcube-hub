@@ -1,0 +1,25 @@
+name: Unittest xcube-hub
+
+on: workflow_dispatch
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          channels: conda-forge
+          activate-environment: xcube-hub
+          environment-file: environment.yml
+      - name: setup xcube-hub
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          python setup.py develop
+      - name: unittest xcube-hub
+        shell: bash -l {0}
+        run: |
+          py.test -v --cov=xcube-hub tests
