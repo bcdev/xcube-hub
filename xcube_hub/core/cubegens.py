@@ -11,7 +11,6 @@ from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api, poller
 from xcube_hub.api import get_json_request_value
-from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase

@@ -6,7 +6,6 @@ import flask_cors
 from dotenv import load_dotenv
 
 from xcube_hub import encoder
-from xcube_hub.cfg import Cfg
 from xcube_hub.core.validations import validate_env
 from xcube_hub.k8scfg import K8sCfg
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -16,7 +15,6 @@ def create_app():
     load_dotenv()
     validate_env()
 
-    Cfg.load_config()
     K8sCfg.load_config_once()
     cache_provider = os.environ.get('XCUBE_HUB_CACHE_PROVIDER', 'inmemory')
     # specification_dir = maybe_raise_for_env("XCUBE_HUB_CFG_DIR", './resources/')

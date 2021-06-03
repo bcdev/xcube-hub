@@ -1,4 +1,14 @@
-## Changes in v2.0.2
+## Changes in v2.1.0.dev0 (in development)
+
+### New Features
+
+
+
+### Fixes
+
+- Removed stores operation. Not used anymore
+
+## Changes in v2.0.1
 
 ### New Features
 
