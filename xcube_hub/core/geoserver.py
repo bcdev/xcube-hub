@@ -3,7 +3,6 @@ from typing import Tuple
 from geo.Geoserver import Geoserver
 
 from xcube_hub import api
-from xcube_hub.api import ApiResponse
 from xcube_hub.models.collection import Collection
 from xcube_hub.typedefs import AnyDict
 
