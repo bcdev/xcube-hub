@@ -22,4 +22,4 @@ jobs:
       - name: unittest xcube-hub
         shell: bash -l {0}
         run: |
-          py.test -v --cov=xcube-hub tests
+          py.test -v --cov=xcube-hub test
