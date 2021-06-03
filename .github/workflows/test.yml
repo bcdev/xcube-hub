@@ -1,6 +1,6 @@
 name: Unittest xcube-hub
 
-on: workflow_dispatch
+on: [push, workflow_dispatch]
 
 jobs:
   unittest:
