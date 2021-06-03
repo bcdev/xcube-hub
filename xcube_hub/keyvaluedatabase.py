@@ -150,6 +150,7 @@ class _RedisKvDB(KeyValueStore):
             self._db = _KvDBMocker()
         else:
             self._db = Redis(host=host, port=port, db=db, **kwargs)
+            # self._db.ping()
 
     def get(self, key):
         """

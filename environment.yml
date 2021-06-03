@@ -15,6 +15,7 @@ dependencies:
   - uwsgi
   - python-dotenv
   - python-keycloak
+  - geoserver-rest
 
   - pip:
       # Required

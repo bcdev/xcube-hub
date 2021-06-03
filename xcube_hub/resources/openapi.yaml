@@ -696,6 +696,123 @@ paths:
       tags:
         - callbacks
       x-openapi-router-controller: xcube_hub.controllers.callbacks
+  /services/geoserver/collections:
+    get:
+      description: Manage GeoDB Collections
+      operationId: get_collections
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOauthResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Client ID not found
+      summary: Get authorization token
+      security:
+        - oAuthorization:
+            - manage:cubegens
+      tags:
+        - geoserver
+      x-openapi-router-controller: xcube_hub.controllers.geoserver
+    put:
+      description: Manage GeoDB Collections
+      operationId: put_collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OauthToken'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOauthResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Client ID not found
+      summary: Get authorization token
+      tags:
+        - geoserver
+      x-openapi-router-controller: xcube_hub.controllers.geoserver
+  /services/geoserver/collections/{collection_id}:
+    get:
+      description: Manage GeoDB Collections
+      operationId: get_collections
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOauthResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Client ID not found
+      summary: Get authorization token
+      security:
+        - oAuthorization:
+            - manage:cubegens
+      tags:
+        - geoserver
+      x-openapi-router-controller: xcube_hub.controllers.geoserver
+    delete:
+      description: Manage GeoDB Collections
+      operationId: post_collections
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOauthResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Client ID not found
+      summary: Get authorization token
+      tags:
+        - geoserver
+      x-openapi-router-controller: xcube_hub.controllers.geoserver
   /oauth/token:
     post:
       description: Get authorization token
@@ -730,33 +847,6 @@ paths:
       tags:
         - oauth
       x-openapi-router-controller: xcube_hub.controllers.oauth
-  /stores:
-    get:
-      description: Get stores
-      operationId: get_stores
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiStoresResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: No stores found
-      summary: Get stores
-      tags:
-        - stores
-      x-openapi-router-controller: xcube_hub.controllers.stores
 components:
   schemas:
     ApiResponse:
@@ -828,15 +918,6 @@ components:
           properties:
             result:
               $ref: '#/components/schemas/Callback'
-    ApiStoresResponse:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          required:
-            - result
-          properties:
-            result:
-              $ref: '#/components/schemas/Stores'
     ApiOauthResponse:
       example:
         access_token: access_token
@@ -873,15 +954,6 @@ components:
         runLocal:
           type: boolean
       type: object
-    Stores:
-      type: object
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        store_id:
-          type: string
     CostConfig:
       allOf:
         - $ref: '#/components/schemas/CubegenConfig'
