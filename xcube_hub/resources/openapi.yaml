@@ -262,10 +262,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Application not found
-      security:
-        - oAuthorization:
-            - manage:subscriptions
-      summary: Manage subscriptions
+      summary: Manage services
       tags:
         - services
       x-openapi-router-controller: xcube_hub.controllers.services
@@ -696,10 +693,19 @@ paths:
       tags:
         - callbacks
       x-openapi-router-controller: xcube_hub.controllers.callbacks
-  /services/geoserver/collections:
+  /services/geoservice/databases/{database_id}/collections:
     get:
       description: Manage GeoDB Collections
       operationId: get_collections
+      parameters:
+        - description: Database ID
+          explode: false
+          in: path
+          name: database_id
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
           content:
@@ -724,13 +730,22 @@ paths:
       summary: Get authorization token
       security:
         - oAuthorization:
-            - manage:cubegens
+            - manage:collections
       tags:
-        - geoserver
-      x-openapi-router-controller: xcube_hub.controllers.geoserver
+        - geoservice
+      x-openapi-router-controller: xcube_hub.controllers.geoservice
     put:
       description: Manage GeoDB Collections
-      operationId: put_collections
+      operationId: put_collection
+      parameters:
+        - description: Database ID
+          explode: false
+          in: path
+          name: database_id
+          required: true
+          schema:
+            type: string
+          style: simple
       requestBody:
         content:
           application/json:
@@ -758,13 +773,33 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Client ID not found
       summary: Get authorization token
+      security:
+        - oAuthorization:
+            - manage:collections
       tags:
-        - geoserver
-      x-openapi-router-controller: xcube_hub.controllers.geoserver
-  /services/geoserver/collections/{collection_id}:
+        - geoservice
+      x-openapi-router-controller: xcube_hub.controllers.geoservice
+  /services/geoservice/databases/{database_id}/collections/{collection_id}:
     get:
       description: Manage GeoDB Collections
-      operationId: get_collections
+      operationId: get_collection
+      parameters:
+        - description: Database ID
+          explode: false
+          in: path
+          name: database_id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Collection ID
+          explode: false
+          in: path
+          name: collection_id
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
           content:
@@ -787,13 +822,30 @@ paths:
       summary: Get authorization token
       security:
         - oAuthorization:
-            - manage:cubegens
+            - manage:collections
       tags:
-        - geoserver
-      x-openapi-router-controller: xcube_hub.controllers.geoserver
+        - geoservice
+      x-openapi-router-controller: xcube_hub.controllers.geoservice
     delete:
       description: Manage GeoDB Collections
-      operationId: post_collections
+      operationId: delete_collection
+      parameters:
+        - description: Database ID
+          explode: false
+          in: path
+          name: database_id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Collection ID
+          explode: false
+          in: path
+          name: collection_id
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
           content:
@@ -814,9 +866,12 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Client ID not found
       summary: Get authorization token
+      security:
+        - oAuthorization:
+            - manage:collections
       tags:
-        - geoserver
-      x-openapi-router-controller: xcube_hub.controllers.geoserver
+        - geoservice
+      x-openapi-router-controller: xcube_hub.controllers.geoservice
   /oauth/token:
     post:
       description: Get authorization token

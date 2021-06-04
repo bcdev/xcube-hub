@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import Mock
 
@@ -13,6 +14,7 @@ def raise_api_exception(namespace, body):
     raise ApiException(500, 'Test')
 
 
+@unittest.skipIf(os.getenv("UNITTEST_SKIP_K8S", "0"), "1")
 class TestK8s(unittest.TestCase):
     def setUp(self) -> None:
         self._core_v1_api = client.CoreV1Api()

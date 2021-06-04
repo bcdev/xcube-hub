@@ -13,7 +13,7 @@ from werkzeug.exceptions import Unauthorized
 from urllib.parse import urlparse
 
 from xcube_hub import api, util
-from xcube_hub.core import users, punits, geodb, geoserver
+from xcube_hub.core import users, punits, geodb, geoservice
 from xcube_hub.core.users import get_request_body_from_user
 from xcube_hub.database import DatabaseError
 from xcube_hub.models.subscription import Subscription
@@ -188,7 +188,7 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
                 raise api.ApiError(400, str(e))
 
         if service_id == "xcube_geoserver":
-            geoserver.register(user_id=user.username, subscription=subscription, headers=self._headers, raising=False)
+            geoservice.register(user_id=user.username, subscription=subscription, headers=self._headers, raising=False)
 
         if new_user:
             user.user_metadata.subscriptions[service_id] = subscription
