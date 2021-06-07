@@ -15,21 +15,24 @@ class Collection(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, collection_id=None, name=None, database=None, href=None, default_style=None, wms_uri=None):
-        """Subscription - a model defined in OpenAPI
+    def __init__(self, collection_id=None, name=None, database=None, href=None, default_style=None, preview_url=None,
+                 geojson_url=None):
+        """Collection - a model defined in OpenAPI
 
         :param collection_id: The id of this Collection.  # noqa: E501
         :type collection_id: str
-        :param name: The name of this Subscription.  # noqa: E501
+        :param name: The name of this Collection.  # noqa: E501
         :type name: str
-        :param database: The database of this Subscription.  # noqa: E501
+        :param database: The database of this Collection.  # noqa: E501
         :type database: str
-        :param href: The href of this Subscription.  # noqa: E501
+        :param href: The href of this Collection.  # noqa: E501
         :type href: str
-        :param default_style: The default_style of this Subscription.  # noqa: E501
+        :param default_style: The default_style of this Collection.  # noqa: E501
         :type default_style: str
-        :param wms_uri: The wms_uri of this Subscription.  # noqa: E501
-        :type wms_uri: str
+        :param preview_url: The preview_url of this Collection.  # noqa: E501
+        :type preview_url: str
+        :param geojson_url: The preview_url of this Collection.  # noqa: E501
+        :type geojson_url: str
         """
         self.openapi_types = {
             'collection_id': str,
@@ -37,7 +40,8 @@ class Collection(Model):
             'database': str,
             'href': str,
             'default_style': str,
-            'wms_uri': str
+            'preview_url': str,
+            'geojson_url': str
         }
 
         self.attribute_map = {
@@ -46,7 +50,8 @@ class Collection(Model):
             'database': 'database',
             'href': 'href',
             'default_style': 'default_style',
-            'wms_uri': 'wms_uri'
+            'preview_url': 'preview_url',
+            'geojson_url': 'geojson_url'
         }
 
         self._collection_id = collection_id
@@ -54,7 +59,8 @@ class Collection(Model):
         self._database = database
         self._href = href
         self._default_style = default_style
-        self._wms_uri = wms_uri
+        self._preview_url = preview_url
+        self._geojson_url = geojson_url
 
     @classmethod
     def from_dict(cls, dikt) -> 'Collection':
@@ -62,27 +68,27 @@ class Collection(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The Subscription of this Subscription.  # noqa: E501
-        :rtype: Subscription
+        :return: The Collection of this Collection.  # noqa: E501
+        :rtype: Collection
         """
         return util.deserialize_model(dikt, cls)
 
     @property
     def collection_id(self):
-        """Gets the collection_id of this Subscription.
+        """Gets the collection_id of this Collection.
 
 
-        :return: The collection_id of this Subscription.
+        :return: The collection_id of this Collection.
         :rtype: str
         """
         return self._collection_id
 
     @collection_id.setter
     def collection_id(self, collection_id):
-        """Sets the collection_id of this Subscription.
+        """Sets the collection_id of this Collection.
 
 
-        :param collection_id: The collection_id of this Subscription.
+        :param collection_id: The collection_id of this Collection.
         :type collection_id: str
         """
 
@@ -90,20 +96,20 @@ class Collection(Model):
 
     @property
     def name(self):
-        """Gets the name of this Subscription.
+        """Gets the name of this Collection.
 
 
-        :return: The name of this Subscription.
+        :return: The name of this Collection.
         :rtype: str
         """
         return self._name
 
     @name.setter
     def name(self, name):
-        """Sets the name of this Subscription.
+        """Sets the name of this Collection.
 
 
-        :param name: The name of this Subscription.
+        :param name: The name of this Collection.
         :type name: str
         """
 
@@ -111,20 +117,20 @@ class Collection(Model):
 
     @property
     def database(self):
-        """Gets the database of this Subscription.
+        """Gets the database of this Collection.
 
 
-        :return: The database of this Subscription.
+        :return: The database of this Collection.
         :rtype: str
         """
         return self._database
 
     @database.setter
     def database(self, database):
-        """Sets the database of this Subscription.
+        """Sets the database of this Collection.
 
 
-        :param database: The database of this Subscription.
+        :param database: The database of this Collection.
         :type database: str
         """
         if database is None:
@@ -134,20 +140,20 @@ class Collection(Model):
 
     @property
     def href(self):
-        """Gets the href of this Subscription.
+        """Gets the href of this Collection.
 
 
-        :return: The href of this Subscription.
+        :return: The href of this Collection.
         :rtype: str
         """
         return self._href
 
     @href.setter
     def href(self, href):
-        """Sets the href of this Subscription.
+        """Sets the href of this Collection.
 
 
-        :param href: The href of this Subscription.
+        :param href: The href of this Collection.
         :type href: str
         """
         if href is None:
@@ -157,42 +163,63 @@ class Collection(Model):
 
     @property
     def default_style(self):
-        """Gets the default_styleof this Subscription.
+        """Gets the default_styleof this Collection.
 
 
-        :return: The default_styleof this Subscription.
+        :return: The default_styleof this Collection.
         :rtype: str
         """
         return self._default_style
 
     @default_style.setter
     def default_style(self, default_style):
-        """Sets the default_styleof this Subscription.
+        """Sets the default_styleof this Collection.
 
 
-        :param default_style: The default_styleof this Subscription.
+        :param default_style: The default_styleof this Collection.
         :type default_style: str
         """
 
         self._default_style= default_style
 
     @property
-    def wms_uri(self):
-        """Gets the wms_uri of this Subscription.
+    def preview_url(self):
+        """Gets the preview_url of this Collection.
 
 
-        :return: The wms_uri of this Subscription.
+        :return: The preview_url of this Collection.
         :rtype: str
         """
-        return self._wms_uri
+        return self._preview_url
 
-    @wms_uri.setter
-    def wms_uri(self, wms_uri):
-        """Sets the wms_uri of this Subscription.
+    @preview_url.setter
+    def preview_url(self, preview_url):
+        """Sets the preview_url of this Collection.
 
 
-        :param wms_uri: The wms_uri of this Subscription.
-        :type wms_uri: str
+        :param preview_url: The preview_url of this Collection.
+        :type preview_url: str
         """
 
-        self.wms_uri = wms_uri
+        self._preview_url = preview_url
+
+    @property
+    def geojson_url(self):
+        """Gets the geojson_url of this Collection.
+
+
+        :return: The geojson_url of this Collection.
+        :rtype: str
+        """
+        return self._geojson_url
+
+    @geojson_url.setter
+    def geojson_url(self, geojson_url):
+        """Sets the layer of this Collection.
+
+
+        :param geojson_url: The geojson_url of this Collection.
+        :type geojson_url: str
+        """
+
+        self._geojson_url = geojson_url

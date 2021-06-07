@@ -1,7 +1,14 @@
 import os
 from typing import Sequence, Optional, Dict
 
-from xcube_hub.controllers.oauth import create_token
+from dotenv import dotenv_values
+
+from xcube_hub.core.oauth import create_token
+
+
+def del_env(dotenv_path='.env'):
+    for k, v in dotenv_values(dotenv_path='test/.env').items():
+        del os.environ[k]
 
 
 def create_test_token(permissions: Optional[Sequence] = None,

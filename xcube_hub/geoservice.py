@@ -1,7 +1,10 @@
 import os
 from abc import abstractmethod, ABC
-from typing import Optional
-from xcube_hub import api, util
+from typing import Optional, Any
+
+import requests
+
+from xcube_hub import api
 from xcube_hub.models.collection import Collection
 
 
@@ -9,7 +12,7 @@ class GeoServiceBase(ABC):
     _provider = None
 
     @abstractmethod
-    def get_layers(self, database_id: str) -> Optional[Collection]:
+    def get_layers(self, database_id: str) -> dict:
         """
         Get a key value
         :param database_id:
@@ -57,7 +60,7 @@ class GeoService(GeoServiceBase):
     def __init__(self, provider: str, **kwargs):
         self._provider = self._new_service(provider=provider, **kwargs)
 
-    def get_layers(self, database_id: str) -> Optional[Collection]:
+    def get_layers(self, database_id: str) -> dict:
         """
         Get a key value
         :param database_id:
@@ -111,13 +114,18 @@ class GeoService(GeoServiceBase):
             raise api.ApiError(400, f"Provider {provider} unknown.")
 
     @classmethod
-    def instance(cls, provider: Optional[str] = None, refresh: bool = False, use_mocker: bool = False, **kwargs)\
+    def instance(cls, provider: Optional[str] = None, refresh: bool = False, **kwargs) \
             -> "GeoServiceBase":
         refresh = refresh or cls._instance is None
         if refresh:
             cls._instance = GeoService(provider=provider, **kwargs)
 
         return cls._instance
+
+
+def _raise_for_none(name: str, value: Any):
+    if value is None:
+        raise api.ApiError(400, f"Value {name} is None")
 
 
 class _GeoServer(GeoServiceBase):
@@ -133,22 +141,33 @@ class _GeoServer(GeoServiceBase):
     ```
     """
 
-    def __init__(self, url='localhost', username='admin', password='geoserver', **kwargs):
+    def __init__(self,
+                 url='localhost',
+                 username='admin',
+                 password='geoserver',
+                 pg_user: Optional[str] = None,
+                 pg_password: Optional[str] = None,
+                 pg_host: Optional[str] = None,
+                 **kwargs):
         super().__init__()
         try:
             from geo.Geoserver import Geoserver
         except ImportError:
             raise api.ApiError(500, "Error: Cannot import Geoserver. Please install first.")
 
-        url = os.getenv('XCUBE_HUB_GEOSERVER_URL') or url
-        username = os.getenv('XCUBE_HUB_GEOSERVER_USERNAME') or username
-        password = os.getenv('XCUBE_HUB_GEOSERVER_PASSWORD') or password
+        self._url = os.getenv('XCUBE_HUB_GEOSERVER_URL') or url
+        self._username = os.getenv('XCUBE_HUB_GEOSERVER_USERNAME') or username
+        self._password = os.getenv('XCUBE_HUB_GEOSERVER_PASSWORD') or password
+        self._pg_host = os.getenv("XCUBE_HUB_POSTGIS_HOST") or pg_host
+        self._pg_user = os.getenv("XCUBE_HUB_POSTGIS_USER") or pg_user
+        self._pg_password = os.getenv("XCUBE_HUB_POSTGIS_PASSWORD") or pg_password
 
-        self._geo = Geoserver(url, username=username, password=password, **kwargs)
-# https://stage.xcube-geodb.brockmann-consult.de/geoserver/demo/wms/kml?layers=demo%3Aeea-urban-atlas_TR021L1_NEVSEHIR_UA2018
-# https://stage.xcube-geodb.brockmann-consult.de/geoserver/demo/wms?service=WMS&version=1.1.0&request=GetMap&layers=demo%3Aeea-urban-atlas_TR021L1_NEVSEHIR_UA2018&bbox=6420649.0%2C2053709.75%2C6457151.0%2C2085892.25&width=768&height=677&srs=EPSG%3A3035&styles=&format=application/openlayers
+        self._geo = Geoserver(self._url, username=self._username, password=self._password)
 
-    def get_layers(self, database_id: str) -> Collection:
+        for prop, value in vars(self).items():
+            _raise_for_none(prop, value)
+
+    def get_layers(self, database_id: str) -> dict:
         """
         Get a key value
         :param database_id:
@@ -169,7 +188,32 @@ class _GeoServer(GeoServiceBase):
         """
 
         try:
-            return self._geo.get_layer(layer_name=collection_id, workspace=database_id)
+            layer_name = database_id + '_' + collection_id
+            layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
+            url = layer['layer']['resource']['href']
+            r = requests.get(url, auth=(self._username, self._password))
+            layer_wms = r.json()
+            bbox = layer_wms['featureType']['nativeBoundingBox']
+            srs = layer_wms['featureType']['srs']
+
+            preview_url = f"{self._url}/{database_id}/wms?service=WMS&version=1.1.0&request=GetMap&" \
+                          f"layers={database_id}:{layer_name}&" \
+                          f"bbox={bbox['minx']},{bbox['miny']},{bbox['maxx']},{bbox['maxy']}&" \
+                          f"width=690&height=768&srs={srs}&styles=&format=application/openlayers"
+
+            geojson_url = f"{self._url}/{database_id}/ows?service=WFS&version=1.0.0&request=GetFeature&" \
+                          f"typeName={database_id}:{layer_name}&maxFeatures=10&outputFormat=application/json"
+
+            collection = Collection(
+                preview_url=preview_url,
+                collection_id=collection_id,
+                database=database_id,
+                name=collection_id.replace(database_id, ''),
+                geojson_url=geojson_url
+            )
+
+            return collection
+
         except Exception as e:
             raise api.ApiError(400, str(e))
 
@@ -185,18 +229,18 @@ class _GeoServer(GeoServiceBase):
             workspace = self._geo.get_workspace(workspace=database_id)
             if workspace is None:
                 self._geo.create_workspace(workspace=database_id)
-                host = util.maybe_raise_for_env("XCUBE_HUB_POSTGIS_HOST")
-                pg_user = util.maybe_raise_for_env("XCUBE_HUB_POSTGIS_USER")
-                pg_password = util.maybe_raise_for_env("XCUBE_HUB_POSTGIS_PASSWORD")
+
                 self._geo.create_featurestore(store_name=database_id,
                                               workspace=database_id,
-                                              host=host,
+                                              host=self._pg_host,
                                               port=5432,
                                               db='geodb',
-                                              pg_user=pg_user,
-                                              pg_password=pg_password)
+                                              pg_user=self._pg_user,
+                                              pg_password=self._pg_password)
 
-            self._geo.publish_featurestore(workspace=database_id, store_name=database_id, pg_table=collection_id)
+            pg_table = database_id + '_' + collection_id
+            self._geo.publish_featurestore(workspace=database_id, store_name=database_id, pg_table=pg_table)
+            return self.get_layer(collection_id=collection_id, database_id=database_id)
         except Exception as e:
             raise api.ApiError(400, str(e))
 
@@ -209,7 +253,9 @@ class _GeoServer(GeoServiceBase):
         """
 
         try:
-            return self._geo.delete_layer(layer_name=collection_id, workspace=database_id)
+            collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+            layer_name = database_id + '_' + collection_id
+            self._geo.delete_layer(layer_name=layer_name, workspace=database_id)
+            return collection
         except Exception as e:
             raise api.ApiError(400, str(e))
-

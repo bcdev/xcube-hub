@@ -31,9 +31,9 @@ def put_collection(database_id: str, body) -> Tuple[AnyDict, int]:
         if 'collection_id' not in body:
             raise api.ApiError(400, "put_collection needs a collection_id")
 
-        geo.publish(collection_id=body['collection_id'], database_id=database_id)
+        res = geo.publish(collection_id=body['collection_id'], database_id=database_id)
 
-        return api.ApiResponse.success("success")
+        return api.ApiResponse.success(res.to_dict())
     except api.ApiError as e:
         return e.response
 

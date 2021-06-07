@@ -4,7 +4,7 @@ from werkzeug.exceptions import Unauthorized
 
 from test.controllers.utils import create_test_token
 from xcube_hub.controllers.authorization import check_oauthorization, validate_scope_oauthorization
-from xcube_hub.controllers.oauth import create_token
+from xcube_hub.core.oauth import create_token
 
 
 class TestOauthorization(unittest.TestCase):
