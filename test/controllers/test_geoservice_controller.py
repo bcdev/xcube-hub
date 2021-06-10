@@ -25,7 +25,7 @@ class TestGeoServerController(BaseTestCase):
         # Test whether the controller works
         self._geo._provider = Mock()
         self._geo._provider.get_layers.return_value = {'layers': {'layer': [{'name': 'test'}]}}
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections',
                                     headers=self._headers, method='GET')
 
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -33,7 +33,7 @@ class TestGeoServerController(BaseTestCase):
 
         # Test whether the controller authorizes
 
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections', method='GET')
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections', method='GET')
 
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
 
@@ -42,7 +42,7 @@ class TestGeoServerController(BaseTestCase):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.get_layers = side_effect
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections',
                                     headers=self._headers, method='GET')
 
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -53,14 +53,14 @@ class TestGeoServerController(BaseTestCase):
         self._geo._provider = Mock()
         self._geo._provider.get_layer.return_value = Collection(name='test')
 
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections/test',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections/test',
                                     headers=self._headers, method='GET')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual('test', response.json['name'])
 
         # Test whether the controller authorizes
 
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections/test', method='GET')
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections/test', method='GET')
 
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
 
@@ -69,7 +69,7 @@ class TestGeoServerController(BaseTestCase):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.get_layer = side_effect
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections/test',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections/test',
                                     headers=self._headers, method='GET')
 
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -83,13 +83,13 @@ class TestGeoServerController(BaseTestCase):
         payload = {
             'collection_id': 'anja_E1'
         }
-        response = self.client.open('/api/v2/services/geoservice/databases/helge/collections',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/helge/collections',
                                     headers=self._headers, json=payload, method='PUT')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
         # Test whether the controller authorizes
 
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections', json=payload,
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections', json=payload,
                                     method='PUT')
 
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -99,7 +99,7 @@ class TestGeoServerController(BaseTestCase):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.publish = side_effect
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections', json=payload,
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections', json=payload,
                                     headers=self._headers, method='PUT')
 
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -109,7 +109,7 @@ class TestGeoServerController(BaseTestCase):
         payload = {
             'collection': 'anja_E1'
         }
-        response = self.client.open('/api/v2/services/geoservice/databases/helge/collections',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/helge/collections',
                                     headers=self._headers, json=payload, method='PUT')
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
 
@@ -120,13 +120,13 @@ class TestGeoServerController(BaseTestCase):
         self._geo._provider = Mock()
         self._geo._provider.unpublish.return_value = Collection(name='test')
 
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections/test',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections/test',
                                     headers=self._headers, method='DELETE')
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
         # Test whether the controller authorizes
 
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections/test',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections/test',
                                     method='DELETE')
 
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -136,7 +136,7 @@ class TestGeoServerController(BaseTestCase):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.unpublish = side_effect
-        response = self.client.open('/api/v2/services/geoservice/databases/terrestris/collections/test',
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections/test',
                                     headers=self._headers, method='DELETE')
 
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))

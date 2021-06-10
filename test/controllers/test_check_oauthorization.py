@@ -29,8 +29,11 @@ class TestOauthorization(unittest.TestCase):
         self.assertEqual("401 Unauthorized: Access denied: No iss.", str(e.exception))
 
     def test_check_oauthorization(self):
-        expected = {'scopes': ['manage:users', 'manage:cubegens'], 'sub': 'test@mail.com',
-                    'user_id': 'a97dfebf4098c0f5c16bca61e2b76c373', 'email': 'test@mail.com'}
+        expected = {'scopes': ['manage:users', 'manage:cubegens'],
+                    'sub': 'test@mail.com',
+                    'iss': 'https://xcube-gen.brockmann-consult.de/',
+                    'user_id': 'a97dfebf4098c0f5c16bca61e2b76c373',
+                    'email': 'test@mail.com'}
         res = check_oauthorization(self._token)
         del res['token']
         self.assertDictEqual(expected, res)

@@ -6,6 +6,7 @@ from jose import jwt
 from moto import mock_s3
 
 from xcube_hub import api
+from xcube_hub.cfg import Cfg
 from xcube_hub.core.punits import add_punits, get_user_data
 from xcube_hub.core.callbacks import put_callback, get_callback
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME

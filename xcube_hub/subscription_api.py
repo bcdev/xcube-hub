@@ -13,7 +13,7 @@ from werkzeug.exceptions import Unauthorized
 from urllib.parse import urlparse
 
 from xcube_hub import api, util
-from xcube_hub.core import users, punits, geodb, geoservice
+from xcube_hub.core import users, punits, geodb
 from xcube_hub.core.users import get_request_body_from_user
 from xcube_hub.database import DatabaseError
 from xcube_hub.models.subscription import Subscription
@@ -153,12 +153,12 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         # if service_id in user.user_metadata.subscriptions:
         #     raise api.ApiError(409, f"The subscription {subscription.subscription_id} exists for service {service_id}.")
 
-        role_id_manage = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_MANAGE")
-        role_id_free = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_FREE")
-        role_id_user = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_USER")
-
         role_id = None
         if service_id == "xcube_geodb":
+            role_id_manage = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_MANAGE")
+            role_id_free = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_FREE")
+            role_id_user = util.maybe_raise_for_env("GEODB_AUTH_ROLE_ID_USER")
+
             if subscription.unit != "cells":
                 raise api.ApiError(400, "Wrong unit for a geodb subscription")
 
@@ -187,8 +187,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
             except (DatabaseError, ClientError) as e:
                 raise api.ApiError(400, str(e))
 
-        if service_id == "xcube_geoserver":
-            geoservice.register(user_id=user.username, subscription=subscription, headers=self._headers, raising=False)
+        if service_id == "xcube_geoserv":
+            role_id = util.maybe_raise_for_env("XCUBE_GEOSERV_ID")
 
         if new_user:
             user.user_metadata.subscriptions[service_id] = subscription
@@ -197,7 +197,7 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         else:
             user.user_metadata.subscriptions[service_id] = subscription
             user_dict = dict(user_metadata=user.user_metadata.to_dict(), app_metadata=user.app_metadata.to_dict())
-            r = requests.patch(f"https://{self._domain}/users/{user.user_id}", json=user_dict, headers=self._headers)
+            r = requests.patch(f"https://{self._domain}/users/auth0|{user_id}", json=user_dict, headers=self._headers)
 
         try:
             r.raise_for_status()
@@ -206,11 +206,11 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
 
         if new_user:
             role = {"roles": [role_id]}
-            r = requests.post(f"https://{self._domain}/users/auth0|{user.user_id}/roles", json=role,
+            r = requests.post(f"https://{self._domain}/users/auth0|{user_id}/roles", json=role,
                               headers=self._headers)
         else:
             role = {"roles": [role_id]}
-            r = requests.post(f"https://{self._domain}/users/auth0|{user.user_id}/roles", json=role,
+            r = requests.post(f"https://{self._domain}/users/auth0|{user_id}/roles", json=role,
                               headers=self._headers)
 
         try:

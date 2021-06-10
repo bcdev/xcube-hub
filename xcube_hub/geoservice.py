@@ -155,12 +155,12 @@ class _GeoServer(GeoServiceBase):
         except ImportError:
             raise api.ApiError(500, "Error: Cannot import Geoserver. Please install first.")
 
-        self._url = os.getenv('XCUBE_HUB_GEOSERVER_URL') or url
-        self._username = os.getenv('XCUBE_HUB_GEOSERVER_USERNAME') or username
-        self._password = os.getenv('XCUBE_HUB_GEOSERVER_PASSWORD') or password
-        self._pg_host = os.getenv("XCUBE_HUB_POSTGIS_HOST") or pg_host
-        self._pg_user = os.getenv("XCUBE_HUB_POSTGIS_USER") or pg_user
-        self._pg_password = os.getenv("XCUBE_HUB_POSTGIS_PASSWORD") or pg_password
+        self._url = url or os.getenv('XCUBE_HUB_GEOSERVER_URL')
+        self._username = username or os.getenv('XCUBE_HUB_GEOSERVER_USERNAME')
+        self._password = password or os.getenv('XCUBE_HUB_GEOSERVER_PASSWORD')
+        self._pg_host = pg_host or os.getenv("XCUBE_HUB_POSTGIS_HOST")
+        self._pg_user = pg_user or os.getenv("XCUBE_HUB_POSTGIS_USER")
+        self._pg_password = pg_password or os.getenv("XCUBE_HUB_POSTGIS_PASSWORD")
 
         self._geo = Geoserver(self._url, username=self._username, password=self._password)
 

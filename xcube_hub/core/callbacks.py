@@ -2,6 +2,7 @@ from botocore.exceptions import ClientError
 
 from xcube_hub import api
 from xcube_hub.api import get_json_request_value
+from xcube_hub.cfg import Cfg
 from xcube_hub.core.costs import get_size_and_cost
 from xcube_hub.core.punits import subtract_punits
 from xcube_hub.keyvaluedatabase import KeyValueDatabase

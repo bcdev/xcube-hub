@@ -7,6 +7,8 @@ import os
 import requests_mock
 from dotenv import load_dotenv
 from flask import json
+
+from test.controllers.utils import del_env
 from xcube_hub.models.oauth_token import OauthToken
 from test import BaseTestCase
 
@@ -17,6 +19,9 @@ class TestOauthController(BaseTestCase):
 
     def setUp(self):
         load_dotenv(dotenv_path='test/.env')
+
+    def tearDown(self) -> None:
+        del_env(dotenv_path='test/.env')
 
     def test_oauth_token_post(self, m):
         """Test case for oauth_token_post

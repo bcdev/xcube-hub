@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": [
+        "title",
+        "store_id",
+        "cost_params"
+    ],
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "store_id": {
+        "type": "string"
+      },
+      "cost_params": {
+        "type": "object",
+        "properties": {
+          "input_pixels_per_unit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "input_punits_weight": {
+            "type": "number",
+            "default": 1,
+            "exclusiveMinimum": 0
+          },
+          "output_pixels_per_punit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "output_punits_weight": {
+            "type": "number",
+            "default": 1,
+            "exclusiveMinimum": 0
+          }
+        }
+      },
+      "store_params": {
+        "type": "object",
+        "properties": {
+          "api_url": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

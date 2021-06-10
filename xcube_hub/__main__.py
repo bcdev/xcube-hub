@@ -6,6 +6,7 @@ import flask_cors
 from dotenv import load_dotenv
 
 from xcube_hub import encoder
+from xcube_hub.cfg import Cfg
 from xcube_hub.core.validations import validate_env
 from xcube_hub.geoservice import GeoService
 from xcube_hub.k8scfg import K8sCfg
@@ -17,6 +18,7 @@ def create_app():
     validate_env()
 
     K8sCfg.load_config_once()
+    Cfg.load_config()
 
     GeoService.instance(provider="geoserver")
 

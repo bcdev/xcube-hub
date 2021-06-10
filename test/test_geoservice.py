@@ -123,20 +123,7 @@ class TestGeoService(unittest.TestCase):
         self.assertEqual("Provider None unknown.", str(e.exception))
 
     def test_geoservice(self):
-        with self.assertRaises(api.ApiError) as e:
-            geo = GeoService.instance(provider='geoserver')
-        self.assertEqual("Value _pg_host is None", str(e.exception))
-
-        with self.assertRaises(api.ApiError) as e:
-            geo = GeoService.instance(provider='geoserver', pg_host='https://test')
-
-        self.assertEqual("Value _pg_user is None", str(e.exception))
-
-        with self.assertRaises(api.ApiError) as e:
-            geo = GeoService.instance(provider='geoserver', pg_user='user', pg_host='https://test')
-
-        self.assertEqual("Value _pg_password is None", str(e.exception))
-
+        GeoService.instance(provider='geoserver', refresh=True)
         geo = GeoService.instance(provider='geoserver', pg_user='user', pg_host='https://test', pg_password='bla')
 
         self.assertIsInstance(geo, GeoService)

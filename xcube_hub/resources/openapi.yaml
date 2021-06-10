@@ -212,6 +212,7 @@ paths:
             enum:
               - xcube_gen
               - xcube_geodb
+              - xcube_geoserv
           style: simple
       responses:
         "200":
@@ -242,6 +243,7 @@ paths:
         get a list of services. Currently, a service can be either of
         - xcube_gen
         - xcube_geodb
+        - xcube_geoserv
       operationId: get_services
       responses:
         "200":
@@ -272,6 +274,7 @@ paths:
         Register a subscription to a service. A service can either of be
         - xcube_gen
         - xcube_geodb
+        - xcube_geoserv
       operationId: put_subscription_to_service
       parameters:
         - description: Service ID
@@ -284,6 +287,7 @@ paths:
             enum:
               - xcube_gen
               - xcube_geodb
+              - xcube_geoserv
           style: simple
       requestBody:
         content:
@@ -329,6 +333,7 @@ paths:
         Get info about a subscription of a service. A service can either of be
         - xcube_gen
         - xcube_geodb
+        - xcube_geoserv
       operationId: get_subscription_from_service
       parameters:
         - description: Service ID
@@ -341,6 +346,7 @@ paths:
             enum:
               - xcube_gen
               - xcube_geodb
+              - xcube_geoserv
           style: simple
         - description: Subscription ID
           explode: false
@@ -382,6 +388,7 @@ paths:
         Delete a subscription from a service.  A service can either of be
         - xcube_gen
         - xcube_geodb
+        - xcube_geoserv
       operationId: delete_subscription_from_service
       parameters:
         - description: Application ID
@@ -394,6 +401,7 @@ paths:
             enum:
               - xcube_gen
               - xcube_geodb
+              - xcube_geoserv
           style: simple
         - description: User ID
           explode: false
@@ -693,7 +701,7 @@ paths:
       tags:
         - callbacks
       x-openapi-router-controller: xcube_hub.controllers.callbacks
-  /services/geoservice/databases/{database_id}/collections:
+  /services/xcube_geoserv/databases/{database_id}/collections:
     get:
       description: Manage GeoDB Collections
       operationId: get_collections
@@ -779,7 +787,7 @@ paths:
       tags:
         - geoservice
       x-openapi-router-controller: xcube_hub.controllers.geoservice
-  /services/geoservice/databases/{database_id}/collections/{collection_id}:
+  /services/xcube_geoserv/databases/{database_id}/collections/{collection_id}:
     get:
       description: Manage GeoDB Collections
       operationId: get_collection

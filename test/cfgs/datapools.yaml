@@ -1,0 +1,10 @@
+sentinelhub_codede:
+  title: SENTINEL Hub (CODE-DE)
+  store_id: sentinelhub
+  cost_params:
+    input_pixels_per_punit: 262144
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://code-de.sentinel-hub.com
