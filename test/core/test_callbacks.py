@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import boto3
 from dotenv import load_dotenv
@@ -97,6 +98,7 @@ class TestCallbacks(unittest.TestCase):
         self._cache = KeyValueDatabase.instance(provider='inmemory')
         self._cache.set('heinrich__cubegen', {'value_key': 'value'})
         self._cache.set('heinrich__cubegen__cfg', CUBEGEN_TEST)
+        self._cache.set('heinrich2__cubegen', {'value_key': 'value', 'progress': [100, ]})
         self._token = jwt.encode(TEST_CLAIMS, "ysdfvdfvdsvfdsvfdvs", algorithm="HS256")
         load_dotenv(dotenv_path='test/.env')
         Cfg.load_config()
@@ -109,6 +111,20 @@ class TestCallbacks(unittest.TestCase):
         res = get_callback('heinrich', 'cubegen2')
 
         self.assertDictEqual({}, res)
+
+        res = get_callback('heinrich2', 'cubegen')
+
+        self.assertEqual([100, ], res)
+
+        cache = KeyValueDatabase.instance()
+
+        with patch.object(cache, 'get') as p:
+            p.side_effect = TimeoutError()
+
+            with self.assertRaises(api.ApiError) as e:
+                get_callback('heinrich2', 'cubegen')
+
+            self.assertEqual("Cache timout", str(e.exception))
 
     @mock_s3
     def test_put_callback(self):
@@ -155,6 +171,10 @@ class TestCallbacks(unittest.TestCase):
         # The above minus 30 from the above substraction
         self.assertEqual(49940, user_data['count'])
 
+        # cfg = {'state': {}, 'sender': 'on_end'}
+        # put_callback(user_id='heinrich', cubegen_id='cubegen', email='heinrich@gmail.com', value=cfg)
+        # user_data = get_user_data('heinrich@gmail.com', dataset_name='punits')
+
         cfg = {'state': {}, 'sender': 'on_end'}
         cubegen_test = CUBEGEN_TEST.copy()
         del cubegen_test['input_configs']
@@ -163,6 +183,15 @@ class TestCallbacks(unittest.TestCase):
             put_callback(user_id='heinrich', cubegen_id='cubegen', email='heinrich@gmail.com', value=cfg)
 
         self.assertEqual("Error in callbacks. Invalid input configuration.", str(e.exception))
+
+        cache = KeyValueDatabase.instance()
+        with patch.object(cache, 'get') as p:
+            p.side_effect = TimeoutError()
+
+            with self.assertRaises(api.ApiError) as e:
+                put_callback(user_id='heinrich', cubegen_id='cubegen', email='heinrich@gmail.com', value=cfg)
+
+            self.assertEqual("Cache timeout", str(e.exception))
 
 
 if __name__ == '__main__':

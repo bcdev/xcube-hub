@@ -2,27 +2,13 @@
 
 from __future__ import absolute_import
 
-import os
-from typing import Dict
 from unittest.mock import patch
-
-from dotenv import load_dotenv
-
-from test.controllers.utils import create_test_token
 from test import BaseTestCase
-import unittest
 
 from xcube_hub import api
 from xcube_hub.api import ApiError
-from xcube_hub.core import cubegens
-from xcube_hub.k8scfg import K8sCfg
-from xcube_hub.models.cubegen_config import CubegenConfig
-from xcube_hub.typedefs import JsonObject
+from xcube_hub.controllers import cubegens
 
-
-def create_cubegen2s(body: JsonObject, token_info: Dict):
-    print("Hello")
-    raise api.ApiError(400, "")
 
 
 CUBEGEN_TEST = {
@@ -74,20 +60,8 @@ TEST_CLAIMS = {
 }
 
 
-@unittest.skipIf(os.getenv("UNITTESTS_SKIP_K8s", "0") == "1", "Kubernetes skipped")
 class TestCubeGensController(BaseTestCase):
     """CubeGensController integration test stubs"""
-
-    def setUp(self) -> None:
-        self._user_id = "a97dfebf4098c0f5c16bca61e2b76c373"
-        self._claims, self._token = create_test_token()
-        self._cube_config = CubegenConfig.from_dict(CUBEGEN_TEST)
-
-        self._claims, self._token = create_test_token(permissions=["manage:cubegens", ])
-        self._headers = {'Authorization': f'Bearer {self._token}'}
-
-        load_dotenv(dotenv_path='test/.env')
-        K8sCfg.load_config_once()
 
     def tearDown(self) -> None:
         pass
@@ -95,131 +69,181 @@ class TestCubeGensController(BaseTestCase):
         # del_env(dotenv_path='test/.env')
 
     # @patch.object(BatchV1Api, 'list_namespaced_job', return_value=V1JobList(items=[]), create=True)
-    @patch('xcube_hub.core.cubegens.list', return_value={}, create=True)
-    def test_get_cubegens_controller(self, p):
-        response = self.client.open('/api/v2/cubegens', headers=self._headers, method='GET')
+    # @patch('xcube_hub.core.cubegens.list', return_value={}, create=True)
+    # def test_get_cubegens_controller(self, p):
+    #     response = self.client.open('/api/v2/cubegens', headers=self._headers, method='GET')
+    #
+    #     self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #     self.assertEqual(0, len(response.json))
+    #
+    #     p.side_effect = ApiError(400, 'test')
+    #     response = self.client.open('/api/v2/cubegens', headers=self._headers, method='GET')
+    #
+    #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #
+    # @patch('xcube_hub.core.cubegens.get', return_value={}, create=True)
+    # def test_get_cubegen_controller(self, p):
+    #     response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='GET')
+    #
+    #     self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #     self.assertEqual(0, len(response.json))
+    #
+    #     p.side_effect = ApiError(400, message='test')
+    #     response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='GET')
+    #
+    #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #
+    # @patch('xcube_hub.core.cubegens.info', return_value={}, create=True)
+    # def test_get_cubegen_info_controller(self, p):
+    #     response = self.client.open('/api/v2/cubegens/info', headers=self._headers, json=self._cube_config.to_dict(),
+    #                                 method='POST')
+    #
+    #     self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #     self.assertEqual(0, len(response.json))
+    #
+    #     p.side_effect = ApiError(400, message='test')
+    #     response = self.client.open('/api/v2/cubegens/info', headers=self._headers, json=self._cube_config.to_dict(),
+    #                                 method='POST')
+    #
+    #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #
+    # @patch('xcube_hub.core.cubegens.delete_all', return_value={}, create=True)
+    # def test_delete_cubegens_controller(self, p):
+    #     response = self.client.open('/api/v2/cubegens', headers=self._headers, method='DELETE')
+    #
+    #     self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #
+    #     p.side_effect = ApiError(400, message='test')
+    #     response = self.client.open('/api/v2/cubegens', headers=self._headers, method='DELETE')
+    #
+    #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #
+    # @patch('xcube_hub.core.cubegens.delete_one', return_value={}, create=True)
+    # def test_delete_cubegen_controller(self, p):
+    #     response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='DELETE')
+    #
+    #     self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+    #
+    #     p.side_effect = ApiError(400, message='test')
+    #     response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='DELETE')
+    #
+    #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
 
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
-        self.assertEqual(0, len(response.json))
-
-        p.side_effect = ApiError(400, 'test')
-        response = self.client.open('/api/v2/cubegens', headers=self._headers, method='GET')
-
-        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-    @patch('xcube_hub.core.cubegens.get', return_value={}, create=True)
-    def test_get_cubegen_controller(self, p):
-        response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='GET')
-
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
-        self.assertEqual(0, len(response.json))
-
-        p.side_effect = ApiError(400, message='test')
-        response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='GET')
-
-        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-    @patch('xcube_hub.core.cubegens.info', return_value={}, create=True)
-    def test_get_cubegen_info_controller(self, p):
-        response = self.client.open('/api/v2/cubegens/info', headers=self._headers, json=self._cube_config.to_dict(),
-                                    method='POST')
-
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
-        self.assertEqual(0, len(response.json))
-
-        p.side_effect = ApiError(400, message='test')
-        response = self.client.open('/api/v2/cubegens/info', headers=self._headers, json=self._cube_config.to_dict(),
-                                    method='POST')
-
-        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-    @patch('xcube_hub.core.cubegens.delete_all', return_value={}, create=True)
-    def test_delete_cubegens_controller(self, p):
-        response = self.client.open('/api/v2/cubegens', headers=self._headers, method='DELETE')
-
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-        p.side_effect = ApiError(400, message='test')
-        response = self.client.open('/api/v2/cubegens', headers=self._headers, method='DELETE')
-
-        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-    @patch('xcube_hub.core.cubegens.delete_one', return_value={}, create=True)
-    def test_delete_cubegen_controller(self, p):
-        response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='DELETE')
-
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-        p.side_effect = ApiError(400, message='test')
-        response = self.client.open('/api/v2/cubegens/test', headers=self._headers, method='DELETE')
-
-        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
-
-    @patch('xcube_hub.core.cubegens.create', return_value={}, create=True)
+    @patch('xcube_hub.core.cubegens.create', return_value={'cubegen_id': 'ajob_id', 'status': 'ready'}, create=True)
     def test_create_cubegen_controller(self, p):
-        response = self.client.open('/api/v2/cubegens', headers=self._headers, json=self._cube_config.to_dict(), method='PUT')
+        expected = {'cubegen_id': 'ajob_id', 'status': 'ready'}
+        p.return_value = expected
 
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+        res = cubegens.create_cubegen({}, {'user_id': 'drwho', 'email': 'drwho@bbc.org', 'token': 'dsfvsdfev'})
+        self.assertDictEqual(expected, res[0])
+        self.assertEqual(200, res[1])
 
-        p.side_effect = ApiError(400, message='test')
-        response = self.client.open('/api/v2/cubegens', headers=self._headers, json=self._cube_config.to_dict(), method='PUT')
+        p.side_effect = ApiError(400, message='error')
 
-        self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
+        res = cubegens.create_cubegen({}, {'user_id': 'drwho', 'email': 'drwho@bbc.org', 'token': 'dsfvsdfev'})
+        self.assertEqual('error', res[0]['message'])
+        self.assertGreater(len(res[0]['traceback']), 0)
+        self.assertEqual(400, res[1])
 
-    def test_delete_cubegen(self):
+    @patch('xcube_hub.core.cubegens.delete_one', return_value={'cubegen_id': 'ajob_id', 'status': 'ready'}, create=True)
+    def test_delete_cubegen(self, p):
         """Test case for delete_cubegen
 
         Delete a cubegen
         """
 
-        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
-        response = self.client.open(f'/api/v2/cubegens/{res["cubegen_id"]}',
-                                    headers={'Authorization': f"Bearer {self._token}"}, method='DELETE')
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+        res = cubegens.delete_cubegen(cubegen_id='anid')
 
-    def test_delete_cubegens(self):
-        """Test case for delete_cubegens
+        self.assertEqual(200, res[1])
 
-        Delete all cubegens
+        p.side_effect = api.ApiError(400, 'Error')
+
+        res = cubegens.delete_cubegen(cubegen_id='anid')
+
+        self.assertEqual(400, res[1])
+        self.assertEqual('Error', res[0]['message'])
+
+    @patch('xcube_hub.core.cubegens.delete_all', return_value='SUCCESS', create=True)
+    def test_delete_cubegens(self, p):
+        """Test case for delete_cubegen
+
+        Delete a cubegen
         """
-        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
-        response = self.client.open('/api/v2/cubegens', headers={'Authorization': f"Bearer {self._token}"},
-                                    method='DELETE')
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_get_costs(self):
-        """Test case for get_costs
+        res = cubegens.delete_cubegens(token_info={'user_id': 'drwho'})
 
-        Receive cost information for running a cubegen
+        self.assertEqual(200, res[1])
+
+        p.side_effect = api.ApiError(400, 'Error')
+
+        res = cubegens.delete_cubegens(token_info={'user_id': 'drwho'})
+
+        self.assertEqual(400, res[1])
+        self.assertEqual('Error', res[0]['message'])
+
+    @patch('xcube_hub.core.cubegens.info', create=True)
+    def test_get_cubegen_info(self, p):
+        """Test case for delete_cubegen
+
+        Delete a cubegen
         """
-        response = self.client.open(
-            '/api/v2/cubegens/info',
-            method='POST',
-            json=CUBEGEN_TEST,
-            headers={'Authorization': f"Bearer {self._token}"},
-            content_type='application/json')
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_get_cubegen(self):
-        """Test case for get_cubegen
+        p.return_value = dict(dataset_descriptor={}, size_estimation={}, cost_estimation={})
 
-        List specific cubegen
+        res = cubegens.get_cubegen_info(body={}, token_info={'user_id': 'drwho',
+                                                             'email': 'drwho@bbc.org',
+                                                             'token': 'dscsdc'})
+
+        self.assertEqual(200, res[1])
+
+        p.side_effect = api.ApiError(400, 'Error')
+
+        res = cubegens.get_cubegen_info(body={}, token_info={'user_id': 'drwho',
+                                                             'email': 'drwho@bbc.org',
+                                                             'token': 'dscsdc'})
+
+        self.assertEqual(400, res[1])
+        self.assertEqual('Error', res[0]['message'])
+
+    @patch('xcube_hub.core.cubegens.get', create=True)
+    def test_get_cubegen(self, p):
+        """Test case for delete_cubegen
+
+        Delete a cubegen
         """
-        res = cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
-        response = self.client.open(f'/api/v2/cubegens/{res["cubegen_id"]}',
-                                    headers={'Authorization': f"Bearer {self._token}"}, method='GET')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_get_cubegens(self):
-        """Test case for get_cubegens
+        p.return_value = {'cubegen_id': 'anid', 'status': 'ready', 'output': [], 'progress': 100}
 
-        List cubegens
+        res = cubegens.get_cubegen(cubegen_id='anid', token_info={'user_id': 'drwho'})
+
+        self.assertEqual(200, res[1])
+
+        p.side_effect = api.ApiError(400, 'Error')
+
+        res = cubegens.get_cubegen(cubegen_id='anid', token_info={'user_id': 'drwho'})
+
+        self.assertEqual(400, res[1])
+        self.assertEqual('Error', res[0]['message'])
+
+    @patch('xcube_hub.core.cubegens.list', create=True)
+    def test_get_cubegens(self, p):
+        """Test case for delete_cubegen
+
+        Delete a cubegen
         """
-        cubegens.create("a97dfebf4098c0f5c16bca61e2b76c373", email="richard@mail.com", cfg=CUBEGEN_TEST, token=self._token)
-        response = self.client.open('/api/v2/cubegens', headers={'Authorization': f"Bearer {self._token}"},
-                                    method='GET')
-        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+
+        p.return_value = []
+
+        res = cubegens.get_cubegens(token_info={'user_id': 'drwho'})
+
+        self.assertEqual(200, res[1])
+
+        p.side_effect = api.ApiError(400, 'Error')
+
+        res = cubegens.get_cubegens(token_info={'user_id': 'drwho'})
+
+        self.assertEqual(400, res[1])
+        self.assertEqual('Error', res[0]['message'])
 
 
 if __name__ == '__main__':

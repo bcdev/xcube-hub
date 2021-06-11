@@ -110,6 +110,8 @@ class GeoService(GeoServiceBase):
 
         if provider == 'geoserver':
             return _GeoServer(**kwargs)
+        elif provider == 'mock':
+            return _GeoServiceMock()
         else:
             raise api.ApiError(400, f"Provider {provider} unknown.")
 
@@ -259,3 +261,47 @@ class _GeoServer(GeoServiceBase):
             return collection
         except Exception as e:
             raise api.ApiError(400, str(e))
+
+
+class _GeoServiceMock(GeoServiceBase):
+    def __init__(self):
+        super().__init__()
+
+    def get_layers(self, database_id: str) -> dict:
+        """
+        Get a key value
+        :param database_id:
+        :return: Collection
+        """
+
+        return {}
+
+    def get_layer(self, collection_id: str, database_id: str) -> Optional[Collection]:
+        """
+        Get a key value
+        :param collection_id:
+        :param database_id:
+        :return: Collection
+        """
+
+        return None
+
+    def publish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+        """
+        Set a key value
+        :param collection_id:
+        :param database_id:
+        :return: Collection
+        """
+
+        return None
+
+    def unpublish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+        """
+        Delete a key
+        :param collection_id:
+        :param database_id:
+        :return: Collection
+        """
+
+        return None

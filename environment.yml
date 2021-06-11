@@ -5,32 +5,32 @@ channels:
 dependencies:
   # Required
   - oauthlib
-  - pip
+  - boto3
   - click
   - flask
   - flask-cors
-  - boto3
-  - python-jose
-  - pandas
-  - uwsgi
-  - python-dotenv
-  - python-keycloak
   - geoserver-rest
+  - pandas
+  - pip
+  - python-dotenv
+  - python-jose
+  - python-keycloak
+  - uwsgi
 
   - pip:
       # Required
-      - requests_oauthlib
       - kubernetes
       - polling2
-      - plyvel
-      - requests-mock
       - flask_oidc
       - flask_cors
-      - redis
       - flask_testing
-      - connexion == 2.6.0
-      - python_dateutil == 2.6.0
-      - setuptools >= 21.0.0
+      - redis
+      - requests_oauthlib
+      - connexion
+      - plyvel
+      - requests-mock
+      - python_dateutil
+      - setuptools
       - connexion[swagger-ui]
 
   # testing

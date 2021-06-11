@@ -174,7 +174,7 @@ def raise_for_invalid_username(username: str) -> bool:
         valid = False
 
     if not valid:
-        raise ValueError("Invalid user name.")
+        raise api.ApiError(400, "Invalid user name.")
 
     return valid
 

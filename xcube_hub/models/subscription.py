@@ -16,7 +16,7 @@ class Subscription(Model):
     """
 
     def __init__(self, subscription_id=None, plan='free', email=None, guid=None, client_id=None, client_secret=None,
-                 units=0.0, unit='punits', first_name=None, last_name=None, start_date=None):  # noqa: E501
+                 units=0.0, unit='punits', first_name=None, last_name=None, start_date=None, role=None):  # noqa: E501
         """Subscription - a model defined in OpenAPI
 
         :param subscription_id: The subscription_id of this Subscription.  # noqa: E501
@@ -41,6 +41,8 @@ class Subscription(Model):
         :type last_name: str
         :param start_date: The start_date of this Subscription.  # noqa: E501
         :type start_date: str
+        :param role: The role of this Subscription.  # noqa: E501
+        :type role: str
         """
         self.openapi_types = {
             'subscription_id': str,
@@ -53,7 +55,8 @@ class Subscription(Model):
             'unit': str,
             'first_name': str,
             'last_name': str,
-            'start_date': str
+            'start_date': str,
+            'role': str
         }
 
         self.attribute_map = {
@@ -67,7 +70,8 @@ class Subscription(Model):
             'unit': 'unit',
             'first_name': 'first_name',
             'last_name': 'last_name',
-            'start_date': 'start_date'
+            'start_date': 'start_date',
+            'role': 'role'
         }
 
         self._subscription_id = subscription_id
@@ -81,6 +85,7 @@ class Subscription(Model):
         self._first_name = first_name
         self._last_name = last_name
         self._start_date = start_date
+        self._role = role
 
     @classmethod
     def from_dict(cls, dikt) -> 'Subscription':
@@ -332,3 +337,24 @@ class Subscription(Model):
         """
 
         self._start_date = start_date
+
+    @property
+    def role(self):
+        """Gets the role of this Subscription.
+
+
+        :return: The role of this Subscription.
+        :rtype: str
+        """
+        return self._role
+
+    @role.setter
+    def role(self, role):
+        """Sets the role of this Subscription.
+
+
+        :param role: The last_name of this Subscription.
+        :type role: str
+        """
+
+        self._role = role

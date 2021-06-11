@@ -190,6 +190,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         if service_id == "xcube_geoserv":
             role_id = util.maybe_raise_for_env("XCUBE_GEOSERV_ID")
 
+        subscription.role = role_id
+
         if new_user:
             user.user_metadata.subscriptions[service_id] = subscription
             user_dict = get_request_body_from_user(user)
@@ -406,7 +408,7 @@ class _SubscriptionKeycloakApi(SubscriptionApiProvider):
 
 class _SubscriptionMockApi(SubscriptionApiProvider):
     def add_subscription(self, service_id: str, subscription: Subscription):
-        return Subscription(
+        sub = Subscription(
             subscription_id='ab123',
             email="peter.pettigrew@mail.com",
             plan='free',
@@ -419,6 +421,7 @@ class _SubscriptionMockApi(SubscriptionApiProvider):
             last_name='Pettigrew',
             start_date="2000-01-01",
         )
+        return sub.to_dict()
 
     def get_subscription(self, service_id: str, subscription_id: str):
         return Subscription(

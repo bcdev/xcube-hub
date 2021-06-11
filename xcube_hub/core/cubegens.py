@@ -11,6 +11,7 @@ from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api, poller
 from xcube_hub.api import get_json_request_value
+from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
@@ -186,7 +187,7 @@ def list(user_id: str):
         raise api.ApiError(400, str(e))
 
 
-def logs(job_id: str) -> Sequence:
+def logs(job_id: str, raises: bool = False) -> Sequence:
     xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
     api_pod_instance = client.CoreV1Api()
 
@@ -201,6 +202,8 @@ def logs(job_id: str) -> Sequence:
 
             lgs.append(lg)
     except (client.ApiValueError, client.ApiException, MaxRetryError) as e:
+        if raises:
+            raise api.ApiError(400, str(e))
         pprint(str(e))
 
     return lgs
@@ -227,16 +230,6 @@ def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
             namespace=xcube_hub_namespace,
             body=client.V1DeleteOptions(propagation_policy='Background', grace_period_seconds=5))
         return api_response.status
-    except (ApiException, MaxRetryError) as e:
-        raise api.ApiError(400, str(e))
-
-
-def delete_all(user_id: str) -> Union[AnyDict, Error]:
-    try:
-        jobs = list(user_id=user_id)
-        for job in jobs:
-            delete_one(job['cubegen_id'])
-        return api.ApiResponse.success("SUCCESS")
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 

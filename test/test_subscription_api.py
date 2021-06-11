@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, MagicMock
 
 import boto3
 import requests_mock
@@ -21,6 +22,7 @@ from xcube_hub.models.user_user_metadata import UserUserMetadata
 
 class TestAuthApi(unittest.TestCase):
     def setUp(self) -> None:
+        load_dotenv(dotenv_path='test/.env')
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
 
     def test_auth_api(self):
@@ -39,14 +41,13 @@ class TestAuthApi(unittest.TestCase):
         self.assertEqual('401 Unauthorized: Issuer ff unknown.', str(e.exception))
 
 
-@unittest.skip
 @requests_mock.Mocker()
 class TestAuth0Api(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv(dotenv_path='test/.env')
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
         self._headers = {'Authorization': f'Bearer {self._token}'}
-        self._domain = "edc.eu.auth0.com"
+        self._domain = "edc.eu.auth0.com/api/v2"
 
     def test_get_subscription(self, m):
         subscription = Subscription(
@@ -197,15 +198,14 @@ class TestAuth0Api(unittest.TestCase):
         # self.assertEqual(409, e.exception.status_code)
 
     def test_add_subscription_geodb(self, m):
-        service_id = "xcube_geodb"
         subscription = Subscription(
             subscription_id='a91f5082900b0803aa28b4679b00e93fa',
             email="peter.pettigrew@mail.com",
-            plan='free',
+            plan='manage',
             guid='dfvdsv',
             client_id='fdvdv',
             client_secret='sdfvsdvdf',
-            units=1000,
+            units=1000.0,
             unit='cells',
             first_name='Peter',
             last_name='Pettigrew',
@@ -224,36 +224,41 @@ class TestAuth0Api(unittest.TestCase):
             connection=""
         )
 
-        m.get("https://edc.eu.auth0.com/api/v2/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa", headers=self._headers,
-              json=user.to_dict())
+        with patch('xcube_hub.core.geodb.register', return_value=True) as p:
+            m.delete(f"https://edc.eu.auth0.com/api/v2/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa/roles",
+                     headers=self._headers)
+            m.post(f"https://edc.eu.auth0.com/api/v2/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa/roles", json={},
+                   headers=self._headers)
+            m.post("https://edc.eu.auth0.com/api/v2/users", json=user.to_dict(), headers=self._headers)
+            service_id = "xcube_geodb"
+            auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+            auth_api._provider._get_user = MagicMock(name='_get_user', return_value=None)
 
-        m.patch("https://edc.eu.auth0.com/api/v2/users/a91f508290%200b0803aa28b4679b00e93fa", json=user.to_dict(),
-                headers=self._headers)
+            sub = Subscription.from_dict(subscription.to_dict())
+            res = auth_api.add_subscription(service_id=service_id, subscription=sub)
 
-        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+            self.assertEqual('rol_IraXoXpSlA408Hqq', res.role)
+            res = res.to_dict()
+            res['role'] = None
+            self.assertDictEqual(subscription.to_dict(), res)
 
-        m.post(f"https://{self._domain}/users", json=user.to_dict(), headers=self._headers)
-        m.post("https://xcube-geodb.brockmann-consult.de/geodb_user_info", headers=self._headers)
-        m.get(f"https://{self._domain}/users/a91f5082900b0803aa28b4679b00e93fa", json=user.to_dict(),
-              headers=self._headers)
-        m.post("https://edc.eu.auth0.com/oauth/token", json={})
+            subscription.plan = 'freetrial'
+            sub = Subscription.from_dict(subscription.to_dict())
+            res = auth_api.add_subscription(service_id=service_id, subscription=sub)
 
-        # res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
-        # self.assertDictEqual(subscription.to_dict(), res.to_dict())
+            self.assertEqual('rol_nF3PSuWkOJLk1mkm', res.role)
+            res = res.to_dict()
+            res['role'] = None
+            self.assertDictEqual(subscription.to_dict(), res)
 
-        # m.post("https://xcube-geodb.brockmann-consult.de/geodb_user_info", headers=self._headers, status_code=404,
-        #        reason="ERROR")
-        # with self.assertRaises(api.ApiError) as e:
-        #     res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
-        #
-        # self.assertEqual("404 Client Error: ERROR for url: https://xcube-geodb.brockmann-consult.de/geodb_user_info",
-        #                  str(e.exception))
-        #
-        # m.post("https://xcube-geodb.brockmann-consult.de/geodb_user_info", headers=self._headers, status_code=409,
-        #        reason="ERROR")
-        #
-        # res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
-        # self.assertEqual(1,1 )
+            subscription.plan = 'user'
+            sub = Subscription.from_dict(subscription.to_dict())
+            res = auth_api.add_subscription(service_id=service_id, subscription=sub)
+
+            self.assertEqual('rol_7p5tk27ORUhYETFI', res.role)
+            res = res.to_dict()
+            res['role'] = None
+            self.assertDictEqual(subscription.to_dict(), res)
 
 
     def test_delete_subscription(self, m):
@@ -269,8 +274,8 @@ class TestAuth0Api(unittest.TestCase):
             connection=""
         )
 
-        m.patch(f"https://{self._domain}/users/a91f5082900b0803aa28b4679b00e93fa", json={}, headers=self._headers)
-        m.get(f"https://{self._domain}/users/a91f5082900b0803aa28b4679b00e93fa", json=user.to_dict(),
+        m.patch(f"https://{self._domain}/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa", json={}, headers=self._headers)
+        m.get(f"https://{self._domain}/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa", json=user.to_dict(),
               headers=self._headers)
 
         service_id = "xcube_gen"
@@ -278,7 +283,7 @@ class TestAuth0Api(unittest.TestCase):
         res = auth_api.delete_subscription(service_id=service_id, subscription_id="a91f5082900b0803aa28b4679b00e93fa")
         self.assertEqual("a91f5082900b0803aa28b4679b00e93fa", res)
 
-        m.patch(f"https://{self._domain}/users/a91f5082900b0803aa28b4679b00e93fa", json={}, headers=self._headers,
+        m.patch(f"https://{self._domain}/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa", json={}, headers=self._headers,
                 status_code=404, reason="ERROR")
 
         with self.assertRaises(api.ApiError) as e:
@@ -286,7 +291,7 @@ class TestAuth0Api(unittest.TestCase):
                                                subscription_id="a91f5082900b0803aa28b4679b00e93fa")
 
         self.assertEqual(
-            "404 Client Error: ERROR for url: https://edc.eu.auth0.com/users/a91f5082900b0803aa28b4679b00e93fa",
+            f"404 Client Error: ERROR for url: https://{self._domain}/users/auth0%7Ca91f5082900b0803aa28b4679b00e93fa",
             str(e.exception))
 
 

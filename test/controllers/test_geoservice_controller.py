@@ -13,7 +13,7 @@ from xcube_hub.models.collection import Collection
 class TestGeoServerController(BaseTestCase):
     def setUp(self):
         load_dotenv(dotenv_path='test/.env')
-        self._geo = GeoService.instance(provider='geoserver')
+        self._geo = GeoService.instance(provider='mock')
 
         self._claims, self._token = create_test_token(permissions=["manage:collections", ])
         self._headers = {'Authorization': f'Bearer {self._token}'}

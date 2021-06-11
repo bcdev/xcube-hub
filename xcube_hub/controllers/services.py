@@ -15,15 +15,6 @@ def get_services():
         return e.response
 
 
-def get_service(service_id: str):
-    try:
-        svcs = services.get_service(service_id=service_id)
-        return api.ApiResponse.success(svcs)
-
-    except api.ApiError as e:
-        return e.response
-
-
 def put_subscription_to_service(service_id: str, body: JsonObject, token_info: Dict):
     try:
         auth_api = SubscriptionApi.instance(iss=token_info['iss'], token=token_info['token'])

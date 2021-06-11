@@ -111,9 +111,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Service not found
-      security:
-        - oAuthorization:
-            - manage:users
+#      security:
+#        - oAuthorization:
+#            - manage:users
       summary: Create a cate service instance
       tags:
         - users
@@ -150,9 +150,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Too many webapis running
-      security:
-        - oAuthorization:
-            - manage:users
+#      security:
+#        - oAuthorization:
+#            - manage:users
       summary: Create a cate service instance
       tags:
         - users
@@ -189,54 +189,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
           description: Service not found
-      security:
-        - oAuthorization:
-            - manage:users
+#      security:
+#        - oAuthorization:
+#            - manage:users
       summary: Create a webapi instance
       tags:
         - users
       x-openapi-router-controller: xcube_hub.controllers.users
-  /services/{service_id}:
-    get:
-      operationId: get_service
-      tags:
-        - services
-      parameters:
-        - description: Service ID
-          explode: false
-          in: path
-          name: service_id
-          required: true
-          schema:
-            type: string
-            enum:
-              - xcube_gen
-              - xcube_geodb
-              - xcube_geoserv
-          style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiServiceResponse'
-          description: Service
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Api Error
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-          description: Service not found
-      security:
-        - oAuthorization:
-            - manage:subscriptions
-      x-openapi-router-controller: xcube_hub.controllers.services
   /services:
     get:
       description: |

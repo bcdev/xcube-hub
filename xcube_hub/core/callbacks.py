@@ -23,7 +23,7 @@ def get_callback(user_id: str, cubegen_id: str) -> JsonObject:
         else:
             return res
     except TimeoutError as r:
-        raise api.ApiError(400, r.strerror)
+        raise api.ApiError(400, 'Cache timout')
 
 
 def put_callback(user_id: str, cubegen_id: str, value: AnyDict, email: str):
@@ -66,4 +66,4 @@ def put_callback(user_id: str, cubegen_id: str, value: AnyDict, email: str):
 
         return kv
     except (TimeoutError, ClientError) as e:
-        raise api.ApiError(400, str(e))
+        raise api.ApiError(400, "Cache timeout")

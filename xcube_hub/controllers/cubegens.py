@@ -1,8 +1,8 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from xcube_hub import api
 from xcube_hub.core import cubegens
-from xcube_hub.typedefs import JsonObject
+from xcube_hub.typedefs import JsonObject, AnyDict
 
 
 def create_cubegen(body: JsonObject, token_info: Dict):
@@ -29,7 +29,7 @@ def create_cubegen(body: JsonObject, token_info: Dict):
         return e.response
 
 
-def delete_cubegen(cubegen_id):
+def delete_cubegen(cubegen_id) -> Tuple[AnyDict, int]:
     """Delete a cubegen
 
     Delete a cubegen
