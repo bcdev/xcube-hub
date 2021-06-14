@@ -8,20 +8,20 @@ from xcube_hub.util import raise_for_invalid_username, load_env_by_regex, maybe_
 class MyTestCase(unittest.TestCase):
     def test_validate_username(self):
         # Email addresses contain @s
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_username('helge@mail')
 
         self.assertEqual("Invalid user name.", str(e.exception))
 
         # Name too long > 63
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_username('vsdfölvjisdöfvijdsfövlijsdölvjsdfövjsdölvjisdfölvjsdflövjisdflövjisdflövjisdfölvji'
                                        'sdflövjisdflövjisdflövijdfsöl')
 
         self.assertEqual("Invalid user name.", str(e.exception))
 
         # Username contains _
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(api.ApiError) as e:
             raise_for_invalid_username('user_name')
 
         self.assertEqual("Invalid user name.", str(e.exception))

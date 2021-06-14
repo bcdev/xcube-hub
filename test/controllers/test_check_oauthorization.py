@@ -1,14 +1,19 @@
 import unittest
 
+from dotenv import load_dotenv
 from werkzeug.exceptions import Unauthorized
 
-from test.controllers.utils import create_test_token
+from test.controllers.utils import create_test_token, del_env
 from xcube_hub.controllers.authorization import check_oauthorization, validate_scope_oauthorization
 from xcube_hub.core.oauth import create_token
 
 
 class TestOauthorization(unittest.TestCase):
+    def tearDown(self) -> None:
+        del_env(dotenv_path='test/.env')
+
     def setUp(self):
+        load_dotenv(dotenv_path='test/.env')
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])
 
         self._claims, self._token = create_test_token(["manage:users", "manage:cubegens"])

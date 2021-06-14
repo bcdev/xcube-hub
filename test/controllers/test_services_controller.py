@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from test import BaseTestCase
 from xcube_hub import api
@@ -47,14 +47,14 @@ class TestServices(BaseTestCase):
 
         error = api.ApiError(400, 'Error')
 
-        self._sub_api._provider.add_subscription = MagicMock(name='add_subscription',
-                                                             side_effect=error,
-                                                             return_value=error.response)
+        with patch.object(self._sub_api._provider, 'add_subscription') as p:
+            p.side_effect = error
+            p.return_value = error.response
 
-        res = services.put_subscription_to_service('xcube_gen', {}, dict(iss="https://test/", token='sdfsdaf'))
+            res = services.put_subscription_to_service('xcube_gen', {}, dict(iss="https://test/", token='sdfsdaf'))
 
-        self.assertEqual(400, res[1])
-        self.assertEqual('Error', res[0]['message'])
+            self.assertEqual(400, res[1])
+            self.assertEqual('Error', res[0]['message'])
 
     def test_get_subscription_from_service(self):
         res = services.get_subscription_from_service('xcube_gen', 'sub_id', dict(iss="https://test/", token='sdfsdaf'))
@@ -64,14 +64,14 @@ class TestServices(BaseTestCase):
 
         error = api.ApiError(400, 'Error')
 
-        self._sub_api._provider.get_subscription = MagicMock(name='get_subscription',
-                                                             side_effect=error,
-                                                             return_value=error.response)
+        with patch.object(self._sub_api._provider, 'get_subscription') as p:
+            p.side_effect = error
+            p.return_value = error.response
 
-        res = services.get_subscription_from_service('xcube_gen', 'sub_id', dict(iss="https://test/", token='sdfsdaf'))
+            res = services.get_subscription_from_service('xcube_gen', 'sub_id', dict(iss="https://test/", token='sdfsdaf'))
 
-        self.assertEqual(400, res[1])
-        self.assertEqual('Error', res[0]['message'])
+            self.assertEqual(400, res[1])
+            self.assertEqual('Error', res[0]['message'])
 
     def test_delete_subscription_from_service(self):
         res = services.delete_subscription_from_service('xcube_gen', 'sub_id',
@@ -82,15 +82,15 @@ class TestServices(BaseTestCase):
 
         error = api.ApiError(400, 'Error')
 
-        self._sub_api._provider.delete_subscription = MagicMock(name='delete_subscription',
-                                                                side_effect=error,
-                                                                return_value=error.response)
+        with patch.object(self._sub_api._provider, 'delete_subscription') as p:
+            p.side_effect = error
+            p.return_value = error.response
 
-        res = services.delete_subscription_from_service('xcube_gen', 'sub_id',
-                                                        dict(iss="https://test/", token='sdfsdaf'))
+            res = services.delete_subscription_from_service('xcube_gen', 'sub_id',
+                                                            dict(iss="https://test/", token='sdfsdaf'))
 
-        self.assertEqual(400, res[1])
-        self.assertEqual('Error', res[0]['message'])
+            self.assertEqual(400, res[1])
+            self.assertEqual('Error', res[0]['message'])
 
 
 if __name__ == '__main__':

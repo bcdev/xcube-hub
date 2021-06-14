@@ -419,7 +419,7 @@ class _SubscriptionMockApi(SubscriptionApiProvider):
             unit='punits',
             first_name='Peter',
             last_name='Pettigrew',
-            start_date="2000-01-01",
+            start_date="2000-01-01"
         )
         return sub.to_dict()
 
