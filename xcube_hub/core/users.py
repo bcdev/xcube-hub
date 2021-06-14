@@ -19,7 +19,7 @@ def get_permissions_by_user_id(auth_user_id: str, token: Optional[str] = None):
     if r.status_code == 404:
         raise api.ApiError(404, "User not found.")
     if r.status_code < 200 or r.status_code >= 300:
-        raise api.ApiError(400, r.json())
+        raise api.ApiError(400, r.text)
 
     return r.json()
 

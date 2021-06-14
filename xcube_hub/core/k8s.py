@@ -5,8 +5,6 @@ from xcube_hub.typedefs import JsonObject
 
 from xcube_hub import api
 
-from xcube_hub.poller import poll_deployment_status
-
 
 def create_pvc_object(user_id: str, storage: str = '2Gi'):
     pvc = client.V1PersistentVolumeClaim(
@@ -36,12 +34,15 @@ def create_pvc_if_not_exists(pvc: client.V1PersistentVolumeClaim, namespace: str
 
     try:
         pvcs = core_v1_api.list_namespaced_persistent_volume_claim(namespace=namespace)
-    except (ApiException, ApiTypeError) as e:
+    except (ApiException, ApiTypeError, ApiValueError) as e:
         raise api.ApiError(400, f"Error when creating the pvc {pvc.metadata.name}: {str(e)}")
 
     pvcs = [pvc.metadata.name for pvc in pvcs.items]
     if len(pvcs) == 0:
         create_pvc(pvc, namespace=namespace)
+        return True
+
+    return False
 
 
 def create_goofys_daemonset_object(name: str, user_id: str, envs: Sequence):
@@ -108,7 +109,7 @@ def create_goofys_daemonset(daemonset: client.V1DaemonSet,
             body=daemonset,
             namespace=namespace)
         print("Deployment created. status='%s'" % str(api_response.status))
-    except (ApiException, ApiTypeError) as e:
+    except (ApiException, ApiTypeError, ApiValueError) as e:
         raise api.ApiError(400, f"Error when creating the deployment {daemonset.metadata.name}: {str(e)}")
 
 
@@ -116,7 +117,7 @@ def list_goofys_daemonsets(namespace: str, core_api: Optional[client.AppsV1Api] 
     api_instance = core_api or client.AppsV1Api()
     try:
         return api_instance.list_namespaced_daemon_set(namespace)
-    except (ApiException, ApiTypeError) as e:
+    except (ApiException, ApiTypeError, ApiValueError) as e:
         raise api.ApiError(400, f"Error when listing daemonsets in namespace {namespace}: {str(e)}")
 
 
@@ -140,7 +141,7 @@ def delete_goofys_daemonset(name: str, namespace: str = 'default', core_api: Opt
                 propagation_policy='Foreground',
                 grace_period_seconds=5))
         print("Daemonset deleted. status='%s'" % str(api_response.status))
-    except (ApiException, ApiTypeError) as e:
+    except (ApiException, ApiTypeError, ApiValueError) as e:
         raise api.ApiError(400, f"Error when deleting the deployment {name}: {str(e)}")
 
 
@@ -215,24 +216,9 @@ def create_deployment(deployment: client.V1Deployment,
 
 
 def create_deployment_if_not_exists(namespace: str, deployment: client.V1Deployment):
-    create = False
-    apps_v1_api = client.AppsV1Api()
     deployment_exists = get_deployment(namespace=namespace, name=deployment.metadata.name)
 
-    deployments = list_deployments(namespace=namespace)
-
     if deployment_exists is None:
-        create = True
-    else:
-        for dep in deployments.items:
-            image_new = deployment.spec.template.spec.containers[0].image
-            image_existing = dep.spec.template.spec.containers[0].image
-            if dep.metadata.name == deployment.metadata.name and image_new != image_existing:
-                delete_deployment(name=dep.metadata.name, namespace=namespace)
-                poll_deployment_status(apps_v1_api.list_namespaced_deployment, status='empty', namespace=namespace)
-                create = True
-
-    if create:
         create_deployment(deployment=deployment, namespace=namespace)
 
 
@@ -255,7 +241,7 @@ def list_deployments(namespace: str, core_api: Optional[client.AppsV1Api] = None
     api_instance = core_api or client.AppsV1Api()
     try:
         return api_instance.list_namespaced_deployment(namespace)
-    except (ApiException, ApiTypeError) as e:
+    except (ApiException, ApiTypeError, ApiValueError) as e:
         raise api.ApiError(400, f"Error when listing deployment in namespace {namespace}: {str(e)}")
 
 
@@ -310,8 +296,8 @@ def list_services(namespace: str = 'default', core_api: Optional[client.CoreV1Ap
         raise api.ApiError(400, f"Error when listing services in namespace {namespace}: {str(e)}")
 
 
-def has_service(name: str, namespace: str = 'default', core_api: Optional[client.CoreV1Api] = None):
-    services = list_services(namespace=namespace, core_api=core_api)
+def has_service(name: str, namespace: str = 'default'):
+    services = list_services(namespace=namespace)
     services = [service.metadata.name for service in services.items]
     return name in services
 
@@ -322,10 +308,6 @@ def create_ingress_object(name: str,
                           user_id: str,
                           host_uri: str) -> client.NetworkingV1beta1Ingress:
     webapi_host = host_uri
-    if host_uri.startswith('https://'):
-        webapi_host = host_uri.replace("https://", "")
-    elif host_uri.startswith('http://'):
-        webapi_host = host_uri.replace("http://", "")
 
     body = client.NetworkingV1beta1Ingress(
         api_version="networking.k8s.io/v1beta1",
@@ -373,70 +355,6 @@ def create_ingress(ingress: client.NetworkingV1beta1Ingress, namespace: str = 'd
         )
     except (ApiException, ApiTypeError) as e:
         raise api.ApiError(400, f"Error when creating the ingress {ingress.metadata.name}: {str(e)}")
-
-
-def add_cate_path_to_ingress(name: str,
-                             namespace: str,
-                             user_id: str,
-                             host_uri: str) -> Optional[bool]:
-
-    service_name = user_id + '-cate'
-    ingress = get_ingress(namespace=namespace, name=name)
-    if not ingress:
-        ingress = create_ingress_object(name=name,
-                                        service_name=service_name,
-                                        service_port=4000,
-                                        user_id=user_id,
-                                        host_uri=host_uri)
-        create_ingress(ingress, namespace=namespace)
-
-    websocket_services = ingress.metadata.annotations["nginx.ingress.kubernetes.io/websocket-services"]
-    if service_name not in websocket_services:
-        websocket_services += ',' + service_name
-
-    annotations = {
-        "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
-        "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
-        "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",
-        "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
-        "nginx.ingress.kubernetes.io/send-timeout": "86400",
-        "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
-        "nginx.ingress.kubernetes.io/enable-cors": "true",
-        "nginx.org/websocket-services": "ws-svc",
-        "nginx.ingress.kubernetes.io/websocket-services": websocket_services
-    }
-
-    webapi_host = host_uri
-    if host_uri.startswith('https://'):
-        webapi_host = host_uri.replace("https://", "")
-    elif host_uri.startswith('http://'):
-        webapi_host = host_uri.replace("http://", "")
-
-    has_path = False
-    for r in ingress.spec.rules:
-        for path in r.http.paths:
-            if path.path == "/" + user_id + "/.*":
-                has_path = True
-
-    if not has_path:
-        new_rule = client.NetworkingV1beta1IngressRule(
-            host=webapi_host,
-            http=client.NetworkingV1beta1HTTPIngressRuleValue(
-                paths=[client.NetworkingV1beta1HTTPIngressPath(
-                    path="/" + user_id + "/.*",
-                    backend=client.NetworkingV1beta1IngressBackend(
-                        service_port=4000,
-                        service_name=user_id + '-cate'
-                    )
-                )]
-            )
-        )
-
-        ingress.spec.rules.append(new_rule)
-        ingress.metadata.annotations = annotations
-        patch_ingress(name=name, namespace=namespace, body=ingress)
-
-    return True
 
 
 def patch_ingress(name: str, body, namespace: str = 'default', core_api: Optional[client.NetworkingV1beta1Api] = None):

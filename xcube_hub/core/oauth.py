@@ -1,7 +1,7 @@
 import datetime
 import os
 from typing import Sequence, Dict, Optional
-from urllib.error import HTTPError
+from requests.exceptions import HTTPError
 
 import requests
 from jose import jwt
@@ -21,7 +21,7 @@ def get_user_by_credentials(token: str, client_id: str, client_secret: str) -> S
     r = requests.get('https://edc.eu.auth0.com/api/v2/users', params={'q': q}, headers=headers)
 
     if r.status_code < 200 or r.status_code >= 300:
-        raise api.ApiError(400, r.json())
+        raise api.ApiError(400, r.text)
 
     res = r.json()
     if len(res) == 0:

@@ -251,14 +251,14 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     try:
         processing_request = json.loads(res)
     except JSONDecodeError as e:
-        raise api.ApiError(400, res)
+        raise api.ApiError(400, str(e))
 
     if 'input_configs' in body:
         input_config = body['input_configs'][0]
     elif 'input_config' in body:
         input_config = body['input_config']
     else:
-        raise api.ApiError(400, "Error in callbacks. Invalid input configuration.")
+        raise api.ApiError(400, "Error. Invalid input configuration.")
 
     store_id = get_json_request_value(input_config, 'store_id',
                                       value_type=str,

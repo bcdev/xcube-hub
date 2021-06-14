@@ -228,7 +228,6 @@ class TestCubeGens(unittest.TestCase):
     def test_info(self, batch_p):
         batch_p.return_value = V1Job(metadata=V1ObjectMeta(name='id-cate'), status=V1Status(message='Ganz blöd',
                                                                                             status=100))
-
         res = cubegens.status('id')
         batch_p.assert_called_once()
 
@@ -391,6 +390,39 @@ class TestCubeGens(unittest.TestCase):
                     'cost_estimation': {'required': 540, 'available': 500, 'limit': 1000}}
 
         self.assertDictEqual(expected, res)
+
+        punits_p.return_value = dict(punits=dict(total_count=1000))
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
+
+        self.assertEqual("Error. Cannot handle punit data. Entry 'count' is missing.", str(e.exception))
+        punits_p.return_value = dict(punits=dict(total_count=1000), count=500)
+
+        cfg = _CFG.copy()
+        del cfg['input_config']
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.info(user_id='drwho', email='drwho@mail.org', body=cfg, token='fdsvdf')
+
+        self.assertEqual("Error. Invalid input configuration.", str(e.exception))
+
+        cfg = _CFG.copy()
+        # noinspection PyTypeChecker
+        cfg['input_configs'] = [_CFG['input_config']]
+
+        res = cubegens.info(user_id='drwho', email='drwho@mail.org', body=cfg, token='fdsvdf')
+
+        self.assertEqual(expected, res)
+
+        output = _OUTPUT.replace("Awaiting", "Awaitingxxx")
+
+        get_p.return_value = {'cubegen_id': 'id', 'status': 'ready', 'output': [output], 'progress': 100}
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
+
+        self.assertEqual("Expecting value: line 2 column 1 (char 1)", str(e.exception))
 
 
 if __name__ == '__main__':
