@@ -21,15 +21,15 @@ from xcube_hub.util import maybe_raise_for_env
 
 def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
     try:
-        output = logs(job_id=cubegen_id)
+        outputs = logs(job_id=cubegen_id)
         stat = status(job_id=cubegen_id)
-
-        progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
 
         if not stat:
             raise api.ApiError(404, message=f"Cubegen {cubegen_id} not found")
 
-        return {'cubegen_id': cubegen_id, 'status': stat, 'output': output, 'progress': progress}
+        progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
+
+        return {'cubegen_id': cubegen_id, 'status': stat, 'output': outputs, 'progress': progress}
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 
@@ -43,6 +43,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
     cdsapi_url = os.getenv("CDSAPI_URL")
     cdsapi_key = os.getenv("CDSAPI_KEY")
+    aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     if not gen_image:
         raise api.ApiError(400, "Could not find an xcube docker image configuration.")
@@ -59,7 +61,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     info_flag = " -i " if info_only else ""
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube --traceback gen2 {info_flag} -v --stores /etc/xcube/data-pools.yaml"]
+                              f"| xcube --traceback gen2 {info_flag} -vvv --stores /etc/xcube/data-pools.yaml"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -67,6 +69,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         client.V1EnvVar(name="SH_INSTANCE_ID", value=sh_instance_id),
         client.V1EnvVar(name="CDSAPI_URL", value=cdsapi_url),
         client.V1EnvVar(name="CDSAPI_KEY", value=cdsapi_key),
+        client.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=aws_access_key_id),
+        client.V1EnvVar(name="AWS_SECRET_ACCESS_KEY", value=aws_secret_access_key)
     ]
 
     volume_mounts = [
@@ -157,11 +161,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         api_instance = client.BatchV1Api()
         api_response = api_instance.create_namespaced_job(body=job, namespace=xcube_hub_namespace)
 
-        # kvdb = KeyValueDatabase.instance()
-        # kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
-        # kvdb.set(user_id + '__' + job_id, {'progress': []})
         kvdb = KeyValueDatabase.instance()
-
         kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
         kvdb.set(user_id + '__' + job_id, {'progress': []})
 
@@ -246,6 +246,8 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
                            name=job['cubegen_id'])
     state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
     res = state['output'][0]
+    if "Error" in res:
+        raise api.ApiError(400, res)
     res = res.replace("Awaiting generator configuration JSON from TTY...", "")
     res = res.replace("Cube generator configuration loaded from TTY.", "")
     try:

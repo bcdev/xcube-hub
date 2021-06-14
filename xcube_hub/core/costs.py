@@ -67,27 +67,38 @@ def get_size_and_cost(processing_request: JsonObject, datastore: JsonObject) -> 
                                          value_type=dict,
                                          item_type=dict)
 
-    input_pixels_per_punit = get_json_request_value(cost_params, 'input_pixels_per_punit',
-                                                    value_type=int)
+    scheme = get_json_request_value(cost_params, 'scheme',
+                                    value_type=str,
+                                    item_type=dict,
+                                    default_value='punits')
 
-    _check_lower_bound(input_pixels_per_punit, 0)
+    input_pixels_per_punit = 1
+    input_punits_weight = 0
+    output_pixels_per_punit = 1
+    output_punits_weight = 0
 
-    input_punits_weight = get_json_request_value(cost_params, 'input_punits_weight',
-                                                 value_type=float,
-                                                 default_value=1.0)
+    if scheme != 'free':
+        input_pixels_per_punit = get_json_request_value(cost_params, 'input_pixels_per_punit',
+                                                        value_type=int)
 
-    _check_lower_bound(input_punits_weight, 0)
+        _check_lower_bound(input_pixels_per_punit, 0)
 
-    output_pixels_per_punit = get_json_request_value(cost_params, 'output_pixels_per_punit',
-                                                     value_type=int)
+        input_punits_weight = get_json_request_value(cost_params, 'input_punits_weight',
+                                                     value_type=float,
+                                                     default_value=1.0)
 
-    _check_lower_bound(output_pixels_per_punit, 0)
+        _check_lower_bound(input_punits_weight, 0)
 
-    output_punits_weight = get_json_request_value(cost_params, 'output_punits_weight',
-                                                  value_type=float,
-                                                  default_value=1.0)
+        output_pixels_per_punit = get_json_request_value(cost_params, 'output_pixels_per_punit',
+                                                         value_type=int)
 
-    _check_lower_bound(output_punits_weight, 0)
+        _check_lower_bound(output_pixels_per_punit, 0)
+
+        output_punits_weight = get_json_request_value(cost_params, 'output_punits_weight',
+                                                      value_type=float,
+                                                      default_value=1.0)
+
+        _check_lower_bound(output_punits_weight, 0)
 
     input_punits_count = _punits(lat, lon, time, num_variables, input_pixels_per_punit)
     output_punits_count = _punits(lat, lon, time, num_variables, output_pixels_per_punit)
