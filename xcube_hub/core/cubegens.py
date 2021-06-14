@@ -6,7 +6,7 @@ from pprint import pprint
 from typing import Union, Sequence, Optional
 
 from kubernetes import client
-from kubernetes.client import ApiException
+from kubernetes.client import ApiException, ApiValueError
 from urllib3.exceptions import MaxRetryError
 
 from xcube_hub import api, poller
@@ -45,10 +45,13 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     cdsapi_key = os.getenv("CDSAPI_KEY")
 
     if not gen_image:
-        raise api.ApiError(400, "Could not find any xcube-sh docker image.")
+        raise api.ApiError(400, "Could not find an xcube docker image configuration.")
 
     if not sh_client_secret or not sh_client_id or not sh_instance_id:
-        raise api.ApiError(400, "SentinelHub credentials invalid. Please contact Brockmann Consult")
+        raise api.ApiError(400, "SentinelHub credentials not set.")
+
+    if not cdsapi_url or not cdsapi_key:
+        raise api.ApiError(400, "CDS credentials not set.")
 
     if not cfg:
         raise api.ApiError(400, "create_gen_cubegen_object needs a config dict.")
@@ -118,11 +121,12 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
 
     if cost_estimation['required'] > int(limit):
         raise api.ApiError(413,
-                           f"Number of required punits ({cost_estimation['required']}) is greater than the absolute limit of {limit}")
+                           f"Number of required punits ({cost_estimation['required']}) is "
+                           f"greater than the absolute limit of {limit}.")
 
     if cost_estimation['required'] > cost_estimation['available']:
         raise api.ApiError(413, f"Number of required punits ({cost_estimation['required']}) "
-                                f"is greater than the available {cost_estimation['available']}")
+                                f"is greater than the available ({cost_estimation['available']}).")
 
 
 def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = False) -> \
@@ -230,7 +234,7 @@ def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
             namespace=xcube_hub_namespace,
             body=client.V1DeleteOptions(propagation_policy='Background', grace_period_seconds=5))
         return api_response.status
-    except (ApiException, MaxRetryError) as e:
+    except (ApiValueError, ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 
 

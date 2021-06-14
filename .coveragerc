@@ -1,0 +1,2 @@
+[run]
+omit = xcube_hub/models/*
