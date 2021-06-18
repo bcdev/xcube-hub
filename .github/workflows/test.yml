@@ -9,12 +9,6 @@ jobs:
       UNITTEST_SKIP_K8S: 0
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.4.1
-        with:
-          minikube version: 'v1.16.0'
-          kubernetes version: 'v1.19.2'
-          github token: ${{ secrets.GITHUB_TOKEN }}
       - uses: conda-incubator/setup-miniconda@v2
         with:
           mamba-version: "*"
@@ -32,7 +26,6 @@ jobs:
         run: |
           py.test -v --cov=xcube-hub test
 
-      - uses: actions/checkout@master
       - uses: codecov/codecov-action@v1
         with:
           fail_ci_if_error: true # optional (default = false)
