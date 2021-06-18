@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     name: build-docker-image
     env:
-      APP_NAME: cate-app
+      APP_NAME: xcube-hub
       ORG_NAME: bcdev
     steps:
       - name: git-checkout
