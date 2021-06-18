@@ -9,15 +9,15 @@ jobs:
       UNITTEST_SKIP_K8S: 0
     steps:
       - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          channels: conda-forge
-          activate-environment: xcube-hub
-          environment-file: environment.yml
       - name: info
         run: |
-          echo "PRERELEASED: ${{ github.event.prereleased }}"
+          echo "PRERELEASED: ${{ github.event.activity_type }}"
+#      - uses: conda-incubator/setup-miniconda@v2
+#        with:
+#          mamba-version: "*"
+#          channels: conda-forge
+#          activate-environment: xcube-hub
+#          environment-file: environment.yml
 #      - name: setup xcube-hub
 #        shell: bash -l {0}
 #        run: |
