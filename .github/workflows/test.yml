@@ -31,4 +31,9 @@ jobs:
         shell: bash -l {0}
         run: |
           py.test -v --cov=xcube-hub test
-          codecov
+
+      - uses: actions/checkout@master
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
