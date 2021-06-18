@@ -1,6 +1,6 @@
 import os
 from abc import abstractmethod, ABC
-from typing import Optional, Any
+from typing import Optional, Any, Dict, Sequence
 
 import requests
 
@@ -169,7 +169,7 @@ class _GeoServer(GeoServiceBase):
         for prop, value in vars(self).items():
             _raise_for_none(prop, value)
 
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str = 'geopandas') -> Sequence[Dict]:
         """
         Get a key value
         :param database_id:
@@ -177,7 +177,35 @@ class _GeoServer(GeoServiceBase):
         """
 
         try:
-            return self._geo.get_layers(workspace=database_id)
+            res = self._geo.get_layers(workspace=database_id)
+            layers = res['layers']['layer']
+
+            if fmt == 'geopandas':
+                layers_res = {
+                    "collection_id": [],
+                    "database": [],
+                    "default_style": [],
+                    "geojson_url": [],
+                    "href": [],
+                    "name": [],
+                    "preview_url": []
+                }
+
+                for layer in layers:
+                    name = layer['name']
+                    collection_id = name.replace(database_id + '_', '')
+                    collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+                    for k, v in collection.to_dict().items():
+                        layers_res[k].append(v)
+            else:
+                layers_res = []
+                for layer in layers:
+                    name = layer['name']
+                    collection_id = name.replace(database_id + '_', '')
+                    collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+                    layers_res.append(collection.to_dict())
+
+            return layers_res
         except Exception as e:
             raise api.ApiError(400, str(e))
 

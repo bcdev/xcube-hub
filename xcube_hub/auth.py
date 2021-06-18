@@ -59,8 +59,6 @@ class Auth(AuthProvider):
         iss = iss or f"https://{auth0_domain}/"
 
         provider = _ISS_TO_PROVIDER.get(iss)
-        if provider is None:
-            raise Unauthorized(description=f"Issuer {iss} unknown.")
 
         self._provider = self._new_auth_provider(audience=audience, provider=provider, **kwargs)
         self._claims = dict()
@@ -130,7 +128,7 @@ class Auth(AuthProvider):
         elif provider == 'mocker':
             return _AuthMocker()
         else:
-            raise Unauthorized(description=f"Provider {provider} unknown.")
+            raise Unauthorized(description=f"Auth provider unknown.")
 
     @classmethod
     def instance(cls, iss: Optional[str] = None, audience: Optional[str] = None, refresh: bool = False, **kwargs) \
