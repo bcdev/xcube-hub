@@ -2,11 +2,13 @@
 
 ### New Features
 
-
+- Added operations that allow publishing collections to a geoserver instance
+- The web service can now started as a command line client. It allows
+  specifying host address and port. Was fix before. 
 
 ### Fixes
 
-- Removed stores operation. Not used anymore
+- Removed stores operation. Not used anymore 
 
 ## Changes in v2.0.1
 
