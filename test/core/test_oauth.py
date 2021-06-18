@@ -70,7 +70,7 @@ class TestOauth(unittest.TestCase):
         token = {'client_id': 'id', 'client_secret': 'sdvdsv', 'aud': 'audience', 'grant_type': 'password'}
         res = oauth.get_token(body=token)
 
-        self.assertDictEqual({'access_token': 'asdcaswdc', 'token_type': 'bearer'}, res)
+        self.assertEqual('asdcaswdc', res)
 
         m.post("https://edc.eu.auth0.com/oauth/token", text='error', status_code=401)
 

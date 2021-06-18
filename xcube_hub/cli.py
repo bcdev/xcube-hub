@@ -22,7 +22,7 @@
 import sys
 import click
 from typing import Optional
-from xcube_hub_old.version import version
+from xcube_hub.version import version
 
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('172.17.0.1', port=9000, stdoutToServer=True, stderrToServer=True)
@@ -36,18 +36,15 @@ from xcube_hub_old.version import version
 @click.option('--port', '-p', type=int,
               help="The port number to listen on. Defaults to 5000.")
 @click.option('--debug', is_flag=True, help='Output extra debugging information.')
-@click.option('--cache-provider', type=click.Choice(['redis', 'leveldb'], case_sensitive=False),
-              help='Output extra debugging information.')
 def start(address: Optional[str],
           port: Optional[int],
-          debug: bool,
-          cache_provider: str):
+          debug: bool):
     """
     Start the service.
     """
 
-    from xcube_hub_old.service import start
-    start(host=address, port=port, debug=debug, cache_provider=cache_provider)
+    from xcube_hub.service import start
+    start(host=address, port=port, debug=debug)
 
 
 @click.command(name="stop")

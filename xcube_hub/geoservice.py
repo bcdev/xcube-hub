@@ -144,9 +144,9 @@ class _GeoServer(GeoServiceBase):
     """
 
     def __init__(self,
-                 url='localhost',
-                 username='admin',
-                 password='geoserver',
+                 url: Optional[str] = None,
+                 username: Optional[str] = None,
+                 password: Optional[str] = None,
                  pg_user: Optional[str] = None,
                  pg_password: Optional[str] = None,
                  pg_host: Optional[str] = None,
@@ -191,7 +191,11 @@ class _GeoServer(GeoServiceBase):
 
         try:
             layer_name = database_id + '_' + collection_id
-            layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
+            try:
+                layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
+            except Exception as e:
+                raise api.ApiError(400, str(e))
+
             url = layer['layer']['resource']['href']
             r = requests.get(url, auth=(self._username, self._password))
             layer_wms = r.json()

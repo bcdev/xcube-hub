@@ -16,7 +16,7 @@ def create_if_not_exists(user_namespace: Optional[str] = None):
         else:
             return False
     except ApiException as e:
-        raise api.ApiError(e.status, str(e))
+        raise api.ApiError(400, str(e))
 
 
 def exists(user_id: str):
@@ -27,7 +27,7 @@ def exists(user_id: str):
         user_namespace_names = [namespace.metadata.name for namespace in namespaces.items]
         return user_id in user_namespace_names
     except ApiException as e:
-        raise api.ApiError(e.status, str(e))
+        raise api.ApiError(400, str(e))
 
 
 def list():
@@ -37,7 +37,7 @@ def list():
         namespaces = api_pod_instance.list_namespace()
         return [namespace.metadata.name for namespace in namespaces.items]
     except ApiException as e:
-        raise api.ApiError(e.status, str(e))
+        raise api.ApiError(400, str(e))
 
 
 def delete(user_id: str):
@@ -47,4 +47,4 @@ def delete(user_id: str):
         api_pod_instance.delete_namespace(name=user_id)
         return True
     except ApiException as e:
-        raise api.ApiError(e.status, str(e))
+        raise api.ApiError(400, str(e))

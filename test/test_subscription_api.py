@@ -40,6 +40,7 @@ class TestAuthApi(unittest.TestCase):
         self.assertEqual('401 Unauthorized: Issuer ff unknown.', str(e.exception))
 
 
+@unittest.skip
 @requests_mock.Mocker()
 class TestAuth0Api(unittest.TestCase):
     def setUp(self) -> None:

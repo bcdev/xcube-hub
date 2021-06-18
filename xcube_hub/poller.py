@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 import polling2
-from kubernetes.client import V1Deployment, V1DeploymentList, V1Pod, V1Job, V1JobList
+from kubernetes.client import V1Pod, V1Job, V1JobList
 
 
 def poll_k8s(poller: Any, check_success: Any, step: int = 1, timeout: int = 3600, **kwargs):
@@ -14,27 +14,6 @@ def poll_k8s(poller: Any, check_success: Any, step: int = 1, timeout: int = 3600
         step=step,
         timeout=timeout
     )
-
-
-def poll_deployment_status(poller: Any, status='ready', **kwargs):
-    def _is_status(deployment: V1Deployment):
-        if not deployment:
-            return False
-        """Check that the response returned 'success'"""
-        for st in deployment.status.conditions:
-            if st.type == 'Available':
-                return True
-
-        return False
-
-    def _is_empty(deployments: V1DeploymentList):
-        if not deployments:
-            return False
-
-        """Check that the response returned 'success'"""
-        return len(deployments.items) == 0
-
-    poll_k8s(poller=poller, check_success=_is_status if status == 'ready' else _is_empty, **kwargs)
 
 
 def poll_pod_phase(poller: Any, phase='running', **kwargs):
