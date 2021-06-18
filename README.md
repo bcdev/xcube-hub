@@ -1,5 +1,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/l77x6qbx0hslwqfd/branch/master?svg=true)](https://ci.appveyor.com/project/bcdev/xcube-geodb/branch/master)
 
+[![GH actions Build status](https://github.com/bcdev/xcube-hub/actions/workflows/test.yml/badge.svg)](https://github.com/bcdev/xcube-hub/actions/workflows/test.yml/badge.svg)
 # OpenAPI generated server
 
 ## Overview

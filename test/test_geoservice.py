@@ -123,13 +123,14 @@ class TestGeoService(unittest.TestCase):
         self.assertEqual("Provider None unknown.", str(e.exception))
 
     def test_geoservice(self):
-        GeoService.instance(provider='geoserver', refresh=True)
+        GeoService.instance(url='https://test0/geoserver', username='drwho', password='pass', pg_user='pg',
+                            pg_password='pwd', pg_host='host', provider='geoserver', refresh=True)
         geo = GeoService.instance(provider='geoserver', pg_user='user', pg_host='https://test', pg_password='bla')
 
         self.assertIsInstance(geo, GeoService)
-        self.assertEqual('localhost', geo._provider._url)
-        self.assertEqual('admin', geo._provider._username)
-        self.assertEqual('geoserver', geo._provider._password)
+        self.assertEqual('https://test0/geoserver', geo._provider._url)
+        self.assertEqual('drwho', geo._provider._username)
+        self.assertEqual('pass', geo._provider._password)
 
         geo = GeoService.instance(provider='geoserver',
                                   url="https://test2",
