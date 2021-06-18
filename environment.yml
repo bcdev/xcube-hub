@@ -36,5 +36,3 @@ dependencies:
   # testing
   - moto
   - flake8
-  - pytest
-  - pytest-cov
