@@ -5,6 +5,8 @@
 - Added operations that allow publishing collections to a geoserver instance
 - The web service can now be started as a command line client. It allows
   specifying host address and port. Was fix before. 
+- Added an operation that returns all wms services of a database
+
 
 ### Fixes
 
