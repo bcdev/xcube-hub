@@ -181,6 +181,9 @@ class _GeoServer(GeoServiceBase):
 
         try:
             res = self._geo.get_layers(workspace=database_id)
+            if res['layers'] == '':
+                raise api.ApiError(404, f'No collections found in database {database_id}')
+
             layers = res['layers']['layer']
 
             if fmt == 'geopandas':
@@ -208,6 +211,9 @@ class _GeoServer(GeoServiceBase):
                     collection_id = name.replace(database_id + '_', '')
                     collection = self.get_layer(collection_id=collection_id, database_id=database_id)
                     layers_res.append(collection.to_dict())
+
+                if len(layers_res) == 0:
+                    raise api.ApiError(404, f'No collections found in database {database_id}')
 
             return layers_res
         except Exception as e:
