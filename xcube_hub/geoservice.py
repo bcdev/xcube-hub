@@ -12,10 +12,11 @@ class GeoServiceBase(ABC):
     _provider = None
 
     @abstractmethod
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str) -> dict:
         """
         Get a key value
         :param database_id:
+        :param fmt: return format [geopandas, json]
         :return: Collection
         """
 
@@ -60,14 +61,15 @@ class GeoService(GeoServiceBase):
     def __init__(self, provider: str, **kwargs):
         self._provider = self._new_service(provider=provider, **kwargs)
 
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str) -> dict:
         """
         Get a key value
         :param database_id:
+        :param fmt: return format [geopandas, json]
         :return: Collection
         """
 
-        return self._provider.get_layers(database_id)
+        return self._provider.get_layers(database_id, fmt)
 
     def get_layer(self, collection_id, database_id: str) -> Optional[Collection]:
         """
@@ -172,6 +174,7 @@ class _GeoServer(GeoServiceBase):
     def get_layers(self, database_id: str, fmt: str = 'geopandas') -> Sequence[Dict]:
         """
         Get a key value
+        :param fmt: return format [geopandas, json]
         :param database_id:
         :return: Collection
         """
@@ -188,7 +191,8 @@ class _GeoServer(GeoServiceBase):
                     "geojson_url": [],
                     "href": [],
                     "name": [],
-                    "preview_url": []
+                    "preview_url": [],
+                    "wfs_url": []
                 }
 
                 for layer in layers:
@@ -238,12 +242,19 @@ class _GeoServer(GeoServiceBase):
             geojson_url = f"{self._url}/{database_id}/ows?service=WFS&version=1.0.0&request=GetFeature&" \
                           f"typeName={database_id}:{layer_name}&maxFeatures=10&outputFormat=application/json"
 
+            wfs_url = f"{self._url}/{database_id}/ows?service=WFS&" \
+                      f"version=1.0.0&" \
+                      f"request=GetFeature&" \
+                      f"typeName={database_id}%3A{layer_name}&maxFeatures=10&" \
+                      f"outputFormat=application%2Fvnd.google-earth.kml%2Bxml"
+
             collection = Collection(
                 preview_url=preview_url,
                 collection_id=collection_id,
                 database=database_id,
                 name=collection_id.replace(database_id, ''),
-                geojson_url=geojson_url
+                geojson_url=geojson_url,
+                wfs_url=wfs_url
             )
 
             return collection
@@ -299,7 +310,7 @@ class _GeoServiceMock(GeoServiceBase):
     def __init__(self):
         super().__init__()
 
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str) -> dict:
         """
         Get a key value
         :param database_id:
