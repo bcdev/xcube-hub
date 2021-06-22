@@ -1,8 +1,10 @@
 from typing import Tuple, Dict
 
 import requests
+from requests import HTTPError
 
 from xcube_hub import api, util
+from xcube_hub.controllers.authorization import _get_claim_from_token
 from xcube_hub.geoservice import GeoService
 from xcube_hub.typedefs import AnyDict
 
@@ -12,6 +14,11 @@ def _raise_for_no_access(database_id, geodb_user, token):
     url = f"{geodb_server_url}/rpc/geodb_list_databases"
 
     r = requests.post(url=url, headers={'Authorization': f'Bearer {token}'})
+
+    try:
+        r.raise_for_status()
+    except HTTPError as e:
+        raise api.ApiError(400, str(e))
 
     res = r.json()
 
@@ -30,7 +37,7 @@ def _raise_for_no_access(database_id, geodb_user, token):
 def get_collections(database_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
         token = token_info['token']
-        geodb_user = token_info['geodb_user']
+        geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
         _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
         geo = GeoService.instance()
@@ -44,7 +51,7 @@ def get_collections(database_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
 def get_collection(collection_id: str, database_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
         token = token_info['token']
-        geodb_user = token_info['geodb_user']
+        geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
         _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
 
@@ -59,7 +66,7 @@ def get_collection(collection_id: str, database_id: str, token_info: Dict) -> Tu
 def put_collection(database_id: str, body, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
         token = token_info['token']
-        geodb_user = token_info['geodb_user']
+        geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
         _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
 
@@ -77,7 +84,7 @@ def put_collection(database_id: str, body, token_info: Dict) -> Tuple[AnyDict, i
 def delete_collection(database_id: str, collection_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
         token = token_info['token']
-        geodb_user = token_info['geodb_user']
+        geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
         _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
 

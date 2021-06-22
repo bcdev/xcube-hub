@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from abc import abstractmethod, ABC
 from typing import Optional
@@ -32,7 +33,7 @@ _ISS_TO_PROVIDER = {
 
 class SubscriptionApiProvider(ABC):
     @abstractmethod
-    def add_subscription(self, service_id: str, subscription: Subscription):
+    def add_subscription(self, service_id: str, subscription: Subscription, token: str):
         """
         Get a key value
         :param service_id:
@@ -41,7 +42,7 @@ class SubscriptionApiProvider(ABC):
         """
 
     @abstractmethod
-    def get_subscription(self, service_id: str, subscription_id: str):
+    def get_subscription(self, service_id: str, subscription_id: str, token: str):
         """
         Get a key value
         :param service_id:
@@ -50,7 +51,7 @@ class SubscriptionApiProvider(ABC):
         """
 
     @abstractmethod
-    def delete_subscription(self, service_id: str, subscription_id: str):
+    def delete_subscription(self, service_id: str, subscription_id: str, token: str):
         """
         Get a key value
         :param service_id:
@@ -70,23 +71,20 @@ class SubscriptionApi(ABC):
     _instance = None
     _provider = None
 
-    def __init__(self, iss: str, token: str):
-        self._token = token
-        self._headers = {'Authorization': f'Bearer {token}'}
+    def __init__(self, iss: str):
+        self._provider = SubscriptionApi._new_auth_api_provider(iss=iss)
 
-        self._provider = SubscriptionApi._new_auth_api_provider(iss=iss, token=token)
+    def add_subscription(self, service_id: str, subscription: Subscription, token: str):
+        return self._provider.add_subscription(service_id=service_id, subscription=subscription, token=token)
 
-    def add_subscription(self, service_id: str, subscription: Subscription):
-        return self._provider.add_subscription(service_id=service_id, subscription=subscription)
+    def get_subscription(self, service_id: str, subscription_id: str, token: str):
+        return self._provider.get_subscription(service_id=service_id, subscription_id=subscription_id, token=token)
 
-    def get_subscription(self, service_id: str, subscription_id: str):
-        return self._provider.get_subscription(service_id=service_id, subscription_id=subscription_id)
-
-    def delete_subscription(self, service_id: str, subscription_id: str):
-        return self._provider.delete_subscription(service_id=service_id, subscription_id=subscription_id)
+    def delete_subscription(self, service_id: str, subscription_id: str, token: str):
+        return self._provider.delete_subscription(service_id=service_id, subscription_id=subscription_id, token=token)
 
     @classmethod
-    def _new_auth_api_provider(cls, iss: str, token: str, **kwargs) -> "SubscriptionApiProvider":
+    def _new_auth_api_provider(cls, iss: str, **kwargs) -> "SubscriptionApiProvider":
         """
         Return a new database instance.
 
@@ -100,31 +98,30 @@ class SubscriptionApi(ABC):
         domain = urlparse(iss).netloc + "/api/v2"
 
         if provider == 'auth0':
-            return _SubscriptionAuth0Api(token=token, domain=domain)
+            return _SubscriptionAuth0Api(domain=domain)
         elif provider == 'keycloak':
-            return _SubscriptionKeycloakApi(token=token, **kwargs)
+            return _SubscriptionKeycloakApi(**kwargs)
         else:  # provider == 'mocker'
             return _SubscriptionMockApi()
 
     @classmethod
-    def instance(cls, iss: Optional[str] = None, token: Optional[str] = None, refresh: bool = False) \
+    def instance(cls, iss: Optional[str] = None, refresh: bool = False) \
             -> "SubscriptionApi":
         refresh = refresh or cls._instance is None
         if refresh:
-            cls._instance = SubscriptionApi(iss=iss, token=token)
+            cls._instance = SubscriptionApi(iss=iss)
 
         return cls._instance
 
 
 class _SubscriptionAuth0Api(SubscriptionApiProvider):
-    def __init__(self, token: str, domain: Optional[str] = None):
+    def __init__(self, domain: Optional[str] = None):
         self._domain = domain
-        self._headers = {'Authorization': f'Bearer {token}'}
 
-    def add_subscription(self, service_id: str, subscription: Subscription,
+    def add_subscription(self, service_id: str, subscription: Subscription, token: str,
                          prefer: str = "resolution=merge-duplicates"):
         user_id = util.create_user_id_from_email(subscription.email)
-        user = self._get_user(user_id=user_id, raising=False)
+        user = self._get_user(user_id=user_id, raising=False, token=token)
         new_user = False
         if user is None:
             new_user = True
@@ -170,11 +167,11 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
                 role_id = role_id_user
 
             user.app_metadata = UserAppMetadata(geodb_role="geodb_" + subscription.guid)
-            geodb.register(user_id=user.username, subscription=subscription, headers=self._headers, raise_on_exist=False)
+            geodb.register(subscription=subscription, raise_on_exist=False)
             roles = {"roles": [role_id_manage, role_id_free, role_id_user]}
 
-            r = requests.delete(f"https://{self._domain}/users/auth0|{user_id}/roles", json=roles,
-                                headers=self._headers)
+            requests.delete(f"https://{self._domain}/users/auth0|{user_id}/roles", json=roles,
+                            headers=self._get_header(token=token))
 
         if service_id == "xcube_gen":
             if subscription.unit != "punits":
@@ -195,11 +192,18 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         if new_user:
             user.user_metadata.subscriptions[service_id] = subscription
             user_dict = get_request_body_from_user(user)
-            r = requests.post(f"https://{self._domain}/users", json=user_dict, headers=self._headers)
+            r = requests.post(f"https://{self._domain}/users", json=user_dict, headers=self._get_header(token=token))
         else:
             user.user_metadata.subscriptions[service_id] = subscription
             user_dict = dict(user_metadata=user.user_metadata.to_dict(), app_metadata=user.app_metadata.to_dict())
-            r = requests.patch(f"https://{self._domain}/users/auth0|{user_id}", json=user_dict, headers=self._headers)
+            r = requests.patch(f"https://{self._domain}/users/auth0|{user_id}", json=user_dict,
+                               headers=self._get_header(token=token))
+
+        with open('debug.txt', 'a') as f:
+            f.write('__________________________________\n\n')
+            f.write(json.dumps(self._get_header(token=token)) + '\n\n')
+            f.write(self._domain + '\n\n')
+            f.write('\n\n')
 
         try:
             r.raise_for_status()
@@ -209,11 +213,11 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
         if new_user:
             role = {"roles": [role_id]}
             r = requests.post(f"https://{self._domain}/users/auth0|{user_id}/roles", json=role,
-                              headers=self._headers)
+                              headers=self._get_header(token=token))
         else:
             role = {"roles": [role_id]}
             r = requests.post(f"https://{self._domain}/users/auth0|{user_id}/roles", json=role,
-                              headers=self._headers)
+                              headers=self._get_header(token=token))
 
         try:
             r.raise_for_status()
@@ -222,8 +226,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
 
         return subscription
 
-    def get_subscription(self, service_id: str, subscription_id: str):
-        r = requests.get(f"https://{self._domain}/users/auth0|{subscription_id}", headers=self._headers)
+    def get_subscription(self, service_id: str, subscription_id: str, token: str):
+        r = requests.get(f"https://{self._domain}/users/auth0|{subscription_id}", headers=self._get_header(token=token))
 
         try:
             r.raise_for_status()
@@ -237,8 +241,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
 
         return user.user_metadata.subscriptions[service_id]
 
-    def delete_subscription(self, service_id: str, subscription_id: str):
-        user = self._get_user(user_id=subscription_id)
+    def delete_subscription(self, service_id: str, subscription_id: str, token: str):
+        user = self._get_user(user_id=subscription_id, token=token)
 
         user_metadata = user.user_metadata
 
@@ -249,7 +253,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
 
         payload = dict(user_metadata=user_metadata.to_dict())
 
-        r = requests.patch(f"https://{self._domain}/users/auth0|{subscription_id}", json=payload, headers=self._headers)
+        r = requests.patch(f"https://{self._domain}/users/auth0|{subscription_id}", json=payload,
+                           headers=self._get_header(token=token))
 
         try:
             r.raise_for_status()
@@ -258,8 +263,8 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
 
         return subscription_id
 
-    def _get_user(self, user_id, raising=True) -> Optional[User]:
-        r = requests.get(f"https://{self._domain}/users/auth0|{user_id}", headers=self._headers)
+    def _get_user(self, user_id, token: str, raising=True) -> Optional[User]:
+        r = requests.get(f"https://{self._domain}/users/auth0|{user_id}", headers=self._get_header(token=token))
 
         try:
             r.raise_for_status()
@@ -270,6 +275,9 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
                 return None
 
         return User.from_dict(r.json())
+
+    def _get_header(self, token: str):
+        return {'Authorization': f'Bearer {token}'}
 
 
 # Not yet used
@@ -332,7 +340,7 @@ class _SubscriptionKeycloakApi(SubscriptionApiProvider):
         except KeycloakError as e:
             raise api.ApiError(e.response_code, str(e))
 
-    def add_subscription(self, service_id: str, subscription: Subscription):
+    def add_subscription(self, service_id: str, subscription: Subscription, token: str):
         raise NotImplemented("Error: The method _KeycloakApi.get_subscription has not been implemented")
         # Method deleted but may be reintroduced when switching from auth0 to keycloak
         # try:
@@ -353,10 +361,10 @@ class _SubscriptionKeycloakApi(SubscriptionApiProvider):
         # except KeycloakGetError as e:
         #     raise api.ApiError(e.response_code, str(e))
 
-    def get_subscription(self, service_id: str, subscription_id: str):
+    def get_subscription(self, service_id: str, subscription_id: str, token: str):
         raise NotImplemented("Error: The method _KeycloakApi.get_subscription has not been implemented")
 
-    def delete_subscription(self, service_id: str, subscription_id: str):
+    def delete_subscription(self, service_id: str, subscription_id: str, token: str):
         raise NotImplemented("Error: The method _KeycloakApi.delete_subscription has not been implemented")
 
     def get_user(self, user_id: str):
@@ -407,7 +415,7 @@ class _SubscriptionKeycloakApi(SubscriptionApiProvider):
 
 
 class _SubscriptionMockApi(SubscriptionApiProvider):
-    def add_subscription(self, service_id: str, subscription: Subscription):
+    def add_subscription(self, service_id: str, subscription: Subscription, token: str):
         sub = Subscription(
             subscription_id='ab123',
             email="peter.pettigrew@mail.com",
@@ -423,7 +431,7 @@ class _SubscriptionMockApi(SubscriptionApiProvider):
         )
         return sub.to_dict()
 
-    def get_subscription(self, service_id: str, subscription_id: str):
+    def get_subscription(self, service_id: str, subscription_id: str, token: str):
         return Subscription(
             subscription_id='ab123',
             email="peter.pettigrew@mail.com",
@@ -438,5 +446,5 @@ class _SubscriptionMockApi(SubscriptionApiProvider):
             start_date="2000-01-01",
         )
 
-    def delete_subscription(self, service_id: str, subscription_id: str):
+    def delete_subscription(self, service_id: str, subscription_id: str, token: str):
         return 'ab123'

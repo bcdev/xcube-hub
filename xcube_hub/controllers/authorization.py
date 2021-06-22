@@ -26,7 +26,6 @@ def check_oauthorization(token):
     # Set audience to auth0 user management audience if token claims to be a user management client token.
     # Otherwise audience wil be None and defined by environment variables
     aud = _get_claim_from_token(token=token, tgt='aud')
-    geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
     user_management_aud = maybe_raise_for_env("XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD")
     audience = user_management_aud if user_management_aud == aud else None
 
@@ -37,7 +36,7 @@ def check_oauthorization(token):
 
     auth.verify_token(token=token)
 
-    return {'scopes': auth.permissions, 'user_id': auth.user_id, 'email': auth.email, 'geodb_user': geodb_user,
+    return {'scopes': auth.permissions, 'user_id': auth.user_id, 'email': auth.email,
             'token': token, 'iss': iss, 'sub': _get_claim_from_token(token=token, tgt='sub')}
 
 

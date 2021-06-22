@@ -15,7 +15,8 @@ def del_env(dotenv_path='.env'):
 def create_test_token(permissions: Optional[Sequence] = None,
                       audience: Optional[str] = "https://xcube-gen.brockmann-consult.de/api/v2/",
                       iss: str = "https://xcube-gen.brockmann-consult.de/",
-                      claims: Optional[Dict] = None):
+                      claims: Optional[Dict] = None,
+                      dbrole: str = None):
     if permissions is None:
         permissions = ["manage:users", "manage:cubegens"]
 
@@ -26,7 +27,8 @@ def create_test_token(permissions: Optional[Sequence] = None,
         "gty": "client-credentials",
         "email": "test@mail.com",
         "sub": "test@mail.com",
-        "permissions": permissions
+        "permissions": permissions,
+        "https://geodb.brockmann-consult.de/dbrole": dbrole
     }
 
     token = create_token(claims=claims)
