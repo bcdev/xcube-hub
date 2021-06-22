@@ -6,7 +6,7 @@ from werkzeug.exceptions import Unauthorized, Forbidden
 
 # noinspection PyProtectedMember
 from xcube_hub import api
-from xcube_hub.auth import Auth, _AuthXcube, _Auth0, _AuthMocker
+from xcube_hub.auth import Auth, _AuthXcube, _Auth0, _AuthMocker, _Keycloak
 
 
 class TestAuth(unittest.TestCase):
@@ -23,11 +23,6 @@ class TestAuth(unittest.TestCase):
         auth = Auth(iss="https://test/")
         self.assertIsInstance(auth._provider, _AuthMocker)
 
-        with self.assertRaises(Unauthorized) as e:
-            Auth(iss="https://test2/")
-
-        self.assertEqual("401 Unauthorized: Issuer https://test2/ unknown.", str(e.exception))
-
     def test_instance(self):
         auth = Auth.instance(iss="https://xcube-gen.brockmann-consult.de/", refresh=True)
         self.assertIsInstance(auth, Auth)
@@ -42,14 +37,19 @@ class TestAuth(unittest.TestCase):
         self.assertIsInstance(auth, Auth)
         self.assertIsInstance(auth._provider, _Auth0)
 
+        Auth._instance = None
+        auth = Auth.instance(iss="https://192-171-139-82.sslip.io/auth/realms/cate", domain="dfv", audience='degbv')
+        self.assertIsInstance(auth, Auth)
+        self.assertIsInstance(auth._provider, _Keycloak)
+
         auth = Auth.instance(iss="https://test/", refresh=True)
         self.assertIsInstance(auth, Auth)
         self.assertIsInstance(auth._provider, _AuthMocker)
 
         with self.assertRaises(Unauthorized) as e:
-            Auth.instance(iss="https://xcube-geodb.brockmann-consult.de/", refresh=True)
+            Auth.instance(iss="https://unkown/", refresh=True)
 
-        self.assertEqual("401 Unauthorized: Issuer https://xcube-geodb.brockmann-consult.de/ unknown.", str(e.exception))
+        self.assertEqual("401 Unauthorized: Auth provider unknown.", str(e.exception))
 
     def test_verify_token(self):
         auth = Auth.instance(iss="https://test/", refresh=True)

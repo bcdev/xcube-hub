@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
       - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build-push-docker-image
+        name: build-push-docker-image-release
         if: ${{ github.event_name == 'release' }}
         with:
           image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}

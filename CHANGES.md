@@ -5,10 +5,14 @@
 - Added operations that allow publishing collections to a geoserver instance
 - The web service can now be started as a command line client. It allows
   specifying host address and port. Was fix before. 
+- Added an operation that returns all wms services of a database
+- The xcube hub is now preventing users to add a geoservice on databases they do not own
 
 ### Fixes
 
-- Removed stores operation. Not used anymore 
+- Removed stores operation. Not used anymore
+- Changed the way how tokens are handled when handling subscriptions to avoid
+  random authorization issues
 
 ## Changes in v2.0.1
 

@@ -1,5 +1,3 @@
-from typing import Dict
-
 import requests
 from requests import HTTPError
 
@@ -8,7 +6,7 @@ from xcube_hub.core import oauth
 from xcube_hub.models.subscription import Subscription
 
 
-def register(user_id: str, subscription: Subscription, headers: Dict, raise_on_exist: bool = True):
+def register(subscription: Subscription, raise_on_exist: bool = True):
     user = [{
         "user_name": f"geodb_{subscription.guid}",
         "start_date": f"{subscription.start_date}",

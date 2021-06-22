@@ -32,6 +32,7 @@ dependencies:
       - python_dateutil
       - setuptools
       - connexion[swagger-ui]
+      - pydevd-pycharm
 
   # testing
   - moto
