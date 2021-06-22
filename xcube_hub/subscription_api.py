@@ -314,14 +314,12 @@ class _SubscriptionKeycloakApi(SubscriptionApiProvider):
     }
 
     def __init__(self,
-                 token: str,
                  server_url: Optional[str] = None,
                  realm: Optional[str] = None,
                  client_id: Optional[str] = None,
                  client_secret: Optional[str] = None):
         super().__init__()
 
-        self._headers = {'Authorization': f'Bearer {token}'}
         self._server_url = server_url or os.getenv("KEYCLOAK_DOMAIN")
         self._realm = realm or os.getenv("KEYCLOAK_REALM")
         self._client_id = client_id or os.getenv("XCUBE_GEN_CLIENT_ID")
