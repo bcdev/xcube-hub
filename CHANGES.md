@@ -1,10 +1,13 @@
-## Changes in v2.1.0.dev0 (in development)
+## Changes in v2.1.0 (in development)
 
 ### New Features
 
 - Added operations that allow publishing collections to a geoserver instance
 - The web service can now be started as a command line client. It allows
-  specifying host address and port. Was fix before. 
+  specifying host address and port. Was fix before.
+- Added an operation that returns all wms services of an existing database
+- The xcube hub is now preventing users to add a geoservice on databases they do not own
+ 
 
 ### Fixes
 
