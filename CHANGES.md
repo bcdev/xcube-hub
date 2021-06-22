@@ -8,7 +8,10 @@
 
 ### Fixes
 
-- Removed stores operation. Not used anymore 
+- Removed stores operation. Not used anymore
+- Changed the way how tokens are handled when handling subscriptions to avoid
+  random authorization issues
+
 
 ## Changes in v2.0.1
 
