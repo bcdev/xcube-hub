@@ -26,7 +26,7 @@ class TestAuthApi(unittest.TestCase):
 
     def test_auth_api(self):
         for k, v in _ISS_TO_PROVIDER.items():
-            api = SubscriptionApi(iss=k, token=self._token)
+            api = SubscriptionApi(iss=k)
             if v == 'mocker':
                 self.assertIsInstance(api._provider, _SubscriptionMockApi)
             elif v == 'keycloak':
@@ -35,7 +35,7 @@ class TestAuthApi(unittest.TestCase):
                 self.assertIsInstance(api._provider, _SubscriptionAuth0Api)
 
         with self.assertRaises(Unauthorized) as e:
-            api = SubscriptionApi(iss='ff', token=self._token)
+            api = SubscriptionApi(iss='ff')
 
         self.assertEqual('401 Unauthorized: Issuer ff unknown.', str(e.exception))
 
@@ -83,8 +83,8 @@ class TestAuth0Api(unittest.TestCase):
 
         service_id = "xcube_gen"
         subscription_id = "ab123"
-        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
-        res = auth_api.get_subscription(service_id=service_id, subscription_id=subscription_id)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/")
+        res = auth_api.get_subscription(service_id=service_id, subscription_id=subscription_id, token=self._token)
         self.assertDictEqual(subscription.to_dict(), res.to_dict())
 
     @mock_s3
@@ -143,8 +143,8 @@ class TestAuth0Api(unittest.TestCase):
         m.post("https://edc.eu.auth0.com/oauth/token", json={})
         service_id = "xcube_gen"
 
-        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
-        res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/")
+        res = auth_api.add_subscription(service_id=service_id, subscription=subscription, token=self._token)
         self.assertDictEqual(subscription.to_dict(), res)
 
         # test user exists
@@ -157,7 +157,7 @@ class TestAuth0Api(unittest.TestCase):
 
         service_id = "xcube_gen"
 
-        res = auth_api.add_subscription(service_id=service_id, subscription=subscription)
+        res = auth_api.add_subscription(service_id=service_id, subscription=subscription, token=self._token)
         self.assertDictEqual(subscription.to_dict(), res)
         # Testing error 409 when a subscription exist already. Removed on request should be reintroduced header
         # controlled
@@ -220,11 +220,11 @@ class TestAuth0Api(unittest.TestCase):
                    headers=self._headers)
             m.post("https://edc.eu.auth0.com/api/v2/users", json=user.to_dict(), headers=self._headers)
             service_id = "xcube_geodb"
-            auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
+            auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/")
             auth_api._provider._get_user = MagicMock(name='_get_user', return_value=None)
 
             sub = Subscription.from_dict(subscription.to_dict())
-            res = auth_api.add_subscription(service_id=service_id, subscription=sub)
+            res = auth_api.add_subscription(service_id=service_id, subscription=sub, token=self._token)
 
             self.assertEqual('rol_IraXoXpSlA408Hqq', res.role)
             res = res.to_dict()
@@ -233,7 +233,7 @@ class TestAuth0Api(unittest.TestCase):
 
             subscription.plan = 'freetrial'
             sub = Subscription.from_dict(subscription.to_dict())
-            res = auth_api.add_subscription(service_id=service_id, subscription=sub)
+            res = auth_api.add_subscription(service_id=service_id, subscription=sub, token=self._token)
 
             self.assertEqual('rol_nF3PSuWkOJLk1mkm', res.role)
             res = res.to_dict()
@@ -242,13 +242,12 @@ class TestAuth0Api(unittest.TestCase):
 
             subscription.plan = 'user'
             sub = Subscription.from_dict(subscription.to_dict())
-            res = auth_api.add_subscription(service_id=service_id, subscription=sub)
+            res = auth_api.add_subscription(service_id=service_id, subscription=sub, token=self._token)
 
             self.assertEqual('rol_7p5tk27ORUhYETFI', res.role)
             res = res.to_dict()
             res['role'] = None
             self.assertDictEqual(subscription.to_dict(), res)
-
 
     def test_delete_subscription(self, m):
         user = User(
@@ -268,8 +267,8 @@ class TestAuth0Api(unittest.TestCase):
               headers=self._headers)
 
         service_id = "xcube_gen"
-        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/", token=self._token)
-        res = auth_api.delete_subscription(service_id=service_id, subscription_id="ab123")
+        auth_api = SubscriptionApi.instance(iss="https://edc.eu.auth0.com/")
+        res = auth_api.delete_subscription(service_id=service_id, subscription_id="ab123", token=self._token)
         self.assertEqual("ab123", res)
 
 
@@ -290,13 +289,13 @@ class TestMockApi(unittest.TestCase):
         )
 
         auth_api = _SubscriptionMockApi()
-        res = auth_api.get_subscription(service_id='', subscription_id='')
+        res = auth_api.get_subscription(service_id='', subscription_id='', token='')
         self.assertDictEqual(subscription.to_dict(), res.to_dict())
 
-        res = auth_api.add_subscription(service_id='', subscription=subscription)
+        res = auth_api.add_subscription(service_id='', subscription=subscription, token='')
         self.assertDictEqual(subscription.to_dict(), res)
 
-        res = auth_api.delete_subscription(service_id='', subscription_id='')
+        res = auth_api.delete_subscription(service_id='', subscription_id='', token='')
         self.assertEqual('ab123', res)
 
 

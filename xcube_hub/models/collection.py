@@ -16,7 +16,7 @@ class Collection(Model):
     """
 
     def __init__(self, collection_id=None, name=None, database=None, href=None, default_style=None, preview_url=None,
-                 geojson_url=None):
+                 geojson_url=None, wfs_url=None):
         """Collection - a model defined in OpenAPI
 
         :param collection_id: The id of this Collection.  # noqa: E501
@@ -31,8 +31,10 @@ class Collection(Model):
         :type default_style: str
         :param preview_url: The preview_url of this Collection.  # noqa: E501
         :type preview_url: str
-        :param geojson_url: The preview_url of this Collection.  # noqa: E501
+        :param geojson_url: The geojson_url of this Collection.  # noqa: E501
         :type geojson_url: str
+        :param wfs_url: The wfs_url of this Collection.  # noqa: E501
+        :type wfs_url: str
         """
         self.openapi_types = {
             'collection_id': str,
@@ -41,7 +43,8 @@ class Collection(Model):
             'href': str,
             'default_style': str,
             'preview_url': str,
-            'geojson_url': str
+            'geojson_url': str,
+            'wfs_url': str
         }
 
         self.attribute_map = {
@@ -51,7 +54,8 @@ class Collection(Model):
             'href': 'href',
             'default_style': 'default_style',
             'preview_url': 'preview_url',
-            'geojson_url': 'geojson_url'
+            'geojson_url': 'geojson_url',
+            'wfs_url': 'wfs_url'
         }
 
         self._collection_id = collection_id
@@ -61,6 +65,7 @@ class Collection(Model):
         self._default_style = default_style
         self._preview_url = preview_url
         self._geojson_url = geojson_url
+        self._wfs_url = wfs_url
 
     @classmethod
     def from_dict(cls, dikt) -> 'Collection':
@@ -223,3 +228,24 @@ class Collection(Model):
         """
 
         self._geojson_url = geojson_url
+
+    @property
+    def wfs_url(self):
+        """Gets the wfs_url of this Collection.
+
+
+        :return: The wfs_url of this Collection.
+        :rtype: str
+        """
+        return self._wfs_url
+
+    @wfs_url.setter
+    def wfs_url(self, wfs_url):
+        """Sets the layer of this Collection.
+
+
+        :param wfs_url: The wfs_url of this Collection.
+        :type wfs_url: str
+        """
+
+        self._wfs_url = wfs_url

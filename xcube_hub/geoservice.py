@@ -1,6 +1,6 @@
 import os
 from abc import abstractmethod, ABC
-from typing import Optional, Any
+from typing import Optional, Any, Dict, Sequence
 
 import requests
 
@@ -12,10 +12,11 @@ class GeoServiceBase(ABC):
     _provider = None
 
     @abstractmethod
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str) -> dict:
         """
         Get a key value
         :param database_id:
+        :param fmt: return format [geopandas, json]
         :return: Collection
         """
 
@@ -60,14 +61,15 @@ class GeoService(GeoServiceBase):
     def __init__(self, provider: str, **kwargs):
         self._provider = self._new_service(provider=provider, **kwargs)
 
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str) -> dict:
         """
         Get a key value
         :param database_id:
+        :param fmt: return format [geopandas, json]
         :return: Collection
         """
 
-        return self._provider.get_layers(database_id)
+        return self._provider.get_layers(database_id, fmt)
 
     def get_layer(self, collection_id, database_id: str) -> Optional[Collection]:
         """
@@ -169,15 +171,51 @@ class _GeoServer(GeoServiceBase):
         for prop, value in vars(self).items():
             _raise_for_none(prop, value)
 
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str = 'geopandas') -> Sequence[Dict]:
         """
         Get a key value
+        :param fmt: return format [geopandas, json]
         :param database_id:
         :return: Collection
         """
 
         try:
-            return self._geo.get_layers(workspace=database_id)
+            res = self._geo.get_layers(workspace=database_id)
+            if res['layers'] == '':
+                raise api.ApiError(404, f'No collections found in database {database_id}')
+
+            layers = res['layers']['layer']
+
+            if fmt == 'geopandas':
+                layers_res = {
+                    "collection_id": [],
+                    "database": [],
+                    "default_style": [],
+                    "geojson_url": [],
+                    "href": [],
+                    "name": [],
+                    "preview_url": [],
+                    "wfs_url": []
+                }
+
+                for layer in layers:
+                    name = layer['name']
+                    collection_id = name.replace(database_id + '_', '')
+                    collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+                    for k, v in collection.to_dict().items():
+                        layers_res[k].append(v)
+            else:
+                layers_res = []
+                for layer in layers:
+                    name = layer['name']
+                    collection_id = name.replace(database_id + '_', '')
+                    collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+                    layers_res.append(collection.to_dict())
+
+                if len(layers_res) == 0:
+                    raise api.ApiError(404, f'No collections found in database {database_id}')
+
+            return layers_res
         except Exception as e:
             raise api.ApiError(400, str(e))
 
@@ -210,12 +248,19 @@ class _GeoServer(GeoServiceBase):
             geojson_url = f"{self._url}/{database_id}/ows?service=WFS&version=1.0.0&request=GetFeature&" \
                           f"typeName={database_id}:{layer_name}&maxFeatures=10&outputFormat=application/json"
 
+            wfs_url = f"{self._url}/{database_id}/ows?service=WFS&" \
+                      f"version=1.0.0&" \
+                      f"request=GetFeature&" \
+                      f"typeName={database_id}%3A{layer_name}&maxFeatures=10&" \
+                      f"outputFormat=application%2Fvnd.google-earth.kml%2Bxml"
+
             collection = Collection(
                 preview_url=preview_url,
                 collection_id=collection_id,
                 database=database_id,
                 name=collection_id.replace(database_id, ''),
-                geojson_url=geojson_url
+                geojson_url=geojson_url,
+                wfs_url=wfs_url
             )
 
             return collection
@@ -271,7 +316,7 @@ class _GeoServiceMock(GeoServiceBase):
     def __init__(self):
         super().__init__()
 
-    def get_layers(self, database_id: str) -> dict:
+    def get_layers(self, database_id: str, fmt: str) -> dict:
         """
         Get a key value
         :param database_id:

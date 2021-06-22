@@ -39,7 +39,7 @@ class TestGeoDB(unittest.TestCase):
 
         m.post("https://stage.xcube-geodb.brockmann-consult.de/geodb_user_info", json=user,
                headers={'Authorization': 'Bearer atoken'})
-        res = geodb.register(user_id='drwho', subscription=subscription, headers={}, raise_on_exist=True)
+        res = geodb.register(subscription=subscription, raise_on_exist=True)
 
         self.assertTrue(res)
 
@@ -47,7 +47,7 @@ class TestGeoDB(unittest.TestCase):
                headers={'Authorization': 'Bearer atoken'}, status_code=401)
 
         with self.assertRaises(api.ApiError) as e:
-            geodb.register(user_id='drwho', subscription=subscription, headers={}, raise_on_exist=True)
+            geodb.register(subscription=subscription, raise_on_exist=True)
 
         self.assertEqual("401 Client Error: None for url: https://stage.xcube-geodb.brockmann-consult.de/"
                          "geodb_user_info", str(e.exception))
@@ -55,7 +55,7 @@ class TestGeoDB(unittest.TestCase):
         m.post("https://stage.xcube-geodb.brockmann-consult.de/geodb_user_info", json=user,
                headers={'Authorization': 'Bearer atoken'}, status_code=409)
 
-        res = geodb.register(user_id='drwho', subscription=subscription, headers={}, raise_on_exist=False)
+        res = geodb.register(subscription=subscription, raise_on_exist=False)
 
         self.assertEqual(409, res)
 

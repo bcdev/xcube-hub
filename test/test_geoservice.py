@@ -64,16 +64,28 @@ _LAYER = {
     }
 }
 
+_EXPECTED_LAYER = {
+    'collection_id': 'test',
+    'database': 'test',
+    'default_style': None,
+    'geojson_url': 'https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:test_test&maxFeatures=10&outputFormat=application/json',
+    'href': None,
+    'name': '',
+    'preview_url': 'https://test/geoserver/test/wms?service=WMS&version=1.1.0&request=GetMap&layers=test:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers',
+    'wfs_url': 'https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml'
+}
 
-_EXPECTED_LAYER = {'collection_id': 'test',
-                   'database': 'test',
-                   'default_style': None,
-                   'geojson_url': 'https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:test_test&maxFeatures=10&outputFormat=application/json',
-                   'href': None,
-                   'name': '',
-                   'preview_url': 'https://test/geoserver/test/wms?service=WMS&version=1.1.0&request=GetMap&layers=test:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers'
-                   }
 
+_EXPECTED_LAYER_GPD_FORMAT = {
+    'collection_id': ['test'],
+    'database': ['test'],
+    'default_style': [None],
+    'geojson_url': ['https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:test_test&maxFeatures=10&outputFormat=application/json'],
+    'href': [None],
+    'name': [''],
+    'preview_url': ['https://test/geoserver/test/wms?service=WMS&version=1.1.0&request=GetMap&layers=test:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers'],
+    'wfs_url': ['https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml']
+}
 
 class TestGeoService(unittest.TestCase):
     def test_geoservice_geoserver(self):
@@ -153,12 +165,20 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice = GeoService.instance(provider='geoserver')
         self._geoservice._provider._geo = Mock()
 
-    def test_get_layers(self):
+    @requests_mock.Mocker()
+    def test_get_layers(self, m):
         # Test whether call succeeds
         self._geoservice._provider._geo.get_layers.return_value = {'layers': {'layer': [{'name': 'test'}]}}
+        self._geoservice._provider._geo.get_layer.return_value = {'layer': {'name': 'test', 'resource':
+            {'href': 'https://test/geoserver'}}}
 
-        res = self._geoservice.get_layers(database_id='test')
-        self.assertDictEqual({'layers': {'layer': [{'name': 'test'}]}}, res)
+        m.get('https://test/geoserver', json=_FTYPE)
+
+        res = self._geoservice.get_layers(database_id='test', fmt='json')
+        self.assertDictEqual(_EXPECTED_LAYER, res[0])
+
+        res = self._geoservice.get_layers(database_id='test', fmt='geopandas')
+        self.assertDictEqual(_EXPECTED_LAYER_GPD_FORMAT, res)
 
         def side_effect(workspace):
             raise Exception("Error: test")
@@ -167,7 +187,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.get_layers = side_effect
 
         with self.assertRaises(api.ApiError) as e:
-            self._geoservice.get_layers(database_id='test')
+            self._geoservice.get_layers(database_id='test', fmt='json')
 
         self.assertEqual('Error: test', str(e.exception))
 
