@@ -264,15 +264,15 @@ class TestCubeGens(unittest.TestCase):
         self.assertEqual("create_gen_cubegen_object needs a config dict.", str(e.exception))
         self.assertEqual(400, e.exception.status_code)
 
-        del os.environ['XCUBE_DOCKER_IMG']
+        del os.environ['XCUBE_REPO']
 
         with self.assertRaises(api.ApiError) as e:
             cubegens.create_cubegen_object('id', _CFG)
 
-        self.assertEqual("Could not find an xcube docker image configuration.", str(e.exception))
+        self.assertEqual("Environment Variable XCUBE_REPO does not exist.", str(e.exception))
         self.assertEqual(400, e.exception.status_code)
 
-        os.environ['XCUBE_DOCKER_IMG'] = 'test'
+        os.environ['XCUBE_REPO'] = 'test'
 
         del os.environ['SH_CLIENT_ID']
 
