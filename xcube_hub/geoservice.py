@@ -289,7 +289,7 @@ class _GeoServer(GeoServiceBase):
                                               workspace=database_id,
                                               host=self._pg_host,
                                               port=5432,
-                                              db='geodb',
+                                              db=self._pg_db,
                                               pg_user=self._pg_user,
                                               pg_password=self._pg_password)
 
