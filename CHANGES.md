@@ -15,6 +15,7 @@
 - Changed the way how tokens are handled when handling subscriptions to avoid
   random authorization issues
 - A proper error is now raised when no collection is find when publishing collections to WMS service
+- The hub is now using XCUBE_REPO and XCUBE_TAG allowing to configure xcube's version tag separately from its repo 
 
 ## Changes in v2.0.1
 
