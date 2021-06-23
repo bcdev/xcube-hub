@@ -152,6 +152,7 @@ class _GeoServer(GeoServiceBase):
                  pg_user: Optional[str] = None,
                  pg_password: Optional[str] = None,
                  pg_host: Optional[str] = None,
+                 pg_db: Optional[str] = None,
                  **kwargs):
         super().__init__()
         try:
@@ -165,6 +166,7 @@ class _GeoServer(GeoServiceBase):
         self._pg_host = pg_host or os.getenv("XCUBE_HUB_POSTGIS_HOST")
         self._pg_user = pg_user or os.getenv("XCUBE_HUB_POSTGIS_USER")
         self._pg_password = pg_password or os.getenv("XCUBE_HUB_POSTGIS_PASSWORD")
+        self._pg_db = pg_db or os.getenv("XCUBE_HUB_POSTGIS_DB")
 
         self._geo = Geoserver(self._url, username=self._username, password=self._password)
 
@@ -231,6 +233,8 @@ class _GeoServer(GeoServiceBase):
             layer_name = database_id + '_' + collection_id
             try:
                 layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
+                if 'get_layer error' in layer:
+                    raise api.ApiError(404, f'Cannot find collection {collection_id} in database {database_id}')
             except Exception as e:
                 raise api.ApiError(400, str(e))
 
@@ -285,7 +289,7 @@ class _GeoServer(GeoServiceBase):
                                               workspace=database_id,
                                               host=self._pg_host,
                                               port=5432,
-                                              db='geodb',
+                                              db=self._pg_db,
                                               pg_user=self._pg_user,
                                               pg_password=self._pg_password)
 

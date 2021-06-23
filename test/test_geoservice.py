@@ -87,6 +87,7 @@ _EXPECTED_LAYER_GPD_FORMAT = {
     'wfs_url': ['https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml']
 }
 
+
 class TestGeoService(unittest.TestCase):
     def test_geoservice_geoserver(self):
         load_dotenv(dotenv_path='test/.env')
@@ -96,6 +97,7 @@ class TestGeoService(unittest.TestCase):
 
     def test_geoservice_refresh(self):
         # test refresh
+        load_dotenv(dotenv_path='test/.env')
         geo = GeoService.instance(provider='geoserver',
                                   url="https://test/geoserver",
                                   username="drwho",
@@ -204,6 +206,14 @@ class TestGeoServiceOps(unittest.TestCase):
         self.assertIsInstance(res, Collection)
         self.maxDiff = None
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
+
+        # Test whether method raises
+        self._geoservice._provider._geo.get_layer.return_value = 'get_layer error: bla'
+
+        with self.assertRaises(api.ApiError) as e:
+            self._geoservice.get_layer(database_id='test', collection_id='test')
+
+        self.assertEqual('Cannot find collection test in database test', str(e.exception))
 
         def side_effect(layer_name, workspace):
             raise Exception("Error: test")
