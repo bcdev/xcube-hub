@@ -87,6 +87,7 @@ _EXPECTED_LAYER_GPD_FORMAT = {
     'wfs_url': ['https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml']
 }
 
+
 class TestGeoService(unittest.TestCase):
     def test_geoservice_geoserver(self):
         load_dotenv(dotenv_path='test/.env')
@@ -96,6 +97,7 @@ class TestGeoService(unittest.TestCase):
 
     def test_geoservice_refresh(self):
         # test refresh
+        load_dotenv(dotenv_path='test/.env')
         geo = GeoService.instance(provider='geoserver',
                                   url="https://test/geoserver",
                                   username="drwho",
