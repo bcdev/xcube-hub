@@ -460,9 +460,20 @@ paths:
       operationId: create_cubegen
       requestBody:
         content:
-          application/json:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/CubegenConfig'
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CubegenConfig'
+#              type: object
+#              $ref: '#/components/schemas/CubegenConfig'
+              properties:
+                files:
+                  type: string
+                  format: base64
+            encoding:
+              files:
+                contentType: image/png
         description: Cubegen configuration
         required: true
       responses:

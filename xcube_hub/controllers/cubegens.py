@@ -1,11 +1,14 @@
 from typing import Dict, Tuple
 
+import flask
+from flask import request
+
 from xcube_hub import api
 from xcube_hub.core import cubegens
 from xcube_hub.typedefs import JsonObject, AnyDict
 
 
-def create_cubegen(body: JsonObject, token_info: Dict):
+def create_cubegen(body: JsonObject, files, token_info: Dict):
     """Create a cubegen
 
     Create a cubegen
@@ -17,7 +20,7 @@ def create_cubegen(body: JsonObject, token_info: Dict):
 
     :rtype: ApiCubeGenResponse
     """
-
+    res = request.files
     try:
         user_id = token_info['user_id']
         email = token_info['email']

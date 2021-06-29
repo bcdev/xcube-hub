@@ -50,6 +50,47 @@ CUBEGEN_TEST = {
     }
 }
 
+
+CUBEGEN_TEST_MULTI_PART = {
+    "input_configs": [
+        {
+            "store_id": "@sentinelhub_codede",
+            "data_id": "S3OLCI",
+            "open_params": {
+                "tile_size": [
+                    1000,
+                    1000
+                ]
+            }
+        }
+    ],
+    "cube_config": {
+        "variable_names": [
+            "B01"
+        ],
+        "crs": "http://www.opengis.net/def/crs/EPSG/0/4326",
+        "spatial_res": 0.01,
+        "bbox": [
+            -180,
+            -85,
+            180,
+            85
+        ],
+        "time_range": [
+            "2016-04-17",
+            "2016-04-20"
+        ],
+        "time_period": "1D"
+    },
+    "output_config": {
+        "store_id": "s3",
+        "store_params": {
+            "bucket_name": "eurodatacube-test",
+        }
+    }
+}
+
+
 TEST_CLAIMS = {
     "iss": "https://edc.eu.auth0.com/",
     "aud": 'https://test',

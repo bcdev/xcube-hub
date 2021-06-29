@@ -339,8 +339,32 @@ class TestCubeGens(unittest.TestCase):
     @patch.object(BatchV1Api, 'create_namespaced_job')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
     def test_create(self, namespace_p, create_p, info_p):
-        # status_p.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(status='ready', type='Complete')]))
-        # status_p.return_value =
+        info_p.return_value = {'cost_estimation': {'required': 1, 'available': 10000000}}
+
+        res = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
+
+        self.assertIn("drwho-", res['cubegen_id'])
+        self.assertEqual(24, len(res['cubegen_id']))
+
+        info_p.return_value = {'cost_estimation': {'required': 20, 'available': 10}}
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
+
+        self.assertEqual('Number of required punits (20) is greater than the available (10).', str(e.exception))
+
+        info_p.return_value = {'cost_estimation': {'required': 3000, 'available': 4000}}
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
+
+        self.assertEqual('Number of required punits (3000) is greater than the absolute limit of 1000.',
+                         str(e.exception))
+
+    @patch('xcube_hub.core.cubegens.info')
+    @patch.object(BatchV1Api, 'create_namespaced_job')
+    @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
+    def test_create_with_file(self, namespace_p, create_p, info_p):
         info_p.return_value = {'cost_estimation': {'required': 1, 'available': 10000000}}
 
         res = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
