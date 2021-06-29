@@ -9,7 +9,7 @@ from kubernetes import client
 from kubernetes.client import ApiException, ApiValueError
 from urllib3.exceptions import MaxRetryError
 
-from xcube_hub import api, poller
+from xcube_hub import api, poller, util
 from xcube_hub.api import get_json_request_value
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
@@ -39,15 +39,15 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
     sh_instance_id = os.environ.get("SH_INSTANCE_ID")
-    gen_image = os.environ.get("XCUBE_DOCKER_IMG")
+    xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
+    xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
     cdsapi_url = os.getenv("CDSAPI_URL")
     cdsapi_key = os.getenv("CDSAPI_KEY")
     aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 
-    if not gen_image:
-        raise api.ApiError(400, "Could not find an xcube docker image configuration.")
+    gen_image = xcube_repo + ':' + xcube_tag
 
     if not sh_client_secret or not sh_client_id or not sh_instance_id:
         raise api.ApiError(400, "SentinelHub credentials not set.")

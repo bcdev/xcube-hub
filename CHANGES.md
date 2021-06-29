@@ -1,13 +1,21 @@
-## Changes in v2.1.0.dev0 (in development)
+## Changes in v2.1.0 (in development)
 
 ### New Features
 
 - Added operations that allow publishing collections to a geoserver instance
 - The web service can now be started as a command line client. It allows
   specifying host address and port. Was fix before. 
+- Added an operation that returns all wms services of a database
+- The xcube hub is now preventing users to add a geoservice on databases they do not own
+- The database name is now configurable for the geoservice
 
 ### Fixes
 
+- Removed stores operation. Not used anymore
+- Changed the way how tokens are handled when handling subscriptions to avoid
+  random authorization issues
+- A proper error is now raised when no collection is find when publishing collections to WMS service
+- The hub is now using XCUBE_REPO and XCUBE_TAG allowing to configure xcube's version tag separately from its repo 
 - Removed stores operation. Not used anymore 
 - The hub is now using XCUBE_REPO and XCUBE_TAG allowing to configure xcube's version tag
 - The database name is now configurable for the geoservice
