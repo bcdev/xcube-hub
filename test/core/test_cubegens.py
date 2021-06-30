@@ -1,16 +1,19 @@
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from dotenv import load_dotenv
 from kubernetes.client import ApiException, BatchV1Api, V1Pod, V1ObjectMeta, V1JobList, CoreV1Api, V1Status, V1Job, \
     ApiValueError, V1JobStatus, V1JobCondition
+from werkzeug.datastructures import FileStorage
 
 from test.controllers.utils import del_env
 from xcube_hub import api
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import cubegens
+from xcube_hub.core.cubegens import process_user_code
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
+from xcube_hub.models.cubegen_config import CubegenConfig
 
 _CFG = {
     "input_config":
@@ -360,6 +363,50 @@ class TestCubeGens(unittest.TestCase):
 
         self.assertEqual('Number of required punits (3000) is greater than the absolute limit of 1000.',
                          str(e.exception))
+
+    def test_process_user_code(self):
+        cfg = {
+            "input_configs": [
+                {
+                    "store_id": "@test",
+                    "data_id": "DATASET-1.zarr"
+                }
+            ],
+            "cube_config": {
+            },
+            "code_config": {
+                "file_set": {
+                    "path": ""
+                },
+                "callable_ref": "processor:process_dataset",
+                "callable_params": {
+                    "output_var_name": "X",
+                    "input_var_name_1": "A",
+                    "input_var_name_2": "B",
+                    "factor_1": 0.4,
+                    "factor_2": 0.2
+                }
+            },
+            "output_config": {
+                "store_id": "@test",
+                "data_id": "OUTPUT.zarr",
+                "replace": True
+            }
+        }
+
+        cfg = CubegenConfig.from_dict(cfg)
+
+        res = process_user_code(cfg=cfg, user_code=None)
+
+        self.assertDictEqual(cfg.to_dict(), res.to_dict())
+
+        user_code = FileStorage(filename='test.zip')
+        user_code.save = MagicMock()
+
+        res = process_user_code(cfg=cfg, user_code=user_code)
+
+        self.assertIn('test.zip', res.code_config.file_set.path)
+        user_code.save.assert_called_once()
 
     @patch('xcube_hub.core.cubegens.info')
     @patch.object(BatchV1Api, 'create_namespaced_job')

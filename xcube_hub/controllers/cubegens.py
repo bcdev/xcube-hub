@@ -1,32 +1,42 @@
+import json
 from typing import Dict, Tuple
 
-import flask
 from flask import request
+from werkzeug.datastructures import FileStorage
 
 from xcube_hub import api
 from xcube_hub.core import cubegens
-from xcube_hub.typedefs import JsonObject, AnyDict
+from xcube_hub.core.cubegens import process_user_code
+from xcube_hub.models.cubegen_config import CubegenConfig
+from xcube_hub.typedefs import AnyDict, JsonObject
 
 
-def create_cubegen(body: JsonObject, files, token_info: Dict):
+def create_cubegen(body: FileStorage, token_info: Dict):
     """Create a cubegen
 
     Create a cubegen
 
     :param body: CubeGen configuration
-    :type body: dict | bytes
+    :type body: FileStorage
     :param token_info: Token claims
     :type token_info: Dict
 
     :rtype: ApiCubeGenResponse
     """
-    res = request.files
+    files = request.files
+    user_code = files.get('user_code')
+
+    body_dict = json.load(body.stream)
+    body = CubegenConfig.from_dict(body_dict)
+
     try:
         user_id = token_info['user_id']
         email = token_info['email']
         token = token_info['token']
 
-        cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
+        body = process_user_code(cfg=body, user_code=user_code)
+
+        cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body.to_dict())
         return api.ApiResponse.success(cubegen)
     except api.ApiError as e:
         return e.response
@@ -50,7 +60,7 @@ def delete_cubegen(cubegen_id) -> Tuple[AnyDict, int]:
         return e.response
 
 
-def delete_cubegens(token_info):
+def delete_cubegens(token_info: JsonObject) -> Tuple:
     """Delete all cubegens
 
     Delete all cubegens

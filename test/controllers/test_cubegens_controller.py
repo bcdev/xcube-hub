@@ -2,13 +2,17 @@
 
 from __future__ import absolute_import
 
+import io
+import json
 from unittest.mock import patch
+
+from werkzeug.datastructures import FileStorage
+
 from test import BaseTestCase
 
 from xcube_hub import api
 from xcube_hub.api import ApiError
 from xcube_hub.controllers import cubegens
-
 
 
 CUBEGEN_TEST = {
@@ -170,18 +174,56 @@ class TestCubeGensController(BaseTestCase):
     #
     #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
 
+    @patch('xcube_hub.core.cubegens.process_user_code', create=True)
     @patch('xcube_hub.core.cubegens.create', return_value={'cubegen_id': 'ajob_id', 'status': 'ready'}, create=True)
-    def test_create_cubegen_controller(self, p):
+    def test_create_cubegen_controller(self, p, process):
+        cfg = {
+            "input_configs": [
+                {
+                    "store_id": "@test",
+                    "data_id": "DATASET-1.zarr"
+                }
+            ],
+            "cube_config": {
+            },
+            "code_config": {
+                "file_set": {
+                    "path": ""
+                },
+                "callable_ref": "processor:process_dataset",
+                "callable_params": {
+                    "output_var_name": "X",
+                    "input_var_name_1": "A",
+                    "input_var_name_2": "B",
+                    "factor_1": 0.4,
+                    "factor_2": 0.2
+                }
+            },
+            "output_config": {
+                "store_id": "@test",
+                "data_id": "OUTPUT.zarr",
+                "replace": True
+            }
+        }
+
+        cfg_json = json.dumps(cfg)
+
+        cfg = io.StringIO(cfg_json)
+        cfg = FileStorage(filename='test.json', stream=cfg)
+
         expected = {'cubegen_id': 'ajob_id', 'status': 'ready'}
         p.return_value = expected
 
-        res = cubegens.create_cubegen({}, {'user_id': 'drwho', 'email': 'drwho@bbc.org', 'token': 'dsfvsdfev'})
+        res = cubegens.create_cubegen(body=cfg, token_info={'user_id': 'drwho', 'email': 'drwho@mail', 'token': 'abc'})
         self.assertDictEqual(expected, res[0])
         self.assertEqual(200, res[1])
 
         p.side_effect = ApiError(400, message='error')
 
-        res = cubegens.create_cubegen({}, {'user_id': 'drwho', 'email': 'drwho@bbc.org', 'token': 'dsfvsdfev'})
+        cfg = io.StringIO(cfg_json)
+        cfg = FileStorage(filename='test.json', stream=cfg)
+
+        res = cubegens.create_cubegen(body=cfg, token_info={'user_id': 'drwho', 'email': 'drwho@mail', 'token': 'abc'})
         self.assertEqual('error', res[0]['message'])
         self.assertGreater(len(res[0]['traceback']), 0)
         self.assertEqual(400, res[1])

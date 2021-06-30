@@ -7,33 +7,27 @@ dependencies:
   - oauthlib
   - boto3
   - click
+  - connexion
   - flask
   - flask-cors
+  - flask-oidc
   - geoserver-rest
   - pandas
   - pip
+  - python-dateutil
   - python-dotenv
   - python-jose
-  - python-keycloak
+  - python-kubernetes
+  # needs 0.24 to avoid issue with urllib3 (https://github.com/marcospereirampj/python-keycloak/issues/196)
+  - python-keycloak=0.24.0
+  - requests-oauthlib
+  - setuptools
   - uwsgi
 
   - pip:
       # Required
-      - kubernetes
-      - polling2
-      - flask_oidc
-      - flask_cors
-      - flask_testing
-      - redis
-      - requests_oauthlib
-      - connexion
-      - plyvel
-      - requests-mock
-      - python_dateutil
-      - setuptools
       - connexion[swagger-ui]
-      - pydevd-pycharm
+      - plyvel
+      - polling2
+      - redis
 
-  # testing
-  - moto
-  - flake8

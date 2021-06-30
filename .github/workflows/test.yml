@@ -24,10 +24,10 @@ jobs:
       - name: unittest-xcube-hub
         shell: bash -l {0}
         run: |
-          pip install pytest
-          pip install pytest-cov
+          pip install pytest pytest-cov
+          mamba install -c conda-forge  flask-testing moto requests-mock
+
           pytest --cov=./ --cov-report=xml
       - uses: codecov/codecov-action@v1
         with:
-          fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)

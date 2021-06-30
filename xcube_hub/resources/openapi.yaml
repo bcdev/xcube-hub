@@ -460,20 +460,20 @@ paths:
       operationId: create_cubegen
       requestBody:
         content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/CubegenConfig'
           multipart/form-data:
             schema:
-#              type: object
-#              $ref: '#/components/schemas/CubegenConfig'
+              type: object
               properties:
-                files:
+                user_code:
                   type: string
-                  format: base64
+                  format: binary
+                body:
+                  type: string
             encoding:
-              files:
-                contentType: image/png
+              user_code:
+                contentType: application/zip
+              body:
+                contentType: application/json
         description: Cubegen configuration
         required: true
       responses:
@@ -1022,6 +1022,8 @@ components:
           $ref: '#/components/schemas/CubegenConfigCubeConfig'
         output_config:
           $ref: '#/components/schemas/CubegenConfigOutputConfig'
+        code_config:
+          $ref: '#/components/schemas/CubegenConfigCodeConfig'
       required:
         - cube_config
         - output_config
@@ -1149,6 +1151,19 @@ components:
         - data_id
         - store_id
       type: object
+    CubegenConfigCodeConfig:
+      type: object
+      properties:
+        file_set:
+          type: object
+          properties:
+            path:
+              type: string
+        callable_ref:
+          type: string
+        callable_params:
+          type: object
+          additionalProperties: true
     CubegenConfigCubeConfig:
       properties:
         variable_names:

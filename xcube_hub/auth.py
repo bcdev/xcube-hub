@@ -243,6 +243,9 @@ class _Keycloak(AuthProvider):
 
         super().__init__()
         self._domain = domain or os.getenv('KEYCLOAK_DOMAIN')
+        self._client_secret_key = os.getenv('KEYCLOAK_CLIENT_SECRET_KEY')
+        self._client_secret_id = os.getenv('KEYCLOAK_CLIENT_SECRET_ID')
+        self._realm = os.getenv('KEYCLOAK_REALM')
         self._audience = audience or os.getenv('XCUBE_HUB_OAUTH_AUD')
         self._algorithms = ["RS256"]
 
@@ -253,9 +256,9 @@ class _Keycloak(AuthProvider):
             raise Unauthorized(description="Keycloak error: Audience not set")
 
         self._keycloak_openid = KeycloakOpenID(server_url=f"https://{self._domain}/auth/",
-                                               client_id="cate",
-                                               realm_name="cate",
-                                               client_secret_key="eb305b23-252d-44c6-8efb-f6d714b87166",
+                                               client_id=self._client_secret_id,
+                                               realm_name=self._realm,
+                                               client_secret_key=self._client_secret_key,
                                                verify=True)
 
     def get_email(self, claims):
