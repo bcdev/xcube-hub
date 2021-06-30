@@ -1,4 +1,15 @@
-## Changes in v2.1.0 (in development)
+## Changes in v2.1.1 (in development)
+
+### New Features
+
+- Changed the operation PUT cubegens from application/json to multipart content. xcube-gen2 now uploads the cube 
+  configuration as JSON file. In addition, xcube-gen2 might upload a zip file containing BYOA Python code.
+
+### Fixes
+
+
+## Changes in v2.1.0
+
 
 ### New Features
 
@@ -8,6 +19,7 @@
 - Added an operation that returns all wms services of a database
 - The xcube hub is now preventing users to add a geoservice on databases they do not own
 - The database name is now configurable for the geoservice
+
 
 ### Fixes
 

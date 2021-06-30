@@ -29,7 +29,7 @@ class CubegenConfig(Model):
         :type cube_config: CubegenConfigCubeConfig
         :param output_config: The output_config of this CubegenConfig.  # noqa: E501
         :type output_config: CubegenConfigOutputConfig
-        :param code_config: The code_config of this CubegenConfig.  # noqa: E501
+        :param code_config: The code_config of this CubegenConfigCodeConfig.  # noqa: E501
         :type code_config: CubegenConfigCodeConfig
         """
         self.openapi_types = {

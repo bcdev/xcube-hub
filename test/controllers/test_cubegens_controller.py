@@ -208,7 +208,7 @@ class TestCubeGensController(BaseTestCase):
 
         cfg_json = json.dumps(cfg)
 
-        cfg = io.StringIO(cfg_json)
+        cfg = io.BytesIO(cfg_json.encode('UTF-8'))
         cfg = FileStorage(filename='test.json', stream=cfg)
 
         expected = {'cubegen_id': 'ajob_id', 'status': 'ready'}
@@ -220,7 +220,7 @@ class TestCubeGensController(BaseTestCase):
 
         p.side_effect = ApiError(400, message='error')
 
-        cfg = io.StringIO(cfg_json)
+        cfg = io.BytesIO(cfg_json.encode('UTF-8'))
         cfg = FileStorage(filename='test.json', stream=cfg)
 
         res = cubegens.create_cubegen(body=cfg, token_info={'user_id': 'drwho', 'email': 'drwho@mail', 'token': 'abc'})

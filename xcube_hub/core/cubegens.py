@@ -8,6 +8,7 @@ from typing import Union, Sequence, Optional
 from kubernetes import client
 from kubernetes.client import ApiException, ApiValueError
 from urllib3.exceptions import MaxRetryError
+from werkzeug.datastructures import FileStorage
 
 from xcube_hub import api, poller, util
 from xcube_hub.api import get_json_request_value
@@ -15,6 +16,7 @@ from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
 from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
+from xcube_hub.models.cubegen_config import CubegenConfig
 from xcube_hub.typedefs import AnyDict, Error, JsonObject
 from xcube_hub.util import maybe_raise_for_env
 
@@ -284,3 +286,23 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
         size_estimation=cost_est['size_estimation'],
         cost_estimation=dict(required=required, available=available['count'], limit=int(limit))
     )
+
+
+def process_user_code(cfg: CubegenConfig, user_code: Optional[FileStorage] = None):
+    if user_code is not None:
+        code_dir = uuid.uuid4().hex
+        code_root_dir = util.maybe_raise_for_env('XCUBE_HUB_CODE_ROOT_DIR')
+        filename = user_code.filename
+
+        code_dir = os.path.join(code_root_dir, code_dir)
+
+        if not os.path.isdir(code_dir):
+            os.mkdir(code_dir)
+
+        code_path = os.path.join(code_dir, filename)
+
+        user_code.save(code_path)
+
+        cfg.code_config.file_set.path = code_path
+
+    return cfg

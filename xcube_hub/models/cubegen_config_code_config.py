@@ -20,7 +20,7 @@ class CubegenConfigCodeConfig(Model):
     def __init__(self, file_set=None, callable_ref=None, callable_params=None):  # noqa: E501
         """CubegenConfigCodeConfig - a model defined in OpenAPI
 
-        :param file_set: The file_set of this CubegenConfigCodeConfig.  # noqa: E501
+        :param file_set: The file_set of this CubegenConfigCodeConfigFileSet.  # noqa: E501
         :type file_set: CubegenConfigCodeConfigFileSet
         :param callable_ref: The callable_ref of this CubegenConfigCodeConfig.  # noqa: E501
         :type callable_ref: str

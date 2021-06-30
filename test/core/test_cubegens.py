@@ -299,8 +299,6 @@ class TestCubeGens(unittest.TestCase):
     @patch.object(BatchV1Api, 'create_namespaced_job')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
     def test_create_info_only(self, namespace_p, create_p, status_p):
-        # status_p.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(status='ready', type='Complete')]))
-        # status_p.return_value =
         res = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=True)
 
         self.assertIn("drwho-", res['cubegen_id'])
@@ -396,17 +394,21 @@ class TestCubeGens(unittest.TestCase):
 
         cfg = CubegenConfig.from_dict(cfg)
 
-        res = process_user_code(cfg=cfg, user_code=None)
+        with patch('os.mkdir') as p:
+            res = process_user_code(cfg=cfg, user_code=None)
 
-        self.assertDictEqual(cfg.to_dict(), res.to_dict())
+            self.assertDictEqual(cfg.to_dict(), res.to_dict())
+            p.assert_not_called()
 
-        user_code = FileStorage(filename='test.zip')
-        user_code.save = MagicMock()
+        with patch('os.mkdir') as p:
+            user_code = FileStorage(filename='test.zip')
+            user_code.save = MagicMock()
 
-        res = process_user_code(cfg=cfg, user_code=user_code)
+            res = process_user_code(cfg=cfg, user_code=user_code)
 
-        self.assertIn('test.zip', res.code_config.file_set.path)
-        user_code.save.assert_called_once()
+            self.assertIn('test.zip', res.code_config.file_set.path)
+            user_code.save.assert_called_once()
+            p.assert_called_once()
 
     @patch('xcube_hub.core.cubegens.info')
     @patch.object(BatchV1Api, 'create_namespaced_job')
