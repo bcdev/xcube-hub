@@ -41,12 +41,23 @@ class TestGeoServerController(BaseTestCase):
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual(1, len(response.json['layers']['layer']))
 
+        tt = []
+        tt.append({'src': None})
+
+        m.post("https://stage.xcube-geodb.brockmann-consult.de/rpc/geodb_list_databases", json=tt)
+
+        response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections',
+                                    headers=self._headers, method='GET')
+
+        self.assert404(response, 'Response body is : ' + response.data.decode('utf-8'))
+
         # Test whether the controller authorizes
 
         response = self.client.open('/api/v2/services/xcube_geoserv/databases/terrestris/collections', method='GET')
 
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
 
+        self.access_mock(m)
         # Test whether the controller returns an error when the service raises an exception
         def side_effect(database_id, fmt):
             raise api.ApiError(400, 'test')

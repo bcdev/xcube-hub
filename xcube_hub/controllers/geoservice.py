@@ -24,6 +24,9 @@ def _raise_for_no_access(database_id, geodb_user, token):
 
     dbs = res[0]['src']
 
+    if dbs is None:
+        raise api.ApiError(404, f'Database {database_id} not found.')
+
     success = False
 
     for db in dbs:
