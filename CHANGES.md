@@ -4,9 +4,11 @@
 
 - Changed the operation PUT cubegens from application/json to multipart content. xcube-gen2 now uploads the cube 
   configuration as JSON file. In addition, xcube-gen2 might upload a zip file containing BYOA Python code.
+- The flask server can now be configured to run in debug mode using the en var XCUBE_HUB_DEBUG 
 
 ### Fixes
 
+- Fixed wrongly names PV and PVC for stores. Used to be called datapools.
 
 ## Changes in v2.1.0
 
