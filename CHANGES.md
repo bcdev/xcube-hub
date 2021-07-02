@@ -9,6 +9,7 @@
 ### Fixes
 
 - Fixed wrongly names PV and PVC for stores. Used to be called datapools.
+- Fixed that _raise_for_no_access would cause a 500 error when the database searched for does not exist
 
 ## Changes in v2.1.0
 
