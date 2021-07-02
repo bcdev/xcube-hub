@@ -17,7 +17,7 @@ def get_service_info():
     res = dict(name=SERVER_NAME,
                description=SERVER_DESCRIPTION,
                version=version,
-               xcubeDockerImage=os.getenv("XCUBE_DOCKER_IMG"),
+               xcubeDockerTag=os.getenv("XCUBE_TAG"),
                serverStartTime=SERVER_START_TIME,
                serverCurrentTime=datetime.datetime.now().isoformat(),
                serverPID=os.getpid(),
