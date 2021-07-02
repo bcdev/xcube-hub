@@ -12,11 +12,7 @@ VERSION = "2.1.0.dev1"
 # prerequisite: setuptools
 # http://pypi.python.org/pypi/setuptools
 
-REQUIRES = [
-    "connexion>=2.0.2",
-    "swagger-ui-bundle>=0.0.2",
-    "python_dateutil>=2.6.0"
-]
+REQUIRES = []
 
 setup(
     name=NAME,
@@ -30,7 +26,7 @@ setup(
     package_data={'': ['resources/openapi.yaml']},
     include_package_data=True,
     entry_points={
-        'console_scripts': ['xcube-hub=xcube_hub.__main__:main']},
+        'console_scripts': ['xcube-hub=xcube_hub.cli:main']},
     long_description="""\
     Restful API for handling xcube Services
     """

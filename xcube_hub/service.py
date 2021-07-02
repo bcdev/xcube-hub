@@ -41,6 +41,8 @@ def attach_debugger():
 
 def start(host: str = '0.0.0.0', port: int = 8080, debug: bool = False):
     attach_debugger()
+
+    debug = debug or int(os.getenv('XCUBE_HUB_DEBUG', False))
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('openapi.yaml',
                 arguments={'title': 'xcube Generation API'},

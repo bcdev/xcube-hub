@@ -77,16 +77,16 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
 
     volume_mounts = [
         {
-            'name': 'xcube-datapools',
-            'mountPath': '/etc/xcube',
+            'name': 'xcube-hub-stores',
+            'mountPath': '/etc/xcube-hub',
             'readOnly': True
         }, ]
 
     volumes = [
         {
-            'name': 'xcube-datapools',
+            'name': 'xcube-hub-stores',
             'configMap': {
-                'name': 'xcube-datapools-cfg'
+                'name': 'xcube-hub-stores'
             }
         }, ]
 
