@@ -249,7 +249,7 @@ class TestCubeGens(unittest.TestCase):
         self.assertIsInstance(cubegen, V1Job)
         self.assertEqual(1, len(cubegen.spec.template.spec.containers))
         self.assertEqual(1, len(cubegen.spec.template.spec.volumes))
-        self.assertDictEqual({'name': 'xcube-datapools', 'configMap': {'name': 'xcube-datapools-cfg'}},
+        self.assertDictEqual({'name': 'xcube-hub-stores', 'configMap': {'name': 'xcube-hub-stores'}},
                              cubegen.spec.template.spec.volumes[0])
 
         container = cubegen.spec.template.spec.containers[0]
@@ -257,7 +257,7 @@ class TestCubeGens(unittest.TestCase):
         self.assertDictEqual({"app": "xcube-gen"}, cubegen.spec.template.metadata.labels)
         self.assertEqual("quay.io/bcdev/xcube-gen:0.7.2.dev0", container.image)
         self.assertEqual(1, len(container.volume_mounts))
-        self.assertDictEqual({'mountPath': '/etc/xcube', 'name': 'xcube-datapools', 'readOnly': True},
+        self.assertDictEqual({'mountPath': '/etc/xcube-hub', 'name': 'xcube-hub-stores', 'readOnly': True},
                              container.volume_mounts[0])
 
         with self.assertRaises(api.ApiError) as e:
