@@ -83,7 +83,12 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
             'name': 'xcube-hub-stores',
             'mountPath': '/etc/xcube-hub',
             'readOnly': True
-        }, ]
+        },
+        {
+            'name': 'workspace-pvc',
+            'mountPath': '/home/xcube/user-code',
+        },
+    ]
 
     volumes = [
         {
@@ -91,7 +96,14 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
             'configMap': {
                 'name': 'xcube-hub-stores'
             }
-        }, ]
+        },
+        {
+            'name': 'workspace-pvc',
+            'persistentVolumeClaim': {
+                'claimName': 'workspace-pvc',
+            }
+        },
+    ]
 
     container = client.V1Container(
         name="xcube-gen",
