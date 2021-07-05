@@ -14,7 +14,6 @@ from xcube_hub import api, poller, util
 from xcube_hub.api import get_json_request_value
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import callbacks, costs, punits
-from xcube_hub.core import user_namespaces
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.models.cubegen_config import CubegenConfig
 from xcube_hub.typedefs import AnyDict, Error, JsonObject
@@ -160,7 +159,8 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
             _raise_for_invalid_punits(user_id=user_id, token=token, email=email, cfg=cfg)
 
         xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
-        user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
+        # Not used as the namespace cate has to be created prior to launching cubegens instances
+        # user_namespaces.create_if_not_exists(user_namespace=xcube_hub_namespace)
         callback_uri = os.getenv('XCUBE_HUB_CALLBACK_URL', False)
 
         if callback_uri is False:

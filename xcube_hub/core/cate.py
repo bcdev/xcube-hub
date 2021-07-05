@@ -69,7 +69,8 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH",
                                                            default="/etc/xcube-hub/stores.yaml")
 
-        user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
+        # Not used as the namespace cate has to be created prior to launching cate instances
+        # user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
         if k8s.count_pods(label_selector="purpose=cate-webapi", namespace=cate_namespace) > max_pods:
             raise api.ApiError(413, "Too many pods running.")
