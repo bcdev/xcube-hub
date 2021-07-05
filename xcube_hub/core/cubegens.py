@@ -48,6 +48,9 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     cdsapi_key = os.getenv("CDSAPI_KEY")
     aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    xcube_hub_cfg_dir = util.maybe_raise_for_env("XCUBE_HUB_CFG_DIR")
+    xcube_hub_cfg_datapools = util.maybe_raise_for_env("XCUBE_HUB_CFG_DATAPOOLS")
+    stores_file = os.path.join(xcube_hub_cfg_dir, xcube_hub_cfg_datapools)
 
     gen_image = xcube_repo + ':' + xcube_tag
 
@@ -63,7 +66,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     info_flag = " -i " if info_only else ""
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube --traceback gen2 {info_flag} -vvv --stores /etc/xcube/data-pools.yaml"]
+                              f"| xcube --traceback gen2 {info_flag} -vvv --stores {stores_file}"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
