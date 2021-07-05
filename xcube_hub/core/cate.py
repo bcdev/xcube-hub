@@ -60,9 +60,6 @@ def launch_cate(user_id: str) -> JsonObject:
 
         raise_for_invalid_username(user_id)
 
-        if k8s.count_pods(label_selector="purpose=cate-webapi") > max_pods:
-            raise api.ApiError(413, "Too many pods running.")
-
         cate_image = util.maybe_raise_for_env("CATE_IMG")
         cate_version = util.maybe_raise_for_env("CATE_VERSION")
         # cate_command = util.maybe_raise_for_env("CATE_COMMAND", default=None)
@@ -73,6 +70,9 @@ def launch_cate(user_id: str) -> JsonObject:
                                                            default="/etc/xcube-hub/stores.yaml")
 
         user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
+
+        if k8s.count_pods(label_selector="purpose=cate-webapi", namespace=cate_namespace) > max_pods:
+            raise api.ApiError(413, "Too many pods running.")
 
         cate_command = "cate-webapi-start -b -p 4000 -a 0.0.0.0 -r /home/cate/workspace"
 
