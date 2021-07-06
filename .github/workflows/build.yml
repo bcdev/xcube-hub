@@ -54,7 +54,6 @@ jobs:
       - uses: actions/checkout@master
         with:
           name: bc-org/k8s-configs
-          ref: main
       - name: update-version-prerelease
         working-directory: ./cate/helm
         if: ${{ github.event_name == 'release' && contains(steps.release.outputs.tag, 'dev')}}
