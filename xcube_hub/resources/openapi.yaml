@@ -460,7 +460,7 @@ paths:
       operationId: create_cubegen
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
@@ -1164,6 +1164,8 @@ components:
         callable_params:
           type: object
           additionalProperties: true
+        inline_code:
+          type: string
     CubegenConfigCubeConfig:
       properties:
         variable_names:

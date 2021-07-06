@@ -2,7 +2,6 @@ import json
 from typing import Dict, Tuple
 
 from flask import request
-from werkzeug.datastructures import FileStorage
 
 from xcube_hub import api
 from xcube_hub.core import cubegens
@@ -11,30 +10,33 @@ from xcube_hub.models.cubegen_config import CubegenConfig
 from xcube_hub.typedefs import AnyDict, JsonObject
 
 
-def create_cubegen(body: FileStorage, token_info: Dict):
+def create_cubegen(body: JsonObject, token_info: Dict):
     """Create a cubegen
 
     Create a cubegen
 
     :param body: CubeGen configuration
-    :type body: FileStorage
+    :type body: JsonObject
     :param token_info: Token claims
     :type token_info: Dict
 
     :rtype: ApiCubeGenResponse
     """
-    files = request.files
-    user_code = files.get('user_code')
-
-    body_dict = json.load(body.stream)
-    body = CubegenConfig.from_dict(body_dict)
-
     try:
+        files = request.files
+
+        if files:
+            user_code = files.get('user_code')
+            body = files.get('body')
+
+            body_dict = json.load(body.stream)
+
+            body = CubegenConfig.from_dict(body_dict)
+            body = process_user_code(cfg=body, user_code=user_code)
+
         user_id = token_info['user_id']
         email = token_info['email']
         token = token_info['token']
-
-        body = process_user_code(cfg=body, user_code=user_code)
 
         cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body.to_dict())
         return api.ApiResponse.success(cubegen)
