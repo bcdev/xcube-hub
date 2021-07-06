@@ -57,7 +57,7 @@ jobs:
           ref: refs/heads/release
       - name: update-version-prerelease
         working-directory: ./cate/helm
-        if: ${{ github.event_name == 'release' && contains(${{ steps.release.outputs.tag }}, 'dev')}}
+        if: ${{ github.event_name == 'release' && contains(steps.release.outputs.tag, 'dev')}}
         run: |
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-dev.yaml
           sed -i 's/xcube-hub-hash\s.*$/xcube-hub-hash null/g' values-dev.yaml
@@ -65,7 +65,7 @@ jobs:
           sed -i 's/xcube-hub-hash\s.*$/xcube-hub-hash null/g' values-stage.yaml
       - name: update-version-release
         working-directory: ./cate/helm
-        if: ${{ github.event_name == 'release' && contains(${{ steps.release.outputs.tag }}, 'dev')}}
+        if: ${{ github.event_name == 'release' && contains(steps.release.outputs.tag, 'dev')}}
         run: |
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-dev.yaml
           sed -i 's/xcube-hub-hash\s.*$/xcube-hub-hash null/g' values-dev.yaml
