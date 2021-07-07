@@ -32,7 +32,7 @@ class TestOauth(unittest.TestCase):
             oauth.get_user_by_credentials(token='dfasvdsav', client_id='döoasvnoösdvi', client_secret='sdvdsv')
 
         self.assertEqual(404, e.exception.status_code)
-        self.assertEqual('No users not found.', str(e.exception))
+        self.assertEqual('No users found.', str(e.exception))
 
         m.get('https://edc.eu.auth0.com/api/v2/users', json=[user.to_dict(), user.to_dict()])
 

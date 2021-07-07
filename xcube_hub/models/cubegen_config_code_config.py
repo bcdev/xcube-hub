@@ -130,7 +130,7 @@ class CubegenConfigCodeConfig(Model):
         :return: The inline_code of this CubegenConfigCodeConfig.
         :rtype: str
         """
-        return self.inline_code
+        return self._inline_code
 
     @inline_code.setter
     def inline_code(self, inline_code):
