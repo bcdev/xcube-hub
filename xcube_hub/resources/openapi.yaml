@@ -469,11 +469,12 @@ paths:
                   format: binary
                 body:
                   type: string
-            encoding:
-              user_code:
-                contentType: application/zip
-              body:
-                contentType: application/json
+#          multipart/form-data:
+#            schema:
+#              type: object
+#              properties:
+#                user_code:
+#                  type: string
         description: Cubegen configuration
         required: true
       responses:

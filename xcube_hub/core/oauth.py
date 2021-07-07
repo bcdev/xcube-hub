@@ -25,7 +25,7 @@ def get_user_by_credentials(token: str, client_id: str, client_secret: str) -> S
 
     res = r.json()
     if len(res) == 0:
-        raise api.ApiError(404, f"No users not found.")
+        raise api.ApiError(404, f"No users found.")
     if len(res) > 1:
         raise api.ApiError(400, f"More than one user found.")
 

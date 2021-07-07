@@ -65,7 +65,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     info_flag = " -i " if info_only else ""
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube --traceback gen2 {info_flag} -vvv --stores {stores_file}"]
+                              f"| xcube --traceback gen2 {info_flag} --stores {stores_file}"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -267,10 +267,11 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
         raise api.ApiError(400, res)
     res = res.replace("Awaiting generator configuration JSON from TTY...", "")
     res = res.replace("Cube generator configuration loaded from TTY.", "")
+    res = res.replace("'", '"')
     try:
         processing_request = json.loads(res)
     except JSONDecodeError as e:
-        raise api.ApiError(400, str(e))
+        raise api.ApiError(400, str(e), output=res)
 
     if 'input_configs' in body:
         input_config = body['input_configs'][0]

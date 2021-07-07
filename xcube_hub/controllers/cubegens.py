@@ -33,12 +33,13 @@ def create_cubegen(body: JsonObject, token_info: Dict):
 
             body = CubegenConfig.from_dict(body_dict)
             body = process_user_code(cfg=body, user_code=user_code)
+            body = body.to_dict()
 
         user_id = token_info['user_id']
         email = token_info['email']
         token = token_info['token']
 
-        cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body.to_dict())
+        cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
         return api.ApiResponse.success(cubegen)
     except api.ApiError as e:
         return e.response
