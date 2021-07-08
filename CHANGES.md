@@ -2,9 +2,10 @@
 
 ### New Features
 
-- Changed the operation PUT cubegens from application/json to multipart content. xcube-gen2 now uploads the cube 
-  configuration as JSON file. In addition, xcube-gen2 might upload a zip file containing BYOA Python code.
-- The flask server can now be configured to run in debug mode using the en var XCUBE_HUB_DEBUG 
+- Added an operation PUT cubegens/code using content type multipart/form-data. This allows xcube-gen2 to upload the cube 
+  configuration as JSON file and user code as a zipped archive.
+- The flask server can now be configured to run in debug mode using the en var XCUBE_HUB_DEBUG
+
 
 ### Fixes
 
