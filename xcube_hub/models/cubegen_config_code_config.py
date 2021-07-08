@@ -17,7 +17,7 @@ class CubegenConfigCodeConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, file_set=None, callable_ref=None, callable_params=None):  # noqa: E501
+    def __init__(self, file_set=None, callable_ref=None, callable_params=None, inline_code=None):  # noqa: E501
         """CubegenConfigCodeConfig - a model defined in OpenAPI
 
         :param file_set: The file_set of this CubegenConfigCodeConfigFileSet.  # noqa: E501
@@ -26,22 +26,27 @@ class CubegenConfigCodeConfig(Model):
         :type callable_ref: str
         :param callable_params: The callable_params of this CubegenConfigCodeConfig.  # noqa: E501
         :type callable_params: Dict[str, object]
+        :param inline_code: The inline_code of this CubegenConfigCodeConfig.  # noqa: E501
+        :type inline_code: Dict[str, object]
         """
         self.openapi_types = {
             'file_set': CubegenConfigCodeConfigFileSet,
             'callable_ref': str,
-            'callable_params': Dict[str, object]
+            'callable_params': Dict[str, object],
+            'inline_code': str
         }
 
         self.attribute_map = {
             'file_set': 'file_set',
             'callable_ref': 'callable_ref',
-            'callable_params': 'callable_params'
+            'callable_params': 'callable_params',
+            'inline_code': 'inline_code'
         }
 
         self._file_set = file_set
         self._callable_ref = callable_ref
         self._callable_params = callable_params
+        self._inline_code = inline_code
 
     @classmethod
     def from_dict(cls, dikt) -> 'CubegenConfigCodeConfig':
@@ -116,3 +121,24 @@ class CubegenConfigCodeConfig(Model):
         """
 
         self._callable_params = callable_params
+
+    @property
+    def inline_code(self):
+        """Gets the inline_code of this CubegenConfigCodeConfig.
+
+
+        :return: The inline_code of this CubegenConfigCodeConfig.
+        :rtype: str
+        """
+        return self._inline_code
+
+    @inline_code.setter
+    def inline_code(self, inline_code):
+        """Sets the inline_code of this CubegenConfigCodeConfig.
+
+
+        :param inline_code: The callable_params of this CubegenConfigCodeConfig.
+        :type inline_code: str
+        """
+
+        self._inline_code = inline_code

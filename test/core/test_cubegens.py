@@ -52,7 +52,7 @@ _CFG = {
 
 _OUTPUT = """
 Awaiting generator configuration JSON from TTY...
-Cube generator configuration loaded from TTY.
+Cube generator configuration loaded from /user-code/id.yaml.
 {
     "dataset_descriptor": {
         "data_id": "test_cube.zarr",
