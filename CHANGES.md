@@ -10,6 +10,9 @@
 
 - Fixed wrongly names PV and PVC for stores. Used to be called datapools.
 - Fixed that _raise_for_no_access would cause a 500 error when the database searched for does not exist
+- Fixed issues when using inline user code for generating xcubes. The hub now stores any cube configuration/user codes
+  in a persistent volume shared with the xcube gen2 Jobs. The xcube gen2 command line has been changed accordingly from
+  using pipes to passing the config as file parameter.
 
 ## Changes in v2.1.0
 
