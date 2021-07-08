@@ -503,56 +503,61 @@ paths:
       tags:
         - cubegens
       x-openapi-router-controller: xcube_hub.controllers.cubegens
-#  /cubgens/upload:
-#    put:
-#      description: |
-#        Create a jcubegen
-#      operationId: create_cubegen_upload
-#      requestBody:
-#        content:
-#          multipart/form-data:
-#            schema:
-#              type: object
-#              properties:
-#                user_code:
-#                  type: string
-#                  format: binary
-#                body:
-#                  type: string
-#        description: Cubegen configuration
-#        required: true
-#      responses:
-#        "200":
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/ApiCubegenResponse'
-#          description: Create a cubegen
-#        "400":
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/ApiErrorResponse'
-#          description: Api Error
-#        "413":
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/ApiErrorResponse'
-#          description: Api Error
-#        "404":
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/ApiErrorResponse'
-#          description: User not found
-#      security:
-#        - oAuthorization:
-#            - manage:cubegens
-#      summary: Create a cubegen
-#      tags:
-#        - cubegens
-#      x-openapi-router-controller: xcube_hub.controllers.cubegens
+  /cubegens/code:
+    put:
+      description: |
+        Create a cubegen passing user code and cube config as json and zip file
+      operationId: create_cubegen_code
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user_code:
+                  type: string
+                  format: binary
+                body:
+                  type: string
+            encoding:
+              user_code:
+                contentType: application/zip
+              body:
+                contentType: application/json
+        description: Cubegen configuration
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCubegenResponse'
+          description: Create a cubegen
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: User not found
+      security:
+        - oAuthorization:
+            - manage:cubegens
+      summary: Create a cubegen
+      tags:
+        - cubegens
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
   /cubegens/info:
     post:
       description: |

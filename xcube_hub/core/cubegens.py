@@ -64,8 +64,15 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
 
     info_flag = " -i " if info_only else ""
 
-    cmd = ["/bin/bash", "-c", f"source activate xcube && echo \'{json.dumps(cfg)}\' "
-                              f"| xcube --traceback gen2 {info_flag} --stores {stores_file}"]
+    xcube_hub_code_root_dir = util.maybe_raise_for_env('XCUBE_HUB_CODE_ROOT_DIR')
+
+    cfg_file = os.path.join(xcube_hub_code_root_dir, cubegen_id + '.yaml')
+
+    with open(cfg_file, 'w') as f:
+        json.dump(cfg, f)
+
+    cmd = ["/bin/bash", "-c", f"source activate xcube && xcube --traceback gen2 -vv "
+                              f"{info_flag} --stores {stores_file} {cfg_file}"]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -85,7 +92,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
         {
             'name': 'workspace-pvc',
-            'mountPath': '/home/xcube/user-code',
+            'mountPath': '/user-code',
         },
     ]
 
@@ -255,6 +262,13 @@ def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
         raise api.ApiError(400, str(e))
 
 
+def delete_all(user_id: str):
+    jobs = list(user_id=user_id)
+
+    for job in jobs:
+        delete_one(job['cubegen_id'])
+
+
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
     job = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
     apps_v1_api = client.BatchV1Api()
@@ -266,7 +280,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     if "Error" in res:
         raise api.ApiError(400, res)
     res = res.replace("Awaiting generator configuration JSON from TTY...", "")
-    res = res.replace("Cube generator configuration loaded from TTY.", "")
+    res = res.replace(f"Cube generator configuration loaded from /user-code/{job['cubegen_id']}.yaml.", "")
     res = res.replace("'", '"')
     try:
         processing_request = json.loads(res)
