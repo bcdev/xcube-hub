@@ -234,7 +234,7 @@ class _GeoServer(GeoServiceBase):
             try:
                 layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
                 if 'get_layer error' in layer:
-                    raise api.ApiError(404, f'Cannot find collection {collection_id} in database {database_id}. ' + layer)
+                    raise api.ApiError(400, layer)
             except Exception as e:
                 raise api.ApiError(400, str(e))
 
