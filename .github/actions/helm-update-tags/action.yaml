@@ -1,0 +1,24 @@
+name: 'Set Helm Tags'
+description: 'Setting Helm Tags'
+inputs:
+  app:
+    description: 'Application to change the tag'
+    required: true
+  tgt:
+    description: 'Target stage (dev/stage/prod)'
+    required: true
+    default: 'dev'
+  tag:
+    description: 'Tag to use'
+    required: true
+  dir:
+    description: 'working directory'
+    required: false
+    default: './'
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      working-directory: ${{ inputs.dir }}
+      run: |
+        sed -i 's/${{ inputs.app }}-tag\s.*$/${{ inputs.app }}-tag ${{ inputs.app }}/g' values-${{ inputs.tgt }}.yaml
