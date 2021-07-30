@@ -87,13 +87,11 @@ jobs:
         if: ${{ github.event_name == 'release' && contains(steps.release.outputs.tag, 'dev') }}
         working-directory: ./k8s/cate/helm
         run: |
-          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-dev.yaml
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
       - name: update-version-release
         if: ${{ github.event_name == 'release' && !contains(steps.release.outputs.tag, 'dev') }}
         working-directory: ./k8s/cate/helm
         run: |
-          sed  -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-dev.yaml
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-prod.yaml
       - name: Pushes to another repository
