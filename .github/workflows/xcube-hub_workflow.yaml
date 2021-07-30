@@ -86,7 +86,7 @@ jobs:
       - run: ls -al
       - name: update-version-prerelease
         if: ${{ github.event.release == 'released' ||  github.event.release == 'prereleased' }}
-        uses: dzelge/helm-update-versions-tags
+        uses: dzelge/helm-update-versions-tags@main
         with:
           app: xcube-hub
           tgt: stage
@@ -94,7 +94,7 @@ jobs:
           dir: ./cate/helm
       - name: update-version-release
         if: ${{ github.event.release == 'released' }}
-        uses: dzelge/helm-update-versions-tags
+        uses: dzelge/helm-update-versions-tags@main
         with:
           app: xcube-hub
           tgt: prod
