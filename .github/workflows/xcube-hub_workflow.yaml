@@ -110,8 +110,9 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source-directory: './k8s'
+          source-directory: 'k8s'
           destination-github-username: 'bc-org'
           destination-repository-name: 'k8s-configs'
           user-email: bcdev@brockmann-consult.de
           target-branch: main
+          commit-message: ${{ github.event.release }}. Set version to ${{ steps.release.outputs.tag }}
