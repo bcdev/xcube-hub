@@ -75,10 +75,6 @@ jobs:
     #    needs: build-docker-image
     name: update-xcube-hub-tag
     steps:
-#      - name: git-checkout
-#        uses: actions/checkout@v2
-#        with:
-#          path: main
       - uses: actions/checkout@v2
         with:
           repository: bc-org/k8s-configs
