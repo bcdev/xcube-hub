@@ -88,28 +88,20 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - name: update-version-prerelease
         if: ${{ github.event.release == 'released' ||  github.event.release == 'prereleased' }}
-        uses: dzelge/helm-update-versions-tags@main
-        with:
-          app: xcube-hub
-          tgt: stage
-          tag: ${{ steps.release.outputs.tag }}
-          dir: ./cate/helm
+        working-directory: ./cate/helm
+        run: |
+          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
       - name: update-version-release
         if: ${{ github.event.release == 'released' }}
-        uses: dzelge/helm-update-versions-tags@main
-        with:
-          app: xcube-hub
-          tgt: prod
-          tag: ${{ steps.release.outputs.tag }}
-          dir: ./cate/helm
+        working-directory: ./cate/helm
+        run: |
+          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
+          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-prod.yaml
       - name: update-version-push
         if: ${{ github.event_name == 'push' }}
-        uses: dzelge/helm-update-version-tags@v0.1.0
-        with:
-          app: xcube-hub
-          tgt: dev
-          tag: latest
-          dir: ./cate/helm
+        working-directory: ./cate/helm
+        run: |
+          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag latest/g' values-dev.yaml
       - name: Pushes to another repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
