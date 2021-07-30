@@ -213,7 +213,7 @@ class TestGeoServiceOps(unittest.TestCase):
         with self.assertRaises(api.ApiError) as e:
             self._geoservice.get_layer(database_id='test', collection_id='test')
 
-        self.assertEqual('Cannot find collection test in database test. get_layer error: bla', str(e.exception))
+        self.assertEqual('get_layer error: bla', str(e.exception))
 
         def side_effect(layer_name, workspace):
             raise Exception("Error: test")
