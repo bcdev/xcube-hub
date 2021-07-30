@@ -81,7 +81,8 @@ jobs:
 #          path: main
       - uses: actions/checkout@v2
         with:
-          name: bc-org/k8s-configs
+          repository: bc-org/k8s-configs
+          token: ${{ secrets.API_TOKEN_GITHUB }}
           path: k8s
       - run: ls -al k8s
       - name: get-release-tag
