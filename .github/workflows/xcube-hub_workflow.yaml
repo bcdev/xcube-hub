@@ -96,7 +96,7 @@ jobs:
           dir: ./cate/helm
       - name: update-version-release
         if: ${{ github.event.release == 'released' }}
-        uses: dzelge/helm-update-versions-tags
+        uses: dzelge/helm-update-versions-tags@main
         with:
           app: xcube-hub
           tgt: prod

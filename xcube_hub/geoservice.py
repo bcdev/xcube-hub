@@ -233,8 +233,6 @@ class _GeoServer(GeoServiceBase):
             layer_name = database_id + '_' + collection_id
             try:
                 layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
-                if 'get_layer error' in layer:
-                    raise api.ApiError(400, layer)
             except Exception as e:
                 raise api.ApiError(400, str(e))
 
@@ -294,6 +292,7 @@ class _GeoServer(GeoServiceBase):
                                               pg_password=self._pg_password)
 
             pg_table = database_id + '_' + collection_id
+
             self._geo.publish_featurestore(workspace=database_id, store_name=database_id, pg_table=pg_table)
             return self.get_layer(collection_id=collection_id, database_id=database_id)
         except Exception as e:
