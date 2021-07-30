@@ -83,27 +83,27 @@ jobs:
         with:
           repository: bc-org/k8s-configs
           token: ${{ secrets.API_TOKEN_GITHUB }}
-          path: k8s
-      - run: ls -al k8s
+      - run: ls -al
       - name: get-release-tag
         id: release
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - name: update-version-prerelease
         if: ${{ github.event.release == 'released' ||  github.event.release == 'prereleased' }}
-        working-directory: ./k8s/cate/helm
+        working-directory: ./cate/helm
         run: |
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
       - name: update-version-release
         if: ${{ github.event.release == 'released' }}
-        working-directory: ./k8s/cate/helm
+        working-directory: ./cate/helm
         run: |
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-prod.yaml
       - name: update-version-push
         if: ${{ github.event_name == 'push' }}
-        working-directory: ./k8s/cate/helm
+        working-directory: ./cate/helm
         run: |
-          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag latest/g' values-dev.yaml
+          sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag testing/g' values-dev.yaml
+          echo
       - name: Pushes to another repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
