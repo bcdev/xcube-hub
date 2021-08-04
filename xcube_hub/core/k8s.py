@@ -167,6 +167,7 @@ def create_deployment_object(name: str, user_id: str,
     container = client.V1Container(
         name=container_name,
         image=image,
+        resources=client.V1ResourceRequirements(limits={'memory': '12Gi'}, requests={'memory': '2Gi'}),
         command=command,
         env=envs,
         image_pull_policy="Always",
