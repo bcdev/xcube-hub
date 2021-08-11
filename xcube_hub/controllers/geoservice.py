@@ -37,6 +37,19 @@ def _raise_for_no_access(database_id, geodb_user, token):
         raise api.ApiError(401, f'The user {geodb_user} does not have access to database {database_id}')
 
 
+def get_all_collections(token_info: Dict) -> Tuple[AnyDict, int]:
+    try:
+        token = token_info['token']
+        geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
+
+        geo = GeoService.instance()
+        collections = geo.get_layers(fmt='geopandas')
+
+        return api.ApiResponse.success(collections)
+    except api.ApiError as e:
+        return e.response
+
+
 def get_collections(database_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
         token = token_info['token']
