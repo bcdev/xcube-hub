@@ -12,7 +12,7 @@ class GeoServiceBase(ABC):
     _provider = None
 
     @abstractmethod
-    def get_layers(self, database_id: str, fmt: str) -> dict:
+    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
         :param database_id:
@@ -61,7 +61,7 @@ class GeoService(GeoServiceBase):
     def __init__(self, provider: str, **kwargs):
         self._provider = self._new_service(provider=provider, **kwargs)
 
-    def get_layers(self, database_id: str, fmt: str) -> dict:
+    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
         :param database_id:
@@ -173,7 +173,7 @@ class _GeoServer(GeoServiceBase):
         for prop, value in vars(self).items():
             _raise_for_none(prop, value)
 
-    def get_layers(self, database_id: str, fmt: str = 'geopandas') -> Sequence[Dict]:
+    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> Sequence[Dict]:
         """
         Get a key value
         :param fmt: return format [geopandas, json]
@@ -321,10 +321,12 @@ class _GeoServiceMock(GeoServiceBase):
     def __init__(self):
         super().__init__()
 
-    def get_layers(self, database_id: str, fmt: str) -> dict:
+    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
+        :param fmt: Format of return
         :param database_id:
+
         :return: Collection
         """
 

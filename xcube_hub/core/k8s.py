@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, Dict
 from kubernetes import client
 from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError, ApiValueError
 from xcube_hub.typedefs import JsonObject
@@ -160,13 +160,16 @@ def create_deployment_object(name: str, user_id: str,
                              envs: Optional[Sequence] = None,
                              volume_mounts: Optional[Sequence] = None,
                              volumes: Optional[Sequence] = None,
-                             init_containers: Optional[Sequence] = None):
+                             init_containers: Optional[Sequence] = None,
+                             limits: Optional[Dict] = None,
+                             requests: Optional[Dict] = None):
     # Configureate Pod template container
     envs = [] if not envs else envs
 
     container = client.V1Container(
         name=container_name,
         image=image,
+        resources=client.V1ResourceRequirements(limits=limits, requests=requests),
         command=command,
         env=envs,
         image_pull_policy="Always",

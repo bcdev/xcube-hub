@@ -62,8 +62,8 @@ def launch_cate(user_id: str) -> JsonObject:
 
         cate_image = util.maybe_raise_for_env("CATE_IMG")
         cate_version = util.maybe_raise_for_env("CATE_VERSION")
-        # cate_command = util.maybe_raise_for_env("CATE_COMMAND", default=None)
-        # cate_env_activate_command = util.maybe_raise_for_env("CATE_ENV_ACTIVATE_COMMAND", default=None)
+        cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
+        cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
         cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
         cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", "cate")
         cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH",
@@ -140,6 +140,9 @@ def launch_cate(user_id: str) -> JsonObject:
             },
         ]
 
+        limits = {'memory': cate_mem_limit}
+        requests = {'memory': cate_mem_request}
+
         deployment = k8s.create_deployment_object(name=user_id + '-cate',
                                                   user_id=user_id,
                                                   container_name=user_id + '-cate',
@@ -149,7 +152,9 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   command=command,
                                                   volumes=volumes,
                                                   volume_mounts=volume_mounts,
-                                                  init_containers=init_containers)
+                                                  init_containers=init_containers,
+                                                  limits=limits,
+                                                  requests=requests)
 
         # Make create_if_exists test for broken pods
         # pod_status = get_status(user_id)

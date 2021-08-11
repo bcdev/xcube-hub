@@ -721,6 +721,38 @@ paths:
       tags:
         - callbacks
       x-openapi-router-controller: xcube_hub.controllers.callbacks
+  /services/xcube_geoserv/collections:
+    get:
+      description: Manage GeoDB Collections
+      operationId: get_all_collections
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiCollectionResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Api Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+          description: Client ID not found
+      summary: Get authorization token
+      security:
+        - oAuthorization:
+            - manage:collections
+      tags:
+        - geoservice
+      x-openapi-router-controller: xcube_hub.controllers.geoservice
   /services/xcube_geoserv/databases/{database_id}/collections:
     get:
       description: Manage GeoDB Collections

@@ -1,11 +1,13 @@
-## Changes in v2.1.1 (in development)
+## Changes in v2.1.2 (in development)
+
+## Changes in v2.1.1
 
 ### New Features
 
 - Added an operation PUT cubegens/code using content type multipart/form-data. This allows xcube-gen2 to upload the cube 
   configuration as JSON file and user code as a zipped archive.
 - The flask server can now be configured to run in debug mode using the en var
-
+- Added new operation get_all_collections for geoservices
 
 ### Fixes
 

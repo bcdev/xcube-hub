@@ -71,6 +71,8 @@ jobs:
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
   update-version-xcube-hub:
+    env:
+      PUSH: 0
     runs-on: ubuntu-latest
     needs: build-docker-image
     name: update-xcube-hub-tag
@@ -95,6 +97,7 @@ jobs:
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-stage.yaml
           sed -i 's/xcube-hub-tag\s.*$/xcube-hub-tag ${{ steps.release.outputs.tag }}/g' values-prod.yaml
       - name: Pushes to another repository
+        if: ${{ env.PUSH == 1 }}
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
