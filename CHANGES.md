@@ -1,4 +1,6 @@
-## Changes in v2.1.1 (in development)
+## Changes in v2.1.2 (in development)
+
+## Changes in v2.1.1
 
 ### New Features
 
