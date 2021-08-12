@@ -59,7 +59,7 @@ class TestGeoServerController(BaseTestCase):
 
         self.access_mock(m)
         # Test whether the controller returns an error when the service raises an exception
-        def side_effect(database_id, fmt):
+        def side_effect(user_id, database_id, fmt):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.get_layers = side_effect
@@ -68,6 +68,17 @@ class TestGeoServerController(BaseTestCase):
 
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual("test", response.json['message'])
+
+    def test_get_all_collections(self, m):
+        self.access_mock(m)
+
+        # Test whether the controller works
+        self._geo._provider = Mock()
+        self._geo._provider.get_all_layers.return_value = {'layers': {'layer': [{'name': 'test_test'}]}}
+        response = self.client.open('/api/v2/services/xcube_geoserv/collections', headers=self._headers, method='GET')
+
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+        self.assertEqual(1, len(response.json['layers']['layer']))
 
     def test_get_collection(self, m):
         self.access_mock(m)
@@ -88,7 +99,7 @@ class TestGeoServerController(BaseTestCase):
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
 
         # Test whether the controller returns an error when the service raises an exception
-        def side_effect(database_id, collection_id):
+        def side_effect(user_id, database_id, collection_id):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.get_layer = side_effect
@@ -120,7 +131,7 @@ class TestGeoServerController(BaseTestCase):
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
 
         # Test whether the controller returns an error when the service raises an exception
-        def side_effect(database_id, collection_id):
+        def side_effect(user_id, database_id, collection_id):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.publish = side_effect
@@ -159,7 +170,7 @@ class TestGeoServerController(BaseTestCase):
         self.assert401(response, 'Response body is : ' + response.data.decode('utf-8'))
 
         # Test whether the controller returns an error when the service raises an exception
-        def side_effect(database_id, collection_id):
+        def side_effect(user_id, database_id, collection_id):
             raise api.ApiError(400, 'test')
 
         self._geo._provider.unpublish = side_effect

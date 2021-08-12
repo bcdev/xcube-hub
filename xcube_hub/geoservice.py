@@ -12,36 +12,48 @@ class GeoServiceBase(ABC):
     _provider = None
 
     @abstractmethod
-    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> dict:
+    def get_all_layers(self, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
-        :param database_id:
         :param fmt: return format [geopandas, json]
         :return: Collection
         """
 
     @abstractmethod
-    def get_layer(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def get_layers(self, user_id: str, database_id: str, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
+        :param database_id:
+        :param user_id
+        :param fmt: return format [geopandas, json]
+        :return: Collection
+        """
+
+    @abstractmethod
+    def get_layer(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
+        """
+        Get a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Collection
         """
 
     @abstractmethod
-    def publish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def publish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Set a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Collection
         """
 
     @abstractmethod
-    def unpublish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def unpublish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Delete a key
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Collection
@@ -61,45 +73,58 @@ class GeoService(GeoServiceBase):
     def __init__(self, provider: str, **kwargs):
         self._provider = self._new_service(provider=provider, **kwargs)
 
-    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> dict:
+    def get_all_layers(self, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
+        :param fmt: return format [geopandas, json]
+        :return: Collection
+        """
+
+        return self._provider.get_all_layers(fmt)
+
+    def get_layers(self, user_id: str, database_id: str, fmt: str = 'geopandas') -> dict:
+        """
+        Get a key value
+        :param user_id:
         :param database_id:
         :param fmt: return format [geopandas, json]
         :return: Collection
         """
 
-        return self._provider.get_layers(database_id, fmt)
+        return self._provider.get_layers(user_id, database_id, fmt)
 
-    def get_layer(self, collection_id, database_id: str) -> Optional[Collection]:
+    def get_layer(self, user_id, collection_id, database_id: str) -> Optional[Collection]:
         """
         Get a key value
+        :param user_id:
         :param database_id:
         :param collection_id:
         :return: Optional[Collection]
         """
 
-        return self._provider.get_layer(collection_id, database_id)
+        return self._provider.get_layer(user_id, collection_id, database_id)
 
-    def publish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def publish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Set a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Optional[Collection]
         """
 
-        return self._provider.publish(collection_id, database_id)
+        return self._provider.publish(user_id=user_id, collection_id=collection_id, database_id=database_id)
 
-    def unpublish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def unpublish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Set a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Optional[Collection]
         """
 
-        return self._provider.unpublish(collection_id, database_id)
+        return self._provider.unpublish(user_id=user_id, collection_id=collection_id, database_id=database_id)
 
     # noinspection PyMethodMayBeStatic
     def _new_service(self, provider: Optional[str] = None, **kwargs) -> "GeoServiceBase":
@@ -132,7 +157,7 @@ def _raise_for_none(name: str, value: Any):
         raise api.ApiError(400, f"Value {name} is None")
 
 
-class _GeoServer(GeoServiceBase):
+class _GeoServer(GeoServiceBase, ABC):
     f"""
     Redis key-value pair database implementation of KeyValueStore
     
@@ -152,8 +177,7 @@ class _GeoServer(GeoServiceBase):
                  pg_user: Optional[str] = None,
                  pg_password: Optional[str] = None,
                  pg_host: Optional[str] = None,
-                 pg_db: Optional[str] = None,
-                 **kwargs):
+                 pg_db: Optional[str] = None):
         super().__init__()
         try:
             from geo.Geoserver import Geoserver
@@ -173,18 +197,18 @@ class _GeoServer(GeoServiceBase):
         for prop, value in vars(self).items():
             _raise_for_none(prop, value)
 
-    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> Sequence[Dict]:
+    def get_all_layers(self, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
         :param fmt: return format [geopandas, json]
-        :param database_id:
         :return: Collection
         """
 
         try:
-            res = self._geo.get_layers(workspace=database_id)
+            res = self._geo.get_layers()
+
             if res['layers'] == '':
-                raise api.ApiError(404, f'No collections found in database {database_id}')
+                raise api.ApiError(404, f'No collections found')
 
             layers = res['layers']['layer']
 
@@ -202,17 +226,70 @@ class _GeoServer(GeoServiceBase):
 
                 for layer in layers:
                     name = layer['name']
-                    collection_id = name.replace(database_id + '_', '')
-                    collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+                    buff = name.split(':')
+                    collection = self.get_layer(user_id=buff[0], collection_id=buff[1])
                     for k, v in collection.to_dict().items():
                         layers_res[k].append(v)
             else:
                 layers_res = []
                 for layer in layers:
                     name = layer['name']
-                    collection_id = name.replace(database_id + '_', '')
-                    collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+                    buff = name.split(':')
+                    collection = self.get_layer(user_id=buff[0], collection_id=buff[1])
                     layers_res.append(collection.to_dict())
+
+                if len(layers_res) == 0:
+                    raise api.ApiError(404, f'No collections found')
+
+            return layers_res
+        except Exception as e:
+            raise api.ApiError(400, str(e))
+
+    def get_layers(self, user_id: str, database_id: Optional[str] = None, fmt: str = 'geopandas') -> Sequence[Dict]:
+        """
+        Get a key value
+        :param user_id:
+        :param fmt: return format [geopandas, json]
+        :param database_id:
+        :return: Collection
+        """
+
+        try:
+            res = self._geo.get_layers(workspace=user_id)
+            if res['layers'] == '':
+                raise api.ApiError(404, f'No collections found in workspace for user {user_id}')
+
+            layers = res['layers']['layer']
+
+            if fmt == 'geopandas':
+                layers_res = {
+                    "collection_id": [],
+                    "database": [],
+                    "default_style": [],
+                    "geojson_url": [],
+                    "href": [],
+                    "name": [],
+                    "preview_url": [],
+                    "wfs_url": []
+                }
+
+                for layer in layers:
+                    name = layer['name']
+                    if database_id is None or str(database_id) + '_' in name:
+                        collection_id = name.replace(database_id + '_', '') if database_id is not None else name
+                        collection = self.get_layer(user_id=user_id, collection_id=collection_id,
+                                                    database_id=database_id)
+                        for k, v in collection.to_dict().items():
+                            layers_res[k].append(v)
+            else:
+                layers_res = []
+                for layer in layers:
+                    name = layer['name']
+                    if database_id is None or str(database_id) + '_' in name:
+                        collection_id = name.replace(database_id + '_', '') if database_id is not None else name
+                        collection = self.get_layer(user_id=user_id, collection_id=collection_id,
+                                                    database_id=database_id)
+                        layers_res.append(collection.to_dict())
 
                 if len(layers_res) == 0:
                     raise api.ApiError(404, f'No collections found in database {database_id}')
@@ -221,18 +298,19 @@ class _GeoServer(GeoServiceBase):
         except Exception as e:
             raise api.ApiError(400, str(e))
 
-    def get_layer(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def get_layer(self, user_id: str, collection_id: str, database_id: Optional[str] = None) -> Optional[Collection]:
         """
         Get a key value
-        :param collection_id:
         :param database_id:
+        :param user_id:
+        :param collection_id:
         :return: Optional[Collection]
         """
 
         try:
-            layer_name = database_id + '_' + collection_id
+            layer_name = database_id + '_' + collection_id if database_id is not None else collection_id
             try:
-                layer = self._geo.get_layer(layer_name=layer_name, workspace=database_id)
+                layer = self._geo.get_layer(layer_name=layer_name, workspace=user_id)
                 if 'get_layer error' in layer:
                     raise api.ApiError(400, layer)
             except Exception as e:
@@ -241,28 +319,34 @@ class _GeoServer(GeoServiceBase):
             url = layer['layer']['resource']['href']
             r = requests.get(url, auth=(self._username, self._password))
             layer_wms = r.json()
-            bbox = layer_wms['featureType']['nativeBoundingBox']
-            srs = layer_wms['featureType']['srs']
 
-            preview_url = f"{self._url}/{database_id}/wms?service=WMS&version=1.1.0&request=GetMap&" \
-                          f"layers={database_id}:{layer_name}&" \
-                          f"bbox={bbox['minx']},{bbox['miny']},{bbox['maxx']},{bbox['maxy']}&" \
-                          f"width=690&height=768&srs={srs}&styles=&format=application/openlayers"
+            if 'featureType' in layer_wms:
+                bbox = layer_wms['featureType']['nativeBoundingBox']
+                srs = layer_wms['featureType']['srs']
 
-            geojson_url = f"{self._url}/{database_id}/ows?service=WFS&version=1.0.0&request=GetFeature&" \
-                          f"typeName={database_id}:{layer_name}&maxFeatures=10&outputFormat=application/json"
+                preview_url = f"{self._url}/{user_id}/wms?service=WMS&version=1.1.0&request=GetMap&" \
+                              f"layers={user_id}:{layer_name}&" \
+                              f"bbox={bbox['minx']},{bbox['miny']},{bbox['maxx']},{bbox['maxy']}&" \
+                              f"width=690&height=768&srs={srs}&styles=&format=application/openlayers"
+            else:
+                preview_url = f"{self._url}/{user_id}/wms?service=WMS&version=1.1.0&request=GetMap&" \
+                              f"layers={user_id}:{layer_name}&" \
+                              f"width=690&height=768&styles=&format=application/openlayers"
 
-            wfs_url = f"{self._url}/{database_id}/ows?service=WFS&" \
+            geojson_url = f"{self._url}/{user_id}/ows?service=WFS&version=1.0.0&request=GetFeature&" \
+                          f"typeName={user_id}:{layer_name}&maxFeatures=10&outputFormat=application/json"
+
+            wfs_url = f"{self._url}/{user_id}/ows?service=WFS&" \
                       f"version=1.0.0&" \
                       f"request=GetFeature&" \
-                      f"typeName={database_id}%3A{layer_name}&maxFeatures=10&" \
+                      f"typeName={user_id}%3A{layer_name}&maxFeatures=10&" \
                       f"outputFormat=application%2Fvnd.google-earth.kml%2Bxml"
 
             collection = Collection(
                 preview_url=preview_url,
                 collection_id=collection_id,
-                database=database_id,
-                name=collection_id.replace(database_id, ''),
+                database=database_id or 'None',
+                name=collection_id,
                 geojson_url=geojson_url,
                 wfs_url=wfs_url
             )
@@ -272,21 +356,22 @@ class _GeoServer(GeoServiceBase):
         except Exception as e:
             raise api.ApiError(400, str(e))
 
-    def publish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def publish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Set a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Optional[Collection]
         """
 
         try:
-            workspace = self._geo.get_workspace(workspace=database_id)
+            workspace = self._geo.get_workspace(workspace=user_id)
             if workspace is None:
-                self._geo.create_workspace(workspace=database_id)
+                self._geo.create_workspace(workspace=user_id)
 
                 self._geo.create_featurestore(store_name=database_id,
-                                              workspace=database_id,
+                                              workspace=user_id,
                                               host=self._pg_host,
                                               port=5432,
                                               db=self._pg_db,
@@ -295,23 +380,24 @@ class _GeoServer(GeoServiceBase):
 
             pg_table = database_id + '_' + collection_id
 
-            self._geo.publish_featurestore(workspace=database_id, store_name=database_id, pg_table=pg_table)
-            return self.get_layer(collection_id=collection_id, database_id=database_id)
+            self._geo.publish_featurestore(workspace=user_id, store_name=database_id, pg_table=pg_table)
+            return self.get_layer(user_id=user_id, collection_id=collection_id, database_id=database_id)
         except Exception as e:
             raise api.ApiError(400, str(e))
 
-    def unpublish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def unpublish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Delete a key
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return:
         """
 
         try:
-            collection = self.get_layer(collection_id=collection_id, database_id=database_id)
+            collection = self.get_layer(user_id=user_id, collection_id=collection_id, database_id=database_id)
             layer_name = database_id + '_' + collection_id
-            self._geo.delete_layer(layer_name=layer_name, workspace=database_id)
+            self._geo.delete_layer(layer_name=layer_name, workspace=user_id)
             return collection
         except Exception as e:
             raise api.ApiError(400, str(e))
@@ -321,9 +407,20 @@ class _GeoServiceMock(GeoServiceBase):
     def __init__(self):
         super().__init__()
 
-    def get_layers(self, database_id: Optional[str] = None, fmt: str = 'geopandas') -> dict:
+    def get_all_layers(self, fmt: str = 'geopandas') -> dict:
         """
         Get a key value
+        :param fmt: Format of return
+
+        :return: Collection
+        """
+
+        return {}
+
+    def get_layers(self, user_id: str, database_id: str, fmt: str = 'geopandas') -> dict:
+        """
+        Get a key value
+        :param user_id:
         :param fmt: Format of return
         :param database_id:
 
@@ -332,9 +429,10 @@ class _GeoServiceMock(GeoServiceBase):
 
         return {}
 
-    def get_layer(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def get_layer(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Get a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Collection
@@ -342,9 +440,10 @@ class _GeoServiceMock(GeoServiceBase):
 
         return None
 
-    def publish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def publish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Set a key value
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Collection
@@ -352,9 +451,10 @@ class _GeoServiceMock(GeoServiceBase):
 
         return None
 
-    def unpublish(self, collection_id: str, database_id: str) -> Optional[Collection]:
+    def unpublish(self, user_id: str, collection_id: str, database_id: str) -> Optional[Collection]:
         """
         Delete a key
+        :param user_id:
         :param collection_id:
         :param database_id:
         :return: Collection

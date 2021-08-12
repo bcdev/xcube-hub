@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 
 import requests
 from requests import HTTPError
@@ -39,25 +39,25 @@ def _raise_for_no_access(database_id, geodb_user, token):
 
 def get_all_collections(token_info: Dict) -> Tuple[AnyDict, int]:
     try:
-        token = token_info['token']
-        geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
-
         geo = GeoService.instance()
-        collections = geo.get_layers(fmt='geopandas')
+        collections = geo.get_all_layers(fmt='geopandas')
 
         return api.ApiResponse.success(collections)
     except api.ApiError as e:
         return e.response
 
 
-def get_collections(database_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
+def get_collections(token_info: Dict, database_id: Optional[str] = None) -> Tuple[AnyDict, int]:
     try:
         token = token_info['token']
         geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
-        _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
+        if database_id is not None and database_id != 'all':
+            _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
+
         geo = GeoService.instance()
-        collections = geo.get_layers(database_id=database_id, fmt='geopandas')
+        database_id = None if database_id == 'all' else database_id
+        collections = geo.get_layers(user_id=geodb_user, database_id=database_id, fmt='geopandas')
 
         return api.ApiResponse.success(collections)
     except api.ApiError as e:
@@ -72,7 +72,7 @@ def get_collection(collection_id: str, database_id: str, token_info: Dict) -> Tu
         _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
 
         geo = GeoService.instance()
-        collection = geo.get_layer(collection_id=collection_id, database_id=database_id)
+        collection = geo.get_layer(user_id=geodb_user, collection_id=collection_id, database_id=database_id)
 
         return api.ApiResponse.success(collection)
     except api.ApiError as e:
@@ -90,7 +90,7 @@ def put_collection(database_id: str, body, token_info: Dict) -> Tuple[AnyDict, i
         if 'collection_id' not in body:
             raise api.ApiError(400, "put_collection needs a collection_id")
 
-        res = geo.publish(collection_id=body['collection_id'], database_id=database_id)
+        res = geo.publish(user_id=geodb_user, collection_id=body['collection_id'], database_id=database_id)
 
         return api.ApiResponse.success(res.to_dict())
     except api.ApiError as e:
@@ -105,7 +105,7 @@ def delete_collection(database_id: str, collection_id: str, token_info: Dict) ->
         _raise_for_no_access(database_id=database_id, geodb_user=geodb_user, token=token)
 
         geo = GeoService.instance()
-        collection = geo.unpublish(collection_id=collection_id, database_id=database_id)
+        collection = geo.unpublish(user_id=geodb_user, collection_id=collection_id, database_id=database_id)
 
         return api.ApiResponse.success(collection)
     except api.ApiError as e:
