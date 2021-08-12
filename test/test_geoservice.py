@@ -68,11 +68,11 @@ _EXPECTED_LAYER = {
     'collection_id': 'test',
     'database': 'test',
     'default_style': None,
-    'geojson_url': 'https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:test_test&maxFeatures=10&outputFormat=application/json',
+    'geojson_url': 'https://test/geoserver/drwho/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=drwho:test_test&maxFeatures=10&outputFormat=application/json',
     'href': None,
-    'name': '',
-    'preview_url': 'https://test/geoserver/test/wms?service=WMS&version=1.1.0&request=GetMap&layers=test:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers',
-    'wfs_url': 'https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml'
+    'name': 'test',
+    'preview_url': 'https://test/geoserver/drwho/wms?service=WMS&version=1.1.0&request=GetMap&layers=drwho:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers',
+    'wfs_url': 'https://test/geoserver/drwho/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=drwho%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml'
 }
 
 
@@ -80,11 +80,11 @@ _EXPECTED_LAYER_GPD_FORMAT = {
     'collection_id': ['test'],
     'database': ['test'],
     'default_style': [None],
-    'geojson_url': ['https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test:test_test&maxFeatures=10&outputFormat=application/json'],
+    'geojson_url': ['https://test/geoserver/drwho/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=drwho:test_test&maxFeatures=10&outputFormat=application/json'],
     'href': [None],
-    'name': [''],
-    'preview_url': ['https://test/geoserver/test/wms?service=WMS&version=1.1.0&request=GetMap&layers=test:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers'],
-    'wfs_url': ['https://test/geoserver/test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml']
+    'name': ['test'],
+    'preview_url': ['https://test/geoserver/drwho/wms?service=WMS&version=1.1.0&request=GetMap&layers=drwho:test_test&bbox=-20037508.3428,-25819498.5135,20037508.3428,25819498.5135&width=690&height=768&srs=EPSG:900913&styles=&format=application/openlayers'],
+    'wfs_url': ['https://test/geoserver/drwho/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=drwho%3Atest_test&maxFeatures=10&outputFormat=application%2Fvnd.google-earth.kml%2Bxml']
 }
 
 
@@ -169,17 +169,18 @@ class TestGeoServiceOps(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_layers(self, m):
+        self.maxDiff = None
         # Test whether call succeeds
-        self._geoservice._provider._geo.get_layers.return_value = {'layers': {'layer': [{'name': 'test'}]}}
-        self._geoservice._provider._geo.get_layer.return_value = {'layer': {'name': 'test', 'resource':
+        self._geoservice._provider._geo.get_layers.return_value = {'layers': {'layer': [{'name': 'test_test'}]}}
+        self._geoservice._provider._geo.get_layer.return_value = {'layer': {'name': 'test_test', 'resource':
             {'href': 'https://test/geoserver'}}}
 
         m.get('https://test/geoserver', json=_FTYPE)
 
-        res = self._geoservice.get_layers(database_id='test', fmt='json')
+        res = self._geoservice.get_layers(user_id='drwho', database_id='test', fmt='json')
         self.assertDictEqual(_EXPECTED_LAYER, res[0])
 
-        res = self._geoservice.get_layers(database_id='test', fmt='geopandas')
+        res = self._geoservice.get_layers(user_id='drwho', database_id='test', fmt='geopandas')
         self.assertDictEqual(_EXPECTED_LAYER_GPD_FORMAT, res)
 
         def side_effect(workspace):
@@ -189,7 +190,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.get_layers = side_effect
 
         with self.assertRaises(api.ApiError) as e:
-            self._geoservice.get_layers(database_id='test', fmt='json')
+            self._geoservice.get_layers(user_id='drwho', database_id='test', fmt='json')
 
         self.assertEqual('Error: test', str(e.exception))
 
@@ -198,10 +199,10 @@ class TestGeoServiceOps(unittest.TestCase):
         # Test whether call succeeds
         m.get('https://test', json=_FTYPE)
         self._geoservice._provider._geo.get_layer.return_value = {'layer': {
-            'name': 'test', 'resource': {'href': 'https://test'}}
+            'name': 'drwho', 'resource': {'href': 'https://test'}}
         }
 
-        res = self._geoservice.get_layer(database_id='test', collection_id='test')
+        res = self._geoservice.get_layer(user_id='drwho', database_id='test', collection_id='test')
 
         self.assertIsInstance(res, Collection)
         self.maxDiff = None
@@ -211,7 +212,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.get_layer.return_value = 'get_layer error: bla'
 
         with self.assertRaises(api.ApiError) as e:
-            self._geoservice.get_layer(database_id='test', collection_id='test')
+            self._geoservice.get_layer(user_id='drwho', database_id='test', collection_id='test')
 
         self.assertEqual('get_layer error: bla', str(e.exception))
 
@@ -222,7 +223,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.get_layer = side_effect
 
         with self.assertRaises(api.ApiError) as e:
-            self._geoservice.get_layer(database_id='test', collection_id='test')
+            self._geoservice.get_layer(user_id='drwho', database_id='test', collection_id='test')
 
         self.assertEqual('Error: test', str(e.exception))
 
@@ -236,7 +237,7 @@ class TestGeoServiceOps(unittest.TestCase):
             'name': 'test', 'resource': {'href': 'https://test'}}
         }
 
-        res = self._geoservice.publish(database_id='test', collection_id='test')
+        res = self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
 
         self._geoservice._provider._geo.create_workspace.assert_not_called()
@@ -246,7 +247,7 @@ class TestGeoServiceOps(unittest.TestCase):
         # Test whether call succeeds when workspace has to be created
         self._geoservice._provider._geo.get_workspace.return_value = None
 
-        res = self._geoservice.publish(database_id='test', collection_id='test')
+        res = self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
 
         self._geoservice._provider._geo.create_workspace.assert_called_once()
         self._geoservice._provider._geo.create_featurestore.assert_called_once()
@@ -258,7 +259,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.publish_featurestore = side_effect
 
         with self.assertRaises(api.ApiError) as e:
-            self._geoservice.publish(database_id='test', collection_id='test')
+            self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
 
         self.assertEqual("Error: test", str(e.exception))
 
@@ -271,7 +272,7 @@ class TestGeoServiceOps(unittest.TestCase):
             'name': 'test', 'resource': {'href': 'https://test'}}
         }
 
-        res = self._geoservice.unpublish(database_id='test', collection_id='test')
+        res = self._geoservice.unpublish(user_id='drwho', database_id='test', collection_id='test')
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
 
         def side_effect(workspace, layer_name):
@@ -280,7 +281,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.delete_layer = side_effect
 
         with self.assertRaises(api.ApiError) as e:
-            self._geoservice.unpublish(database_id='test', collection_id='test')
+            self._geoservice.unpublish(user_id='drwho', database_id='test', collection_id='test')
 
         self.assertEqual("Error: test", str(e.exception))
 
