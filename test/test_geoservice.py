@@ -237,6 +237,7 @@ class TestGeoServiceOps(unittest.TestCase):
             'name': 'test', 'resource': {'href': 'https://test'}}
         }
 
+        self._geoservice._provider._geo.get_featurestore.return_value = ''
         self._geoservice._provider._geo.publish_featurestore.return_value = None
         res = self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
