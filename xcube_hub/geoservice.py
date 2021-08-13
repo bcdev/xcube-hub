@@ -206,6 +206,8 @@ class _GeoServer(GeoServiceBase, ABC):
 
         try:
             res = self._geo.get_layers()
+            if 'Error' in res:
+                raise api.ApiError(400, res)
 
             if res['layers'] == '':
                 raise api.ApiError(404, f'No collections found')
@@ -370,6 +372,9 @@ class _GeoServer(GeoServiceBase, ABC):
             if workspace is None:
                 self._geo.create_workspace(workspace=user_id)
 
+            feature_store = self._geo.get_featurestore(store_name=database_id, workspace=user_id)
+
+            if feature_store is None:
                 self._geo.create_featurestore(store_name=database_id,
                                               workspace=user_id,
                                               host=self._pg_host,
@@ -380,7 +385,11 @@ class _GeoServer(GeoServiceBase, ABC):
 
             pg_table = database_id + '_' + collection_id
 
-            self._geo.publish_featurestore(workspace=user_id, store_name=database_id, pg_table=pg_table)
+            res = self._geo.publish_featurestore(workspace=user_id, store_name=database_id, pg_table=pg_table)
+
+            if res is not None:
+                raise api.ApiError(400, res)
+
             return self.get_layer(user_id=user_id, collection_id=collection_id, database_id=database_id)
         except Exception as e:
             raise api.ApiError(400, str(e))
@@ -397,7 +406,9 @@ class _GeoServer(GeoServiceBase, ABC):
         try:
             collection = self.get_layer(user_id=user_id, collection_id=collection_id, database_id=database_id)
             layer_name = database_id + '_' + collection_id
-            self._geo.delete_layer(layer_name=layer_name, workspace=user_id)
+            res = self._geo.delete_layer(layer_name=layer_name, workspace=user_id)
+            if res is not None:
+                raise api.ApiError(400, res)
             return collection
         except Exception as e:
             raise api.ApiError(400, str(e))

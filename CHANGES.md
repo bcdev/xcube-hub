@@ -1,6 +1,16 @@
+## Changes in v2.1.3 (in development)
+
+### New Features
+
+### Fixes
+
+- The feature store is now created independently from the workspace
+- Improved error messages from the Geoserver (i.e. no empty ones)
+- Updated geoserver-rest version to 2.0.0 
+
 ## Changes in v2.1.2
 
-# New Features
+### New Features
 
 - Added new operation get_all_collections for geoservices
 

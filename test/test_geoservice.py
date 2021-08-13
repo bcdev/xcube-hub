@@ -237,6 +237,7 @@ class TestGeoServiceOps(unittest.TestCase):
             'name': 'test', 'resource': {'href': 'https://test'}}
         }
 
+        self._geoservice._provider._geo.publish_featurestore.return_value = None
         res = self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
 
@@ -250,7 +251,6 @@ class TestGeoServiceOps(unittest.TestCase):
         res = self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
 
         self._geoservice._provider._geo.create_workspace.assert_called_once()
-        self._geoservice._provider._geo.create_featurestore.assert_called_once()
         self._geoservice._provider._geo.publish_featurestore.assert_called()
 
         def side_effect(workspace, store_name, pg_table):
@@ -271,6 +271,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.get_layer.return_value = {'layer': {
             'name': 'test', 'resource': {'href': 'https://test'}}
         }
+        self._geoservice._provider._geo.delete_layer.return_value = None
 
         res = self._geoservice.unpublish(user_id='drwho', database_id='test', collection_id='test')
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
