@@ -30,7 +30,7 @@ dependencies:
   - pip:
       # Required
       - connexion[swagger-ui]
-      - geoserver-rest
+      - git+https://github.com/bc-org/geoserver-rest
       - plyvel
       - polling2
       - redis
