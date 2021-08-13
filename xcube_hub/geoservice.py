@@ -355,6 +355,8 @@ class _GeoServer(GeoServiceBase, ABC):
 
             return collection
 
+        except api.ApiError as e:
+            raise e
         except Exception as e:
             raise api.ApiError(400, str(e))
 
@@ -407,9 +409,11 @@ class _GeoServer(GeoServiceBase, ABC):
             collection = self.get_layer(user_id=user_id, collection_id=collection_id, database_id=database_id)
             layer_name = database_id + '_' + collection_id
             res = self._geo.delete_layer(layer_name=layer_name, workspace=user_id)
-            if res is not None:
+            if 'Error' in res:
                 raise api.ApiError(400, res)
             return collection
+        except api.ApiError as e:
+            raise e
         except Exception as e:
             raise api.ApiError(400, str(e))
 

@@ -272,7 +272,7 @@ class TestGeoServiceOps(unittest.TestCase):
         self._geoservice._provider._geo.get_layer.return_value = {'layer': {
             'name': 'test', 'resource': {'href': 'https://test'}}
         }
-        self._geoservice._provider._geo.delete_layer.return_value = None
+        self._geoservice._provider._geo.delete_layer.return_value = 'bla'
 
         res = self._geoservice.unpublish(user_id='drwho', database_id='test', collection_id='test')
         self.assertDictEqual(_EXPECTED_LAYER, res.to_dict())
