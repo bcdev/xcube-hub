@@ -374,7 +374,7 @@ class _GeoServer(GeoServiceBase, ABC):
 
             feature_store = self._geo.get_featurestore(store_name=database_id, workspace=user_id)
 
-            if feature_store is None:
+            if 'Error' in feature_store:
                 self._geo.create_featurestore(store_name=database_id,
                                               workspace=user_id,
                                               host=self._pg_host,
