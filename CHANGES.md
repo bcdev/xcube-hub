@@ -1,6 +1,14 @@
+## Changes in v2.1.3 (in development)
+
+### New Features
+
+### Fixes
+
+- The feature store is now created independently from the workspace 
+
 ## Changes in v2.1.2
 
-# New Features
+### New Features
 
 - Added new operation get_all_collections for geoservices
 

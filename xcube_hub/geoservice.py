@@ -370,6 +370,9 @@ class _GeoServer(GeoServiceBase, ABC):
             if workspace is None:
                 self._geo.create_workspace(workspace=user_id)
 
+            feature_store = self._geo.get_featurestore(store_name=database_id, workspace=user_id)
+
+            if feature_store is None:
                 self._geo.create_featurestore(store_name=database_id,
                                               workspace=user_id,
                                               host=self._pg_host,
