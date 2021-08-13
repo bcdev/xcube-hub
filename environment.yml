@@ -5,13 +5,16 @@ channels:
 dependencies:
   # Required
   - oauthlib
+  - babel
   - boto3
   - click
   - connexion
+  - docutils
   - flask
   - flask-cors
   - flask-oidc
-  - geoserver-rest
+  - gdal
+  - packaging
   - pandas
   - pip
   - python-dateutil
@@ -27,6 +30,7 @@ dependencies:
   - pip:
       # Required
       - connexion[swagger-ui]
+      - geoserver-rest
       - plyvel
       - polling2
       - redis
