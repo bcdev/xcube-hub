@@ -20,6 +20,7 @@ RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get -y install apt-utils
 RUN apt-get -y install curl unzip build-essential iputils-ping vim
+RUN apt-get -y remove patch
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 
 USER ${XCUBE_USER_NAME}
