@@ -388,7 +388,7 @@ class _GeoServer(GeoServiceBase, ABC):
             res = self._geo.publish_featurestore(workspace=user_id, store_name=database_id, pg_table=pg_table)
 
             if res is not None:
-                raise api.ApiError(400, res + " Collection might already exist.")
+                raise api.ApiError(400, res)
 
             return self.get_layer(user_id=user_id, collection_id=collection_id, database_id=database_id)
         except Exception as e:
