@@ -95,7 +95,7 @@ jobs:
           app: xcube-hub
           tgt: dev
           tag: test
-#          dir: ./k8s/cate/helm
+          dir: ./k8s/cate/helm
 #      - name: update-version-prerelease
 #        if: ${{ github.event_name == 'release' && contains(steps.release.outputs.tag, 'dev') }}
 #        working-directory: ./k8s/cate/helm
