@@ -93,6 +93,7 @@ jobs:
         uses: dzelge/helm-update-version-tags@main
         with:
           app: xcube-hub
+          if: ${{ github.event_name == 'release' && contains(steps.release.outputs.tag, 'dev') }}
           tgt: dev
           tag: test
           dir: ./k8s/cate/helm
