@@ -128,7 +128,7 @@ jobs:
           phase: ${{ steps.deployment-phase.outputs.phase }}
           delimiter: ' '
           tag: ${{ steps.release.outputs.tag }}
-          dir: ./k8s/xcube-gen/helm
+          working-directory: ./k8s/xcube-gen/helm
       - name: cat-result
         working-directory: ./k8s/xcube-gen/helm
         run: |
