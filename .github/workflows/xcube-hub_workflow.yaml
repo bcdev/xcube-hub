@@ -87,38 +87,40 @@ jobs:
       - name: get-release-tag
         id: release
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      - name: get-deployment-stage
-        id: stage
+      - name: get-deployment-phase
+        id: deployment-phase
         run: |
           if [[ "${{ github.event_name }}" == "release" && "${{ steps.release.outputs.tag }}" == *"dev"* ]]
           then
-            echo ::set-output name=stage::stage
+            echo ::set-output name=phase::stage
           elif [[ "${{ github.event_name }}" == "release" && "${{ steps.release.outputs.tag }}" != *"dev"* ]]
           then
-            echo ::set-output name=stage::prod
+            echo ::set-output name=phase::prod
           elif [[ "${{ steps.release.outputs.tag }}" == *"master"* || "${{ steps.release.outputs.tag }}" == *"main"* ]]
           then
-            echo ::set-output name=stage::dev
+            echo ::set-output name=phase::dev
           else
-            echo ::set-output name=stage::ingnore
+            echo ::set-output name=phase::ingnore
           fi
       - name: info
         run: |
           echo "Event: ${{ github.event_name }}"
-          echo "Deployment Stage: ${{ steps.stage.outputs.stage }}"
+          echo "Deployment Stage: ${{ steps.deployment-phase.outputs.phase }}"
           echo "Release Tag: ${{ steps.release.outputs.tag }}"
       - name: set-version-tag-cate
-        uses: dzelge/helm-update-version-tags@main
+        uses: bc-org/update-application-version-tags@main
         with:
           app: xcube-hub
-          tgt: ${{ steps.stage.outputs.stage }}
+          phase: ${{ steps.deployment-phase.outputs.phase }}
+          delimiter: ' '
           tag: ${{ steps.release.outputs.tag }}
-          dir: ./k8s/cate/helm
+          working-directory: ./k8s/cate/helm
       - name: set-version-tag-xcube-gen
-        uses: dzelge/helm-update-version-tags@main
+        uses: bc-org/update-application-version-tags@main
         with:
           app: xcube-hub
-          tgt: ${{ steps.stage.outputs.stage }}
+          phase: ${{ steps.deployment-phase.outputs.phase }}
+          delimiter: ' '
           tag: ${{ steps.release.outputs.tag }}
           dir: ./k8s/xcube-gen/helm
       - name: Pushes to another repository
