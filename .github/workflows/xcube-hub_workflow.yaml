@@ -93,14 +93,17 @@ jobs:
           if [[ "${{ github.event_name }}" == "release" && "${{ steps.release.outputs.tag }}" == *"dev"* ]]
           then
             echo ::set-output name=phase::stage
+            echo ::set-output name=tag::${{ steps.release.outputs.tag }}
           elif [[ "${{ github.event_name }}" == "release" && "${{ steps.release.outputs.tag }}" != *"dev"* ]]
           then
             echo ::set-output name=phase::prod
+            echo ::set-output name=tag::${{ steps.release.outputs.tag }}
           elif [[ "${{ steps.release.outputs.tag }}" == *"master"* || "${{ steps.release.outputs.tag }}" == *"main"* ]]
           then
             echo ::set-output name=phase::dev
+            echo ::set-output name=tag::latest
           else
-            echo ::set-output name=phase::ingnore
+            echo ::set-output name=phase::ignore
           fi
       - name: info
         run: |
@@ -113,7 +116,7 @@ jobs:
           app: xcube-hub
           phase: ${{ steps.deployment-phase.outputs.phase }}
           delimiter: ' '
-          tag: ${{ steps.release.outputs.tag }}
+          tag: ${{ steps.deployment-phase.outputs.tag }}
           working-directory: ./k8s/cate/helm
       - name: cat-result
         working-directory: ./k8s/cate/helm
@@ -127,7 +130,7 @@ jobs:
           app: xcube-hub
           phase: ${{ steps.deployment-phase.outputs.phase }}
           delimiter: ' '
-          tag: ${{ steps.release.outputs.tag }}
+          tag: ${{ steps.deployment-phase.outputs.tag }}
           working-directory: ./k8s/xcube-gen/helm
       - name: cat-result
         working-directory: ./k8s/xcube-gen/helm
