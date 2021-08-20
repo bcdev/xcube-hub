@@ -6,7 +6,7 @@
 
 ### Fixes
 
-- The feature store is now created independently from the workspace
+- The feature store is now created independently of the workspace
 - Improved error messages from the Geoserver (i.e. no empty ones)
 - Updated geoserver-rest version to 2.0.0 
 
