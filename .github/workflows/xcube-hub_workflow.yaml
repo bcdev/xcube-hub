@@ -122,6 +122,7 @@ jobs:
           phase: ${{ steps.deployment-phase.outputs.phase }}
           delimiter: ' '
           tag: ${{ steps.deployment-phase.outputs.tag }}
+          hash: ${{ steps.get-hash.outputs.hash }}
           working-directory: ./k8s/cate/helm
       - name: cat-result
         working-directory: ./k8s/cate/helm
