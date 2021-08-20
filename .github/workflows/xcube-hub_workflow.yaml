@@ -87,8 +87,9 @@ jobs:
       - name: get-release-tag
         id: release
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      - name: get-deployment-phase
-        uses: ./github/actions/determine-phase
+      - name: deployment-phase
+        id: deployment-phase
+        uses: ./.github/actions/determine-phase
         with:
           event_name: ${{ github.event_name }}
           tag: ${{ steps.release.outputs.tag }}
@@ -97,6 +98,7 @@ jobs:
           echo "Event: ${{ github.event_name }}"
           echo "Deployment Stage: ${{ steps.deployment-phase.outputs.phase }}"
           echo "Release Tag: ${{ steps.release.outputs.tag }}"
+          echo "Deployemt Release Tag: ${{ steps.deployment-phase.outputs.tag }}"
       - name: set-version-tag-cate
         uses: bc-org/update-application-version-tags@main
         with:
