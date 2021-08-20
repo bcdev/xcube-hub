@@ -60,7 +60,7 @@ jobs:
         with:
           image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
           tags: master, latest
-          registry: ${{ envs.REG_NAME }}
+          registry: ${{ env.REG_NAME }}
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
       - uses: mr-smithers-excellent/docker-build-push@v5
@@ -69,7 +69,7 @@ jobs:
         with:
           image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
           tags: ${{ steps.release.outputs.tag }}
-          registry: ${{ envs.REG_NAME }}
+          registry: ${{ env.REG_NAME }}
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
       - name: docker-info
@@ -101,7 +101,7 @@ jobs:
       - name: get-hash
         id: get-hash
         run: |
-          HASH=$(skopeo inspect docker://${{ envs.REG_NAME }}/${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} | jq '.Digest')
+          HASH=$(skopeo inspect docker://${{ env.REG_NAME }}/${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} | jq '.Digest')
           if [[ "$HASH" == *"sha256"* ]]; then
             echo ::set-output name=hash::$HASH
           else
