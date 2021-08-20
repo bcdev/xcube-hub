@@ -74,9 +74,6 @@ jobs:
           registry: ${{ env.REG_NAME }}
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
-      - name: docker-info
-        run: |
-          docker images ${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} --no-trunc
   update-version-xcube-hub:
     env:
       PUSH: 1
@@ -96,7 +93,7 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - name: deployment-phase
         id: deployment-phase
-        uses: ./.github/actions/determine-phase
+        uses: bc-org/gha-determine-phase@v0.1
         with:
           event_name: ${{ github.event_name }}
           tag: ${{ steps.release.outputs.tag }}
@@ -133,7 +130,7 @@ jobs:
           head values-stage.yaml
           head values-prod.yaml
       - name: set-version-tag-xcube-gen
-        uses: bc-org/update-application-version-tags@main
+        uses: bc-org/gha-update-application-version-tags@main
         with:
           app: xcube-hub
           phase: ${{ steps.deployment-phase.outputs.phase }}
