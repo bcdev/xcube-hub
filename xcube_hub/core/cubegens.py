@@ -40,8 +40,11 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     sh_client_id = os.environ.get("SH_CLIENT_ID")
     sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
     sh_instance_id = os.environ.get("SH_INSTANCE_ID")
+
     xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
     xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
+    xcube_hash = os.getenv("XCUBE_HASH", default=None)
+
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
     cdsapi_url = os.getenv("CDSAPI_URL")
     cdsapi_key = os.getenv("CDSAPI_KEY")
@@ -51,7 +54,10 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     xcube_hub_cfg_datapools = util.maybe_raise_for_env("XCUBE_HUB_CFG_DATAPOOLS")
     stores_file = os.path.join(xcube_hub_cfg_dir, xcube_hub_cfg_datapools)
 
-    gen_image = xcube_repo + ':' + xcube_tag
+    if xcube_hash is not None:
+        gen_image = xcube_repo + '@' + xcube_hash
+    else:
+        gen_image = xcube_repo + ':' + xcube_tag
 
     if not sh_client_secret or not sh_client_id or not sh_instance_id:
         raise api.ApiError(400, "SentinelHub credentials not set.")

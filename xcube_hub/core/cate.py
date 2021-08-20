@@ -61,7 +61,9 @@ def launch_cate(user_id: str) -> JsonObject:
         raise_for_invalid_username(user_id)
 
         cate_image = util.maybe_raise_for_env("CATE_IMG")
-        cate_version = util.maybe_raise_for_env("CATE_VERSION")
+        cate_tag = util.maybe_raise_for_env("CATE_TAG")
+        cate_hash = os.getenv("CATE_HASH", default=None)
+
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
         cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
         cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
@@ -79,7 +81,10 @@ def launch_cate(user_id: str) -> JsonObject:
 
         cate_env_activate_command = "source activate cate-env"
 
-        cate_image = cate_image + ':' + cate_version
+        if cate_hash is not None:
+            cate_image = cate_image + '@' + cate_hash
+        else:
+            cate_image = cate_image + ':' + cate_tag
 
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
