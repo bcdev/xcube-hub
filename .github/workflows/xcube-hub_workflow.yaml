@@ -72,8 +72,7 @@ jobs:
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
       - name: docker-info
         run: |
-          skopeo inspect docker://${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} | jq '.Digest'
-
+          docker images ${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} --no-trunc
   update-version-xcube-hub:
     env:
       PUSH: 1
@@ -100,7 +99,7 @@ jobs:
       - name: get-hash
         id: get-hash
         run: |
-          HASH=$(skopeo inspect docker://quay.io/bcdev/xcube-hub:v2.1.0 | jq '.Digest')
+          HASH=$(skopeo inspect docker://${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} | jq '.Digest')
           echo ::set-output name=hash::$HASH
       - name: info
         run: |
