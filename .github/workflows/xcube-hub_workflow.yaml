@@ -34,6 +34,7 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           verbose: true # optional (default = false)
+  # build docker images and push to
   build-docker-image:
     runs-on: ubuntu-latest
     name: build-docker-image
@@ -41,6 +42,7 @@ jobs:
     env:
       APP_NAME: xcube-hub
       ORG_NAME: bcdev
+      REG_NAME: quay.io
     steps:
       - name: git-checkout
         uses: actions/checkout@v2
@@ -58,7 +60,7 @@ jobs:
         with:
           image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
           tags: master, latest
-          registry: quay.io
+          registry: ${{ envs.REG_NAME }}
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
       - uses: mr-smithers-excellent/docker-build-push@v5
@@ -67,7 +69,7 @@ jobs:
         with:
           image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
           tags: ${{ steps.release.outputs.tag }}
-          registry: quay.io
+          registry: ${{ envs.REG_NAME }}
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
       - name: docker-info
@@ -99,8 +101,13 @@ jobs:
       - name: get-hash
         id: get-hash
         run: |
-          HASH=$(skopeo inspect docker://${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} | jq '.Digest')
-          echo ::set-output name=hash::$HASH
+          HASH=$(skopeo inspect docker://${{ envs.REG_NAME }}/${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} | jq '.Digest')
+          if [[ "$HASH" == *"sha256"* ]]; then
+            echo ::set-output name=hash::$HASH
+          else
+            echo "No has present. Using none as hash. This will use the version tag instead for deployment."
+            echo ::set-output name=hash::none
+          fi
       - name: info
         run: |
           echo "Event: ${{ github.event_name }}"
