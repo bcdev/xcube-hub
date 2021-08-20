@@ -70,6 +70,10 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
           password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
+      - name: docker-info
+        run: |
+          docker images ${{ env.ORG_NAME }}/${{ env.APP_NAME }}:${{ steps.release.outputs.tag }} --no-trunc -q
+
   update-version-xcube-hub:
     env:
       PUSH: 1
