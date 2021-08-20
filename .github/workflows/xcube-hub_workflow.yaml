@@ -6,105 +6,92 @@ on:
     types: [published]
 
 jobs:
-  unittest:
-    runs-on: ubuntu-latest
-    env:
-      UNITTEST_SKIP_K8S: 0
-    steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          channels: conda-forge
-          activate-environment: xcube-hub
-          environment-file: environment.yml
-      - name: setup xcube-hub
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          python setup.py develop
-      - name: unittest-xcube-hub
-        shell: bash -l {0}
-        run: |
-          pip install pytest pytest-cov
-          mamba install -c conda-forge  flask-testing moto requests-mock
-
-          pytest --cov=./ --cov-report=xml
-      - uses: codecov/codecov-action@v1
-        with:
-          verbose: true # optional (default = false)
-  build-docker-image:
-    runs-on: ubuntu-latest
-    name: build-docker-image
-    needs: unittest
-    env:
-      APP_NAME: xcube-hub
-      ORG_NAME: bcdev
-    steps:
-      - name: git-checkout
-        uses: actions/checkout@v2
-      - name: get-release-tag
-        id: release
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      - name: info
-        id: info
-        run: |
-          echo "TAG: ${{ steps.release.outputs.tag }}"
-          echo "EVENT: ${{ github.event_name }}"
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build-push-docker-image-latest
-        if: ${{ github.event_name == 'push' && steps.release.outputs.tag == 'master'  }}
-        with:
-          image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
-          tags: master, latest
-          registry: quay.io
-          username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
-          password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build-push-docker-image-release
-        if: ${{ github.event_name == 'release' }}
-        with:
-          image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
-          tags: ${{ steps.release.outputs.tag }}
-          registry: quay.io
-          username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
-          password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
+#  unittest:
+#    runs-on: ubuntu-latest
+#    env:
+#      UNITTEST_SKIP_K8S: 0
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: conda-incubator/setup-miniconda@v2
+#        with:
+#          mamba-version: "*"
+#          channels: conda-forge
+#          activate-environment: xcube-hub
+#          environment-file: environment.yml
+#      - name: setup xcube-hub
+#        shell: bash -l {0}
+#        run: |
+#          conda info
+#          conda list
+#          python setup.py develop
+#      - name: unittest-xcube-hub
+#        shell: bash -l {0}
+#        run: |
+#          pip install pytest pytest-cov
+#          mamba install -c conda-forge  flask-testing moto requests-mock
+#
+#          pytest --cov=./ --cov-report=xml
+#      - uses: codecov/codecov-action@v1
+#        with:
+#          verbose: true # optional (default = false)
+#  build-docker-image:
+#    runs-on: ubuntu-latest
+#    name: build-docker-image
+#    needs: unittest
+#    env:
+#      APP_NAME: xcube-hub
+#      ORG_NAME: bcdev
+#    steps:
+#      - name: git-checkout
+#        uses: actions/checkout@v2
+#      - name: get-release-tag
+#        id: release
+#        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+#      - name: info
+#        id: info
+#        run: |
+#          echo "TAG: ${{ steps.release.outputs.tag }}"
+#          echo "EVENT: ${{ github.event_name }}"
+#      - uses: mr-smithers-excellent/docker-build-push@v5
+#        name: build-push-docker-image-latest
+#        if: ${{ github.event_name == 'push' && steps.release.outputs.tag == 'master'  }}
+#        with:
+#          image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
+#          tags: master, latest
+#          registry: quay.io
+#          username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
+#          password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
+#      - uses: mr-smithers-excellent/docker-build-push@v5
+#        name: build-push-docker-image-release
+#        if: ${{ github.event_name == 'release' }}
+#        with:
+#          image: ${{ env.ORG_NAME }}/${{ env.APP_NAME }}
+#          tags: ${{ steps.release.outputs.tag }}
+#          registry: quay.io
+#          username: ${{ secrets.QUAY_DOCKER_REPO_USERNAME }}
+#          password: ${{ secrets.QUAY_DOCKER_REPO_PASSWORD }}
   update-version-xcube-hub:
     env:
       PUSH: 1
     runs-on: ubuntu-latest
-    needs: build-docker-image
+#    needs: build-docker-image
     name: update-xcube-hub-tag
     steps:
       - name: git-checkout
         uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-        with:
-          repository: bc-org/k8s-configs
-          token: ${{ secrets.API_TOKEN_GITHUB }}
-          path: k8s
+#      - uses: actions/checkout@v2
+#        with:
+#          repository: bc-org/k8s-configs
+#          token: ${{ secrets.API_TOKEN_GITHUB }}
+#          path: k8s
       - name: get-release-tag
         id: release
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - name: get-deployment-phase
-        id: deployment-phase
-        run: |
-          if [[ "${{ github.event_name }}" == "release" && "${{ steps.release.outputs.tag }}" == *"dev"* ]]
-          then
-            echo ::set-output name=phase::stage
-            echo ::set-output name=tag::${{ steps.release.outputs.tag }}
-          elif [[ "${{ github.event_name }}" == "release" && "${{ steps.release.outputs.tag }}" != *"dev"* ]]
-          then
-            echo ::set-output name=phase::prod
-            echo ::set-output name=tag::${{ steps.release.outputs.tag }}
-          elif [[ "${{ steps.release.outputs.tag }}" == *"master"* || "${{ steps.release.outputs.tag }}" == *"main"* ]]
-          then
-            echo ::set-output name=phase::dev
-            echo ::set-output name=tag::latest
-          else
-            echo ::set-output name=phase::ignore
-          fi
+        uses: ./github/actions/determine-phase
+        with:
+          event_name: ${{ github.event_name }}
+          tag: ${{ steps.release.outputs.tag }}
       - name: info
         run: |
           echo "Event: ${{ github.event_name }}"

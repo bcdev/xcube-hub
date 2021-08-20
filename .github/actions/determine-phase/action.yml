@@ -1,0 +1,41 @@
+name: 'Determine Deployment Phase'
+description: 'Setting application version tags (e.g. for docker image versions) in (e.g. Helm) configuration files for different deployment phases (e.g. dev/stage/prod).'
+inputs:
+  event_name:
+    description: ''
+    required: true
+  tag:
+    description: 'Deployment phase (dev/stage/prod/ignore). In mode single the user is free to use whatever name suits except for ignore.'
+    required: true
+    default: 'dev'
+outputs:
+  phase:
+    description: "Deployment phase"
+    value: ${{ steps.get-phase-and-tag.outputs.phase }}
+  tag:
+    description: "Deployment tag"
+    value: ${{ steps.get-phase-and-tag.outputs.tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      id: get-phase-and-tag
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if [[ "${{ inputs.event_name }}" == "release" && "${{ inputs.tag }}" == *"dev"* ]]
+        then
+          echo ::set-output name=phase::stage
+          echo ::set-output name=tag::${{ inputs.tag }}
+        elif [[ "${{ inputs.event_name }}" == "release" && "${{ inputs.tag }}" != *"dev"* ]]
+        then
+          echo ::set-output name=phase::prod
+          echo ::set-output name=tag::${{ inputs.tag }}
+        elif [[ "${{ inputs.tag }}" == *"master"* || "${{ inputs.tag }}" == *"main"* ]]
+        then
+          echo ::set-output name=phase::dev
+          echo ::set-output name=tag::latest
+        else
+          echo ::set-output name=phase::ignore
+          echo ::set-output name=tag::${{ inputs.tag }}
+        fi
