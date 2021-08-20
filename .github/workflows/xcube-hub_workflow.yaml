@@ -79,11 +79,11 @@ jobs:
     steps:
       - name: git-checkout
         uses: actions/checkout@v2
-#      - uses: actions/checkout@v2
-#        with:
-#          repository: bc-org/k8s-configs
-#          token: ${{ secrets.API_TOKEN_GITHUB }}
-#          path: k8s
+      - uses: actions/checkout@v2
+        with:
+          repository: bc-org/k8s-configs
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+          path: k8s
       - name: get-release-tag
         id: release
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
