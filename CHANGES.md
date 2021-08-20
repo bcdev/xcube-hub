@@ -2,6 +2,8 @@
 
 ### New Features
 
+- Cate and xcube image versions can now be configured using digest hashes.
+
 ### Fixes
 
 - The feature store is now created independently from the workspace
