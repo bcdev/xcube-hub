@@ -78,7 +78,9 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         json.dump(cfg, f)
 
     cmd = ["/bin/bash", "-c", f"source activate xcube && xcube --traceback gen2 -vv "
-                              f"{info_flag} --stores {stores_file} {cfg_file}"]
+                              f"{info_flag} --stores {stores_file} {cfg_file}"
+                              f" && curl -X POST localhost:3500/v1.3.0/shutdown"
+           ]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
