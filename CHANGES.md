@@ -1,3 +1,9 @@
+## Changes in v2.1.4 (in development)
+
+### New Features
+
+- Added dapr logging annotations to job pods.
+
 ## Changes in v2.1.3
 
 ### New Features
