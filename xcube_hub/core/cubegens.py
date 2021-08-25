@@ -128,7 +128,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
             labels={"app": "xcube-gen"},
-            annotations={"dapr.io/app-id": cubegen_id, "dapr.io/enabled": True, "dapr.io/log-as-json": True}
+            annotations={"dapr.io/app-id": cubegen_id, "dapr.io/enabled": "true", "dapr.io/log-as-json": "true"}
         ),
         spec=client.V1PodSpec(
             volumes=volumes,
