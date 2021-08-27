@@ -162,7 +162,8 @@ def create_deployment_object(name: str, user_id: str,
                              volumes: Optional[Sequence] = None,
                              init_containers: Optional[Sequence] = None,
                              limits: Optional[Dict] = None,
-                             requests: Optional[Dict] = None):
+                             requests: Optional[Dict] = None,
+                             annotations: Optional[Dict] = None):
     # Configureate Pod template container
     envs = [] if not envs else envs
 
@@ -180,7 +181,10 @@ def create_deployment_object(name: str, user_id: str,
 
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": container_name, "purpose": "cate-webapi"}),
+        metadata=client.V1ObjectMeta(
+            labels={"app": container_name, "purpose": "cate-webapi"},
+            annotations=annotations
+        ),
         spec=client.V1PodSpec(
             containers=[container],
             volumes=volumes,

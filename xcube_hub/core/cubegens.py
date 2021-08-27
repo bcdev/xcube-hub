@@ -44,6 +44,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
     xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
     xcube_hash = os.getenv("XCUBE_HASH", default=None)
+    xcube_use_dapr = os.getenv("XCUBE_USE_DAPR", default=None)
 
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
     cdsapi_url = os.getenv("CDSAPI_URL")
@@ -54,7 +55,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     xcube_hub_cfg_datapools = util.maybe_raise_for_env("XCUBE_HUB_CFG_DATAPOOLS")
     stores_file = os.path.join(xcube_hub_cfg_dir, xcube_hub_cfg_datapools)
 
-    if xcube_hash is not None:
+    if xcube_hash is not None and xcube_hash != "null":
         gen_image = xcube_repo + '@' + xcube_hash
     else:
         gen_image = xcube_repo + ':' + xcube_tag
@@ -77,10 +78,10 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     with open(cfg_file, 'w') as f:
         json.dump(cfg, f)
 
-    cmd = ["/bin/bash", "-c", f"source activate xcube && xcube --traceback gen2 -vv "
-                              f"{info_flag} --stores {stores_file} {cfg_file}"
-                              f" && curl -X POST localhost:3500/v1.0/shutdown"
-           ]
+    cmd = f"source activate xcube && xcube --traceback gen2 -vv {info_flag} --stores {stores_file} {cfg_file}"
+    cmd = cmd + " && curl -X POST localhost:3500/v1.0/shutdown" if xcube_use_dapr else None
+
+    cmd = ["/bin/bash", "-c", cmd]
 
     sh_envs = [
         client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
@@ -119,6 +120,9 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
     ]
 
+    annotations = {"dapr.io/app-id": cubegen_id, "dapr.io/enabled": "true",
+                   "dapr.io/log-as-json": "true"} if xcube_use_dapr else None
+
     container = client.V1Container(
         name="xcube-gen",
         image=gen_image,
@@ -130,7 +134,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
             labels={"app": "xcube-gen"},
-            annotations={"dapr.io/app-id": cubegen_id, "dapr.io/enabled": "true", "dapr.io/log-as-json": "true"}
+            annotations=annotations
         ),
         spec=client.V1PodSpec(
             volumes=volumes,

@@ -67,6 +67,7 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
         cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
         cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
+        cate_use_dapr = os.getenv("CATE_USE_DAPR", None)
         cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", "cate")
         cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH",
                                                            default="/etc/xcube-hub/stores.yaml")
@@ -81,7 +82,7 @@ def launch_cate(user_id: str) -> JsonObject:
 
         cate_env_activate_command = "source activate cate-env"
 
-        if cate_hash is not None:
+        if cate_hash is not None and cate_hash != "null":
             cate_image = cate_image + '@' + cate_hash
         else:
             cate_image = cate_image + ':' + cate_tag
@@ -148,6 +149,9 @@ def launch_cate(user_id: str) -> JsonObject:
         limits = {'memory': cate_mem_limit}
         requests = {'memory': cate_mem_request}
 
+        annotations = {"dapr.io/app-id": user_id + '-cate', "dapr.io/enabled": "true",
+                       "dapr.io/log-as-json": "true"} if cate_use_dapr else None
+
         deployment = k8s.create_deployment_object(name=user_id + '-cate',
                                                   user_id=user_id,
                                                   container_name=user_id + '-cate',
@@ -159,7 +163,8 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   volume_mounts=volume_mounts,
                                                   init_containers=init_containers,
                                                   limits=limits,
-                                                  requests=requests)
+                                                  requests=requests,
+                                                  annotations=annotations)
 
         # Make create_if_exists test for broken pods
         # pod_status = get_status(user_id)
