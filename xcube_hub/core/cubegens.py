@@ -79,7 +79,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         json.dump(cfg, f)
 
     cmd = f"source activate xcube && xcube --traceback gen2 -vv {info_flag} --stores {stores_file} {cfg_file}"
-    cmd = cmd + " && curl -X POST localhost:3500/v1.0/shutdown" if xcube_use_dapr else None
+    # cmd = cmd + " && curl -X POST localhost:3500/v1.0/shutdown" if xcube_use_dapr else None
 
     cmd = ["/bin/bash", "-c", cmd]
 
@@ -120,8 +120,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
     ]
 
-    annotations = {"dapr.io/app-id": cubegen_id, "dapr.io/enabled": "true",
-                   "dapr.io/log-as-json": "true"} if xcube_use_dapr else None
+    # annotations = {"dapr.io/app-id": cubegen_id, "dapr.io/enabled": "true",
+    #                "dapr.io/log-as-json": "true"} if xcube_use_dapr else None
 
     container = client.V1Container(
         name="xcube-gen",
@@ -134,7 +134,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
             labels={"app": "xcube-gen"},
-            annotations=annotations
+            # annotations=annotations
         ),
         spec=client.V1PodSpec(
             volumes=volumes,
