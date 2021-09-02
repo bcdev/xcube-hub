@@ -6,7 +6,7 @@
 
 ### Fixes
 
-- Data stores are not served anymore by the hub. Hence, the data store validation file is not validated anymore.
+- Data stores are not served any more by the hub. Hence, the data store validation file is not validated anymore.
 
 ## Changes in v2.1.3
 
