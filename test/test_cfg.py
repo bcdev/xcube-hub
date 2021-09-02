@@ -22,12 +22,13 @@ class TestCfg(unittest.TestCase):
         self.assertEqual('Error: Could not load datastore configuration. Datastore unknown not in config.',
                          str(e.exception))
 
-        Cfg._datapools_cfg = None
-        with self.assertRaises(api.ApiError) as e:
-            Cfg.load_config('datapools_invalid.yaml')
-
-        self.assertIn("Could not validate data pools configuration. 'cost_params' is a required property",
-                      str(e.exception))
+        # Validation switched off as teh hub is not serving the data stores anymore
+        # Cfg._datapools_cfg = None
+        # with self.assertRaises(api.ApiError) as e:
+        #     Cfg.load_config('datapools_invalid.yaml')
+        #
+        # self.assertIn("Could not validate data pools configuration. 'cost_params' is a required property",
+        #               str(e.exception))
 
         Cfg._datapools_cfg = None
         with self.assertRaises(api.ApiError) as e:

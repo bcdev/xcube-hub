@@ -57,7 +57,7 @@ class Cfg:
             try:
                 with open(os.path.join(data_pools_cfg_dir, data_pools_cfg_file), 'r') as f:
                     cls._datapools_cfg = yaml.safe_load(f)
-                    cls._validate_datastores(cls._datapools_cfg)
+                    # cls._validate_datastores(cls._datapools_cfg)
             except FileNotFoundError:
                 raise api.ApiError(404, "Could not find data pools configuration")
 
