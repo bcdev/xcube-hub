@@ -358,8 +358,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     return dict(
         dataset_descriptor=cost_est['dataset_descriptor'],
         size_estimation=cost_est['size_estimation'],
-        cost_estimation=dict(required=required, available=available['count'], limit=int(limit)),
-        result=res
+        cost_estimation=dict(required=required, available=available['count'], limit=int(limit))
     )
 
 

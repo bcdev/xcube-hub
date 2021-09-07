@@ -51,67 +51,67 @@ _CFG = {
 }
 
 _OUTPUT = """
-Awaiting generator configuration JSON from TTY...
-Cube generator configuration loaded from /user-code/id.yaml.
 {
-    "dataset_descriptor": {
-        "data_id": "test_cube.zarr",
-        "type_specifier": "dataset",
-        "crs": "WGS84",
-        "bbox": [
-            -2.24,
-            51.99,
-            -2.15,
-            52.05
-        ],
-        "time_range": [
-            "2020-12-01",
-            "2021-02-28"
-        ],
-        "time_period": "1D",
-        "dims": {
-            "time": 90,
-            "lat": 674,
-            "lon": 1024
-        },
-        "spatial_res": 8.9e-05,
-        "data_vars": {
-            "B02": {
-                "name": "B02",
-                "dtype": "float32",
-                "dims": [
-                    "time",
-                    "lat",
-                    "lon"
-                ]
+    "result": {
+        "dataset_descriptor": {
+            "data_id": "test_cube.zarr",
+            "type_specifier": "dataset",
+            "crs": "WGS84",
+            "bbox": [
+                -2.24,
+                51.99,
+                -2.15,
+                52.05
+            ],
+            "time_range": [
+                "2020-12-01",
+                "2021-02-28"
+            ],
+            "time_period": "1D",
+            "dims": {
+                "time": 90,
+                "lat": 674,
+                "lon": 1024
             },
-            "CLM": {
-                "name": "CLM",
-                "dtype": "float32",
-                "dims": [
-                    "time",
-                    "lat",
-                    "lon"
-                ]
+            "spatial_res": 8.9e-05,
+            "data_vars": {
+                "B02": {
+                    "name": "B02",
+                    "dtype": "float32",
+                    "dims": [
+                        "time",
+                        "lat",
+                        "lon"
+                    ]
+                },
+                "CLM": {
+                    "name": "CLM",
+                    "dtype": "float32",
+                    "dims": [
+                        "time",
+                        "lat",
+                        "lon"
+                    ]
+                }
             }
+        },
+        "size_estimation": {
+            "image_size": [
+                1024,
+                674
+            ],
+            "tile_size": [
+                512,
+                512
+            ],
+            "num_variables": 5,
+            "num_tiles": [
+                2,
+                1
+            ],
+            "num_requests": 900,
+            "num_bytes": 1242316800
         }
-    },
-    "size_estimation": {
-        "image_size": [
-            1024,
-            674
-        ],
-        "tile_size": [
-            512,
-            512
-        ],
-        "num_variables": 5,
-        "num_tiles": [
-            2,
-            1
-        ],
-        "num_requests": 900,
-        "num_bytes": 1242316800
     }
 }
 """
@@ -125,6 +125,14 @@ class TestCubeGens(unittest.TestCase):
 
     def tearDown(self) -> None:
         del_env(dotenv_path='test/.env')
+        import glob
+        file_list = glob.glob("test/drwho*.yaml")
+        for f in file_list:
+            os.remove(f)
+
+        file_list = glob.glob("test/id*.json")
+        for f in file_list:
+            os.remove(f)
 
     @patch('xcube_hub.core.callbacks.get_callback')
     @patch('xcube_hub.core.cubegens.logs')
@@ -135,7 +143,8 @@ class TestCubeGens(unittest.TestCase):
         logs_p.return_value = ['bla']
         res = cubegens.get(user_id='drwho', cubegen_id='id')
 
-        self.assertDictEqual({'cubegen_id': 'id', 'status': 'Ready', 'output': ['bla'], 'progress': 100}, res)
+        self.assertDictEqual({'cubegen_id': 'id', 'result': {'result': {}}, 'status': 'Ready', 'output': ['bla'], 'progress': 100},
+                             res)
 
         status_p.return_value = None
 
@@ -440,13 +449,16 @@ class TestCubeGens(unittest.TestCase):
     @patch('xcube_hub.core.cubegens.get')
     @patch('xcube_hub.core.cubegens.create')
     @patch.object(BatchV1Api, 'read_namespaced_job_status')
-    def test_info(self, status_p, create_p, get_p, punits_p):
+    def test_info2(self, status_p, create_p, get_p, punits_p):
         status_p.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(type='Complete', status='ready')]))
         create_p.return_value = {'cubegen_id': 'id', 'status': V1JobStatus().to_dict()}
 
         get_p.return_value = {'cubegen_id': 'id', 'status': 'ready', 'output': [_OUTPUT], 'progress': 100}
 
-        punits_p.return_value = dict(punits=dict(total_count=1000), count=500)
+        punits_p.return_value = dict(punits=dict(total_count=1000), count=500, result=dict())
+
+        with open('test/id.json', 'w') as f:
+            f.write(_OUTPUT)
 
         res = cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
 
@@ -487,15 +499,6 @@ class TestCubeGens(unittest.TestCase):
         res = cubegens.info(user_id='drwho', email='drwho@mail.org', body=cfg, token='fdsvdf')
 
         self.assertEqual(expected, res)
-
-        output = _OUTPUT.replace("Awaiting", "Awaitingxxx")
-
-        get_p.return_value = {'cubegen_id': 'id', 'status': 'ready', 'output': [output], 'progress': 100}
-
-        with self.assertRaises(api.ApiError) as e:
-            cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
-
-        self.assertEqual("Expecting value: line 2 column 1 (char 1)", str(e.exception))
 
 
 if __name__ == '__main__':
