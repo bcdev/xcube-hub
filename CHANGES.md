@@ -1,3 +1,11 @@
+## Changes in v2.1.5 (in development)
+
+### New Features
+
+- xcube-hub is now collecting xcube-gen results for info from a json file provided by `xcube gen2`.
+- `xcube gen2` now returns a result object. This has been added to the hub's responses. The result set has been defined 
+  intentionally vaguely as the result can vary.
+
 ## Changes in v2.1.4
 
 ### New Features
