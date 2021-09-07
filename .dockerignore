@@ -1,3 +1,5 @@
+Dockerfile
+
 .travis.yaml
 .openapi-generator-ignore
 README.md

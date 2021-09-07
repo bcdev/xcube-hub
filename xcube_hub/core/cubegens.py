@@ -72,13 +72,21 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     info_flag = " -i " if info_only else ""
 
     xcube_hub_code_root_dir = util.maybe_raise_for_env('XCUBE_HUB_CODE_ROOT_DIR')
+    xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
+
+    if not os.path.isdir(xcube_hub_code_root_dir):
+        os.mkdir(xcube_hub_code_root_dir)
+
+    if not os.path.isdir(xcube_hub_result_root_dir):
+        os.mkdir(xcube_hub_result_root_dir)
 
     cfg_file = os.path.join(xcube_hub_code_root_dir, cubegen_id + '.yaml')
+    res_file = os.path.join(xcube_hub_result_root_dir, cubegen_id + '.json')
 
     with open(cfg_file, 'w') as f:
         json.dump(cfg, f)
 
-    cmd = f"source activate xcube && xcube --traceback gen2 -vv {info_flag} --stores {stores_file} {cfg_file}"
+    cmd = f"source activate xcube && xcube --traceback gen2 -o {res_file} -vv {info_flag} --stores {stores_file} {cfg_file}"
     # cmd = cmd + " && curl -X POST localhost:3500/v1.0/shutdown" if xcube_use_dapr else None
 
     cmd = ["/bin/bash", "-c", cmd]
@@ -101,7 +109,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
         {
             'name': 'workspace-pvc',
-            'mountPath': '/user-code',
+            'mountPath': '/data',
         },
     ]
 
@@ -291,16 +299,21 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
                            name=job['cubegen_id'])
     state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
-    res = state['output'][0]
-    if "Error" in res:
-        raise api.ApiError(400, res)
-    res = res.replace("Awaiting generator configuration JSON from TTY...", "")
-    res = res.replace(f"Cube generator configuration loaded from /user-code/{job['cubegen_id']}.yaml.", "")
-    res = res.replace("'", '"')
+    output = state['output'][0]
+
+    if "Error" in output:
+        raise api.ApiError(400, output)
+
+    xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
+
+    fn = os.path.join(xcube_hub_result_root_dir, job['cubegen_id'] + '.json')
+
     try:
-        processing_request = json.loads(res)
+        with open(fn, 'r') as res_file:
+            response = json.load(res_file)
+            processing_request = response['result']
     except JSONDecodeError as e:
-        raise api.ApiError(400, str(e), output=res)
+        raise api.ApiError(400, str(e))
 
     if 'input_configs' in body:
         input_config = body['input_configs'][0]
