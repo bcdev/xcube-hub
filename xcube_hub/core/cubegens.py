@@ -1,7 +1,6 @@
 import json
 import os
 import uuid
-from json.decoder import JSONDecodeError
 from pprint import pprint
 from typing import Union, Sequence, Optional
 
@@ -30,7 +29,10 @@ def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
 
         progress = callbacks.get_callback(user_id=user_id, cubegen_id=cubegen_id)
 
-        return {'cubegen_id': cubegen_id, 'status': stat, 'output': outputs, 'progress': progress}
+        xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
+        res = cubegens_result(job_id=cubegen_id, root=xcube_hub_result_root_dir)
+
+        return {'cubegen_id': cubegen_id, 'status': stat, 'output': outputs, 'progress': progress, 'result': res}
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 
@@ -238,6 +240,22 @@ def list(user_id: str):
         raise api.ApiError(400, str(e))
 
 
+def cubegens_result(job_id: str, root: str):
+    try:
+        if not os.path.isdir(root):
+            os.mkdir(root)
+
+        fn = os.path.join(root, job_id + '.json')
+
+        if os.path.isfile(fn):
+            with open(fn, 'r') as f:
+                return json.load(f)
+        else:
+            return {'result': {}}
+    except Exception as e:
+        raise api.ApiError(400, str(e))
+
+
 def logs(job_id: str, raises: bool = False) -> Sequence:
     xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
     api_pod_instance = client.CoreV1Api()
@@ -306,14 +324,12 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
 
     xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
 
-    fn = os.path.join(xcube_hub_result_root_dir, job['cubegen_id'] + '.json')
+    res = cubegens_result(job_id=job['cubegen_id'], root=xcube_hub_result_root_dir)
 
-    try:
-        with open(fn, 'r') as res_file:
-            response = json.load(res_file)
-            processing_request = response['result']
-    except JSONDecodeError as e:
-        raise api.ApiError(400, str(e))
+    if 'result' not in res:
+        raise api.ApiError(400, "Result dict from xcube gen2 --info must have a 'result' entry")
+
+    processing_request = res['result']
 
     if 'input_configs' in body:
         input_config = body['input_configs'][0]
@@ -342,7 +358,8 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     return dict(
         dataset_descriptor=cost_est['dataset_descriptor'],
         size_estimation=cost_est['size_estimation'],
-        cost_estimation=dict(required=required, available=available['count'], limit=int(limit))
+        cost_estimation=dict(required=required, available=available['count'], limit=int(limit)),
+        result=res
     )
 
 

@@ -993,13 +993,6 @@ components:
           properties:
             running_pods:
               type: integer
-    ApiServiceResponse:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          properties:
-            result:
-              $ref: '#/components/schemas/Service'
     ApiServicesResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -1092,6 +1085,8 @@ components:
           $ref: '#/components/schemas/SizeEstimation'
         cost_estimation:
           $ref: '#/components/schemas/CostEstimation'
+        result:
+          type: object
     CubegenConfig:
       properties:
         input_configs:
@@ -1147,6 +1142,8 @@ components:
           items:
             type: string
           type: array
+        result:
+          type: object
         status:
           type: object
           required:
