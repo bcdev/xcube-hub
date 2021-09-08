@@ -1,0 +1,19 @@
+name: xcube-hub-helm-workflow
+
+on:
+  release:
+    types: [published]
+
+env:
+  APP_NAME: xcube-hub
+  ORG_NAME: bcdev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: build
+        run: |
+          helm dependencies update
+          helm lint .
+          helm package .
