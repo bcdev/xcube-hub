@@ -271,13 +271,13 @@ class TestCubeGensController(BaseTestCase):
         Delete a cubegen
         """
 
-        p.return_value = dict(dataset_descriptor={}, size_estimation={}, cost_estimation={})
+        p.return_value = dict(status='ok', dataset_descriptor={}, size_estimation={}, cost_estimation={})
 
         res = cubegens.get_cubegen_info(body={}, token_info={'user_id': 'drwho',
                                                              'email': 'drwho@bbc.org',
                                                              'token': 'dscsdc'})
 
-        self.assertEqual(200, res[1])
+        self.assertEqual(201, res[1])
 
         p.side_effect = api.ApiError(400, 'Error')
 
