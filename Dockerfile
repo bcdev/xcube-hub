@@ -34,12 +34,12 @@ ADD --chown=1000:100 environment.yml environment.yml
 RUN mamba env create
 RUN echo "conda activate xcube-hub" >> ~/.bashrc
 
-#ADD --chown=1000:100 ./ .
-#RUN source activate xcube-hub && pip install .
-#
-#EXPOSE 8000
-#EXPOSE 8080
-#EXPOSE 5050
-#
-#CMD ["/opt/conda/envs/xcube-hub/bin/python", "-m", "xcube_hub"]
+ADD --chown=1000:100 ./ .
+RUN source activate xcube-hub && pip install .
+
+EXPOSE 8000
+EXPOSE 8080
+EXPOSE 5050
+
+CMD ["/opt/conda/envs/xcube-hub/bin/python", "-m", "xcube_hub"]
 #CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
