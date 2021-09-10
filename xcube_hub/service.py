@@ -34,9 +34,13 @@ app = create_app()
 
 def attach_debugger():
     xcube_hub_debug = os.getenv('XCUBE_HUB_DEBUG', "0")
+
     if xcube_hub_debug == "1":
+        print("Attaching Debugger")
+
         import pydevd_pycharm
-        pydevd_pycharm.settrace('0.0.0.0', port=9000, stdoutToServer=True, stderrToServer=True)
+        pydevd_pycharm.settrace('localhost', port=9000, stdoutToServer=True, stderrToServer=True)
+        print("Attached Debugger")
 
 
 def start(host: str = '0.0.0.0', port: int = 8080, debug: bool = False):
