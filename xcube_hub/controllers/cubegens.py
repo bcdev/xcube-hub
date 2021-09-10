@@ -99,6 +99,16 @@ def delete_cubegens(token_info: JsonObject) -> Tuple:
         return e.response
 
 
+def _get_http_status(cubgen_result: Dict) -> int:
+    status = cubgen_result['status']
+    if status == "ok":
+        return 201
+    elif status == "warning":
+        return 200
+    elif status == "error":
+        return 400
+
+
 def get_cubegen_info(body, token_info: Dict):
     """Receive cost information for runnning a cubegen
 
@@ -118,7 +128,7 @@ def get_cubegen_info(body, token_info: Dict):
 
         result = cubegens.info(user_id=user_id, email=email, token=token, body=body)
 
-        return api.ApiResponse.success(result=result)
+        return api.ApiResponse.success(result=result, status_code=_get_http_status(result))
     except api.ApiError as e:
         return e.response
 

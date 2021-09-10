@@ -67,3 +67,4 @@ target/
 /okteto.yml
 /.pycharm_helpers/
 /xcube_hub/resources/data-pools.yaml
+/.env

@@ -46,7 +46,6 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
     xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
     xcube_hash = os.getenv("XCUBE_HASH", default=None)
-    xcube_use_dapr = os.getenv("XCUBE_USE_DAPR", default=None)
 
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
     cdsapi_url = os.getenv("CDSAPI_URL")
@@ -169,7 +168,7 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
     limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
 
     infos = info(user_id=user_id, email=email, body=cfg, token=token)
-    cost_estimation = infos['cost_estimation']
+    cost_estimation = infos['result']['cost_estimation']
 
     if cost_estimation['required'] > int(limit):
         raise api.ApiError(413,
@@ -268,8 +267,8 @@ def logs(job_id: str, raises: bool = False) -> Sequence:
             name = pod.metadata.name
 
             lg = api_pod_instance.read_namespaced_pod_log(namespace=xcube_hub_namespace, name=name)
-
-            lgs.append(lg)
+            lg = lg.splitlines()
+            lgs += lg
     except (client.ApiValueError, client.ApiException, MaxRetryError) as e:
         if raises:
             raise api.ApiError(400, str(e))
@@ -311,25 +310,20 @@ def delete_all(user_id: str):
 
 
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
+    xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
+
     job = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
     apps_v1_api = client.BatchV1Api()
     xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
     poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
                            name=job['cubegen_id'])
+
     state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
-    output = state['output'][0]
+    job_result = cubegens_result(job_id=job['cubegen_id'], root=xcube_hub_result_root_dir)
 
-    if "Error" in output:
-        raise api.ApiError(400, output)
+    output = state['output']
 
-    xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
-
-    res = cubegens_result(job_id=job['cubegen_id'], root=xcube_hub_result_root_dir)
-
-    if 'result' not in res:
-        raise api.ApiError(400, "Result dict from xcube gen2 --info must have a 'result' entry")
-
-    processing_request = res['result']
+    processing_request = job_result['result']
 
     if 'input_configs' in body:
         input_config = body['input_configs'][0]
@@ -354,12 +348,11 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     required = cost_est['punits']['total_count']
 
     limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
+    job_result['result']['cost_estimation'] = dict(required=required, available=available['count'], limit=int(limit))
+    job_result['result']['size_estimation'] = cost_est['size_estimation']
+    job_result['output'] = output
 
-    return dict(
-        dataset_descriptor=cost_est['dataset_descriptor'],
-        size_estimation=cost_est['size_estimation'],
-        cost_estimation=dict(required=required, available=available['count'], limit=int(limit))
-    )
+    return job_result
 
 
 def process_user_code(cfg: CubegenConfig, user_code: Optional[FileStorage] = None):

@@ -1,0 +1,101 @@
+sentinelhub_eu:
+  title: SENTINEL Hub (Central Europe)
+  store_id: sentinelhub
+  cost_params:
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://services.sentinel-hub.com
+
+sentinelhub_uswest:
+  title: SENTINEL Hub (US-West)
+  store_id: sentinelhub
+  cost_params:
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://services-uswest2.sentinel-hub.com
+
+sentinelhub_creodias:
+  title: SENTINEL Hub (CreoDIAS)
+  store_id: sentinelhub
+  cost_params:
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://creodias.sentinel-hub.com
+
+sentinelhub_mundi:
+  title: SENTINEL Hub (Mundi)
+  store_id: sentinelhub
+  cost_params:
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://shservices.mundiwebservices.com
+
+sentinelhub_codede:
+  title: SENTINEL Hub (CODE-DE)
+  store_id: sentinelhub
+  cost_params:
+    input_pixels_per_punit: 262144
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144
+    output_punits_weight: 1.0
+  store_params:
+    api_url: https://code-de.sentinel-hub.com
+
+cds:
+  title: C3S Climate Data Store (CDS)
+  description: Selected datasets from the Copernicus CDS API
+  store_id: cds
+  cost_params:
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+
+cciodp:
+  title: ESA Climate Change Initiative (CCI)
+  description: Data from the ESA CCI Open Data Portal API
+  store_id: cciodp
+  cost_params:
+    input_pixels_per_punit: 589824 # 768^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+
+cop_services_data:
+  title: Datasets from Copernicus Services
+  store_id: s3
+  store_params:
+    root: "cop-services"
+    fs_params:
+      client_kwargs:
+        region_name: "eu-central-1"
+  cost_params:
+    input_pixels_per_punit: 262144 # 512^2
+    input_punits_weight: 1.0
+    output_pixels_per_punit: 262144 # 512^2
+    output_punits_weight: 1.0
+
+
+eurodatacube_scratch:
+  store_id: s3
+  title: eurodatacube scratch datasets for BC users
+  store_params:
+    root: "eurodatacube-scratch"
+    fs_params:
+      client_kwargs:
+        region_name: "eu-central-1"
+
+
+

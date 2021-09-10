@@ -58,7 +58,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiWebapisResponse'
-          description: Create a cubegen
+          description: Create a webapi
         "400":
           content:
             application/json:
@@ -462,13 +462,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user_code:
-                  type: string
-                  format: binary
-                body:
-                  type: string
+              $ref: '#/components/schemas/CubeGeneratorRequest'
         description: Cubegen configuration
         required: true
       responses:
@@ -979,6 +973,10 @@ components:
           properties:
             traceback:
               type: string
+            result:
+              oneOf:
+                - $ref: '#/components/schemas/CubeGenResult'
+                - $ref: '#/components/schemas/CubeGenInfoResult'
     ApiSubscriptionResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -999,23 +997,203 @@ components:
         - type: array
           items:
             $ref: '#/components/schemas/Service'
+    CubeGenResult:
+      type: object
+      required:
+        - data_id
+      properties:
+        message:
+          type: string
+        output:
+          type: array
+          items:
+            type: string
+        data_id:
+          type: string
+          minLength: 1
+        status:
+          type: string
+          enum:
+            - ok
+            - error
+            - warning
+        traceback:
+          type: array
+          items:
+            type: string
+    CostEstimation:
+      type: object
+      required:
+        - required
+      additionalProperties: false
+      properties:
+        available:
+          minimum: 0
+          type: integer
+        limit:
+          minimum: 0
+          type: integer
+        required:
+          minimum: 0
+          type: integer
+    DatasetDescriptor:
+      type: object
+      required:
+        - data_id
+        - data_type
+      properties:
+        attrs:
+          additionalProperties: true
+          type: object
+        bbox:
+          items:
+            - type: number
+            - type: number
+            - type: number
+            - type: number
+          type: array
+        coords:
+          additionalProperties:
+            additionalProperties: false
+            properties:
+              attrs:
+                additionalProperties: true
+                type: object
+              chunks:
+                items:
+                  minimum: 0
+                  type: integer
+                type: array
+              dims:
+                items:
+                  minLength: 1
+                  type: string
+                type: array
+              dtype:
+                minLength: 1
+                type: string
+              name:
+                minLength: 1
+                type: string
+            required:
+              - dims
+              - name
+              - dtype
+            type: object
+          type: object
+        crs:
+          minLength: 1
+          type: string
+        data_id:
+          minLength: 1
+          type: string
+        data_type:
+          minLength: 1
+          type: string
+        data_vars:
+          additionalProperties:
+            additionalProperties: false
+            properties:
+              attrs:
+                additionalProperties: true
+                type: object
+              chunks:
+                items:
+                  minimum: 0
+                  type: integer
+                type: array
+              dims:
+                items:
+                  minLength: 1
+                  type: string
+                type: array
+              dtype:
+                minLength: 1
+                type: string
+              name:
+                minLength: 1
+                type: string
+            required:
+              - dims
+              - name
+              - dtype
+            type: object
+          type: object
+        dims:
+          additionalProperties:
+            minimum: 0
+            type: integer
+          type: object
+        open_params_schema:
+          additionalProperties: true
+          type: object
+        spatial_res:
+          minimum: 0.0
+          exclusiveMinimum: true
+          type: number
+        time_period:
+          minLength: 1
+          type: string
+        time_range:
+          items:
+            - format: date
+              type: string
+              nullable: true
+            - format: date
+              type: string
+              nullable: true
+          type: array
+          nullable: true
+    CubeGenInfoResult:
+      type: object
+      properties:
+        message:
+          type: string
+        output:
+          type: array
+          items:
+            type: string
+        traceback:
+          type: array
+          items:
+            type: string
+        data_id:
+          type: string
+          minLength: 1
+        status:
+          type: string
+          enum:
+            - ok
+            - error
+            - warning
+        result:
+          type: object
+          additionalProperties: true
+          required:
+            - size_estimation
+            - dataset_descriptor
+          properties:
+            cost_estimation:
+              $ref: '#/components/schemas/CostEstimation'
+            dataset_descriptor:
+              $ref: '#/components/schemas/DatasetDescriptor'
+            size_estimation:
+              additionalProperties: true
+              type: object
     ApiCubegenResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
         - $ref: '#/components/schemas/CubegenStatus'
-    ApiCubegenInfoResponse:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponse'
-        - $ref: '#/components/schemas/CubegenInfo'
     ApiCubegensResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
-        - type: object
-          properties:
-            result:
-              type: array
-              items:
-                $ref: '#/components/schemas/CubegenStatus'
+        - type: array
+          items:
+            $ref: '#/components/schemas/CubegenStatus'
+    ApiCubegenInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - $ref: '#/components/schemas/CubeGenInfoResult'
     ApiServiceInformationResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -1075,36 +1253,182 @@ components:
       type: object
     CostConfig:
       allOf:
-        - $ref: '#/components/schemas/CubegenConfig'
-    CubegenInfo:
+        - $ref: '#/components/schemas/CubeGeneratorRequest'
+    CubeGeneratorRequest:
       type: object
-      properties:
-        dataset_descriptor:
-          $ref: '#/components/schemas/DatasetDescriptor'
-        size_estimation:
-          $ref: '#/components/schemas/SizeEstimation'
-        cost_estimation:
-          $ref: '#/components/schemas/CostEstimation'
-        result:
-          type: object
-    CubegenConfig:
-      properties:
-        input_configs:
-          items:
-            $ref: '#/components/schemas/CubegenConfigInputConfig'
-          type: array
-        input_config:
-          $ref: '#/components/schemas/CubegenConfigInputConfig'
-        cube_config:
-          $ref: '#/components/schemas/CubegenConfigCubeConfig'
-        output_config:
-          $ref: '#/components/schemas/CubegenConfigOutputConfig'
-        code_config:
-          $ref: '#/components/schemas/CubegenConfigCodeConfig'
       required:
         - cube_config
         - output_config
+      properties:
+        callback_config:
+          $ref: '#/components/schemas/CubeGenCallbackConfig'
+        cube_config:
+          $ref: '#/components/schemas/CubeGenCubeConfig'
+        input_config:
+          $ref: '#/components/schemas/CubeGenInputConfig'
+        code_config:
+          $ref: '#/components/schemas/CubeGenCodeConfig'
+        input_configs:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CubeGenInputConfig'
+        output_config:
+            $ref: '#/components/schemas/CubeGenOutputConfig'
+    CubeGenCubeConfig:
       type: object
+      properties:
+        bbox:
+          type: array
+          nullable: true
+          items:
+            - type: number
+            - type: number
+            - type: number
+            - type: number
+        chunks:
+          type: object
+          nullable: true
+          additionalProperties:
+            minimum: 1
+            type: integer
+            nullable: true
+        crs:
+          minLength: 1
+          type: string
+          nullable: true
+        spatial_res:
+          minimum: 0.0
+          exclusiveMinimum: true
+          type: number
+          nullable: true
+        tile_size:
+          type: array
+          nullable: true
+          items:
+            - maximum: 2500
+              minimum: 1
+              type: integer
+            - maximum: 2500
+              minimum: 1
+              type: integer
+        time_period:
+          type: string
+          nullable: true
+          pattern: ^([1-9][0-9]*)?[DWMY]$
+        time_range:
+          type: array
+          nullable: true
+          items:
+            - format: date
+              type: string
+              nullable: true
+            - format: date
+              type: string
+              nullable: true
+        variable_names:
+          type: array
+          nullable: true
+          minItems: 0
+          items:
+            type: string
+            minLength: 1
+    CubeGenCodeConfig:
+      type: object
+      properties:
+        callable_params:
+          additionalProperties: true
+          type: object
+        callable_ref:
+          minLength: 1
+          type: string
+        file_set:
+          required:
+            - path
+          type: object
+          properties:
+            excludes:
+              items:
+                minLength: 1
+                type: string
+              type: array
+            includes:
+              type: array
+              items:
+                minLength: 1
+                type: string
+            path:
+              minLength: 1
+              type: string
+            storage_params:
+              additionalProperties: true
+              type: object
+            sub_path:
+              minLength: 1
+              type: string
+        inline_code:
+          minLength: 1
+          type: string
+        install_required:
+          type: boolean
+    CubeGenCallbackConfig:
+        type: object
+        required:
+          - access_token
+          - api_uri
+        properties:
+          access_token:
+            minLength: 1
+            type: string
+          api_uri:
+            minLength: 1
+            type: string
+    CubeGenInputConfig:
+      additionalProperties: false
+      required:
+        - data_id
+      properties:
+        data_id:
+          minLength: 1
+          type: string
+        open_params:
+          type: object
+          nullable: true
+          additionalProperties: true
+        opener_id:
+          minLength: 1
+          type: string
+        store_id:
+          minLength: 1
+          type: string
+        store_params:
+          type: object
+          nullable: true
+          additionalProperties: true
+    CubeGenOutputConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        data_id:
+          default: null
+          type: string
+        replace:
+          default: false
+          type: boolean
+        store_id:
+          minLength: 1
+          type: string
+        store_params:
+          additionalProperties: true
+          type: object
+          nullable: true
+        write_params:
+          additionalProperties: true
+          type: object
+          nullable: true
+        writer_id:
+          minLength: 1
+          type: string
     Callback:
       required:
         - state
@@ -1132,18 +1456,15 @@ components:
       type: object
       required:
         - cubegen_id
-        - status
       properties:
         cubegen_id:
           type: string
         progress:
           $ref: '#/components/schemas/Callback'
-        output:
-          items:
-            type: string
-          type: array
         result:
-          type: object
+          oneOf:
+            - $ref: '#/components/schemas/CubeGenResult'
+            - $ref: '#/components/schemas/CubeGenInfoResult'
         status:
           type: object
           required:
@@ -1211,171 +1532,6 @@ components:
         - client_id
         - client_secret
       type: object
-    CubegenConfigOpenParams:
-      properties:
-        tile_size:
-          items:
-            type: number
-          type: array
-      type: object
-    CubegenConfigInputConfig:
-      properties:
-        store_id:
-          type: string
-        data_id:
-          type: string
-        open_params:
-          $ref: '#/components/schemas/CubegenConfigOpenParams'
-      required:
-        - data_id
-        - store_id
-      type: object
-    CubegenConfigCodeConfig:
-      type: object
-      properties:
-        file_set:
-          type: object
-          properties:
-            path:
-              type: string
-        callable_ref:
-          type: string
-        callable_params:
-          type: object
-          additionalProperties: true
-        inline_code:
-          type: string
-    CubegenConfigCubeConfig:
-      properties:
-        variable_names:
-          items:
-            type: string
-          type: array
-        crs:
-          type: string
-        spatial_res:
-          type: number
-        chunks:
-          type: object
-          nullable: true
-          additionalProperties:
-            type: integer
-            nullable: true
-            minimum: 1
-        bbox:
-          items:
-            maxItems: 4
-            minItems: 4
-            type: number
-          type: array
-        time_range:
-          items:
-            format: date
-            maxItems: 2
-            minItems: 1
-            type: string
-            nullable: true
-          type: array
-        time_period:
-          type: string
-          nullable: true
-      required:
-        - bbox
-        - crs
-        - spatial_res
-        - time_range
-        - variable_names
-      type: object
-    CubegenConfigOutputConfig:
-      properties:
-        store_id:
-          type: string
-        store_params:
-          type: object
-      required:
-        - store_id
-      type: object
-    CostEstimation:
-      type: object
-      properties:
-        required:
-          type: integer
-          default: 1
-        available:
-          type: integer
-          default: 1
-        limit:
-          type: integer
-          default: 1
-    SizeEstimation:
-      type: object
-      properties:
-        image_size:
-          type: array
-          items:
-            type: integer
-        tile_size:
-          type: array
-          items:
-            type: integer
-        num_tiles:
-          type: array
-          items:
-            type: integer
-        num_variables:
-          type: integer
-        num_requests:
-          type: integer
-        num_bytes:
-          type: integer
-    DatasetDescriptor:
-      type: object
-      properties:
-        type_specifier:
-          type: string
-        data_id:
-          type: string
-        crs:
-          type: string
-        bbox:
-          type: array
-          items:
-            type: number
-            format: int32
-          default: [0, 0, 0, 0]
-        time_range:
-          type: array
-          items:
-            type: string
-            format: date
-          default: ["2020-01-01", "2020-01-15"]
-        time_period:
-          type: string
-          default: "1D"
-        data_vars:
-          type: object
-        spatial_res:
-          type: number
-          format: float
-          default: 0.01
-        dims:
-          type: object
-          properties:
-            time:
-              type: integer
-              default: 1
-            lat:
-              type: number
-              format: float
-            lon:
-              type: number
-              format: float
-            x:
-              type: number
-              format: float
-            y:
-              type: number
-              format: float
     Service:
       type: object
       required:
