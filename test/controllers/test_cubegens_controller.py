@@ -2,11 +2,7 @@
 
 from __future__ import absolute_import
 
-import io
-import json
 from unittest.mock import patch
-
-from werkzeug.datastructures import FileStorage
 
 from test import BaseTestCase
 
@@ -175,7 +171,7 @@ class TestCubeGensController(BaseTestCase):
     #     self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
 
     @patch('xcube_hub.core.cubegens.process_user_code', create=True)
-    @patch('xcube_hub.core.cubegens.create', return_value={'cubegen_id': 'ajob_id', 'status': 'ready'}, create=True)
+    @patch('xcube_hub.core.cubegens.create', return_value=({'job_id': 'ajob_id', 'status': 'ready'}, 200), create=True)
     def test_create_cubegen_controller(self, p, process):
         cfg = {
             "input_configs": [
@@ -206,22 +202,14 @@ class TestCubeGensController(BaseTestCase):
             }
         }
 
-        cfg_json = json.dumps(cfg)
-
-        cfg = io.BytesIO(cfg_json.encode('UTF-8'))
-        cfg = FileStorage(filename='test.json', stream=cfg)
-
-        expected = {'cubegen_id': 'ajob_id', 'status': 'ready'}
-        p.return_value = expected
+        expected = {'job_id': 'ajob_id', 'status': 'ready'}
+        p.return_value = expected, 200
 
         res = cubegens.create_cubegen(body=cfg, token_info={'user_id': 'drwho', 'email': 'drwho@mail', 'token': 'abc'})
         self.assertDictEqual(expected, res[0])
         self.assertEqual(200, res[1])
 
         p.side_effect = ApiError(400, message='error')
-
-        cfg = io.BytesIO(cfg_json.encode('UTF-8'))
-        cfg = FileStorage(filename='test.json', stream=cfg)
 
         res = cubegens.create_cubegen(body=cfg, token_info={'user_id': 'drwho', 'email': 'drwho@mail', 'token': 'abc'})
         self.assertEqual('error', res[0]['message'])
@@ -271,7 +259,7 @@ class TestCubeGensController(BaseTestCase):
         Delete a cubegen
         """
 
-        p.return_value = dict(status='ok', dataset_descriptor={}, size_estimation={}, cost_estimation={})
+        p.return_value = dict(status='ok', dataset_descriptor={}, size_estimation={}, cost_estimation={}), 201
 
         res = cubegens.get_cubegen_info(body={}, token_info={'user_id': 'drwho',
                                                              'email': 'drwho@bbc.org',
@@ -289,13 +277,15 @@ class TestCubeGensController(BaseTestCase):
         self.assertEqual('Error', res[0]['message'])
 
     @patch('xcube_hub.core.cubegens.get', create=True)
-    def test_get_cubegen(self, p):
+    @patch('xcube_hub.core.cubegens.cubegens_result', create=True)
+    def test_get_cubegen(self, res_p, p):
         """Test case for delete_cubegen
 
         Delete a cubegen
         """
 
-        p.return_value = {'cubegen_id': 'anid', 'status': 'ready', 'output': [], 'progress': 100}
+        res_p.return_value = {'status_code': 200, }
+        p.return_value = {'job_id': 'anid', 'status': 'ready', 'output': [], 'progress': 100}, 200
 
         res = cubegens.get_cubegen(cubegen_id='anid', token_info={'user_id': 'drwho'})
 

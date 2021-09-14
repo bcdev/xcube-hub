@@ -333,10 +333,10 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     apps_v1_api = client.BatchV1Api()
     xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
     poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
-                           name=job['cubegen_id'])
+                           name=job['job_id'])
 
-    state, status_code = get(user_id=user_id, cubegen_id=job['cubegen_id'])
-    job_result = cubegens_result(job_id=job['cubegen_id'], root=xcube_hub_result_root_dir)
+    state, status_code = get(user_id=user_id, cubegen_id=job['job_id'])
+    job_result = cubegens_result(job_id=job['job_id'], root=xcube_hub_result_root_dir)
 
     output = state['output']
 

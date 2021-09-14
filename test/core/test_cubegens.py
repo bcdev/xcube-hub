@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 from unittest.mock import patch, MagicMock
@@ -137,14 +138,23 @@ class TestCubeGens(unittest.TestCase):
     @patch('xcube_hub.core.callbacks.get_callback')
     @patch('xcube_hub.core.cubegens.logs')
     @patch('xcube_hub.core.cubegens.status')
-    def test_get(self, status_p, logs_p, call_p):
+    @patch('xcube_hub.core.cubegens.cubegens_result', create=True)
+    def test_get(self, res_p, status_p, logs_p, call_p):
         call_p.return_value = 100
         status_p.return_value = 'Ready'
         logs_p.return_value = ['bla']
-        res = cubegens.get(user_id='drwho', cubegen_id='id')
+        res_p.return_value = {'status_code': 200, 'result': {}}
+        res, status_code = cubegens.get(user_id='drwho', cubegen_id='id')
+
+        expected = {'job_id': 'id',
+                    'job_status': 'Ready',
+                    'job_result': {'status_code': 200,
+                                   'result': {},
+                                   'output': ['bla']},
+                    'output': ['bla'], 'progress': 100}
 
         self.assertDictEqual(
-            {'cubegen_id': 'id', 'result': {'result': {}}, 'status': 'Ready', 'output': ['bla'], 'progress': 100},
+            expected,
             res)
 
         status_p.return_value = None
@@ -169,11 +179,11 @@ class TestCubeGens(unittest.TestCase):
     @patch.object(BatchV1Api, 'list_namespaced_job')
     def test_list(self, batch_p, get_p):
         batch_p.return_value = V1JobList(items=[V1Pod(metadata=V1ObjectMeta(name='drwho-cate-sdav'))])
-        get_p.return_value = {'cubegen_id': 'id', 'status': 'Ready', 'output': ['bla'], 'progress': 100}
+        get_p.return_value = {'jobs_id': 'id', 'status': 'Ready', 'output': ['bla'], 'progress': 100}, 200
         res = cubegens.list('drwho')
 
-        self.assertEqual(1, len(res))
-        self.assertDictEqual({'cubegen_id': 'id', 'status': 'Ready', 'output': ['bla'], 'progress': 100}, res[0])
+        self.assertEqual(1, len(res[0]))
+        self.assertDictEqual({'jobs_id': 'id', 'status': 'Ready', 'output': ['bla'], 'progress': 100}, res[0][0])
 
         batch_p.side_effect = ApiException(401, 'Unauthorized')
 
@@ -309,10 +319,10 @@ class TestCubeGens(unittest.TestCase):
     @patch.object(BatchV1Api, 'create_namespaced_job')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
     def test_create_info_only(self, namespace_p, create_p, status_p):
-        res = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=True)
+        res, status_code = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=True)
 
-        self.assertIn("drwho-", res['cubegen_id'])
-        self.assertEqual(24, len(res['cubegen_id']))
+        self.assertIn("drwho-", res['job_id'])
+        self.assertEqual(24, len(res['job_id']))
 
         create_p.side_effect = ApiException(401, 'Unauthorized')
 
@@ -350,21 +360,21 @@ class TestCubeGens(unittest.TestCase):
     @patch.object(BatchV1Api, 'create_namespaced_job')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
     def test_create(self, namespace_p, create_p, info_p):
-        info_p.return_value = {'result': {'cost_estimation': {'required': 1, 'available': 10000000}}}
+        info_p.return_value = {'result': {'cost_estimation': {'required': 1, 'available': 10000000}}}, 200
 
-        res = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
+        res, status_code = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
 
-        self.assertIn("drwho-", res['cubegen_id'])
-        self.assertEqual(24, len(res['cubegen_id']))
+        self.assertIn("drwho-", res['job_id'])
+        self.assertEqual(24, len(res['job_id']))
 
-        info_p.return_value = {'result': {'cost_estimation': {'required': 20, 'available': 10}}}
+        info_p.return_value = {'result': {'cost_estimation': {'required': 20, 'available': 10}}}, 200
 
         with self.assertRaises(api.ApiError) as e:
             cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
 
         self.assertEqual('Number of required punits (20) is greater than the available (10).', str(e.exception))
 
-        info_p.return_value = {'result': {'cost_estimation': {'required': 3000, 'available': 4000}}}
+        info_p.return_value = {'result': {'cost_estimation': {'required': 3000, 'available': 4000}}}, 200
 
         with self.assertRaises(api.ApiError) as e:
             cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
@@ -424,21 +434,21 @@ class TestCubeGens(unittest.TestCase):
     @patch.object(BatchV1Api, 'create_namespaced_job')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
     def test_create_with_file(self, namespace_p, create_p, info_p):
-        info_p.return_value = {'result': {'cost_estimation': {'required': 1, 'available': 10000000}}}
+        info_p.return_value = {'result': {'cost_estimation': {'required': 1, 'available': 10000000}}}, 200
 
-        res = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
+        res, status_code = cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
 
-        self.assertIn("drwho-", res['cubegen_id'])
-        self.assertEqual(24, len(res['cubegen_id']))
+        self.assertIn("drwho-", res['job_id'])
+        self.assertEqual(24, len(res['job_id']))
 
-        info_p.return_value = {'result': {'cost_estimation': {'required': 20, 'available': 10}}}
+        info_p.return_value = {'result': {'cost_estimation': {'required': 20, 'available': 10}}}, 200
 
         with self.assertRaises(api.ApiError) as e:
             cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
 
         self.assertEqual('Number of required punits (20) is greater than the available (10).', str(e.exception))
 
-        info_p.return_value = {'result': {'cost_estimation': {'required': 3000, 'available': 4000}}}
+        info_p.return_value = {'result': {'cost_estimation': {'required': 3000, 'available': 4000}}}, 200
 
         with self.assertRaises(api.ApiError) as e:
             cubegens.create('drwho', 'drwho@mail.org', _CFG, info_only=False)
@@ -450,44 +460,23 @@ class TestCubeGens(unittest.TestCase):
     @patch('xcube_hub.core.cubegens.get')
     @patch('xcube_hub.core.cubegens.create')
     @patch.object(BatchV1Api, 'read_namespaced_job_status')
-    def test_info2(self, status_p, create_p, get_p, punits_p):
+    @patch('xcube_hub.core.cubegens.cubegens_result', create=True)
+    def test_info2(self, res_p, status_p, create_p, get_p, punits_p):
+        self.maxDiff = None
+        res_p.return_value = {'status_code': 200, 'result': json.loads(_OUTPUT)['result']}
         status_p.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(type='Complete', status='ready')]))
-        create_p.return_value = {'cubegen_id': 'id', 'status': V1JobStatus().to_dict()}
+        create_p.return_value = {'job_id': 'id', 'status': V1JobStatus().to_dict()}, 200
 
-        get_p.return_value = {'cubegen_id': 'id', 'status': 'ready', 'output': ["bla", ], 'progress': 100}
+        get_p.return_value = {'job_id': 'id', 'result': {'status_code': 200}, 'status': 'ready', 'output': ["bla", ], 'progress': 100}, 200
 
         punits_p.return_value = dict(punits=dict(total_count=1000), count=500, result=dict())
 
         with open('test/id.json', 'w') as f:
             f.write(_OUTPUT)
 
-        res = cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
+        res, status_code = cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
 
-        expected = {'result':
-                        {'dataset_descriptor':
-                             {'data_id': 'test_cube.zarr',
-                              'type_specifier': 'dataset',
-                              'crs': 'WGS84',
-                              'bbox': [-2.24, 51.99, -2.15, 52.05],
-                              'time_range': ['2020-12-01', '2021-02-28'],
-                              'time_period': '1D',
-                              'dims': {'time': 90, 'lat': 674, 'lon': 1024},
-                              'spatial_res': 8.9e-05,
-                              'data_vars': {'B02':
-                                                {'name': 'B02',
-                                                 'dtype': 'float32',
-                                                 'dims': ['time', 'lat', 'lon']},
-                                            'CLM': {'name': 'CLM', 'dtype': 'float32',
-                                                    'dims': ['time', 'lat', 'lon']}}},
-                         'size_estimation': {'image_size': [1024, 674],
-                                             'tile_size': [512, 512],
-                                             'num_variables': 5,
-                                             'num_tiles': [2, 1],
-                                             'num_requests': 900,
-                                             'num_bytes': 1242316800},
-                         'cost_estimation': {'required': 540, 'available': 500, 'limit': 1000}},
-                    'output': ["bla", ]
-                    }
+        expected = {'status_code': 200, 'result': {'dataset_descriptor': {'data_id': 'test_cube.zarr', 'type_specifier': 'dataset', 'crs': 'WGS84', 'bbox': [-2.24, 51.99, -2.15, 52.05], 'time_range': ['2020-12-01', '2021-02-28'], 'time_period': '1D', 'dims': {'time': 90, 'lat': 674, 'lon': 1024}, 'spatial_res': 8.9e-05, 'data_vars': {'B02': {'name': 'B02', 'dtype': 'float32', 'dims': ['time', 'lat', 'lon']}, 'CLM': {'name': 'CLM', 'dtype': 'float32', 'dims': ['time', 'lat', 'lon']}}}, 'size_estimation': {'image_size': [1024, 674], 'tile_size': [512, 512], 'num_variables': 5, 'num_tiles': [2, 1], 'num_requests': 900, 'num_bytes': 1242316800}, 'cost_estimation': {'required': 540, 'available': 500, 'limit': 1000}}, 'output': ['bla']}
 
         self.assertDictEqual(expected, res)
 
@@ -511,7 +500,7 @@ class TestCubeGens(unittest.TestCase):
         # noinspection PyTypeChecker
         cfg['input_configs'] = [_CFG['input_config']]
 
-        res = cubegens.info(user_id='drwho', email='drwho@mail.org', body=cfg, token='fdsvdf')
+        res, status_code = cubegens.info(user_id='drwho', email='drwho@mail.org', body=cfg, token='fdsvdf')
 
         self.assertEqual(expected, res)
 
