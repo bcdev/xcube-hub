@@ -27,8 +27,8 @@ def create_cubegen(body: JsonObject, token_info: Dict):
         email = token_info['email']
         token = token_info['token']
 
-        cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
-        return api.ApiResponse.success(cubegen)
+        cubegen, status_code = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
+        return api.ApiResponse.success(cubegen, status_code=status_code)
     except api.ApiError as e:
         return e.response
 
@@ -58,8 +58,8 @@ def create_cubegen_code(body: FileStorage, user_code: FileStorage, token_info: D
         email = token_info['email']
         token = token_info['token']
 
-        cubegen = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
-        return api.ApiResponse.success(cubegen)
+        cubegen, status_code = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
+        return api.ApiResponse.success(cubegen, status_code=status_code)
     except api.ApiError as e:
         return e.response
 
@@ -99,18 +99,8 @@ def delete_cubegens(token_info: JsonObject) -> Tuple:
         return e.response
 
 
-def _get_http_status(cubgen_result: Dict) -> int:
-    status = cubgen_result['status']
-    if status == "ok":
-        return 201
-    elif status == "warning":
-        return 200
-    elif status == "error":
-        return 400
-
-
 def get_cubegen_info(body, token_info: Dict):
-    """Receive cost information for runnning a cubegen
+    """Receive cost information for running a cubegen
 
     Receive cost information of using a service
 
@@ -126,9 +116,9 @@ def get_cubegen_info(body, token_info: Dict):
         email = token_info['email']
         token = token_info['token']
 
-        result = cubegens.info(user_id=user_id, email=email, token=token, body=body)
+        result, status_code = cubegens.info(user_id=user_id, email=email, token=token, body=body)
 
-        return api.ApiResponse.success(result=result, status_code=_get_http_status(result))
+        return api.ApiResponse.success(result=result, status_code=status_code)
     except api.ApiError as e:
         return e.response
 
@@ -148,8 +138,8 @@ def get_cubegen(cubegen_id, token_info):
 
     try:
         user_id = token_info['user_id']
-        res = cubegens.get(user_id=user_id, cubegen_id=cubegen_id)
-        return api.ApiResponse.success(res)
+        res, status_code = cubegens.get(user_id=user_id, cubegen_id=cubegen_id)
+        return api.ApiResponse.success(res, status_code=status_code)
     except api.ApiError as e:
         return e.response
 

@@ -2,7 +2,7 @@ import json
 import os
 import uuid
 from pprint import pprint
-from typing import Union, Sequence, Optional
+from typing import Union, Sequence, Optional, Tuple, Dict
 
 from kubernetes import client
 from kubernetes.client import ApiException, ApiValueError
@@ -19,7 +19,7 @@ from xcube_hub.typedefs import AnyDict, Error, JsonObject
 from xcube_hub.util import maybe_raise_for_env
 
 
-def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
+def get(user_id: str, cubegen_id: str) -> Tuple[JsonObject, int]:
     try:
         outputs = logs(job_id=cubegen_id)
         stat = status(job_id=cubegen_id)
@@ -32,7 +32,20 @@ def get(user_id: str, cubegen_id: str) -> Union[AnyDict, Error]:
         xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
         res = cubegens_result(job_id=cubegen_id, root=xcube_hub_result_root_dir)
 
-        return {'cubegen_id': cubegen_id, 'status': stat, 'output': outputs, 'progress': progress, 'result': res}
+        if 'output' not in res:
+            res['output'] = outputs
+        else:
+            res['output'] += outputs
+
+        status_code = res['status_code']
+
+        res = {'job_id': cubegen_id,
+               'job_status': stat,
+               'job_result': res,
+               'output': outputs,
+               'progress': progress}
+
+        return res, status_code
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 
@@ -87,7 +100,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     with open(cfg_file, 'w') as f:
         json.dump(cfg, f)
 
-    cmd = f"source activate xcube && xcube --traceback gen2 -o {res_file} -vv {info_flag} --stores {stores_file} {cfg_file}"
+    cmd = f"source activate xcube && xcube --traceback gen2 -o {res_file} -vv {info_flag} " \
+          f"--stores {stores_file} {cfg_file}"
     # cmd = cmd + " && curl -X POST localhost:3500/v1.0/shutdown" if xcube_use_dapr else None
 
     cmd = ["/bin/bash", "-c", cmd]
@@ -167,7 +181,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
 def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str):
     limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
 
-    infos = info(user_id=user_id, email=email, body=cfg, token=token)
+    infos, status_code = info(user_id=user_id, email=email, body=cfg, token=token)
     cost_estimation = infos['result']['cost_estimation']
 
     if cost_estimation['required'] > int(limit):
@@ -181,7 +195,7 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
 
 
 def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = False) -> \
-        Union[AnyDict, Error]:
+        Tuple[JsonObject, int]:
     try:
         if 'input_config' not in cfg and 'input_configs' not in cfg:
             raise api.ApiError(400, "Either 'input_config' or 'input_configs' must be given")
@@ -213,7 +227,9 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
         kvdb.set(user_id + '__' + job_id, {'progress': []})
 
-        return {'cubegen_id': job_id, 'status': api_response.status.to_dict()}
+        job_result = dict(output=[], status_code=200)
+
+        return {'job_id': job_id, 'job_status': api_response.status.to_dict(), 'job_result': job_result}, 200
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, message=str(e))
     except Exception as e:
@@ -230,16 +246,16 @@ def list(user_id: str):
         res = []
         for job in api_response.items:
             if user_id in job.metadata.name:
-                job = get(user_id=user_id, cubegen_id=job.metadata.name)
+                job, status_code = get(user_id=user_id, cubegen_id=job.metadata.name)
 
                 res.append(job)
 
-        return res
+        return res, 200
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, str(e))
 
 
-def cubegens_result(job_id: str, root: str):
+def cubegens_result(job_id: str, root: str) -> Dict:
     try:
         if not os.path.isdir(root):
             os.mkdir(root)
@@ -250,7 +266,7 @@ def cubegens_result(job_id: str, root: str):
             with open(fn, 'r') as f:
                 return json.load(f)
         else:
-            return {'result': {}}
+            return dict()
     except Exception as e:
         raise api.ApiError(400, str(e))
 
@@ -303,22 +319,23 @@ def delete_one(cubegen_id: str) -> Union[AnyDict, Error]:
 
 
 def delete_all(user_id: str):
-    jobs = list(user_id=user_id)
+    jobs, status_code = list(user_id=user_id)
 
     for job in jobs:
         delete_one(job['cubegen_id'])
 
 
-def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> JsonObject:
+def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> Tuple[JsonObject, int]:
     xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
 
-    job = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
+    job, status_code = create(user_id=user_id, email=email, cfg=body, info_only=True, token=token)
+
     apps_v1_api = client.BatchV1Api()
     xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
     poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
                            name=job['cubegen_id'])
 
-    state = get(user_id=user_id, cubegen_id=job['cubegen_id'])
+    state, status_code = get(user_id=user_id, cubegen_id=job['cubegen_id'])
     job_result = cubegens_result(job_id=job['cubegen_id'], root=xcube_hub_result_root_dir)
 
     output = state['output']
@@ -351,8 +368,9 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     job_result['result']['cost_estimation'] = dict(required=required, available=available['count'], limit=int(limit))
     job_result['result']['size_estimation'] = cost_est['size_estimation']
     job_result['output'] = output
+    status_code = job_result['status_code']
 
-    return job_result
+    return job_result, status_code
 
 
 def process_user_code(cfg: CubegenConfig, user_code: Optional[FileStorage] = None):
