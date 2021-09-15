@@ -429,7 +429,7 @@ paths:
         List user cubegens
       operationId: get_cubegens
       responses:
-        "200":
+        "201":
           content:
             application/json:
               schema:

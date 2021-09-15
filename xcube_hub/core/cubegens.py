@@ -37,7 +37,7 @@ def get(user_id: str, cubegen_id: str) -> Tuple[JsonObject, int]:
         else:
             res['output'] += outputs
 
-        status_code = res['status_code']
+        status_code = res['status_code'] if 'status_code' in res else 200
 
         res = {'job_id': cubegen_id,
                'job_status': stat,
@@ -227,7 +227,7 @@ def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, 
         kvdb.set(user_id + '__' + job_id + '__cfg', cfg)
         kvdb.set(user_id + '__' + job_id, {'progress': []})
 
-        job_result = dict(output=[], status_code=200)
+        job_result = dict(output=[], status_code=200, status='ok')
 
         return {'job_id': job_id, 'job_status': api_response.status.to_dict(), 'job_result': job_result}, 200
     except (ApiException, MaxRetryError) as e:
@@ -266,7 +266,7 @@ def cubegens_result(job_id: str, root: str) -> Dict:
             with open(fn, 'r') as f:
                 return json.load(f)
         else:
-            return dict()
+            return dict(status_code=404, status='warning')
     except Exception as e:
         raise api.ApiError(400, str(e))
 
@@ -368,6 +368,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     job_result['result']['cost_estimation'] = dict(required=required, available=available['count'], limit=int(limit))
     job_result['result']['size_estimation'] = cost_est['size_estimation']
     job_result['output'] = output
+    job_result['result']['status'] = job_result['status']
     status_code = job_result['status_code']
 
     return job_result, status_code
