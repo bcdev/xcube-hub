@@ -368,7 +368,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     job_result['result']['cost_estimation'] = dict(required=required, available=available['count'], limit=int(limit))
     job_result['result']['size_estimation'] = cost_est['size_estimation']
     job_result['output'] = output
-    job_result['result']['status'] = job_result['status']
+
     status_code = job_result['status_code']
 
     return job_result, status_code
