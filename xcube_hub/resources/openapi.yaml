@@ -397,6 +397,28 @@ paths:
       tags:
         - services
       x-openapi-router-controller: xcube_hub.controllers.services
+  /xcube:
+    put:
+      description: |
+        Add an xcube service
+      operationId: create_xcube
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/XcubeRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Api Error
+      security:
+        - oAuthorization:
+            - manage:xcube
+      summary: Create a xcube service
+      tags:
+        - xcube
+      x-openapi-router-controller: xcube_hub.controllers.xcube
   /cubegens:
     delete:
       description: |
@@ -1500,6 +1522,58 @@ components:
           type: string
         progress:
           $ref: '#/components/schemas/Callback'
+    XcubeRequest:
+      type: object
+      properties:
+        dataset_chunk_cache_size:
+          type: string
+          default: "100M"
+        data_stores:
+          type: array
+          items:
+            type: object
+            properties:
+              identifier:
+                type: string
+              store_id:
+                type: string
+              datasets:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                  properties:
+                    identifier:
+                      type: string
+                      default: "*.zarr"
+                    style:
+                      type: string
+                      default: "default"
+              store_params:
+                type: object
+                properties:
+                  root:
+                    type: string
+                  max_depth:
+                    type: integer
+                  storage_options:
+                    type: object
+                    properties:
+                      anon:
+                        type: boolean
+                      client_kwargs:
+                        type: object
+                        additionalProperties: true
+        styles:
+          type: array
+          items:
+            type: object
+            properties:
+              identifier:
+                type: string
+              color_mappings:
+                additionalProperties:
+                  type: object
     Collection:
       properties:
         collection_id:

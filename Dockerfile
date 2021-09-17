@@ -35,11 +35,11 @@ RUN mamba env create
 RUN echo "conda activate xcube-hub" >> ~/.bashrc
 
 ADD --chown=1000:100 ./ .
-RUN source activate xcube-hub && pip install .
+RUN source activate xcube-hub && pip install --use-feature=in-tree-build .
 
 EXPOSE 8000
 EXPOSE 8080
 EXPOSE 5050
 
-CMD ["/opt/conda/envs/xcube-hub/bin/python", "-m", "xcube_hub"]
-#CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --static-index /viewer/index.html --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+#CMD ["/opt/conda/envs/xcube-hub/bin/python", "-m", "xcube_hub"]
+CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]

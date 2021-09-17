@@ -1,3 +1,4 @@
+import base64
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 
@@ -5,7 +6,7 @@ from kubernetes import client
 from kubernetes.client import ApiException, V1ObjectMeta, CoreV1Api, V1PersistentVolumeClaimList, \
     V1PersistentVolumeClaim, ApiValueError, AppsV1Api, V1DaemonSet, V1DaemonSetList, V1Status, V1Deployment, \
     V1DeploymentList, V1ServiceList, NetworkingV1beta1Ingress, NetworkingV1beta1IngressList, V1Pod, V1PodList, \
-    V1ConfigMap
+    V1ConfigMap, V1Secret
 from xcube_hub import api
 from xcube_hub.core import k8s
 
@@ -23,6 +24,28 @@ class TestK8s(unittest.TestCase):
         self._core_v1_api = client.CoreV1Api()
         self._networking_api = client.NetworkingV1beta1Api()
         self._apps_api = client.AppsV1Api()
+
+    @patch.object(CoreV1Api, 'read_namespaced_secret')
+    def test_get_secret(self, read_p):
+        secret_success = V1Secret(
+            data=dict(MY_SECRET=base64.b64encode("Olaf".encode()))
+        )
+        read_p.return_value = secret_success
+        res = k8s.get_secret(name="test", secret_item="MY_SECRET", namespace="default")
+
+        self.assertEqual("Olaf", res)
+
+        with self.assertRaises(api.ApiError) as e:
+            k8s.get_secret(name="test", secret_item="MY_SECRET_NOT", namespace="default")
+
+        self.assertEqual("System Error: Secret MY_SECRET_NOT not found in secret test.", str(e.exception))
+
+        read_p.side_effect = ApiValueError("Whatever")
+
+        with self.assertRaises(api.ApiError) as e:
+            k8s.get_secret(name="test", secret_item="MY_SECRET_NOT", namespace="default")
+
+        self.assertEqual("Whatever", str(e.exception))
 
     def test_create_pvc_object(self):
         res = k8s.create_pvc_object('drwho')

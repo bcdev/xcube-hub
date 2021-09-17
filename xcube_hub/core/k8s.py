@@ -1,9 +1,25 @@
+import base64
 from typing import Optional, Sequence, Union, Dict
 from kubernetes import client
-from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError, ApiValueError
+from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError, ApiValueError, \
+    CoreV1Api
 from xcube_hub.typedefs import JsonObject
 
 from xcube_hub import api
+
+
+def get_secret(name: str, secret_item: str, namespace: str, v1_client: Optional[CoreV1Api] = None) -> str:
+    v1_client = v1_client or client.CoreV1Api()
+
+    try:
+        secret = v1_client.read_namespaced_secret(name=name, namespace=namespace)
+    except Exception as e:
+        raise api.ApiError(400, str(e))
+
+    if secret_item not in secret.data:
+        raise api.ApiError(400, f"System Error: Secret {secret_item} not found in secret {name}.")
+
+    return base64.b64decode(secret.data[secret_item]).decode()
 
 
 def create_pvc_object(user_id: str, storage: str = '2Gi'):
@@ -217,7 +233,7 @@ def create_deployment(deployment: client.V1Deployment,
         api_response = apps_v1_api.create_namespaced_deployment(
             body=deployment,
             namespace=namespace)
-        print("Deployment created. status='%s'" % str(api_response.status))
+        return api_response.status
     except (ApiException, ApiTypeError) as e:
         raise api.ApiError(400, f"Error when creating the deployment {deployment.metadata.name}: {str(e)}")
 
@@ -226,7 +242,9 @@ def create_deployment_if_not_exists(namespace: str, deployment: client.V1Deploym
     deployment_exists = get_deployment(namespace=namespace, name=deployment.metadata.name)
 
     if deployment_exists is None:
-        create_deployment(deployment=deployment, namespace=namespace)
+        return create_deployment(deployment=deployment, namespace=namespace)
+
+    return False
 
 
 def delete_deployment(name: str, namespace: str = 'default', core_api: Optional[client.AppsV1Api] = None):
