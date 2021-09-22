@@ -1074,7 +1074,12 @@ components:
         message:
           type: string
         versions:
+          type: object
           additionalProperties: true
+        traceback:
+          type: array
+          items:
+            type: string
         output:
           items:
             type: string
