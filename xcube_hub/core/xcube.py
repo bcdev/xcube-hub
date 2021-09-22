@@ -165,7 +165,7 @@ def create(user_id: str, cfg: JsonObject) -> Tuple[JsonObject, int]:
         return {
                    'server_url': server_url,
                    'viewer_url': viewer_url
-               }, 200
+               }, 201
     except (ApiException, MaxRetryError) as e:
         raise api.ApiError(400, message=str(e))
     except Exception as e:
