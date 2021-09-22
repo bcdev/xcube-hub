@@ -198,7 +198,7 @@ def create_deployment_object(name: str, user_id: str,
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
-            labels={"app": container_name, "purpose": "cate-webapi"},
+            labels={"app": container_name, "purpose": "webapi"},
             annotations=annotations
         ),
         spec=client.V1PodSpec(
@@ -272,6 +272,7 @@ def list_deployments(namespace: str, core_api: Optional[client.AppsV1Api] = None
 
 def get_deployment(namespace: str, name: str):
     deployments = list_deployments(namespace=namespace)
+
     for deployment in deployments.items:
         if deployment.metadata.name == name:
             return deployment
@@ -331,22 +332,24 @@ def create_ingress_object(name: str,
                           service_name: str,
                           service_port: int,
                           user_id: str,
-                          host_uri: str) -> client.NetworkingV1beta1Ingress:
-    webapi_host = host_uri
+                          host_uri: str,
+                          annotations: Optional[Sequence] = None) -> client.NetworkingV1beta1Ingress:
+    webapi_host = host_uri.replace("https://", "").replace("http://", "")
+    annotations = annotations or {
+        "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
+        "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
+        "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",
+        "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
+        "nginx.ingress.kubernetes.io/send-timeout": "86400",
+        "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
+        "nginx.ingress.kubernetes.io/enable-cors": "true",
+        "nginx.ingress.kubernetes.io/websocket-services": service_name
+    }
 
     body = client.NetworkingV1beta1Ingress(
         api_version="networking.k8s.io/v1beta1",
         kind="Ingress",
-        metadata=client.V1ObjectMeta(name=name, annotations={
-            "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
-            "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
-            "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",
-            "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
-            "nginx.ingress.kubernetes.io/send-timeout": "86400",
-            "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
-            "nginx.ingress.kubernetes.io/enable-cors": "true",
-            "nginx.ingress.kubernetes.io/websocket-services": service_name
-        }),
+        metadata=client.V1ObjectMeta(name=name, annotations=annotations),
         spec=client.NetworkingV1beta1IngressSpec(
             rules=[client.NetworkingV1beta1IngressRule(
                 host=webapi_host,

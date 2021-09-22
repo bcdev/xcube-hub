@@ -408,13 +408,23 @@ paths:
             schema:
               $ref: '#/components/schemas/XcubeRequest'
       responses:
-        "200":
+        "201":
           description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  server_url:
+                    type: string
+                    format: url
+                  viewer_url:
+                    type: string
+                    format: url
         "400":
           description: Api Error
-      security:
-        - oAuthorization:
-            - manage:xcube
+#      security:
+#        - oAuthorization:
+#            - manage:cubegens
       summary: Create a xcube service
       tags:
         - xcube
@@ -1045,6 +1055,13 @@ components:
           type: string
         status_code:
           type: integer
+        traceback:
+          type: array
+          items:
+            type: string
+        versions:
+          type: object
+          additionalProperties: true
       required:
         - status
       type: object
@@ -1056,6 +1073,8 @@ components:
       properties:
         message:
           type: string
+        versions:
+          additionalProperties: true
         output:
           items:
             type: string
@@ -1525,55 +1544,60 @@ components:
     XcubeRequest:
       type: object
       properties:
-        dataset_chunk_cache_size:
+        user_id:
           type: string
-          default: "100M"
-        data_stores:
-          type: array
-          items:
-            type: object
-            properties:
-              identifier:
-                type: string
-              store_id:
-                type: string
-              datasets:
-                type: array
-                items:
-                  type: object
-                  additionalProperties: true
-                  properties:
-                    identifier:
-                      type: string
-                      default: "*.zarr"
-                    style:
-                      type: string
-                      default: "default"
-              store_params:
+        cfg:
+          type: object
+          properties:
+            dataset_chunk_cache_size:
+              type: string
+              default: "100M"
+            data_stores:
+              type: array
+              items:
                 type: object
                 properties:
-                  root:
+                  identifier:
                     type: string
-                  max_depth:
-                    type: integer
-                  storage_options:
+                  store_id:
+                    type: string
+                  datasets:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        identifier:
+                          type: string
+                          default: "*.zarr"
+                        style:
+                          type: string
+                          default: "default"
+                  store_params:
                     type: object
                     properties:
-                      anon:
-                        type: boolean
-                      client_kwargs:
+                      root:
+                        type: string
+                      max_depth:
+                        type: integer
+                      storage_options:
                         type: object
-                        additionalProperties: true
-        styles:
-          type: array
-          items:
-            type: object
-            properties:
-              identifier:
-                type: string
-              color_mappings:
-                additionalProperties:
-                  type: object
+                        properties:
+                          anon:
+                            type: boolean
+                          client_kwargs:
+                            type: object
+                            additionalProperties: true
+            styles:
+              type: array
+              items:
+                type: object
+                properties:
+                  identifier:
+                    type: string
+                  color_mappings:
+                    additionalProperties:
+                      type: object
     Collection:
       properties:
         collection_id:
