@@ -41,5 +41,5 @@ EXPOSE 8000
 EXPOSE 8080
 EXPOSE 5050
 
-#CMD ["/opt/conda/envs/xcube-hub/bin/python", "-m", "xcube_hub"]
-CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
+CMD ["/opt/conda/envs/xcube-hub/bin/python", "-m", "xcube_hub"]
+#CMD ["/bin/bash", "-c", "source activate xcube-hub && uwsgi --yaml ${XCUBE_API_UWSGI_INI_PATH}"]
