@@ -32,7 +32,7 @@ def _create_xcube_deployment_object(user_id: str, cfg_id: str, cfg: JsonObject) 
     else:
         image = xcube_repo + ':' + xcube_tag
 
-    cmd = "source activate xcube && xcube serve -v --traceperf -P 8080 -A 0.0.0.0 -c " + \
+    cmd = f"source activate xcube && xcube serve -v --traceperf -P 8080 --prefix /{user_id} -A 0.0.0.0 -c " + \
           cfg_file_name
 
     cmd = ["/bin/bash", "-c", cmd]
