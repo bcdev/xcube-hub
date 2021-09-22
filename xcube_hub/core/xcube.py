@@ -156,7 +156,8 @@ def create(user_id: str, cfg: JsonObject) -> Tuple[JsonObject, int]:
                                             service_port=8080,
                                             user_id=user_id,
                                             host_uri=host_uri,
-                                            annotations=annotations)
+                                            annotations=annotations,
+                                            path_regex="/(.*)")
 
         k8s.create_ingress(ingress, namespace=xcube_namespace)
         server_url = f"{host_uri}/{user_id}/"

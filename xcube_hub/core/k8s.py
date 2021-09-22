@@ -333,7 +333,9 @@ def create_ingress_object(name: str,
                           service_port: int,
                           user_id: str,
                           host_uri: str,
-                          annotations: Optional[Sequence] = None) -> client.NetworkingV1beta1Ingress:
+                          annotations: Optional[Sequence] = None,
+                          path_regex: str = "/.*"
+                          ) -> client.NetworkingV1beta1Ingress:
     webapi_host = host_uri.replace("https://", "").replace("http://", "")
     annotations = annotations or {
         "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
@@ -355,7 +357,7 @@ def create_ingress_object(name: str,
                 host=webapi_host,
                 http=client.NetworkingV1beta1HTTPIngressRuleValue(
                     paths=[client.NetworkingV1beta1HTTPIngressPath(
-                        path="/" + user_id + "/.*",
+                        path="/" + user_id + path_regex,
                         backend=client.NetworkingV1beta1IngressBackend(
                             service_port=service_port,
                             service_name=service_name)
