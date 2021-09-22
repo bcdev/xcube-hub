@@ -159,7 +159,7 @@ def create(user_id: str, cfg: JsonObject) -> Tuple[JsonObject, int]:
                                             annotations=annotations)
 
         k8s.create_ingress(ingress, namespace=xcube_namespace)
-        server_url = f"{host_uri}/{user_id}"
+        server_url = f"{host_uri}/{user_id}/"
         viewer_url = f"{viewer_uri}?serverUrl={server_url}&serverName={user_id}"
 
         return {
