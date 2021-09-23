@@ -1352,6 +1352,9 @@ components:
           additionalProperties: true
           type: object
           nullable: true
+        variable_metadata:
+          type: object
+          additionalProperties: true
         spatial_res:
           minimum: 0.0
           exclusiveMinimum: true
