@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 import datetime
-from typing import Any, Tuple, Union, Optional
+from typing import Any, Tuple, Union, Optional, Dict
 
 from xcube_hub.typedefs import AnyDict, UNDEFINED, JsonObject, JsonValue
 
@@ -41,7 +41,8 @@ class ApiResponse:
               error: Optional[Union[str, BaseException]] = None,
               output: Optional[Union[str, BaseException]] = None,
               traceback: Optional[Union[str, BaseException]] = None,
-              status_code: int = 500) -> Tuple[AnyDict, int]:
+              status_code: int = 500,
+              result: Optional[Dict] = None) -> Tuple[AnyDict, int]:
         response = dict()
         if error is not None:
             response['message'] = f'{error}'
@@ -52,16 +53,22 @@ class ApiResponse:
         if traceback is not None:
             response['traceback'] = f'{traceback}'
 
+        response['job_id'] = 'unknown'
+        response['job_status'] = {'active': 0, 'failed': 0, 'succeeded': 1}
+        response['result'] = result
+
         return response, status_code
 
 
 class ApiError(BaseException):
     def __init__(self, status_code: int,
                  message: str,
-                 output: Optional[str] = None):
+                 output: Optional[str] = None,
+                 result: Optional[Dict] = None):
         super().__init__(message)
         self.status_code = status_code
         self._output = output
+        self._result = result
 
     @property
     def response(self):
@@ -69,7 +76,8 @@ class ApiError(BaseException):
         return ApiResponse.error(error=self,
                                  status_code=self.status_code,
                                  output=self._output,
-                                 traceback=traceback.format_exc())
+                                 traceback=traceback.format_exc(),
+                                 result=self._result)
 
 
 def get_json_request_value(request: JsonObject,

@@ -10,6 +10,12 @@ from xcube_hub.models.cubegen_config import CubegenConfig
 from xcube_hub.typedefs import AnyDict, JsonObject
 
 
+def _maybe_raise_for_process_not_allowed(body: JsonObject, token_info: Dict):
+    if 'code_config' in body:
+        if 'process:cubegens' not in token_info['scopes']:
+            raise api.ApiError(403, "You don't have access to using byoa code.")
+
+
 def create_cubegen(body: JsonObject, token_info: Dict):
     """Create a cubegen
 
@@ -27,6 +33,7 @@ def create_cubegen(body: JsonObject, token_info: Dict):
         email = token_info['email']
         token = token_info['token']
 
+        _maybe_raise_for_process_not_allowed(body, token_info)
         cubegen, status_code = cubegens.create(user_id=user_id, email=email, token=token, cfg=body)
         return api.ApiResponse.success(cubegen, status_code=status_code)
     except api.ApiError as e:

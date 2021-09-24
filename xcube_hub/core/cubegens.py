@@ -187,11 +187,13 @@ def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str
     if cost_estimation['required'] > int(limit):
         raise api.ApiError(413,
                            f"Number of required punits ({cost_estimation['required']}) is "
-                           f"greater than the absolute limit of {limit}.")
+                           f"greater than the absolute limit of {limit}.",
+                           result=infos['result'])
 
     if cost_estimation['required'] > cost_estimation['available']:
         raise api.ApiError(413, f"Number of required punits ({cost_estimation['required']}) "
-                                f"is greater than the available ({cost_estimation['available']}).")
+                                f"is greater than the available ({cost_estimation['available']}).",
+                           result=infos['result'])
 
 
 def create(user_id: str, email: str, cfg: AnyDict, token: Optional[str] = None, info_only: bool = False) -> \

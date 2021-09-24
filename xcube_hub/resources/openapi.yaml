@@ -579,7 +579,7 @@ paths:
           description: User not found
       security:
         - oAuthorization:
-            - manage:cubegens
+            - process:cubegens
       summary: Create a cubegen
       tags:
         - cubegens

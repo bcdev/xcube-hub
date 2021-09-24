@@ -3,6 +3,7 @@ import os
 
 import connexion
 import flask_cors
+from connexion.decorators.validation import ParameterValidator, RequestBodyValidator
 from dotenv import load_dotenv
 
 from xcube_hub import encoder
@@ -12,6 +13,25 @@ from xcube_hub.geoservice import GeoService
 from xcube_hub.k8scfg import K8sCfg
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 
+
+class CustomRequestBodyValidator(RequestBodyValidator):
+    def __init__(self, schema, consumes, api, is_null_value_valid=False, validator=None,
+                 strict_validation=False):
+        super().__init__(schema, consumes, api, is_null_value_valid, validator, strict_validation)
+
+    def validate_schema(self, data, url):
+        pass
+        # try:
+        #     super().validate_schema(data, url)
+        # except BadRequestProblem as e:
+        #     e.mes
+        #     raise BadRequestProblem() from e
+
+
+validator_map = {
+    'body': CustomRequestBodyValidator,
+    'parameter': ParameterValidator
+}
 
 def create_app():
     load_dotenv()
@@ -26,7 +46,9 @@ def create_app():
     # specification_dir = maybe_raise_for_env("XCUBE_HUB_CFG_DIR", './resources/')
     KeyValueDatabase.instance(provider=cache_provider)
 
-    return connexion.App(__name__, specification_dir='./resources/')
+    connexion_app = connexion.App(__name__, specification_dir='./resources/')
+
+    return connexion_app
 
 
 app = create_app()

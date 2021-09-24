@@ -177,7 +177,10 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
             if subscription.unit != "punits":
                 raise api.ApiError(400, "Wrong unit for a xcube gen subscription")
 
-            role_id = util.maybe_raise_for_env("XCUBE_GEN_ROLE_ID")
+            if subscription.plan == "processing":
+                role_id = util.maybe_raise_for_env("XCUBE_GEN_PROCESSING_ROLE_ID")
+            else:
+                role_id = util.maybe_raise_for_env("XCUBE_GEN_ROLE_ID")
             try:
                 punits.override_punits(user_id=user.email,
                                        punits_request=dict(punits=dict(total_count=int(subscription.units))))
