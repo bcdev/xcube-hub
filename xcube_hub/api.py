@@ -44,18 +44,21 @@ class ApiResponse:
               status_code: int = 500,
               result: Optional[Dict] = None) -> Tuple[AnyDict, int]:
         response = dict()
+
+        result = result or {}
         if error is not None:
             response['message'] = f'{error}'
-
+            result['message'] = f'{error}'
         if output is not None:
             response['output'] = f'{output}'
 
         if traceback is not None:
             response['traceback'] = f'{traceback}'
 
+        result['status'] = 'error'
         response['job_id'] = 'unknown'
-        response['job_status'] = {'active': 0, 'failed': 0, 'succeeded': 1}
-        response['result'] = result
+        response['job_status'] = {'active': 0, 'failed': 1, 'succeeded': 0}
+        response['job_result'] = result
 
         return response, status_code
 

@@ -1005,7 +1005,11 @@ components:
           properties:
             traceback:
               type: string
-            result:
+            job_status:
+              $ref: '#/components/schemas/JobStatus'
+            job_id:
+              type: string
+            job_result:
               oneOf:
                 - $ref: '#/components/schemas/CubeGenResult'
                 - $ref: '#/components/schemas/CubeGenInfoResult'
@@ -1700,6 +1704,8 @@ components:
             - 'euro'
             - 'n/a'
           default: 'punits'
+        option:
+          type: string
   securitySchemes:
     oAuthorization:
       description: This API uses Oauth 2 with the implicit grant flow.

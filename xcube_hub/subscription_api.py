@@ -177,15 +177,15 @@ class _SubscriptionAuth0Api(SubscriptionApiProvider):
             if subscription.unit != "punits" and subscription.unit != "euro":
                 raise api.ApiError(400, "Wrong unit for a xcube gen subscription")
 
-            if subscription.plan == "processing":
+            if subscription.option == "processing":
                 role_id = util.maybe_raise_for_env("XCUBE_GEN_PROCESSING_ROLE_ID")
             else:
                 role_id = util.maybe_raise_for_env("XCUBE_GEN_ROLE_ID")
-                try:
-                    punits.override_punits(user_id=user.email,
-                                           punits_request=dict(punits=dict(total_count=int(subscription.units))))
-                except (DatabaseError, ClientError) as e:
-                    raise api.ApiError(400, str(e))
+            try:
+                punits.override_punits(user_id=user.email,
+                                       punits_request=dict(punits=dict(total_count=int(subscription.units))))
+            except (DatabaseError, ClientError) as e:
+                raise api.ApiError(400, str(e))
 
         if service_id == "xcube_geoserv":
             role_id = util.maybe_raise_for_env("XCUBE_GEOSERV_ID")

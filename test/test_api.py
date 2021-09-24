@@ -9,9 +9,9 @@ class ApiErrorTest(unittest.TestCase):
         self.assertEqual(403, error.status_code)
         self.assertEqual('hands off', f'{error}')
         expected = ({'job_id': 'unknown',
-                     'job_status': {'active': 0, 'failed': 0, 'succeeded': 1},
+                     'job_result': {'message': 'hands off', 'status': 'error'},
+                     'job_status': {'active': 0, 'failed': 1, 'succeeded': 0},
                      'message': 'hands off',
-                     'result': None,
                      'traceback': 'NoneType: None\n'},
                     403)
         self.assertEqual(expected, error.response)

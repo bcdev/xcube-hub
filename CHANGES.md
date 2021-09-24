@@ -1,3 +1,10 @@
+## Changes in v2.1.6
+
+### New Features
+
+- The Hub has now an additional options for xcube-gen subscription which is called `processing`
+  This will allow the user to execute BYOA scripts  
+
 ## Changes in v2.1.5
 
 ### New Features

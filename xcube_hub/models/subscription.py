@@ -16,7 +16,7 @@ class Subscription(Model):
     """
 
     def __init__(self, subscription_id=None, plan='free', email=None, guid=None, client_id=None, client_secret=None,
-                 units=0.0, unit='punits', first_name=None, last_name=None, start_date=None, role=None):  # noqa: E501
+                 units=0.0, unit='punits', first_name=None, last_name=None, start_date=None, role=None, option=None):  # noqa: E501
         """Subscription - a model defined in OpenAPI
 
         :param subscription_id: The subscription_id of this Subscription.  # noqa: E501
@@ -43,6 +43,8 @@ class Subscription(Model):
         :type start_date: str
         :param role: The role of this Subscription.  # noqa: E501
         :type role: str
+        :param option: An additional option for this Subscription.  # noqa: E501
+        :type option: str
         """
         self.openapi_types = {
             'subscription_id': str,
@@ -56,7 +58,8 @@ class Subscription(Model):
             'first_name': str,
             'last_name': str,
             'start_date': str,
-            'role': str
+            'role': str,
+            'option': str
         }
 
         self.attribute_map = {
@@ -71,7 +74,8 @@ class Subscription(Model):
             'first_name': 'first_name',
             'last_name': 'last_name',
             'start_date': 'start_date',
-            'role': 'role'
+            'role': 'role',
+            'option': 'option'
         }
 
         self._subscription_id = subscription_id
@@ -86,6 +90,7 @@ class Subscription(Model):
         self._last_name = last_name
         self._start_date = start_date
         self._role = role
+        self._option = option
 
     @classmethod
     def from_dict(cls, dikt) -> 'Subscription':
@@ -358,3 +363,24 @@ class Subscription(Model):
         """
 
         self._role = role
+
+    @property
+    def option(self):
+        """Gets the option of this Subscription.
+
+
+        :return: The option of this Subscription.
+        :rtype: str
+        """
+        return self._option
+
+    @option.setter
+    def option(self, option):
+        """Sets the option of this Subscription.
+
+
+        :param option: The last_name of this Subscription.
+        :type option: str
+        """
+
+        self._option = option
