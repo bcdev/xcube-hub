@@ -267,7 +267,7 @@ class Subscription(Model):
         :param unit: The unit of this Subscription.
         :type unit: str
         """
-        allowed_values = ["punits", "cells"]  # noqa: E501
+        allowed_values = ["punits", "cells", "euro", "n/a"]  # noqa: E501
         if unit not in allowed_values:
             raise ValueError(
                 "Invalid value for `unit` ({0}), must be one of {1}".format(unit, allowed_values)

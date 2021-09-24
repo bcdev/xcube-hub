@@ -1697,6 +1697,7 @@ components:
           enum:
             - 'punits'
             - 'cells'
+            - 'euro'
             - 'n/a'
           default: 'punits'
   securitySchemes:
