@@ -1,4 +1,4 @@
-## Changes in v2.1.5 (in development)
+## Changes in v2.1.5
 
 ### New Features
 
