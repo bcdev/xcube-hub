@@ -12,7 +12,7 @@ from xcube_hub.typedefs import AnyDict, JsonObject
 
 def _maybe_raise_for_process_not_allowed(body: JsonObject, token_info: Dict):
     if 'code_config' in body:
-        if 'process:cubegens' not in token_info['scopes']:
+        if 'scopes' in token_info and 'process:cubegens' not in token_info['scopes']:
             raise api.ApiError(403, "You don't have access to using byoa code.")
 
 

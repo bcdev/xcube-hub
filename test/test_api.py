@@ -8,8 +8,13 @@ class ApiErrorTest(unittest.TestCase):
         error = ApiError(403, 'hands off')
         self.assertEqual(403, error.status_code)
         self.assertEqual('hands off', f'{error}')
-        self.assertEqual((dict(message='hands off', traceback='NoneType: None\n'), 403),
-                         error.response)
+        expected = ({'job_id': 'unknown',
+                     'job_status': {'active': 0, 'failed': 0, 'succeeded': 1},
+                     'message': 'hands off',
+                     'result': None,
+                     'traceback': 'NoneType: None\n'},
+                    403)
+        self.assertEqual(expected, error.response)
 
 
 class GetJsonResponseTest(unittest.TestCase):
