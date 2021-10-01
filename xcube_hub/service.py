@@ -72,7 +72,8 @@ def start(host: str = '0.0.0.0', port: int = 8080, debug: bool = False):
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('openapi.yaml',
                 arguments={'title': 'xcube Generation API'},
-                pythonic_params=True)
+                pythonic_params=True,
+                validate_responses=False)
     flask_cors.CORS(app.app)
     app.run(host=host, port=port, debug=debug, use_reloader=False)
 

@@ -179,7 +179,8 @@ def create_deployment_object(name: str, user_id: str,
                              init_containers: Optional[Sequence] = None,
                              limits: Optional[Dict] = None,
                              requests: Optional[Dict] = None,
-                             annotations: Optional[Dict] = None):
+                             annotations: Optional[Dict] = None,
+                             labels: Optional [Dict] = None):
     # Configureate Pod template container
     envs = [] if not envs else envs
 
@@ -209,16 +210,20 @@ def create_deployment_object(name: str, user_id: str,
         )
     )
     # Create the specification of deployment
+    labels['app'] = container_name
+    match_labels = {'matchLabels': labels}
     spec = client.V1DeploymentSpec(
         replicas=1,
         template=template,
-        selector={'matchLabels': {'app': container_name}}
+        selector=match_labels
     )
     # Instantiate the deployment object
+
+    metadata = client.V1ObjectMeta(name=name, labels=labels)
     deployment = client.V1Deployment(
         api_version="apps/v1",
         kind="Deployment",
-        metadata=client.V1ObjectMeta(name=name),
+        metadata=metadata,
         spec=spec)
 
     return deployment

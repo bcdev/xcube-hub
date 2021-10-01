@@ -1,3 +1,14 @@
+## Changes in v2.1.7
+
+### Fixes
+
+- Publish geoservice is now raising an error message when a workspace cannot be created
+
+### Others 
+
+- Added additional labels to deployments and jobs allowing to filter for them easier
+- Allowed for annotations and labels to be added in create_deployment_object
+
 ## Changes in v2.1.6
 
 ### New Features

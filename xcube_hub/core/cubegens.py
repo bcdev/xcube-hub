@@ -172,7 +172,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     cubegen = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        metadata=client.V1ObjectMeta(name=cubegen_id),
+        metadata=client.V1ObjectMeta(name=cubegen_id, labels=dict(typ="cubegen")),
         spec=spec)
 
     return cubegen

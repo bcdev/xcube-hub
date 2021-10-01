@@ -152,6 +152,8 @@ def launch_cate(user_id: str) -> JsonObject:
         annotations = {"dapr.io/app-id": user_id + '-cate', "dapr.io/enabled": "true",
                        "dapr.io/log-as-json": "true"} if cate_use_dapr else None
 
+        labels = dict(typ="cate")
+
         deployment = k8s.create_deployment_object(name=user_id + '-cate',
                                                   user_id=user_id,
                                                   container_name=user_id + '-cate',
@@ -164,7 +166,8 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   init_containers=init_containers,
                                                   limits=limits,
                                                   requests=requests,
-                                                  annotations=annotations)
+                                                  annotations=annotations,
+                                                  labels=labels)
 
         # Make create_if_exists test for broken pods
         # pod_status = get_status(user_id)
