@@ -210,6 +210,7 @@ def create_deployment_object(name: str, user_id: str,
         )
     )
     # Create the specification of deployment
+    labels = labels or {}
     labels['app'] = container_name
     match_labels = {'matchLabels': labels}
     spec = client.V1DeploymentSpec(

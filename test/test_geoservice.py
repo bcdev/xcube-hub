@@ -232,6 +232,7 @@ class TestGeoServiceOps(unittest.TestCase):
     def test_publish(self, m):
         m.get('https://test', json=_FTYPE)
         # Test whether call succeeds if workspace exists
+        self._geoservice._provider._geo.create_workspace.return_value = None
         self._geoservice._provider._geo.get_workspace.return_value = "db"
         self._geoservice._provider._geo.get_layer.return_value = {'layer': {
             'name': 'test', 'resource': {'href': 'https://test'}}
@@ -258,6 +259,13 @@ class TestGeoServiceOps(unittest.TestCase):
             raise Exception("Error: test")
 
         self._geoservice._provider._geo.publish_featurestore = side_effect
+
+        with self.assertRaises(api.ApiError) as e:
+            self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')
+
+        self.assertEqual("Error: test", str(e.exception))
+
+        self._geoservice._provider._geo.create_workspace.return_value = "Error: test"
 
         with self.assertRaises(api.ApiError) as e:
             self._geoservice.publish(user_id='drwho', database_id='test', collection_id='test')

@@ -373,7 +373,7 @@ class _GeoServer(GeoServiceBase, ABC):
             workspace = self._geo.get_workspace(workspace=user_id)
             if workspace is None:
                 res = self._geo.create_workspace(workspace=user_id)
-                if "Error" in res:
+                if res is not None and "Error" in res:
                     raise api.ApiError(400, res)
 
             feature_store = self._geo.get_featurestore(store_name=database_id, workspace=user_id)
