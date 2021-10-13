@@ -155,7 +155,7 @@ def launch_cate(user_id: str) -> JsonObject:
         labels = dict(typ="cate")
 
         deployment = k8s.create_deployment_object(name=user_id + '-cate',
-                                                  user_id=user_id,
+                                                  application='cate-webapi',
                                                   container_name=user_id + '-cate',
                                                   image=cate_image,
                                                   envs=envs,

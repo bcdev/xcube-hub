@@ -168,7 +168,8 @@ def create_goofys_daemonset_if_not_exists(namespace: str, daemonset: client.V1Da
         create_goofys_daemonset(daemonset=daemonset, namespace=namespace)
 
 
-def create_deployment_object(name: str, user_id: str,
+def create_deployment_object(name: str,
+                             application: str,
                              container_name: str,
                              image: str,
                              container_port: int,
@@ -180,8 +181,8 @@ def create_deployment_object(name: str, user_id: str,
                              limits: Optional[Dict] = None,
                              requests: Optional[Dict] = None,
                              annotations: Optional[Dict] = None,
-                             labels: Optional [Dict] = None):
-    # Configureate Pod template container
+                             labels: Optional[Dict] = None):
+    # Configure Pod template container
     envs = [] if not envs else envs
 
     container = client.V1Container(
@@ -196,10 +197,15 @@ def create_deployment_object(name: str, user_id: str,
         security_context=client.V1SecurityContext(privileged=True)
     )
 
-    # Create and configurate a spec section
+    # Create and configure a spec section
+
+    labels = labels or dict()
+    labels["app"] = container_name
+    labels["application"] = application
+
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
-            labels={"app": container_name, "purpose": "webapi"},
+            labels=labels,
             annotations=annotations
         ),
         spec=client.V1PodSpec(
@@ -210,8 +216,6 @@ def create_deployment_object(name: str, user_id: str,
         )
     )
     # Create the specification of deployment
-    labels = labels or {}
-    labels['app'] = container_name
     match_labels = {'matchLabels': labels}
     spec = client.V1DeploymentSpec(
         replicas=1,

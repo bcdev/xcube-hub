@@ -93,10 +93,8 @@ def _create_xcube_deployment_object(user_id: str, cfg_id: str, cfg: JsonObject) 
         },
     ]
 
-    labels = dict(typ="xcube-server")
-
     deployment = k8s.create_deployment_object(name=user_id,
-                                              user_id=user_id,
+                                              application='xcube-webapi',
                                               container_name=user_id,
                                               image=image,
                                               container_port=8080,
@@ -105,8 +103,7 @@ def _create_xcube_deployment_object(user_id: str, cfg_id: str, cfg: JsonObject) 
                                               volume_mounts=volume_mounts,
                                               volumes=volumes,
                                               limits={},
-                                              requests={},
-                                              labels=labels)
+                                              requests={})
 
     return deployment
 

@@ -173,7 +173,7 @@ class TestK8s(unittest.TestCase):
             p.assert_called_once()
 
     def test_create_deployment_object(self):
-        res = k8s.create_deployment_object(name='test', container_name='test', user_id='drwho', container_port=8080,
+        res = k8s.create_deployment_object(name='test', container_name='test', application='app', container_port=8080,
                                            image='cate')
         self.assertIsInstance(res, V1Deployment)
         self.assertEqual('test', res.metadata.name)
@@ -199,7 +199,7 @@ class TestK8s(unittest.TestCase):
 
     @patch('xcube_hub.core.k8s.get_deployment')
     def test_create_deployment_if_exists(self, get_p):
-        res = k8s.create_deployment_object(name='test', container_name='test', user_id='drwho', container_port=8080,
+        res = k8s.create_deployment_object(name='test', container_name='test', application='app', container_port=8080,
                                            image='cate')
 
         with patch('xcube_hub.core.k8s.create_deployment') as e:
@@ -229,7 +229,7 @@ class TestK8s(unittest.TestCase):
 
     @patch('xcube_hub.core.k8s.list_deployments')
     def test_get_deployment(self, list_p):
-        deployment = k8s.create_deployment_object(name='test', container_name='test', user_id='drwho',
+        deployment = k8s.create_deployment_object(name='test', container_name='test', application='application',
                                                   container_port=8080, image='cate')
 
         list_p.return_value = V1DeploymentList(items=[deployment])
