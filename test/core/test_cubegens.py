@@ -480,6 +480,17 @@ class TestCubeGens(unittest.TestCase):
 
         self.assertDictEqual(expected, res)
 
+        ### Test limits not in correct format
+
+        os.environ['XCUBE_HUB_PROCESS_LIMIT'] = 'sdfsdf'
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.info(user_id='drwho', email='drwho@mail.org', body=_CFG, token='fdsvdf')
+
+        self.assertEqual("could not convert string to float: 'sdfsdf'", str(e.exception))
+
+        os.environ['XCUBE_HUB_PROCESS_LIMIT'] = '1000'
+
         punits_p.return_value = dict(punits=dict(total_count=1000))
 
         with self.assertRaises(api.ApiError) as e:

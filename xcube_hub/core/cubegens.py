@@ -367,6 +367,12 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     required = cost_est['punits']['total_count']
 
     limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
+
+    try:
+        limit = int(float(limit))
+    except ValueError as e:
+        raise api.ApiError(400, str(e))
+
     job_result['result']['cost_estimation'] = dict(required=required, available=available['count'], limit=int(limit))
     job_result['result']['size_estimation'] = cost_est['size_estimation']
     job_result['output'] = output
