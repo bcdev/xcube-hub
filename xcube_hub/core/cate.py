@@ -214,6 +214,8 @@ def launch_cate(user_id: str) -> JsonObject:
 
 
 def get_status(user_id: str):
+    user_id = maybe_raise_for_invalid_username(user_id)
+
     cate_namespace = os.environ.get("WORKSPACE_NAMESPACE", "cate")
     pod = k8s.get_pod(prefix=user_id + '-cate', namespace=cate_namespace)
     if pod:
