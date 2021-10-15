@@ -1,4 +1,4 @@
-## Changes in v2.1.7 (in development)
+## Changes in v2.1.7
 
 ### Fixes
 
