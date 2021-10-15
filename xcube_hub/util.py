@@ -164,7 +164,10 @@ def maybe_raise_for_env(env_var: str, default: Optional[Any] = None, typ=str) ->
     return val
 
 
-def raise_for_invalid_username(username: str) -> bool:
+def maybe_raise_for_invalid_username(username: str) -> str:
+    username = username.replace('.', '-')
+    username = username.replace('@', '-')
+    username = username.replace('_', '-')
     valid = True
     if len(username) > 63:
         valid = False
@@ -176,7 +179,7 @@ def raise_for_invalid_username(username: str) -> bool:
     if not valid:
         raise api.ApiError(400, "Invalid user name.")
 
-    return valid
+    return username
 
 
 def load_env_by_regex(regex: Optional[str] = None) -> Sequence[client.V1EnvVar]:

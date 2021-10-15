@@ -5,6 +5,7 @@
 - Publish geoservice is now raising an error message when a workspace cannot be created
 - Cost estimation function is now able to convert scientific notation to an int value for punit limits.
 - The above conversion is now raising an  `ApiError` when the punit limit obtains a value that cannot be converted to int  
+- Cate: Fixed that usernames get rejected if they contain dots, underscores and @s
 
 ### Others 
 

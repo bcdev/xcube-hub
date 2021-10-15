@@ -29,7 +29,7 @@ from xcube_hub import api, util, poller
 from xcube_hub.core import user_namespaces, k8s
 from xcube_hub.core.k8s import get_pod
 from xcube_hub.typedefs import JsonObject
-from xcube_hub.util import raise_for_invalid_username
+from xcube_hub.util import maybe_raise_for_invalid_username
 
 
 def delete_cate(user_id: str, prune: bool = False) -> bool:
@@ -58,7 +58,7 @@ def launch_cate(user_id: str) -> JsonObject:
 
         grace = util.maybe_raise_for_env("CATE_LAUNCH_GRACE", default=2, typ=int)
 
-        raise_for_invalid_username(user_id)
+        user_id = maybe_raise_for_invalid_username(user_id)
 
         cate_image = util.maybe_raise_for_env("CATE_IMG")
         cate_tag = util.maybe_raise_for_env("CATE_TAG")
