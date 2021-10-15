@@ -1,4 +1,4 @@
-[![GH actions Build status](https://github.com/bcdev/xcube-hub/actions/workflows/test.yml/badge.svg)](https://github.com/bcdev/xcube-hub/actions/workflows/test.yml/badge.svg)
+[![xcube-hub workflow](https://github.com/bcdev/xcube-hub/actions/workflows/xcube-hub_workflow.yaml/badge.svg)](https://github.com/bcdev/xcube-hub/actions/workflows/xcube-hub_workflow.yaml)
 [![codecov](https://codecov.io/gh/bcdev/xcube-hub/branch/master/graph/badge.svg)](https://codecov.io/gh/bcdev/xcube-hub)
 
 # OpenAPI generated server
