@@ -100,8 +100,10 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     with open(cfg_file, 'w') as f:
         json.dump(cfg, f)
 
-    cmd = f"source activate xcube && xcube --traceback gen2 -o {res_file} -vv {info_flag} " \
-          f"--stores {stores_file} {cfg_file}"
+    cmd = f"source activate xcube && date '+%Y-%m-%d %T' START && " \
+          f"xcube --traceback gen2 -o {res_file} -vv {info_flag} " \
+          f"--stores {stores_file} {cfg_file}" \
+          f"date '+%Y-%m-%d %T' END"
     # cmd = cmd + " && curl -X POST localhost:3500/v1.0/shutdown" if xcube_use_dapr else None
 
     cmd = ["/bin/bash", "-c", cmd]
