@@ -100,9 +100,9 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     with open(cfg_file, 'w') as f:
         json.dump(cfg, f)
 
-    cmd = f"source activate xcube && date '+%Y-%m-%d %T' START && " \
+    cmd = f"source activate xcube && date '+%Y-%m-%d %T' && echo START && " \
           f"xcube --traceback gen2 -o {res_file} -vv {info_flag} " \
-          f"--stores {stores_file} {cfg_file} && date '+%Y-%m-%d %T' END"
+          f"--stores {stores_file} {cfg_file} && date '+%Y-%m-%d %T' && echo END"
 
     cmd = ["/bin/bash", "-c", cmd]
 
