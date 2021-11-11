@@ -89,9 +89,14 @@ def launch_cate(user_id: str) -> JsonObject:
 
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
-        envs = [client.V1EnvVar(name='CATE_USER_ROOT', value="/home/cate/workspace"),
-                client.V1EnvVar(name='CATE_STORES_CONFIG_PATH', value=cate_stores_config_path),
-                client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX', value='/' + user_id + '/')]
+        envs = [client.V1EnvVar(name='CATE_USER_ROOT',
+                                value="/home/cate/workspace"),
+                client.V1EnvVar(name='CATE_LOCAL_DATA_STORE_PATH',
+                                value="/home/cate/data_stores/local"),
+                client.V1EnvVar(name='CATE_STORES_CONFIG_PATH',
+                                value=cate_stores_config_path),
+                client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX',
+                                value=f'/{user_id}/')]
 
         volume_mounts = [
             {
