@@ -3,7 +3,9 @@
 from setuptools import setup, find_packages
 
 NAME = "xcube-hub"
-VERSION = "2.1.0.dev1"
+version = None
+with open('xcube_hub/version.py') as f:
+    exec(f.read())
 
 # To install the library, run the following
 #
@@ -16,7 +18,7 @@ REQUIRES = []
 
 setup(
     name=NAME,
-    version=VERSION,
+    version=version,
     description="xcube Generation API",
     author_email="info@brockmann-consult.de",
     url="",
