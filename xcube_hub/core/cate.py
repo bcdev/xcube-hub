@@ -64,6 +64,10 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_tag = util.maybe_raise_for_env("CATE_TAG")
         cate_hash = os.getenv("CATE_HASH", default=None)
 
+        cate_command = util.maybe_raise_for_env("CATE_COMMAND",
+                                                "cate-webapi-start -b -p 4000 "
+                                                "-a 0.0.0.0 -s 3600 -r"
+                                                "/home/xcube/workspace")
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
         cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
         cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
@@ -71,6 +75,8 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", "cate")
         cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH",
                                                            default="/etc/xcube-hub/stores.yaml")
+        cate_user_root = util.maybe_raise_for_env("CATE_USER_ROOT",
+                                                  "/home/xcube/workspace")
 
         # Not used as the namespace cate has to be created prior to launching cate instances
         # user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
@@ -78,9 +84,7 @@ def launch_cate(user_id: str) -> JsonObject:
         if k8s.count_pods(label_selector="purpose=cate-webapi", namespace=cate_namespace) > max_pods:
             raise api.ApiError(413, "Too many pods running.")
 
-        cate_command = "cate-webapi-start -b -p 4000 -a 0.0.0.0 -r /home/cate/workspace"
-
-        cate_env_activate_command = "source activate cate-env"
+        cate_env_activate_command = "source activate xcube"
 
         if cate_hash is not None and cate_hash != "null":
             cate_image = cate_image + '@' + cate_hash
@@ -90,9 +94,7 @@ def launch_cate(user_id: str) -> JsonObject:
         command = ["/bin/bash", "-c", f"{cate_env_activate_command} && {cate_command}"]
 
         envs = [client.V1EnvVar(name='CATE_USER_ROOT',
-                                value="/home/cate/workspace"),
-                client.V1EnvVar(name='CATE_LOCAL_DATA_STORE_PATH',
-                                value="/home/cate/data_stores/local"),
+                                value=cate_user_root),
                 client.V1EnvVar(name='CATE_STORES_CONFIG_PATH',
                                 value=cate_stores_config_path),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX',
@@ -101,12 +103,12 @@ def launch_cate(user_id: str) -> JsonObject:
         volume_mounts = [
             {
                 'name': 'workspace-pvc',
-                'mountPath': '/home/cate/workspace',
+                'mountPath': '/home/xcube/workspace',
                 'subPath': user_id + '-scratch'
             },
             {
                 'name': 'workspace-pvc',
-                'mountPath': '/home/cate/.cate',
+                'mountPath': '/home/xcube/.cate',
                 'subPath': user_id + '-cate'
             },
             {
@@ -135,15 +137,19 @@ def launch_cate(user_id: str) -> JsonObject:
             {
                 "name": "fix-owner",
                 "image": "bash",
-                "command": ["chown", "-R", "1000.1000", "/home/cate/.cate", "/home/cate/workspace"],
+                "command": ["chown",
+                            "-R",
+                            "1000.1000",
+                            "/home/xcube/.cate",
+                            "/home/xcube/workspace"],
                 "volumeMounts": [
                     {
-                        "mountPath": "/home/cate/.cate",
+                        "mountPath": "/home/xcube/.cate",
                         "subPath": user_id + '-cate',
                         "name": "workspace-pvc",
                     },
                     {
-                        "mountPath": "/home/cate/workspace",
+                        "mountPath": "/home/xcube/workspace",
                         "subPath": user_id + '-scratch',
                         "name": "workspace-pvc",
                     },

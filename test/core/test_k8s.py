@@ -445,12 +445,13 @@ class TestK8s(unittest.TestCase):
     @patch.object(CoreV1Api, 'list_namespaced_pod')
     @patch.object(CoreV1Api, 'list_pod_for_all_namespaces')
     def test_list_pods(self, list_all_p, list_p):
-        pod = V1Pod(metadata=V1ObjectMeta(name='test'))
+        pod = V1Pod(metadata=V1ObjectMeta(name='test',
+                                          labels=dict(app='quest_app')))
 
         list_p.return_value = V1PodList(items=[pod])
         list_all_p.return_value = V1PodList(items=[pod])
 
-        res = list_pods(namespace='test', label_selector='test')
+        res = list_pods(namespace='test', label_selector='test_app')
         self.assertIsInstance(res, V1PodList)
         self.assertEqual(1, len(res.items))
 

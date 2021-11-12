@@ -1,11 +1,12 @@
-## Changes in v2.1.8
+## Changes in v2.1.8 (in dev)
 
 ### Fixes
 
-- Cate:  Now setting env var `CATE_LOCAL_DATA_STORE_PATH` to 
-  `"/home/cate/data_stores/local"`. This is to prevent Cate from 
-  constructing a default path that contains the current username 
-  `xcube` defined by the container and which doesn't exist.
+- Read `cate_user_root` and `cate_user_command` from environment
+
+### Others
+
+- Adapt to change of cate user from `cate` to `xcube`
 
 ## Changes in v2.1.7
 
