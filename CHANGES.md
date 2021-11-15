@@ -3,6 +3,8 @@
 ### Fixes
 
 - Read `cate_user_root` and `cate_user_command` from environment
+- Method `get_pods_count()` in `cate.py` only counts pods that are part of the
+  cate web application.
 
 ### Others
 

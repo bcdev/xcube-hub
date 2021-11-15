@@ -81,7 +81,7 @@ def launch_cate(user_id: str) -> JsonObject:
         # Not used as the namespace cate has to be created prior to launching cate instances
         # user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
-        if k8s.count_pods(label_selector="purpose=cate-webapi", namespace=cate_namespace) > max_pods:
+        if get_pod_count().get('running_pods', 0) > max_pods:
             raise api.ApiError(413, "Too many pods running.")
 
         cate_env_activate_command = "source activate xcube"
@@ -235,7 +235,8 @@ def get_status(user_id: str):
         return {'phase': 'Unknown'}
 
 
-def get_pod_count(label_selector: Optional[str] = None):
+def get_pod_count():
     cate_namespace = os.environ.get("WORKSPACE_NAMESPACE", "cate")
+    label_selector = 'application=cate-webapi'
     ct = k8s.count_pods(label_selector=label_selector, namespace=cate_namespace)
     return {'running_pods': ct}
