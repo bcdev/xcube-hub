@@ -20,7 +20,7 @@ def get_user_webapi(user_id: str):
 
 def delete_user_webapi(user_id: str):
     try:
-        res = cate.delete_cate(user_id=user_id)
+        res = cate.delete_cate(user_id=user_id, prune=True)
         return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response
