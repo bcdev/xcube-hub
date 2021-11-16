@@ -446,16 +446,52 @@ class TestK8s(unittest.TestCase):
     @patch.object(CoreV1Api, 'list_pod_for_all_namespaces')
     def test_list_pods(self, list_all_p, list_p):
         pod = V1Pod(metadata=V1ObjectMeta(name='test',
-                                          labels=dict(app='quest_app')))
+                                          namespace='test_space',
+                                          labels=dict(app='test_app')))
 
-        list_p.return_value = V1PodList(items=[pod])
-        list_all_p.return_value = V1PodList(items=[pod])
+        def _side_effect(namespace:str, label_selector: str=None):
+            if pod.metadata.namespace == namespace:
+                if not label_selector:
+                    return V1PodList(items=[pod])
+                split_selector = label_selector.split('=')
+                if pod.metadata.labels.get(split_selector[0], {}) \
+                        == split_selector[1]:
+                    return V1PodList(items=[pod])
+            return V1PodList(items=[])
 
-        res = list_pods(namespace='test', label_selector='test_app')
+        def _side_effect_all(label_selector: str=None):
+            if not label_selector:
+                return V1PodList(items=[pod])
+            split_selector = label_selector.split('=')
+            if pod.metadata.labels.get(split_selector[0], {}) \
+                    == split_selector[1]:
+                return V1PodList(items=[pod])
+            return V1PodList(items=[])
+
+        list_p.side_effect = _side_effect
+        list_all_p.side_effect = _side_effect_all
+
+        res = list_pods(namespace='test_space', label_selector='app=test_app')
         self.assertIsInstance(res, V1PodList)
         self.assertEqual(1, len(res.items))
 
-        res = list_pods(label_selector='test')
+        res = list_pods(namespace='quest_space', label_selector='app=test_app')
+        self.assertIsInstance(res, V1PodList)
+        self.assertEqual(0, len(res.items))
+
+        res = list_pods(namespace='test_space', label_selector='app=quest_app')
+        self.assertIsInstance(res, V1PodList)
+        self.assertEqual(0, len(res.items))
+
+        res = list_pods(label_selector='app=test_app')
+        self.assertIsInstance(res, V1PodList)
+        self.assertEqual(1, len(res.items))
+
+        res = list_pods(label_selector='app=quest_app')
+        self.assertIsInstance(res, V1PodList)
+        self.assertEqual(0, len(res.items))
+
+        res = list_pods()
         self.assertIsInstance(res, V1PodList)
         self.assertEqual(1, len(res.items))
 
