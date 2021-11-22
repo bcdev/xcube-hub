@@ -1,4 +1,4 @@
-## Changes in v2.1.8 (in dev)
+## Changes in v2.1.8
 
 ### Fixes
 
