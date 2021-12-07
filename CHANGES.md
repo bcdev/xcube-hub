@@ -1,5 +1,8 @@
-## Changes in v2.1.9 (in dev)
+## Changes in v2.1.9 (in development)
 
+## New Features
+
+- It is now possible to set the restart policy for pods via the env variable (`RESTART_POLICY` ['OnFailure']).  
 
 ## Changes in v2.1.8
 
