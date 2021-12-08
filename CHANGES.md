@@ -1,5 +1,6 @@
-## Changes in v2.1.9 (in dev)
-
+## Changes in v2.2.O (in development)
+- reverted to commit id fde02d4e5ac18b7bb64a4bfcdaa56178ff81ad1d because all
+  later commits concerning restart policy broke the service. 
 
 ## Changes in v2.1.8
 
