@@ -181,21 +181,21 @@ class TestK8s(unittest.TestCase):
     @patch.object(AppsV1Api, 'create_namespaced_deployment')
     def test_create_deployment(self, create_p):
         pvc = client.V1Deployment(
-            metadata=V1ObjectMeta(name='deployment'),
+            metadata=V1ObjectMeta(name='my-deployment'),
         )
 
         k8s.create_deployment(pvc, 'test')
 
         create_p.assert_called_once()
 
-        create_p.side_effect = MagicMock(side_effect=ApiException(500, 'Test'))
+        create_p.side_effect = MagicMock(side_effect=ApiException(422, 'Test'))
         with self.assertRaises(api.ApiError) as e:
             k8s.create_deployment(pvc, 'test')
 
-        expected = ("Error when creating the deployment deployment: (500)\n"
+        expected = ("Error when creating the deployment my-deployment: (422)\n"
                     "Reason: Test\n")
         self.assertEqual(expected, str(e.exception))
-        self.assertEqual(400, e.exception.status_code)
+        self.assertEqual(422, e.exception.status_code)
 
     @patch('xcube_hub.core.k8s.get_deployment')
     def test_create_deployment_if_exists(self, get_p):

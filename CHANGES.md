@@ -1,6 +1,15 @@
-## Changes in v2.2.O (in development)
-- reverted to commit id fde02d4e5ac18b7bb64a4bfcdaa56178ff81ad1d because all
-  later commits concerning restart policy broke the service. 
+## Changes in v2.1.9 (in development)
+
+## New Features
+
+- Added a new configuration for cate. It adds a grace period after the deployment has been created (default: 2s)
+- A grace period has been added after a cate pod is started. It can be set via the env variable `CATE_LAUNCH_GRACE_PERIOD`
+- Reverted setting for Restart policy. Deployments only allow restart policy "Always" for containers.
+
+## Other
+
+- Set cate timeout default to 86400s (24 hours)
+- Updated pydevd-pycharm version to 213.5744.223
 
 ## Changes in v2.1.8
 

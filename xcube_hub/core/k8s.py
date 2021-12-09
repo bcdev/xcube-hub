@@ -245,7 +245,7 @@ def create_deployment(deployment: client.V1Deployment,
             namespace=namespace)
         return api_response.status
     except (ApiException, ApiTypeError) as e:
-        raise api.ApiError(400, f"Error when creating the deployment {deployment.metadata.name}: {str(e)}")
+        raise api.ApiError(e.status, f"Error when creating the deployment {deployment.metadata.name}: {str(e)}")
 
 
 def create_deployment_if_not_exists(namespace: str, deployment: client.V1Deployment):
