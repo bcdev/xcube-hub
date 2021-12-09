@@ -77,8 +77,6 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_user_root = util.maybe_raise_for_env("CATE_USER_ROOT",
                                                   "/home/xcube/workspace")
 
-        restart_policy = os.getenv("RESTART_POLICY", "OnFailure")
-
         # Not used as the namespace cate has to be created prior to launching cate instances
         # user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
@@ -179,8 +177,7 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   limits=limits,
                                                   requests=requests,
                                                   annotations=annotations,
-                                                  labels=labels,
-                                                  restart_policy=restart_policy)
+                                                  labels=labels)
 
         # Make create_if_exists test for broken pods
         # pod_status = get_status(user_id)

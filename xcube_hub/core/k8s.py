@@ -181,8 +181,7 @@ def create_deployment_object(name: str,
                              limits: Optional[Dict] = None,
                              requests: Optional[Dict] = None,
                              annotations: Optional[Dict] = None,
-                             labels: Optional[Dict] = None,
-                             restart_policy: Optional[str] = "OnFailure"):
+                             labels: Optional[Dict] = None):
     # Configure Pod template container
     envs = [] if not envs else envs
 
@@ -211,7 +210,6 @@ def create_deployment_object(name: str,
         ),
         spec=client.V1PodSpec(
             containers=[container],
-            restart_policy=restart_policy,
             volumes=volumes,
             init_containers=init_containers,
             security_context=client.V1PodSecurityContext(fs_group=1000)
@@ -247,7 +245,7 @@ def create_deployment(deployment: client.V1Deployment,
             namespace=namespace)
         return api_response.status
     except (ApiException, ApiTypeError) as e:
-        raise api.ApiError(400, f"Error when creating the deployment {deployment.metadata.name}: {str(e)}")
+        raise api.ApiError(e.status, f"Error when creating the deployment {deployment.metadata.name}: {str(e)}")
 
 
 def create_deployment_if_not_exists(namespace: str, deployment: client.V1Deployment):

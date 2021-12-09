@@ -2,7 +2,11 @@
 
 ## New Features
 
-- It is now possible to set the restart policy for pods via the env variable: `RESTART_POLICY` default 'OnFailure'.  
+- Reverted setting for Restart policy. Deployments only allow restart policy "Always" for containers
+
+## Other
+
+- Updated pydevd-pycharm version to 213.5744.223
 
 ## Changes in v2.1.8
 
