@@ -181,7 +181,7 @@ class TestK8s(unittest.TestCase):
     @patch.object(AppsV1Api, 'create_namespaced_deployment')
     def test_create_deployment(self, create_p):
         pvc = client.V1Deployment(
-            metadata=V1ObjectMeta(name='deployment'),
+            metadata=V1ObjectMeta(name='my-deployment'),
         )
 
         k8s.create_deployment(pvc, 'test')
@@ -192,7 +192,7 @@ class TestK8s(unittest.TestCase):
         with self.assertRaises(api.ApiError) as e:
             k8s.create_deployment(pvc, 'test')
 
-        expected = ("Error when creating the deployment object: (422)\n"
+        expected = ("Error when creating the deployment my-deployment: (422)\n"
                     "Reason: Test\n")
         self.assertEqual(expected, str(e.exception))
         self.assertEqual(422, e.exception.status_code)
