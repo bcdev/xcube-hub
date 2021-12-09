@@ -3,6 +3,7 @@
 ## New Features
 
 - Added a new configuration for cate. It adds a grace period after the deployment has been created (default: 2s)
+- A grace period has been added after a cate pod is started. It can be set via the env variable `CATE_LAUNCH_GRACE_PERIOD`
 - Reverted setting for Restart policy. Deployments only allow restart policy "Always" for containers.
 
 ## Other
