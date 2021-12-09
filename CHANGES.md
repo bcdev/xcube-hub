@@ -7,6 +7,7 @@
 
 ## Other
 
+- Set cate timeout default to 86400s (24 hours)
 - Updated pydevd-pycharm version to 213.5744.223
 
 ## Changes in v2.1.8
