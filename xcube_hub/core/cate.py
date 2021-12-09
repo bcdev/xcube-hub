@@ -66,7 +66,7 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_launch_grace = os.getenv("CATE_LAUNCH_GRACE_PERIOD", default=2)
 
         cate_command = util.maybe_raise_for_env("CATE_COMMAND",
-                                                "cate-webapi-start -b -p 4000 "
+                                                "cate-webapi-start -v -b -p 4000 "
                                                 "-a 0.0.0.0 -s 86400 -r"
                                                 "/home/xcube/workspace")
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
