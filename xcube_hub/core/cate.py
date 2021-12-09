@@ -62,6 +62,8 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_image = util.maybe_raise_for_env("CATE_IMG")
         cate_tag = util.maybe_raise_for_env("CATE_TAG")
         cate_hash = os.getenv("CATE_HASH", default=None)
+        cate_debug = os.getenv("CATE_DEBUG", default='0')
+        cate_launch_grace = os.getenv("CATE_LAUNCH_GRACE_PERIOD", default=2)
 
         cate_command = util.maybe_raise_for_env("CATE_COMMAND",
                                                 "cate-webapi-start -b -p 4000 "
@@ -94,6 +96,8 @@ def launch_cate(user_id: str) -> JsonObject:
 
         envs = [client.V1EnvVar(name='CATE_USER_ROOT',
                                 value=cate_user_root),
+                client.V1EnvVar(name='CATE_DEBUG',
+                                value=cate_debug),
                 client.V1EnvVar(name='CATE_STORES_CONFIG_PATH',
                                 value=cate_stores_config_path),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX',
@@ -185,6 +189,8 @@ def launch_cate(user_id: str) -> JsonObject:
         #     create_deployment(namespace=user_id, deployment=deployment)
         # else:
         k8s.create_deployment_if_not_exists(namespace=cate_namespace, deployment=deployment)
+
+        time.sleep(cate_launch_grace)
 
         service = k8s.create_service_object(name=user_id + '-cate', port=4000, target_port=4000)
         k8s.create_service_if_not_exists(service=service, namespace=cate_namespace)

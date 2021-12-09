@@ -2,7 +2,8 @@
 
 ## New Features
 
-- Reverted setting for Restart policy. Deployments only allow restart policy "Always" for containers
+- Added a new configuration for cate. It adds a grace period after the deployment has been created (default: 2s)
+- Reverted setting for Restart policy. Deployments only allow restart policy "Always" for containers.
 
 ## Other
 
