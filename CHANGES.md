@@ -1,4 +1,4 @@
-## Changes in v2.1.9 (in development)
+## Changes in v2.1.9
 
 ## New Features
 

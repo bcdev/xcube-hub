@@ -2,8 +2,8 @@ FROM quay.io/bcdev/miniconda3:latest
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
-ENV XCUBE_HUB_DOCKER_VERSION=2.1.9.dev3
-ENV XCUBE_HUB_VERSION=2.1.9.dev3
+ENV XCUBE_HUB_DOCKER_VERSION=2.1.9
+ENV XCUBE_HUB_VERSION=2.1.9
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_hub/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
