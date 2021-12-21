@@ -19,7 +19,6 @@ RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 RUN apt-get -y update --allow-releaseinfo-change
 RUN apt-get -y upgrade
 RUN apt-get -y install apt-utils
-RUN apt-get -y install curl unzip build-essential iputils-ping vim
 RUN apt-get -y remove patch
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 

@@ -49,3 +49,4 @@ def supplement_user(user: User, subscription: Subscription):
     user.password = util.generate_temp_password()
 
     return user
+
