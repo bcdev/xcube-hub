@@ -148,6 +148,7 @@ class TestCubeGens(unittest.TestCase):
 
         expected = {'job_id': 'id',
                     'job_status': 'Ready',
+                    'message': '',
                     'job_result': {'status_code': 200,
                                    'result': {},
                                    'output': ['bla']},
@@ -467,7 +468,8 @@ class TestCubeGens(unittest.TestCase):
         status_p.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(type='Complete', status='ready')]))
         create_p.return_value = {'job_id': 'id', 'status': V1JobStatus().to_dict()}, 200
 
-        get_p.return_value = {'job_id': 'id', 'result': {'status_code': 200}, 'status': 'ready', 'output': ["bla", ], 'progress': 100}, 200
+        get_p.return_value = {'job_id': 'id', 'job_status': 'success', 'result': {'status_code': 200},
+                              'status': 'ready', 'output': ["bla", ], 'progress': 100}, 200
 
         punits_p.return_value = dict(punits=dict(total_count=1000), count=500, result=dict())
 
