@@ -1,5 +1,10 @@
 ## Changes in v2.1.10 (in development)
 
+## New Features
+
+- The RestApi has been extended by a new operation `GET /cubegens/version` that allows querying versions that will be 
+  used when running `cubegens` processes.
+
 ## Changes in v2.1.9
 
 ## New Features

@@ -584,6 +584,31 @@ paths:
       tags:
         - cubegens
       x-openapi-router-controller: xcube_hub.controllers.cubegens
+  /cubegens/version:
+    get:
+      description: | 
+        Receive versions used in a generation run
+      operationId: get_cubegen_version
+      responses:
+        "200":
+          description: version response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCubegenInfoResponse'
+        "400":
+          description: api error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      security:
+        - oAuthorization:
+            - manage:cubegens
+      summary: Receive version information for runnning a cubegen process
+      tags:
+        - cubegens
+      x-openapi-router-controller: xcube_hub.controllers.cubegens
   /cubegens/info:
     post:
       description: |
@@ -1069,6 +1094,10 @@ components:
       required:
         - status
       type: object
+    CubeGenVersionResult:
+      type: object
+      additionalProperties:
+        type: string
     CubeGenInfoResult:
       additionalProperties: true
       required:
@@ -1248,6 +1277,8 @@ components:
         $ref: '#/components/schemas/ApiCubegenResponse'
     ApiCubegenInfoResponse:
       $ref: '#/components/schemas/CubeGenInfoResult'
+    ApiCubegenVersionResponse:
+      $ref: '#/components/schemas/CubeGenVersionResult'
     ApiServiceInformationResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'

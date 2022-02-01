@@ -178,6 +178,51 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     return cubegen
 
 
+def create_cubegen_version_object(cubegen_id: str) -> client.V1Job:
+    xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
+    xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
+    xcube_hash = os.getenv("XCUBE_HASH", default=None)
+
+    if xcube_hash is not None and xcube_hash != "null":
+        gen_image = xcube_repo + '@' + xcube_hash
+    else:
+        gen_image = xcube_repo + ':' + xcube_tag
+
+    cmd = f"source activate xcube && " \
+          f"xcube versions "
+
+    cmd = ["/bin/bash", "-c", cmd]
+
+    container = client.V1Container(
+        name="xcube-gen",
+        image=gen_image,
+        command=cmd)
+
+    # Create and configure a spec section
+    template = client.V1PodTemplateSpec(
+        metadata=client.V1ObjectMeta(
+            labels={"app": "xcube-gen"},
+            # annotations=annotations
+        ),
+        spec=client.V1PodSpec(
+            restart_policy="Never",
+            containers=[container]
+        ))
+
+    # Create the specification of deployment
+    spec = client.V1JobSpec(
+        template=template,
+        backoff_limit=1)
+    # Instantiate the cubegen object
+    cubegen = client.V1Job(
+        api_version="batch/v1",
+        kind="Job",
+        metadata=client.V1ObjectMeta(name=cubegen_id, labels=dict(typ="cubegen")),
+        spec=spec)
+
+    return cubegen
+
+
 def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str):
     limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
 
@@ -325,6 +370,42 @@ def delete_all(user_id: str):
 
     for job in jobs:
         delete_one(job['cubegen_id'])
+
+
+def create_version(user_id: str) -> \
+        Tuple[JsonObject, int]:
+    try:
+        xcube_hub_namespace = os.getenv("WORKSPACE_NAMESPACE", "xcube-gen-dev")
+
+        job_id = f"{user_id}-{str(uuid.uuid4())[:18]}"
+
+        job = create_cubegen_version_object(job_id)
+
+        api_instance = client.BatchV1Api()
+        api_response = api_instance.create_namespaced_job(body=job, namespace=xcube_hub_namespace)
+
+        job_result = dict(output=[], status_code=200, status='ok')
+
+        return {'job_id': job_id, 'job_status': api_response.status.to_dict(), 'job_result': job_result}, 200
+    except (ApiException, MaxRetryError) as e:
+        raise api.ApiError(400, message=str(e))
+    except Exception as e:
+        raise api.ApiError(400, message=str(e))
+
+
+def version(user_id: str):
+    xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
+    xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
+
+    job, status_code = create_version(user_id=user_id)
+
+    apps_v1_api = client.BatchV1Api()
+    poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
+                           name=job['job_id'])
+
+    job_result = logs(job_id=job['job_id'])
+
+    return job_result, status_code
 
 
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> Tuple[JsonObject, int]:

@@ -168,3 +168,18 @@ def get_cubegens(token_info):
         return api.ApiResponse.success(res)
     except api.ApiError as e:
         return e.response
+
+
+def get_cubegen_version():
+    """List xcube generation versions
+
+    List xcube generation versions
+
+    :return: ApiCubeGenResponse
+    """
+
+    try:
+        res = cubegens.version(user_id='generic')
+        return api.ApiResponse.success(res)
+    except api.ApiError as e:
+        return e.response
