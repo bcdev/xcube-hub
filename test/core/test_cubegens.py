@@ -515,6 +515,31 @@ class TestCubeGens(unittest.TestCase):
 
         self.assertEqual(expected, res)
 
+    @patch('xcube_hub.core.cubegens.get')
+    @patch('xcube_hub.core.cubegens.create')
+    @patch.object(BatchV1Api, 'read_namespaced_job_status')
+    def test_info2_error_response(self, status_p, create_p, get_p):
+        status_p.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(type='Failed', status='error')]))
+        create_p.return_value = \
+            {'job_id': 'id', 'status': V1JobStatus().to_dict()}, \
+            404
+
+        get_p.return_value = {'job_id': 'id',
+                              'result': {'status_code': 404},
+                              'status': 'error',
+                              'output': ["bla", ],
+                              'message': 'something is wrong',
+                              'progress': 100}, \
+                             404
+
+        with self.assertRaises(api.ApiError) as ae:
+            cubegens.info(user_id='drwho',
+                          email='drwho@mail.org',
+                          body=_CFG,
+                          token='fdsvdf')
+        self.assertEqual("something is wrong",
+                         str(ae.exception))
+
 
 if __name__ == '__main__':
     unittest.main()
