@@ -7,7 +7,7 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
   title: xcube Generator API
-  version: 2.1.0.dev2
+  version: 2.1.10.dev1
 servers:
   - url: https://xcube-gen.brockmann-consult.de/api/v2
   - url: https://stage.xcube-gen.brockmann-consult.de/api/v2
