@@ -38,10 +38,12 @@ def get(user_id: str, cubegen_id: str) -> Tuple[JsonObject, int]:
             res['output'] += outputs
 
         status_code = res['status_code'] if 'status_code' in res else 200
+        message = res.get('message', '')
 
         res = {'job_id': cubegen_id,
                'job_status': stat,
                'job_result': res,
+               'message': message,
                'output': outputs,
                'progress': progress}
 
@@ -338,6 +340,12 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
                            name=job['job_id'])
 
     state, status_code = get(user_id=user_id, cubegen_id=job['job_id'])
+
+    if state.get('job_status', 'error') == 'error':
+        raise api.ApiError(status_code,
+                           state.get('message', f'{status_code}'),
+                           output=state.get('output'))
+
     job_result = cubegens_result(job_id=job['job_id'], root=xcube_hub_result_root_dir)
 
     output = state['output']
