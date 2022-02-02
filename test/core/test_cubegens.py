@@ -288,34 +288,6 @@ class TestCubeGens(unittest.TestCase):
         self.assertEqual("create_gen_cubegen_object needs a config dict.", str(e.exception))
         self.assertEqual(400, e.exception.status_code)
 
-        del os.environ['XCUBE_REPO']
-
-        with self.assertRaises(api.ApiError) as e:
-            cubegens.create_cubegen_object('id', _CFG)
-
-        self.assertEqual("Environment Variable XCUBE_REPO does not exist.", str(e.exception))
-        self.assertEqual(400, e.exception.status_code)
-
-        os.environ['XCUBE_REPO'] = 'test'
-
-        del os.environ['SH_CLIENT_ID']
-
-        with self.assertRaises(api.ApiError) as e:
-            cubegens.create_cubegen_object('id', _CFG)
-
-        self.assertEqual("SentinelHub credentials not set.", str(e.exception))
-        self.assertEqual(400, e.exception.status_code)
-
-        os.environ['SH_CLIENT_ID'] = 'test'
-
-        del os.environ['CDSAPI_URL']
-
-        with self.assertRaises(api.ApiError) as e:
-            cubegens.create_cubegen_object('id', _CFG)
-
-        self.assertEqual("CDS credentials not set.", str(e.exception))
-        self.assertEqual(400, e.exception.status_code)
-
     @patch('xcube_hub.core.cubegens.info')
     @patch.object(BatchV1Api, 'create_namespaced_job')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
