@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 
 import connexion
@@ -12,6 +11,34 @@ from xcube_hub.core.validations import validate_env
 from xcube_hub.geoservice import GeoService
 from xcube_hub.k8scfg import K8sCfg
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
+from logging.config import dictConfig
+
+
+dictConfig({
+    'version': 1,
+    'formatters': {
+        'default': {
+            'format': '[%(levelname).1s %(asctime)s  %(name)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'wsgi': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://flask.logging.wsgi_errors_stream',
+            'formatter': 'default'
+        }
+    },
+    'loggers': {
+        'xcube-hub': {
+            'level': 'INFO',
+            'handlers': ['wsgi']
+        }
+    },
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
 
 
 class CustomRequestBodyValidator(RequestBodyValidator):
@@ -21,17 +48,13 @@ class CustomRequestBodyValidator(RequestBodyValidator):
 
     def validate_schema(self, data, url):
         pass
-        # try:
-        #     super().validate_schema(data, url)
-        # except BadRequestProblem as e:
-        #     e.mes
-        #     raise BadRequestProblem() from e
 
 
 validator_map = {
     'body': CustomRequestBodyValidator,
     'parameter': ParameterValidator
 }
+
 
 def create_app():
     load_dotenv()
@@ -75,5 +98,4 @@ def start(host: str = '0.0.0.0', port: int = 8080, debug: bool = False):
                 pythonic_params=True,
                 validate_responses=False)
     flask_cors.CORS(app.app)
-    app.run(host=host, port=port, debug=debug, use_reloader=False)
-
+    app.run(host=host, port=port, debug=False, use_reloader=False)

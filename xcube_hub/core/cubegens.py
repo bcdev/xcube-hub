@@ -53,34 +53,21 @@ def get(user_id: str, cubegen_id: str) -> Tuple[JsonObject, int]:
 
 
 def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False) -> client.V1Job:
-    # Configure Pod template container
-    sh_client_id = os.environ.get("SH_CLIENT_ID")
-    sh_client_secret = os.environ.get("SH_CLIENT_SECRET")
-    sh_instance_id = os.environ.get("SH_INSTANCE_ID")
-
     xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
     xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
     xcube_hash = os.getenv("XCUBE_HASH", default=None)
 
     gen_container_pull_policy = os.environ.get("XCUBE_GEN_DOCKER_PULL_POLICY")
-    cdsapi_url = os.getenv("CDSAPI_URL")
-    cdsapi_key = os.getenv("CDSAPI_KEY")
-    aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
     xcube_hub_cfg_dir = util.maybe_raise_for_env("XCUBE_HUB_CFG_DIR")
     xcube_hub_cfg_datapools = util.maybe_raise_for_env("XCUBE_HUB_CFG_DATAPOOLS")
     stores_file = os.path.join(xcube_hub_cfg_dir, xcube_hub_cfg_datapools)
+    xcube_hub_cfg_secret = os.getenv("XCUBE_HUB_CFG_SECRET", default=None)
+    xcube_hub_cfg_map = os.getenv("XCUBE_HUB_CFG_MAP", default=None)
 
     if xcube_hash is not None and xcube_hash != "null":
         gen_image = xcube_repo + '@' + xcube_hash
     else:
         gen_image = xcube_repo + ':' + xcube_tag
-
-    if not sh_client_secret or not sh_client_id or not sh_instance_id:
-        raise api.ApiError(400, "SentinelHub credentials not set.")
-
-    if not cdsapi_url or not cdsapi_key:
-        raise api.ApiError(400, "CDS credentials not set.")
 
     if not cfg:
         raise api.ApiError(400, "create_gen_cubegen_object needs a config dict.")
@@ -108,15 +95,12 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
 
     cmd = ["/bin/bash", "-c", cmd]
 
-    sh_envs = [
-        client.V1EnvVar(name="SH_CLIENT_ID", value=sh_client_id),
-        client.V1EnvVar(name="SH_CLIENT_SECRET", value=sh_client_secret),
-        client.V1EnvVar(name="SH_INSTANCE_ID", value=sh_instance_id),
-        client.V1EnvVar(name="CDSAPI_URL", value=cdsapi_url),
-        client.V1EnvVar(name="CDSAPI_KEY", value=cdsapi_key),
-        client.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=aws_access_key_id),
-        client.V1EnvVar(name="AWS_SECRET_ACCESS_KEY", value=aws_secret_access_key)
-    ]
+    # configure job env vars from either secrets or configmaps
+    env_from = []
+    if xcube_hub_cfg_secret is not None:
+        env_from.append(client.V1EnvFromSource(secret_ref=client.V1SecretEnvSource(name=xcube_hub_cfg_secret)))
+    if xcube_hub_cfg_map is not None:
+        env_from.append(client.V1EnvFromSource(config_map_ref=client.V1ConfigMapEnvSource(name=xcube_hub_cfg_map)))
 
     volume_mounts = [
         {
@@ -145,16 +129,13 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
     ]
 
-    # annotations = {"dapr.io/app-id": cubegen_id, "dapr.io/enabled": "true",
-    #                "dapr.io/log-as-json": "true"} if xcube_use_dapr else None
-
     container = client.V1Container(
         name="xcube-gen",
         image=gen_image,
         command=cmd,
         volume_mounts=volume_mounts,
         image_pull_policy=gen_container_pull_policy,
-        env=sh_envs)
+        env_from=env_from)
     # Create and configure a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
@@ -396,7 +377,6 @@ def create_version(user_id: str) -> \
 
 
 def version(user_id: str):
-    xcube_hub_result_root_dir = util.maybe_raise_for_env("XCUBE_HUB_RESULT_ROOT_DIR")
     xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
 
     job, status_code = create_version(user_id=user_id)

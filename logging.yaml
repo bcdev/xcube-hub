@@ -1,0 +1,43 @@
+version: 1
+formatters:
+  xcubeHubDebug:
+    format: '[%(levelname).1s %(asctime)s  %(name)s p%(process)s {%(pathname)s:%(lineno)d}] %(message)s'
+  xcubeHubNonDebug:
+    format: '[%(levelname).1s %(asctime)s  %(name)s p%(process)s] %(message)s'
+handlers:
+  consoleDebug:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: xcubeHubDebug
+    stream: ext://sys.stdout
+  consoleError:
+    class: logging.StreamHandler
+    level: ERROR
+    formatter: xcubeHubNonDebug
+    stream: ext://sys.stdout
+  consoleWarning:
+    class: logging.StreamHandler
+    level: WARNING
+    formatter: xcubeHubNonDebug
+    stream: ext://sys.stdout
+  consoleInfo:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: xcubeHubNonDebug
+    stream: ext://sys.stdout
+loggers:
+  xcubeHubDebugLogger:
+    level: DEBUG
+    handlers: [ consoleDebug ]
+    propagate: no
+  xcubeHubErrorLogger:
+    level: ERROR
+    handlers: [ consoleError, consoleInfo, consoleWarning ]
+    propagate: no
+  xcubeHubInfoLogger:
+    level: INFO
+    handlers: [ consoleInfo ]
+    propagate: no
+root:
+  level: WARNING
+  handlers: [ console ]
