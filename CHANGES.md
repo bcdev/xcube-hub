@@ -3,7 +3,7 @@
 ## New Features
 
 - The RestApi has been extended by a new operation `GET /cubegens/version` that allows querying versions that will be 
-  used when running `cubegens` processes.
+  used when running `cubegens` processes. This operation is public. 
 
 ## Changes in v2.1.9
 
