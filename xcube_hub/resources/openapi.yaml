@@ -602,9 +602,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-      security:
-        - oAuthorization:
-            - manage:cubegens
       summary: Receive version information for runnning a cubegen process
       tags:
         - cubegens
