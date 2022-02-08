@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Dict, Optional
 
 import requests
@@ -7,6 +8,13 @@ from xcube_hub import api, util
 from xcube_hub.controllers.authorization import _get_claim_from_token
 from xcube_hub.geoservice import GeoService
 from xcube_hub.typedefs import AnyDict
+
+
+def _maybe_raise_for_service_silent():
+    cate_silent = os.getenv("GEOSERVICE_SILENT", default=None)
+
+    if cate_silent == '1':
+        raise api.ApiError(422, "Geoservice resources are switched off on this service")
 
 
 def _raise_for_no_access(database_id, geodb_user, token):
@@ -39,6 +47,7 @@ def _raise_for_no_access(database_id, geodb_user, token):
 
 def get_all_collections(token_info: Dict) -> Tuple[AnyDict, int]:
     try:
+        _maybe_raise_for_service_silent()
         geo = GeoService.instance()
         collections = geo.get_all_layers(fmt='geopandas')
 
@@ -49,6 +58,7 @@ def get_all_collections(token_info: Dict) -> Tuple[AnyDict, int]:
 
 def get_collections(token_info: Dict, database_id: Optional[str] = None) -> Tuple[AnyDict, int]:
     try:
+        _maybe_raise_for_service_silent()
         token = token_info['token']
         geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
@@ -66,6 +76,7 @@ def get_collections(token_info: Dict, database_id: Optional[str] = None) -> Tupl
 
 def get_collection(collection_id: str, database_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
+        _maybe_raise_for_service_silent()
         token = token_info['token']
         geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
@@ -81,6 +92,7 @@ def get_collection(collection_id: str, database_id: str, token_info: Dict) -> Tu
 
 def put_collection(database_id: str, body, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
+        _maybe_raise_for_service_silent()
         token = token_info['token']
         geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 
@@ -99,6 +111,7 @@ def put_collection(database_id: str, body, token_info: Dict) -> Tuple[AnyDict, i
 
 def delete_collection(database_id: str, collection_id: str, token_info: Dict) -> Tuple[AnyDict, int]:
     try:
+        _maybe_raise_for_service_silent()
         token = token_info['token']
         geodb_user = _get_claim_from_token(token=token, tgt="https://geodb.brockmann-consult.de/dbrole")
 

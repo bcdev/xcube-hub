@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, Tuple
 
 from werkzeug.datastructures import FileStorage
@@ -16,6 +17,13 @@ def _maybe_raise_for_process_not_allowed(body: JsonObject, token_info: Dict):
             raise api.ApiError(403, "You don't have access to using byoa code.")
 
 
+def _maybe_raise_for_service_silent():
+    cate_silent = os.getenv("CUBEGENS_SILENT", default=None)
+
+    if cate_silent == '1':
+        raise api.ApiError(422, "Cubegens resources are switched off on this service")
+
+
 def create_cubegen(body: JsonObject, token_info: Dict):
     """Create a cubegen
 
@@ -29,6 +37,7 @@ def create_cubegen(body: JsonObject, token_info: Dict):
     :rtype: ApiCubeGenResponse
     """
     try:
+        _maybe_raise_for_service_silent()
         user_id = token_info['user_id']
         email = token_info['email']
         token = token_info['token']
@@ -55,6 +64,7 @@ def create_cubegen_code(body: FileStorage, user_code: FileStorage, token_info: D
     :rtype: ApiCubeGenResponse
     """
     try:
+        _maybe_raise_for_service_silent()
         body_dict = json.load(body.stream)
 
         body = CubegenConfig.from_dict(body_dict)
@@ -83,6 +93,7 @@ def delete_cubegen(cubegen_id) -> Tuple[AnyDict, int]:
     """
 
     try:
+        _maybe_raise_for_service_silent()
         status = cubegens.delete_one(cubegen_id=cubegen_id)
         return api.ApiResponse.success(status)
     except api.ApiError as e:
@@ -99,6 +110,7 @@ def delete_cubegens(token_info: JsonObject) -> Tuple:
     """
 
     try:
+        _maybe_raise_for_service_silent()
         user_id = token_info['user_id']
         cubegens.delete_all(user_id=user_id)
         return api.ApiResponse.success("Success")
@@ -119,6 +131,7 @@ def get_cubegen_info(body, token_info: Dict):
     """
 
     try:
+        _maybe_raise_for_service_silent()
         user_id = token_info['user_id']
         email = token_info['email']
         token = token_info['token']
@@ -144,6 +157,7 @@ def get_cubegen(cubegen_id, token_info):
     """
 
     try:
+        _maybe_raise_for_service_silent()
         user_id = token_info['user_id']
         res, status_code = cubegens.get(user_id=user_id, cubegen_id=cubegen_id)
         return api.ApiResponse.success(res, status_code=status_code)
@@ -163,6 +177,7 @@ def get_cubegens(token_info):
     """
 
     try:
+        _maybe_raise_for_service_silent()
         user_id = token_info['user_id']
         res = cubegens.list(user_id=user_id)
         return api.ApiResponse.success(res)
@@ -179,6 +194,7 @@ def get_cubegen_version():
     """
 
     try:
+        _maybe_raise_for_service_silent()
         res = cubegens.version(user_id='generic')
         return api.ApiResponse.success(res)
     except api.ApiError as e:
