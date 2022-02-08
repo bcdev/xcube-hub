@@ -2,8 +2,8 @@ FROM quay.io/bcdev/miniconda3:latest
 
 ARG XCUBE_VIEWER_VERSION=0.4.2
 ARG XCUBE_USER_NAME=xcube
-ENV XCUBE_HUB_DOCKER_VERSION=2.1.10.dev0
-ENV XCUBE_HUB_VERSION=2.1.10.dev0
+ENV XCUBE_HUB_DOCKER_VERSION=2.1.10.dev1
+ENV XCUBE_HUB_VERSION=2.1.10.dev1
 ENV XCUBE_API_UWSGI_INI_PATH="/home/${XCUBE_USER_NAME}/xcube_hub/resources/uwsgi.yaml"
 
 LABEL maintainer="helge.dzierzon@brockmann-consult.de"
@@ -19,6 +19,7 @@ RUN chown -R ${XCUBE_USER_NAME}.users /opt/conda
 RUN apt-get -y update --allow-releaseinfo-change
 RUN apt-get -y upgrade
 RUN apt-get -y install apt-utils
+RUN apt-get -y install curl unzip build-essential iputils-ping
 RUN apt-get -y remove patch
 RUN mkdir /var/log/uwsgi && chown 1000.users /var/log/uwsgi
 
