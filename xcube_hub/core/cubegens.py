@@ -5,7 +5,7 @@ from pprint import pprint
 from typing import Union, Sequence, Optional, Tuple, Dict
 
 from kubernetes import client
-from kubernetes.client import ApiException, ApiValueError
+from kubernetes.client import ApiException, ApiValueError, V1Toleration
 from urllib3.exceptions import MaxRetryError
 from werkzeug.datastructures import FileStorage
 
@@ -63,6 +63,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     stores_file = os.path.join(xcube_hub_cfg_dir, xcube_hub_cfg_datapools)
     xcube_hub_cfg_secret = os.getenv("XCUBE_HUB_CFG_SECRET", default=None)
     xcube_hub_cfg_map = os.getenv("XCUBE_HUB_CFG_MAP", default=None)
+    xcube_hub_job_has_toleration = os.getenv("XCUBE_HUB_JOB_HAS_TOLERATION", default=None)
+    xcube_hub_job_has_node_selector = os.getenv("XCUBE_HUB_JOB_HAS_NODE_SELECTOR", default=None)
 
     if xcube_hash is not None and xcube_hash != "null":
         gen_image = xcube_repo + '@' + xcube_hash
@@ -129,6 +131,11 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
     ]
 
+    toleration = V1Toleration(key='compute', operator='Equals', value='true', effect='NoSchedule') \
+        if xcube_hub_job_has_toleration else None
+
+    node_selector = {'role': 'compute'} if xcube_hub_job_has_node_selector else None
+
     container = client.V1Container(
         name="xcube-gen",
         image=gen_image,
@@ -144,6 +151,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         ),
         spec=client.V1PodSpec(
             volumes=volumes,
+            tolerations=[toleration],
+            node_selector=node_selector,
             restart_policy="Never",
             containers=[container]
         ))

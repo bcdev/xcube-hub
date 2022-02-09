@@ -4,6 +4,17 @@
 
 - The RestApi has been extended by a new operation `GET /cubegens/version` that allows querying versions that will be 
   used when running `cubegens` processes. This operation is public. 
+- Added two new env vars that allow switching on and off node selectors and tolerations. If switched on, the spec will 
+  be extended by: 
+```yaml
+nodeSelector:
+  role: "compute"
+tolerations:
+  - key: "compute"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+```
 
 ## Changes in v2.1.9
 
