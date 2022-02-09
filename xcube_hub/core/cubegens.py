@@ -131,7 +131,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         },
     ]
 
-    toleration = V1Toleration(key='compute', operator='Equals', value='true', effect='NoSchedule') \
+    toleration = V1Toleration(key='compute', operator='Equal', value='true', effect='NoSchedule') \
         if xcube_hub_job_has_toleration else None
 
     node_selector = {'role': 'compute'} if xcube_hub_job_has_node_selector else None

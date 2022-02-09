@@ -4,7 +4,7 @@
 
 - The RestApi has been extended by a new operation `GET /cubegens/version` that allows querying versions that will be 
   used when running `cubegens` processes. This operation is public. 
-- Added two new env vars that allow switching on and off node selectors and tolerations. If switched on, the spec will 
+- Added two new env vars (`XCUBE_HUB_JOB_HAS_TOLERATION`, `XCUBE_HUB_JOB_HAS_NODE_SELECTOR`) that allow switching on and off node selectors and tolerations. If switched on, the spec will 
   be extended by: 
 ```yaml
 nodeSelector:
