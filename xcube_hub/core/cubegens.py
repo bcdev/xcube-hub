@@ -154,8 +154,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         ),
         spec=client.V1PodSpec(
             volumes=volumes,
-            tolerations=tolerations,
-            node_selector=node_selector,
+            # tolerations=tolerations,
+            # node_selector=node_selector,
             restart_policy="Never",
             containers=[container]
         ))
