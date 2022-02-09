@@ -12,7 +12,7 @@ from test.controllers.utils import del_env
 from xcube_hub import api
 from xcube_hub.cfg import Cfg
 from xcube_hub.core import cubegens
-from xcube_hub.core.cubegens import process_user_code
+from xcube_hub.core.cubegens import process_user_code, version
 from xcube_hub.keyvaluedatabase import KeyValueDatabase
 from xcube_hub.models.cubegen_config import CubegenConfig
 
@@ -503,16 +503,51 @@ class TestCubeGens(unittest.TestCase):
                               'status': 'error',
                               'output': ["bla", ],
                               'message': 'something is wrong',
-                              'progress': 100}, \
-                             404
+                              'progress': 100}, 404
 
-        with self.assertRaises(api.ApiError) as ae:
+        with self.assertRaises(api.ApiError) as e:
             cubegens.info(user_id='drwho',
                           email='drwho@mail.org',
                           body=_CFG,
                           token='fdsvdf')
         self.assertEqual("something is wrong",
-                         str(ae.exception))
+                         str(e.exception))
+
+    @patch.object(BatchV1Api, 'create_namespaced_job')
+    def test_create_version(self, p_create):
+        res, status_code = cubegens.create_version('drwho')
+
+        self.assertIn('drwho', res['job_id'])
+        self.assertEqual(200, status_code)
+
+        p_create.side_effect = ApiException("test")
+
+        with self.assertRaises(api.ApiError) as e:
+            cubegens.create_version('drwho')
+
+        self.assertEqual('(test)\nReason: None\n', str(e.exception))
+        self.assertEqual(400, e.exception.status_code)
+
+    @patch.object(BatchV1Api, 'read_namespaced_job_status')
+    @patch('xcube_hub.core.cubegens.create_version')
+    @patch('xcube_hub.core.cubegens.logs')
+    def test_versions(self, p_logs, p_create_version, p_status):
+        p_create_version.return_value = {'job_id': 'drwho-abc'}, 200
+        p_logs.return_value = ['xcube: v1.0', '', 'xcube-sh: v1.0', '']
+        p_status.return_value = V1Job(status=V1JobStatus(conditions=[V1JobCondition(status='Ready', type='Complete')]))
+
+        res, status_code = version('drwho')
+        expected = {'result': ['xcube: v1.0', 'xcube-sh: v1.0']}
+        self.assertEqual(expected, res)
+        self.assertEqual(200, status_code)
+
+        p_status.side_effect = ApiValueError('error')
+
+        with self.assertRaises(api.ApiError) as e:
+            version('drwho')
+
+        self.assertEqual('error', str(e.exception))
+        self.assertEqual(400, e.exception.status_code)
 
 
 if __name__ == '__main__':

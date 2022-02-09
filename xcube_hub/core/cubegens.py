@@ -377,17 +377,27 @@ def create_version(user_id: str) -> \
 
 
 def version(user_id: str):
-    xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
+    try:
+        xcube_hub_namespace = maybe_raise_for_env("WORKSPACE_NAMESPACE", "xc-gen")
 
-    job, status_code = create_version(user_id=user_id)
+        job, status_code = create_version(user_id=user_id)
 
-    apps_v1_api = client.BatchV1Api()
-    poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
-                           name=job['job_id'])
+        apps_v1_api = client.BatchV1Api()
+        poller.poll_job_status(apps_v1_api.read_namespaced_job_status, namespace=xcube_hub_namespace,
+                               name=job['job_id'])
 
-    job_result = logs(job_id=job['job_id'])
+        job_result = logs(job_id=job['job_id'])
+        res = dict(result=[])
 
-    return job_result, status_code
+        for log in job_result:
+            if log.strip() != "":
+                res['result'].append(log)
+
+        return res, status_code
+    except (ApiException, ApiValueError, MaxRetryError) as e:
+        raise api.ApiError(400, message=str(e))
+    except Exception as e:
+        raise api.ApiError(400, message=str(e))
 
 
 def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None) -> Tuple[JsonObject, int]:
