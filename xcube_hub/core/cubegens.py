@@ -134,6 +134,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
     toleration = V1Toleration(key='compute', operator='Equal', value='true', effect='NoSchedule') \
         if xcube_hub_job_has_toleration else None
 
+    tolerations = [toleration, ] if toleration else None
+
     node_selector = {'role': 'compute'} if xcube_hub_job_has_node_selector else None
 
     container = client.V1Container(
@@ -141,6 +143,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         image=gen_image,
         command=cmd,
         volume_mounts=volume_mounts,
+        # resources=resources,
         image_pull_policy=gen_container_pull_policy,
         env_from=env_from)
     # Create and configure a spec section
@@ -151,7 +154,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
         ),
         spec=client.V1PodSpec(
             volumes=volumes,
-            tolerations=[toleration],
+            tolerations=tolerations,
             node_selector=node_selector,
             restart_policy="Never",
             containers=[container]
