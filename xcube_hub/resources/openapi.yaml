@@ -595,7 +595,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiCubegenInfoResponse'
+                $ref: '#/components/schemas/ApiCubegenVersionResponse'
         "400":
           description: api error
           content:

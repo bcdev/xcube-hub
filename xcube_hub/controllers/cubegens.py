@@ -195,7 +195,7 @@ def get_cubegen_version():
 
     try:
         _maybe_raise_for_service_silent()
-        res = cubegens.version(user_id='generic')
-        return api.ApiResponse.success(res)
+        res, status_code = cubegens.version(user_id='generic')
+        return api.ApiResponse.success(res, status_code=status_code)
     except api.ApiError as e:
         return e.response
