@@ -97,7 +97,7 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
 
     cmd = ["/bin/bash", "-c", cmd]
 
-    # configure job env vars from either secrets or configmaps
+    # configure job env vars from either secrets or configmaps.
     env_from = []
     if xcube_hub_cfg_secret is not None:
         env_from.append(client.V1EnvFromSource(secret_ref=client.V1SecretEnvSource(name=xcube_hub_cfg_secret)))
