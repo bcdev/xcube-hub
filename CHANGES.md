@@ -1,4 +1,4 @@
-## Changes in v2.1.10 (in development)
+## Changes in v2.1.10
 
 ## New Features
 
