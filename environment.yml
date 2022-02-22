@@ -20,7 +20,7 @@ dependencies:
   - python-dateutil
   - python-dotenv
   - python-jose
-  - python-kubernetes<22.0.0
+  - python-kubernetes
   # needs 0.24 to avoid issue with urllib3 (https://github.com/marcospereirampj/python-keycloak/issues/196)
   - python-keycloak=0.24.0
   - requests-oauthlib

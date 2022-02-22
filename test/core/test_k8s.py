@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch, MagicMock
 from kubernetes import client
 from kubernetes.client import ApiException, V1ObjectMeta, CoreV1Api, V1PersistentVolumeClaimList, \
     V1PersistentVolumeClaim, ApiValueError, AppsV1Api, V1DaemonSet, V1DaemonSetList, V1Status, V1Deployment, \
-    V1DeploymentList, V1ServiceList, NetworkingV1beta1Ingress, NetworkingV1beta1IngressList, V1Pod, V1PodList, \
+    V1DeploymentList, V1ServiceList, V1Pod, V1PodList, \
     V1ConfigMap, V1Secret
 from xcube_hub import api
 from xcube_hub.core import k8s
@@ -22,7 +22,7 @@ def raise_api_exception(namespace, body):
 class TestK8s(unittest.TestCase):
     def setUp(self) -> None:
         self._core_v1_api = client.CoreV1Api()
-        self._networking_api = client.NetworkingV1beta1Api()
+        self._networking_api = client.NetworkingV1Api()
         self._apps_api = client.AppsV1Api()
 
     @patch.object(CoreV1Api, 'read_namespaced_secret')
@@ -318,13 +318,13 @@ class TestK8s(unittest.TestCase):
         res = k8s.create_ingress_object(name='test', service_name='test', service_port=8000, user_id='drwho',
                                         host_uri='https://test')
 
-        self.assertIsInstance(res, NetworkingV1beta1Ingress)
+        self.assertIsInstance(res, client.V1Ingress)
         self.assertEqual('test', res.metadata.name)
 
     def test_create_ingress(self):
         self._networking_api.create_namespaced_ingress = Mock(side_effect=ApiException(500, 'Test'))
 
-        ingress = client.NetworkingV1beta1Ingress(
+        ingress = client.V1Ingress(
             metadata=V1ObjectMeta(name='ingress'),
         )
 
@@ -339,7 +339,7 @@ class TestK8s(unittest.TestCase):
     def test_patch_ingress(self):
         self._networking_api.patch_namespaced_ingress = Mock(side_effect=ApiException(500, 'Test'))
 
-        ingress = client.NetworkingV1beta1Ingress(
+        ingress = client.V1Ingress(
             metadata=V1ObjectMeta(name='ingress'),
         )
 
@@ -378,14 +378,14 @@ class TestK8s(unittest.TestCase):
         ingress = k8s.create_ingress_object(name='test', service_name='test', service_port=8000, user_id='drwho',
                                             host_uri='https://test')
 
-        list_p.return_value = NetworkingV1beta1IngressList(items=[ingress])
+        list_p.return_value = client.V1IngressList(items=[ingress])
 
         res = k8s.get_ingress(namespace='test', name='test')
 
-        self.assertIsInstance(res, NetworkingV1beta1Ingress)
+        self.assertIsInstance(res, client.V1Ingress)
         self.assertEqual('test', res.metadata.name)
 
-        list_p.return_value = NetworkingV1beta1IngressList(items=[])
+        list_p.return_value = client.V1IngressList(items=[])
 
         res = k8s.get_ingress(namespace='test', name='test')
         self.assertIsNone(res)
@@ -396,12 +396,12 @@ class TestK8s(unittest.TestCase):
                                             host_uri='https://test')
 
         with patch('xcube_hub.core.k8s.create_ingress') as p:
-            list_p.return_value = NetworkingV1beta1IngressList(items=[ingress])
+            list_p.return_value = client.V1IngressList(items=[ingress])
 
             k8s.create_ingress_if_not_exists(ingress=ingress)
             p.assert_not_called()
 
-            list_p.return_value = NetworkingV1beta1IngressList(items=[])
+            list_p.return_value = client.V1IngressList(items=[])
             k8s.create_ingress_if_not_exists(ingress=ingress)
 
     @patch('xcube_hub.core.k8s.list_pods')

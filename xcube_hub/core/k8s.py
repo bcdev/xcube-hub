@@ -1,7 +1,7 @@
 import base64
 from typing import Optional, Sequence, Union, Dict
 from kubernetes import client
-from kubernetes.client import V1Pod, V1PodList, NetworkingV1beta1Ingress, ApiException, ApiTypeError, ApiValueError, \
+from kubernetes.client import V1Pod, V1PodList, ApiException, ApiTypeError, ApiValueError, \
     CoreV1Api
 from xcube_hub.typedefs import JsonObject
 
@@ -345,7 +345,7 @@ def create_ingress_object(name: str,
                           host_uri: str,
                           annotations: Optional[Sequence] = None,
                           path_regex: str = "/.*"
-                          ) -> client.NetworkingV1beta1Ingress:
+                          ) -> client.V1Ingress:
     webapi_host = host_uri.replace("https://", "").replace("http://", "")
     annotations = annotations or {
         "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
@@ -358,20 +358,23 @@ def create_ingress_object(name: str,
         "nginx.ingress.kubernetes.io/websocket-services": service_name
     }
 
-    body = client.NetworkingV1beta1Ingress(
-        api_version="networking.k8s.io/v1beta1",
+    body = client.V1Ingress(
+        api_version="networking.k8s.io/v1",
         kind="Ingress",
         metadata=client.V1ObjectMeta(name=name, annotations=annotations),
-        spec=client.NetworkingV1beta1IngressSpec(
-            rules=[client.NetworkingV1beta1IngressRule(
+        spec=client.V1IngressSpec(
+            rules=[client.V1IngressRule(
                 host=webapi_host,
-                http=client.NetworkingV1beta1HTTPIngressRuleValue(
-                    paths=[client.NetworkingV1beta1HTTPIngressPath(
+                http=client.V1HTTPIngressRuleValue(
+                    paths=[client.V1HTTPIngressPath(
                         path="/" + user_id + path_regex,
-                        backend=client.NetworkingV1beta1IngressBackend(
-                            service_port=service_port,
-                            service_name=service_name)
-
+                        path_type='ImplementationSpecific',
+                        backend=client.V1IngressBackend(
+                            service=client.V1IngressServiceBackend(
+                                port=service_port,
+                                name=service_name
+                            )
+                        )
                     )]
                 )
             )
@@ -381,12 +384,12 @@ def create_ingress_object(name: str,
     return body
 
 
-def create_ingress(ingress: client.NetworkingV1beta1Ingress, namespace: str = 'default',
-                   core_api: Optional[client.NetworkingV1beta1Api] = None):
+def create_ingress(ingress: client.V1Ingress, namespace: str = 'default',
+                   core_api: Optional[client.NetworkingV1Api] = None):
     # Creation of the Deployment in specified namespace
     # (Can replace "default" with a namespace you may have created)
 
-    networking_v1_beta1_api = core_api or client.NetworkingV1beta1Api()
+    networking_v1_beta1_api = core_api or client.NetworkingV1Api()
 
     try:
         networking_v1_beta1_api.create_namespaced_ingress(
@@ -397,11 +400,11 @@ def create_ingress(ingress: client.NetworkingV1beta1Ingress, namespace: str = 'd
         raise api.ApiError(400, f"Error when creating the ingress {ingress.metadata.name}: {str(e)}")
 
 
-def patch_ingress(name: str, body, namespace: str = 'default', core_api: Optional[client.NetworkingV1beta1Api] = None):
+def patch_ingress(name: str, body, namespace: str = 'default', core_api: Optional[client.NetworkingV1Api] = None):
     # Creation of the Deployment in specified namespace
     # (Can replace "default" with a namespace you may have created)
 
-    networking_v1_beta1_api = core_api or client.NetworkingV1beta1Api()
+    networking_v1_beta1_api = core_api or client.NetworkingV1Api()
     try:
         networking_v1_beta1_api.patch_namespaced_ingress(
             name=name,
@@ -419,11 +422,11 @@ def create_ingress_if_not_exists(ingress, namespace: str = 'default'):
         create_ingress(ingress, namespace)
 
 
-def delete_ingress(name, namespace: str = 'default', core_api: Optional[client.NetworkingV1beta1Api] = None):
+def delete_ingress(name, namespace: str = 'default', core_api: Optional[client.NetworkingV1Api] = None):
     # Creation of the Deployment in specified namespace
     # (Can replace "default" with a namespace you may have created)
 
-    networking_v1_beta1_api = core_api or client.NetworkingV1beta1Api()
+    networking_v1_beta1_api = core_api or client.NetworkingV1Api()
     try:
         networking_v1_beta1_api.delete_namespaced_ingress(
             namespace=namespace,
@@ -433,18 +436,18 @@ def delete_ingress(name, namespace: str = 'default', core_api: Optional[client.N
         raise api.ApiError(400, f"Error when deleting the ingress {name}: {str(e)}")
 
 
-def list_ingresses(namespace: str = 'default', core_api: Optional[client.NetworkingV1beta1Api] = None):
+def list_ingresses(namespace: str = 'default', core_api: Optional[client.NetworkingV1Api] = None):
     # Creation of the Deployment in specified namespace
     # (Can replace "default" with a namespace you may have created)
 
-    networking_v1_beta1_api = core_api or client.NetworkingV1beta1Api()
+    networking_v1_beta1_api = core_api or client.NetworkingV1Api()
     try:
         return networking_v1_beta1_api.list_namespaced_ingress(namespace=namespace)
     except (ApiException, ApiTypeError) as e:
         raise api.ApiError(400, f"Error when listing ingresses in namespace {namespace}: {str(e)}")
 
 
-def get_ingress(namespace: str, name: str) -> Optional[NetworkingV1beta1Ingress]:
+def get_ingress(namespace: str, name: str) -> Optional[client.V1Ingress]:
     ingresses = list_ingresses(namespace=namespace)
     for ingress in ingresses.items:
         if ingress.metadata.name == name:
