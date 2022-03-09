@@ -72,7 +72,6 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
         cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
         cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
-        cate_use_dapr = os.getenv("CATE_USE_DAPR", None)
         cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", "cate")
         cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH",
                                                            default="/etc/xcube-hub/stores.yaml")
@@ -163,9 +162,6 @@ def launch_cate(user_id: str) -> JsonObject:
         limits = {'memory': cate_mem_limit}
         requests = {'memory': cate_mem_request}
 
-        annotations = {"dapr.io/app-id": user_id + '-cate', "dapr.io/enabled": "true",
-                       "dapr.io/log-as-json": "true"} if cate_use_dapr else None
-
         labels = dict(typ="cate")
 
         deployment = k8s.create_deployment_object(name=user_id + '-cate',
@@ -180,14 +176,8 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   init_containers=init_containers,
                                                   limits=limits,
                                                   requests=requests,
-                                                  annotations=annotations,
                                                   labels=labels)
 
-        # Make create_if_exists test for broken pods
-        # pod_status = get_status(user_id)
-        # if pod_status != "Running":
-        #     create_deployment(namespace=user_id, deployment=deployment)
-        # else:
         k8s.create_deployment_if_not_exists(namespace=cate_namespace, deployment=deployment)
 
         time.sleep(cate_launch_grace)

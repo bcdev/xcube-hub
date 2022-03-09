@@ -2,7 +2,7 @@ import base64
 from typing import Optional, Sequence, Union, Dict
 from kubernetes import client
 from kubernetes.client import V1Pod, V1PodList, ApiException, ApiTypeError, ApiValueError, \
-    CoreV1Api
+    CoreV1Api, V1ServiceBackendPort
 from xcube_hub.typedefs import JsonObject
 
 from xcube_hub import api
@@ -371,7 +371,7 @@ def create_ingress_object(name: str,
                         path_type='ImplementationSpecific',
                         backend=client.V1IngressBackend(
                             service=client.V1IngressServiceBackend(
-                                port=service_port,
+                                port=V1ServiceBackendPort(number=service_port),
                                 name=service_name
                             )
                         )

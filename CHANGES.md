@@ -1,3 +1,13 @@
+## Changes in v2.1.11 (in development)
+
+- Set version to 2.1.11.dev1
+
+### Fixes
+
+- Fixed ingress error when default value is used. Set Ingress port by using class V1IngressServiceBackend
+- Removed CATE_USE_DAPR side container config. Not used.
+ 
+
 ## Changes in v2.1.10
 
 ## New Features

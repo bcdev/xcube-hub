@@ -14,6 +14,7 @@ dependencies:
   - flask-cors
   - flask-oidc
   - gdal
+  - geoserver-rest
   - packaging
   - pandas
   - pip
@@ -30,7 +31,6 @@ dependencies:
   - pip:
       # Required
       - connexion[swagger-ui]
-      - git+https://github.com/bc-org/geoserver-rest
       - plyvel
       - polling2
       - redis
