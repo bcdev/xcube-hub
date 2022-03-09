@@ -18,7 +18,7 @@ class TestPoller(unittest.TestCase):
                 return None
             elif _CT == 1:
                 _CT += 1
-                return V1Pod(metadata=V1ObjectMeta(name='test'), status=V1PodStatus(phase='deas'))
+                return V1Pod(metadata=V1ObjectMeta(name='test'), status=V1PodStatus(phase='Failed'))
             else:
                 _CT += 1
                 return pod
