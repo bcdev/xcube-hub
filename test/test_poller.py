@@ -9,7 +9,7 @@ _CT = 0
 
 class TestPoller(unittest.TestCase):
     def test_poll_pod_phase(self):
-        pod = V1Pod(metadata=V1ObjectMeta(name='test'), status=V1PodStatus(phase='running'))
+        pod = V1Pod(metadata=V1ObjectMeta(name='test'), status=V1PodStatus(phase='Running'))
 
         def get_pod(prefix: str, namespace=None, label_selector: str = None):
             global _CT
