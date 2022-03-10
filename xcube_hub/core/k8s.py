@@ -347,16 +347,6 @@ def create_ingress_object(name: str,
                           path_regex: str = "/.*"
                           ) -> client.V1Ingress:
     webapi_host = host_uri.replace("https://", "").replace("http://", "")
-    annotations = annotations or {
-        "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
-        "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
-        "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",
-        "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
-        "nginx.ingress.kubernetes.io/send-timeout": "86400",
-        "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
-        "nginx.ingress.kubernetes.io/enable-cors": "true",
-        "nginx.ingress.kubernetes.io/websocket-services": service_name
-    }
 
     body = client.V1Ingress(
         api_version="networking.k8s.io/v1",

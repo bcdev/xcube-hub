@@ -189,12 +189,24 @@ def launch_cate(user_id: str) -> JsonObject:
 
         service_name = user_id + '-cate'
 
+        annotations = {
+            "proxy_set_header": "Upgrade $http_upgrade; Connection \"upgrade\"",
+            "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
+            "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",
+            "nginx.ingress.kubernetes.io/proxy-send-timeout": "86400",
+            "nginx.ingress.kubernetes.io/send-timeout": "86400",
+            "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
+            "nginx.ingress.kubernetes.io/enable-cors": "true",
+            "nginx.ingress.kubernetes.io/websocket-services": service_name
+        }
+
         ingress = k8s.get_ingress(namespace=cate_namespace, name=service_name)
         if not ingress:
             ingress = k8s.create_ingress_object(name=service_name,
                                                 service_name=service_name,
                                                 service_port=4000,
                                                 user_id=user_id,
+                                                annotations=annotations,
                                                 host_uri=host_uri)
             k8s.create_ingress(ingress, namespace=cate_namespace)
 
