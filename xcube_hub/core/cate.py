@@ -78,6 +78,8 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_user_root = util.maybe_raise_for_env("CATE_USER_ROOT",
                                                   "/home/xcube/workspace")
 
+        cate_storage_mode = util.maybe_raise_for_env("CATE_STORAGE_MODE", "pvc")
+
         # Not used as the namespace cate has to be created prior to launching cate instances
         # user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
@@ -102,62 +104,66 @@ def launch_cate(user_id: str) -> JsonObject:
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX',
                                 value=f'/{user_id}/')]
 
-        volume_mounts = [
-            {
-                'name': 'workspace-pvc',
-                'mountPath': '/home/xcube/workspace',
-                'subPath': user_id + '-scratch'
-            },
-            {
-                'name': 'workspace-pvc',
-                'mountPath': '/home/xcube/.cate',
-                'subPath': user_id + '-cate'
-            },
-            {
-                'name': 'xcube-hub-stores',
-                'mountPath': '/etc/xcube-hub',
-                'readOnly': True
-            },
-        ]
+        volume_mounts = None
+        volumes = None
+        init_containers = None
+        if cate_storage_mode == "pvc":
+            volume_mounts = [
+                {
+                    'name': 'workspace-pvc',
+                    'mountPath': '/home/xcube/workspace',
+                    'subPath': user_id + '-scratch'
+                },
+                {
+                    'name': 'workspace-pvc',
+                    'mountPath': '/home/xcube/.cate',
+                    'subPath': user_id + '-cate'
+                },
+                {
+                    'name': 'xcube-hub-stores',
+                    'mountPath': '/etc/xcube-hub',
+                    'readOnly': True
+                },
+            ]
 
-        volumes = [
-            {
-                'name': 'workspace-pvc',
-                'persistentVolumeClaim': {
-                    'claimName': 'workspace-pvc',
-                }
-            },
-            {
-                'name': 'xcube-hub-stores',
-                'configMap': {
-                    'name': 'xcube-hub-stores'
-                }
-            },
-        ]
+            volumes = [
+                {
+                    'name': 'workspace-pvc',
+                    'persistentVolumeClaim': {
+                        'claimName': 'workspace-pvc',
+                    }
+                },
+                {
+                    'name': 'xcube-hub-stores',
+                    'configMap': {
+                        'name': 'xcube-hub-stores'
+                    }
+                },
+            ]
 
-        init_containers = [
-            {
-                "name": "fix-owner",
-                "image": "bash",
-                "command": ["chown",
-                            "-R",
-                            "1000.1000",
-                            "/home/xcube/.cate",
-                            "/home/xcube/workspace"],
-                "volumeMounts": [
-                    {
-                        "mountPath": "/home/xcube/.cate",
-                        "subPath": user_id + '-cate',
-                        "name": "workspace-pvc",
-                    },
-                    {
-                        "mountPath": "/home/xcube/workspace",
-                        "subPath": user_id + '-scratch',
-                        "name": "workspace-pvc",
-                    },
-                ]
-            },
-        ]
+            init_containers = [
+                {
+                    "name": "fix-owner",
+                    "image": "bash",
+                    "command": ["chown",
+                                "-R",
+                                "1000.1000",
+                                "/home/xcube/.cate",
+                                "/home/xcube/workspace"],
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/home/xcube/.cate",
+                            "subPath": user_id + '-cate',
+                            "name": "workspace-pvc",
+                        },
+                        {
+                            "mountPath": "/home/xcube/workspace",
+                            "subPath": user_id + '-scratch',
+                            "name": "workspace-pvc",
+                        },
+                    ]
+                },
+            ]
 
         limits = {'memory': cate_mem_limit}
         requests = {'memory': cate_mem_request}

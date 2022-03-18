@@ -1,6 +1,8 @@
 ## Changes in v2.1.11 (in development)
 
 - Set version to 2.1.11.dev1
+- Added an env var CATE_STORAGE_MODE (local, pvc) which allows switching off the craetion of PVCs per user. This
+  is useful for testing purposes
 
 ### Fixes
 

@@ -22,6 +22,21 @@ def get_secret(name: str, secret_item: str, namespace: str, v1_client: Optional[
     return base64.b64decode(secret.data[secret_item]).decode()
 
 
+def create_pv_object(user_id: str, storage: str = '2Gi', storage_class_name='standard'):
+    pv = client.V1PersistentVolume(
+        metadata=client.V1ObjectMeta(name=f'claim-{user_id}', labels={'app': 'xczbe-hub'}),
+        spec=client.V1PersistentVolumeSpec(
+            storage_class_name=storage_class_name,
+            capacity=storage,
+            volume_mode="FileSystem",
+            access_modes=["ReadWriteInce"],
+            persistent_volume_reclaim_policy="Retain",
+        )
+    )
+
+    return pv
+
+
 def create_pvc_object(user_id: str, storage: str = '2Gi'):
     pvc = client.V1PersistentVolumeClaim(
         metadata={'name': 'claim-' + user_id},

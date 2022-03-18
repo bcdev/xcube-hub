@@ -163,8 +163,8 @@ def create_cubegen_object(cubegen_id: str, cfg: AnyDict, info_only: bool = False
 
 
 def create_cubegen_version_object(cubegen_id: str) -> client.V1Job:
-    xcube_repo = util.maybe_raise_for_env("XCUBE_REPO")
-    xcube_tag = util.maybe_raise_for_env("XCUBE_TAG")
+    xcube_repo = util.maybe_raise_for_env("XCUBE_REPO", 'quay.io/bcdev/xcube')
+    xcube_tag = util.maybe_raise_for_env("XCUBE_TAG", 'latest')
     xcube_hash = os.getenv("XCUBE_HASH", default=None)
 
     if xcube_hash is not None and xcube_hash != "null":
