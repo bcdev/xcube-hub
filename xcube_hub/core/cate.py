@@ -205,6 +205,7 @@ def launch_cate(user_id: str) -> JsonObject:
             "nginx.ingress.kubernetes.io/send-timeout": "86400",
             "nginx.ingress.kubernetes.io/proxy-body-size": "2000m",
             "nginx.ingress.kubernetes.io/enable-cors": "true",
+            "kubernetes.io/ingress.class": "nginx",
             "nginx.ingress.kubernetes.io/websocket-services": service_name
         }
 
