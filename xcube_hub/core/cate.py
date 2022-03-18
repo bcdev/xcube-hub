@@ -65,10 +65,6 @@ def launch_cate(user_id: str) -> JsonObject:
         cate_debug = os.getenv("CATE_DEBUG", default='0')
         cate_launch_grace = os.getenv("CATE_LAUNCH_GRACE_PERIOD", default=2)
 
-        cate_command = util.maybe_raise_for_env("CATE_COMMAND",
-                                                "cate-webapi-start -v -b -p 4000 "
-                                                "-a 0.0.0.0 -s 86400 -r"
-                                                "/home/xcube/workspace")
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
         cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
         cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
@@ -77,6 +73,12 @@ def launch_cate(user_id: str) -> JsonObject:
                                                            default="/etc/xcube-hub/stores.yaml")
         cate_user_root = util.maybe_raise_for_env("CATE_USER_ROOT",
                                                   "/home/xcube/workspace")
+
+        cate_command = util.maybe_raise_for_env("CATE_COMMAND",
+                                                "cate-webapi-start -v -b -p 4000 "
+                                                "-a 0.0.0.0 -s 86400 -r"
+                                                f"{cate_user_root}")
+
 
         cate_storage_mode = util.maybe_raise_for_env("CATE_STORAGE_MODE", "pvc")
 
