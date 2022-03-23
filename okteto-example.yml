@@ -1,22 +1,12 @@
-name: xcube-gen-dev
-image: quay.io/bcdev/xcubehub-base:1.0.dev0
+name: xcube-hub
+command: bash
+securityContext:
+  runAsUser: 1000
+sync:
+  - .:/home/xcube
 forward:
   - 8080:8080
-  - 8000:8000
 reverse:
   - 9000:9000
-
-remote: 2222
-
-workdir: /usr/src/app
-sync:
-  - .:/usr/src/app
-command:
-  - bash
-
-namespace: default
-
-securityContext:
-  capabilities:
-    add:
-      - SYS_PTRACE
+volumes:
+  - /root/.cache/pip
