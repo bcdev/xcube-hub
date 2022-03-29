@@ -3,8 +3,14 @@ image: quay.io/bcdev/xcubehub-base:1.0.dev0
 command: bash
 securityContext:
   runAsUser: 1000
+  capabilities:
+    add:
+      - SYS_PTRACE
 sync:
   - .:/home/xcube
+  - .:/usr/src/app
+workdir: /usr/src/app
+namespace: default
 forward:
   - 8080:8080
 reverse:
