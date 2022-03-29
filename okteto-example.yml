@@ -1,4 +1,4 @@
-name: xcube-hub
+name: xcube-hub-okteto
 command: bash
 securityContext:
   runAsUser: 1000
