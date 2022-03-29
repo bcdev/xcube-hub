@@ -1,19 +1,22 @@
-name: xcube-hub-okteto
+name: xcube-gen-dev
 image: quay.io/bcdev/xcubehub-base:1.0.dev0
-command: bash
+forward:
+  - 8080:8080
+  - 8000:8000
+reverse:
+  - 9000:9000
+
+remote: 2222
+
+workdir: /usr/src/app
+sync:
+  - .:/usr/src/app
+command:
+  - bash
+
+namespace: default
+
 securityContext:
-  runAsUser: 2000
   capabilities:
     add:
       - SYS_PTRACE
-sync:
-  - .:/home/xcube
-  - .:/usr/src/app
-workdir: /usr/src/app
-namespace: default
-forward:
-  - 8080:8080
-reverse:
-  - 9000:9000
-volumes:
-  - /root/.cache/pip
