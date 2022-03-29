@@ -2,7 +2,7 @@ name: xcube-hub-okteto
 image: quay.io/bcdev/xcubehub-base:1.0.dev0
 command: bash
 securityContext:
-#  runAsUser: 1000
+  runAsUser: 2000
   capabilities:
     add:
       - SYS_PTRACE
