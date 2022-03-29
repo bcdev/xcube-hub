@@ -10,7 +10,6 @@ env:
   ORG_NAME: bcdev
   REG_NAME: quay.io
 
-
 jobs:
   unittest:
     runs-on: ubuntu-latest
