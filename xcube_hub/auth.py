@@ -125,7 +125,7 @@ class Auth(AuthProvider):
         elif provider == 'xcube':
             return _AuthXcube(audience=audience, **kwargs)
         elif provider == 'jasmin':
-            return _Keycloak(domain='kc.brockmann-consult.de', audience='edc-admin', **kwargs)
+            return _Keycloak(audience='edc-admin', **kwargs)
         elif provider == 'mocker':
             return _AuthMocker()
         else:
