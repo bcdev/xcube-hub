@@ -34,13 +34,13 @@ def get_user_by_credentials(token: str, client_id: str, client_secret: str) -> S
 
 def _get_management_token(client_id: Optional[str] = None, client_secret: Optional[str] = None,
                           aud: Optional[str] = None):
-    client_id = client_id or os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_ID", None)
+    client_id = client_id or os.environ.get("XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_ID", None)
     if client_id is None:
-        raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_ID")
+        raise Unauthorized(description="Please configure the env variable XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_ID")
 
-    client_secret = client_secret or os.environ.get("AUTH0_USER_MANAGEMENT_CLIENT_SECRET", None)
+    client_secret = client_secret or os.environ.get("XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_SECRET", None)
     if client_secret is None:
-        raise Unauthorized(description="Please configure the env variable AUTH0_USER_MANAGEMENT_CLIENT_SECRET")
+        raise Unauthorized(description="Please configure the env variable XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_SECRET")
 
     audience = aud or os.getenv("XCUBE_HUB_OAUTH_USER_MANAGEMENT_AUD", None)
     if audience is None:
@@ -67,7 +67,7 @@ def _get_management_token(client_id: Optional[str] = None, client_secret: Option
 
 
 def create_token(claims: Dict, days_valid: int = 90):
-    secret = util.maybe_raise_for_env("XCUBE_HUB_TOKEN_SECRET")
+    secret = util.maybe_raise_for_env("XCUBE_HUB_OAUTH_HS256_SECRET")
 
     if len(secret) < 256:
         raise api.ApiError(400, "System Error: Invalid token secret given.")
@@ -80,7 +80,7 @@ def create_token(claims: Dict, days_valid: int = 90):
 
 
 def get_token(body: JsonObject):
-    user_client_id = util.maybe_raise_for_env("AUTH0_USER_MANAGEMENT_CLIENT_ID")
+    user_client_id = util.maybe_raise_for_env("XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_ID")
     oauth_token = OauthToken.from_dict(body)
 
     if oauth_token.client_id == user_client_id:

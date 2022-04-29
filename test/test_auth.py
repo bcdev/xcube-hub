@@ -95,14 +95,14 @@ class TestAuth(unittest.TestCase):
         self.assertEqual("https://xcube-gen.brockmann-consult.de/api/v2/", auth._provider._audience)
         self.assertEqual(["RS256"], auth._provider._algorithms)
 
-        domain = os.getenv('AUTH0_DOMAIN')
-        del os.environ['AUTH0_DOMAIN']
+        domain = os.getenv('XCUBE_HUB_OAUTH_DOMAIN')
+        del os.environ['XCUBE_HUB_OAUTH_DOMAIN']
         with self.assertRaises(api.ApiError) as e:
             auth = Auth.instance(iss="https://edc.eu.auth0.com/", refresh=True)
 
-        self.assertEqual("Environment Variable AUTH0_DOMAIN does not exist.", str(e.exception))
+        self.assertEqual("Environment Variable XCUBE_HUB_OAUTH_DOMAIN does not exist.", str(e.exception))
 
-        os.environ['AUTH0_DOMAIN'] = domain
+        os.environ['XCUBE_HUB_OAUTH_DOMAIN'] = domain
 
         audience = os.getenv('XCUBE_HUB_OAUTH_AUD')
         del os.environ['XCUBE_HUB_OAUTH_AUD']

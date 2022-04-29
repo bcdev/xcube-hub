@@ -139,8 +139,8 @@ def create(user_id: str, cfg: JsonObject) -> Tuple[JsonObject, int]:
 
         # Create ingress
 
-        host_uri = os.environ.get("XCUBE_WEBAPI_URI")
-        viewer_uri = os.environ.get("XCUBE_VIEWER_URI")
+        host_uri = os.environ.get("XCUBE_WEBAPI_BASE_URI")
+        viewer_uri = os.environ.get("XCUBE_VIEWER_BASE_URI")
         annotations = {
             "nginx.ingress.kubernetes.io/proxy-connect-timeout": "86400",
             "nginx.ingress.kubernetes.io/proxy-read-timeout": "86400",

@@ -18,7 +18,7 @@ def _maybe_raise_for_service_silent():
 
 
 def _raise_for_no_access(database_id, geodb_user, token):
-    geodb_server_url = util.maybe_raise_for_env('GEODB_SERVER_URL')
+    geodb_server_url = util.maybe_raise_for_env('GEODB_POSTGREST_REST_URL')
     url = f"{geodb_server_url}/rpc/geodb_list_databases"
 
     r = requests.post(url=url, headers={'Authorization': f'Bearer {token}'})

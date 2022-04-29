@@ -1,0 +1,32 @@
+@startuml
+title Authentication/Authorization and Data Flow xcube geoDB
+autonumber
+
+actor User as user
+participant "EOX" as eox
+participant "Jupyter Lab" as lab
+participant "Python client" as client
+participant "xcube Hub" as hub
+participant "Auth0" as auth
+participant "Auth0 Management API" as authmanage
+participant "xcube geodb RestAPI" as postgrest
+participant "xcube geodb PostGIS DB" as postgis
+participant "S3 Object Storage" as obs
+
+user -> eox : Logs in to the Jupyter Lab
+eox -> lab: Provides credentials
+lab -> client: Receives credentials
+client -> hub: Sends credentials
+hub -> auth: Sends Management ID and secret
+auth -> hub: Returns management bearer token
+hub -> authmanage: Sends Query for a user with credentials in user_metadata
+authmanage -> hub: User Info if exists
+hub -> client: Returns bearer token
+client -> postgrest: Sends query request to PostGrest
+postgrest -> postgis: Authenticates user
+postgrest -> postgis: Sends query request
+postgis -> postgrest: Returns result
+postgrest -> client: Receives result
+client -> user: Receives result
+
+@enduml

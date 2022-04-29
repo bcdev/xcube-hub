@@ -422,9 +422,9 @@ paths:
                     format: url
         "400":
           description: Api Error
-#      security:
-#        - oAuthorization:
-#            - manage:cubegens
+      security:
+        - oAuthorization:
+            - manage:cubegens
       summary: Create a xcube service
       tags:
         - xcube
@@ -1287,6 +1287,9 @@ components:
           $ref: '#/components/schemas/Callback'
     XcubeRequest:
       type: object
+      required:
+        - user_id
+        - cfg
       properties:
         user_id:
           type: string

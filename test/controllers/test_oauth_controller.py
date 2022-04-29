@@ -53,12 +53,12 @@ class TestOauthController(BaseTestCase):
         self.assertEqual("Environment Variable XCUBE_HUB_OAUTH_AUD does not exist.", data['message'])
 
         os.environ['XCUBE_HUB_OAUTH_AUD'] = aud
-        secret = os.environ['XCUBE_HUB_TOKEN_SECRET']
-        os.environ['XCUBE_HUB_TOKEN_SECRET'] = 'sdfvgd'
+        secret = os.environ['XCUBE_HUB_OAUTH_HS256_SECRET']
+        os.environ['XCUBE_HUB_OAUTH_HS256_SECRET'] = 'sdfvgd'
         response = self.client.open('/api/v2/oauth/token', method='POST', data=json.dumps(body),
                                     content_type='application/json')
 
-        os.environ['XCUBE_HUB_TOKEN_SECRET'] = secret
+        os.environ['XCUBE_HUB_OAUTH_HS256_SECRET'] = secret
         data = response.json
         self.assert400(response, 'Response body is : ' + response.data.decode('utf-8'))
         self.assertEqual("System Error: Invalid token secret given.", data['message'])

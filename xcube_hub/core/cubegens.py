@@ -208,7 +208,7 @@ def create_cubegen_version_object(cubegen_id: str) -> client.V1Job:
 
 
 def _raise_for_invalid_punits(user_id: str, email: str, cfg: AnyDict, token: str):
-    limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
+    limit = os.getenv("GENERATOR_PROCESS_LIMIT", 1000)
 
     infos, status_code = info(user_id=user_id, email=email, body=cfg, token=token)
     cost_estimation = infos['result']['cost_estimation']
@@ -446,7 +446,7 @@ def info(user_id: str, email: str, body: JsonObject, token: Optional[str] = None
     cost_est = costs.get_size_and_cost(processing_request=processing_request, datastore=data_store)
     required = cost_est['punits']['total_count']
 
-    limit = os.getenv("XCUBE_HUB_PROCESS_LIMIT", 1000)
+    limit = os.getenv("GENERATOR_PROCESS_LIMIT", 1000)
 
     try:
         limit = int(float(limit))

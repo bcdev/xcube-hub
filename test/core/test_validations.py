@@ -15,11 +15,11 @@ class TestValidations(BaseTestCase):
         res = validate_env()
         self.assertTrue(res)
 
-        del os.environ['AUTH0_USER_MANAGEMENT_CLIENT_ID']
+        del os.environ['XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_ID']
         with self.assertRaises(api.ApiError) as e:
             validate_env()
 
-        self.assertEqual("Env var AUTH0_USER_MANAGEMENT_CLIENT_ID required.", str(e.exception))
+        self.assertEqual("Env var XCUBE_HUB_OAUTH_USER_MANAGEMENT_CLIENT_ID required.", str(e.exception))
 
 
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ def register(subscription: Subscription, raise_on_exist: bool = True):
 
     client_id = util.maybe_raise_for_env("GEODB_ADMIN_CLIENT_ID")
     client_secret = util.maybe_raise_for_env("GEODB_ADMIN_CLIENT_SECRET")
-    server_url = util.maybe_raise_for_env("GEODB_SERVER_URL")
+    server_url = util.maybe_raise_for_env("GEODB_POSTGREST_REST_URL")
 
     oauth_token = dict(
         audience="https://xcube-gen.brockmann-consult.de/api/v2/",

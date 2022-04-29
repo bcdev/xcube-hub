@@ -1,0 +1,33 @@
+@startuml
+title Authentication/Authorization and Data Flow xcube Generator
+autonumber
+
+actor User as user
+participant "EOX" as eox
+participant "Jupyter Lab" as lab
+participant "Python client" as client
+participant "xcube Hub" as hub
+participant "Auth0" as auth
+participant "Auth0 Management API" as authmanage
+participant "Cluster" as cluster
+participant "xcube Job" as job
+participant "S3 Object Storage" as obs
+
+user -> eox : Logs in to the Jupyter Lab
+eox -> lab: Provides credentials
+lab -> client: Receives credentials
+client -> hub: Sends credentials
+hub -> auth: Sends Management ID and secret
+auth -> hub: Returns management bearer token
+hub -> authmanage: Sends Query for a user with credentials in user_metadata
+authmanage -> hub: User Info if exists
+hub -> client: Returns bearer token
+client -> hub: Sends job request with token
+hub -> cluster: Sends Job request
+cluster -> job: Starts Job
+job -> obs: Sends result to OBS
+job -> hub: Returns result information
+hub -> client: Receives result
+client -> user: Receives result
+
+@enduml

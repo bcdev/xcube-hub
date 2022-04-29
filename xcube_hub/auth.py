@@ -19,7 +19,8 @@ _ISS_TO_PROVIDER = {
     "https://xcube-gen.brockmann-consult.de/": 'xcube',
     "https://edc.eu.auth0.com/": 'auth0',
     "https://test/": 'mocker',
-    "https://192-171-139-82.sslip.io/auth/realms/cate": "jasmin"
+    "https://192-171-139-82.sslip.io/auth/realms/cate": "jasmin",
+    "https://kc.brockmann-consult.de/auth/realms/edc": "jasmin"
 }
 
 
@@ -54,7 +55,7 @@ class Auth(AuthProvider):
     _instance = None
 
     def __init__(self, iss: Optional[str] = None, audience: Optional[str] = None, **kwargs):
-        auth0_domain = util.maybe_raise_for_env("AUTH0_DOMAIN")
+        auth0_domain = util.maybe_raise_for_env("XCUBE_HUB_OAUTH_DOMAIN")
 
         iss = iss or f"https://{auth0_domain}/"
 
@@ -124,7 +125,7 @@ class Auth(AuthProvider):
         elif provider == 'xcube':
             return _AuthXcube(audience=audience, **kwargs)
         elif provider == 'jasmin':
-            return _Keycloak(audience='cate', **kwargs)
+            return _Keycloak(domain='kc.brockmann-consult.de', audience='edc-admin', **kwargs)
         elif provider == 'mocker':
             return _AuthMocker()
         else:
@@ -159,7 +160,7 @@ class _Auth0(AuthProvider):
                  audience: Optional[str] = None):
 
         super().__init__()
-        self._domain = domain or os.getenv('AUTH0_DOMAIN')
+        self._domain = domain or os.getenv('XCUBE_HUB_OAUTH_DOMAIN')
         self._audience = audience or os.getenv('XCUBE_HUB_OAUTH_AUD')
         self._algorithms = ["RS256"]
 
@@ -316,8 +317,8 @@ class _AuthXcube(AuthProvider):
 
         super().__init__()
         self._audience = os.getenv('XCUBE_HUB_OAUTH_AUD') or audience
-        self._secret = os.getenv('XCUBE_HUB_TOKEN_SECRET') or secret
-        self._algorithms = ["HS256"]
+        self._secret = os.getenv('XCUBE_HUB_OAUTH_HS256_SECRET') or secret
+        self._algorithms = ["HS256", "RS256"]
 
     def get_email(self, claims):
         try:
