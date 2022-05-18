@@ -35,7 +35,7 @@ RUN mamba env create
 RUN echo "conda activate xcube-hub" >> ~/.bashrc
 
 ADD --chown=1000:100 ./ .
-RUN source activate xcube-hub && pip install --use-feature=in-tree-build .
+RUN source activate xcube-hub && pip install .
 
 EXPOSE 8000
 EXPOSE 8080
