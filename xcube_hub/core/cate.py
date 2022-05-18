@@ -146,7 +146,7 @@ def launch_cate(user_id: str) -> JsonObject:
             init_containers = [
                 {
                     "name": "fix-owner",
-                    "image": "bash",
+                    "image": "quay.io/bcdev/bash:latest",
                     "command": ["chown",
                                 "-R",
                                 "1000.1000",
