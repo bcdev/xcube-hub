@@ -1,3 +1,5 @@
+## Changes in v2.1.12 (in development)
+
 ## Changes in v2.1.11
 
 - Set version to 2.1.11.dev1
