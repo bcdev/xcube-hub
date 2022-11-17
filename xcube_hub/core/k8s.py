@@ -196,7 +196,8 @@ def create_deployment_object(name: str,
                              limits: Optional[Dict] = None,
                              requests: Optional[Dict] = None,
                              annotations: Optional[Dict] = None,
-                             labels: Optional[Dict] = None):
+                             labels: Optional[Dict] = None,
+                             restart_policy: Optional[str] = None):
     # Configure Pod template container
     envs = [] if not envs else envs
 
@@ -227,7 +228,8 @@ def create_deployment_object(name: str,
             containers=[container],
             volumes=volumes,
             init_containers=init_containers,
-            security_context=client.V1PodSecurityContext(fs_group=1000)
+            security_context=client.V1PodSecurityContext(fs_group=1000),
+            restart_policy=restart_policy
         )
     )
     # Create the specification of deployment
