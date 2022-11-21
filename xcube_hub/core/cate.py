@@ -104,7 +104,15 @@ def launch_cate(user_id: str) -> JsonObject:
                 client.V1EnvVar(name='CATE_STORES_CONFIG_PATH',
                                 value=cate_stores_config_path),
                 client.V1EnvVar(name='JUPYTERHUB_SERVICE_PREFIX',
-                                value=f'/{user_id}/')]
+                                value=f'/{user_id}/'),
+                client.V1EnvVar(name='CATE_NODE_NAME',
+                                value_from=client.V1EnvVarSource(
+                                    field_ref=client.V1ObjectFieldSelector(
+                                        field_path='spec.nodeName'
+                                    )
+                                )
+                )
+                ]
 
         volume_mounts = None
         volumes = None
@@ -120,6 +128,11 @@ def launch_cate(user_id: str) -> JsonObject:
                     'name': 'workspace-pvc',
                     'mountPath': '/home/xcube/.cate',
                     'subPath': user_id + '-cate'
+                },
+                {
+                    'name': 'workspace-pvc',
+                    'mountPath': '/etc/logs',
+                    'subPath': 'logs'
                 },
                 {
                     'name': 'xcube-hub-stores',
@@ -156,6 +169,11 @@ def launch_cate(user_id: str) -> JsonObject:
                         {
                             "mountPath": "/home/xcube/.cate",
                             "subPath": user_id + '-cate',
+                            "name": "workspace-pvc",
+                        },
+                        {
+                            "mountPath": '/etc/logs',
+                            "subPath": 'logs',
                             "name": "workspace-pvc",
                         },
                         {
