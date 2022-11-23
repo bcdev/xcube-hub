@@ -196,8 +196,8 @@ def launch_cate(user_id: str) -> JsonObject:
             '$JUPYTERHUB_SERVICE_PREFIX,'\
             '$CATE_NODE_NAME,'\
             '{},'\
-            'cat /proc/$(pgrep cate-webapi-sta)/oom_score,'\
-            'cat /proc/$(pgrep cate-webapi-sta)/oom_score_adj,'\
+            '$(cat /proc/$(pgrep cate-webapi-sta)/oom_score),'\
+            '$(cat /proc/$(pgrep cate-webapi-sta)/oom_score_adj),'\
             '$(cat /proc/$(pgrep cate-webapi-sta)/status | grep State),'\
             '$(dmesg | tail -1) >> /etc/logs/logs.csv'
 
