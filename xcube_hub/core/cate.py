@@ -199,7 +199,7 @@ def launch_cate(user_id: str) -> JsonObject:
             'cat /proc/$(pgrep cate-webapi-sta)/oom_score,'\
             'cat /proc/$(pgrep cate-webapi-sta)/oom_score_adj,'\
             '$(cat /proc/$(pgrep cate-webapi-sta)/status | grep State),'\
-            '$(dmesg | tail -1) > /etc/logs/logs.csv'
+            '$(dmesg | tail -1) >> /etc/logs/logs.csv'
 
         lifecycle = client.V1Lifecycle(
             post_start=client.V1LifecycleHandler(
