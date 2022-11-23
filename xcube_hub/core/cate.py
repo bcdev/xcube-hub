@@ -164,6 +164,7 @@ def launch_cate(user_id: str) -> JsonObject:
                                 "-R",
                                 "1000.1000",
                                 "/home/xcube/.cate",
+                                "etc/logs",
                                 "/home/xcube/workspace"],
                     "volumeMounts": [
                         {
@@ -190,6 +191,31 @@ def launch_cate(user_id: str) -> JsonObject:
 
         labels = dict(typ="cate")
 
+        lifecycle_handler_command = \
+            'echo $(date +"%Y-%m-%d-%T"),'\
+            '$JUPYTERHUB_SERVICE_PREFIX,'\
+            '$CATE_NODE_NAME,'\
+            '{},'\
+            'cat /proc/$(pgrep cate-webapi-sta)/oom_score,'\
+            'cat /proc/$(pgrep cate-webapi-sta)/oom_score_adj,'\
+            '$(cat /proc/$(pgrep cate-webapi-sta)/status | grep State),'\
+            '$(dmesg | tail -1) >> /etc/logs/logs.csv'
+
+        lifecycle = client.V1Lifecycle(
+            post_start=client.V1LifecycleHandler(
+                _exec=client.V1ExecAction(
+                    command=["/bin/sh", "-c",
+                             lifecycle_handler_command.format('start')]
+                )
+            ),
+            pre_stop=client.V1LifecycleHandler(
+                _exec=client.V1ExecAction(
+                    command=["/bin/sh", "-c",
+                             lifecycle_handler_command.format('stop')]
+                )
+            )
+        )
+
         deployment = k8s.create_deployment_object(name=user_id + '-cate',
                                                   application='cate-webapi',
                                                   container_name=user_id + '-cate',
@@ -202,7 +228,8 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   init_containers=init_containers,
                                                   limits=limits,
                                                   requests=requests,
-                                                  labels=labels)
+                                                  labels=labels,
+                                                  lifecycle=lifecycle)
 
         k8s.create_deployment_if_not_exists(namespace=cate_namespace, deployment=deployment)
 

@@ -196,7 +196,9 @@ def create_deployment_object(name: str,
                              limits: Optional[Dict] = None,
                              requests: Optional[Dict] = None,
                              annotations: Optional[Dict] = None,
-                             labels: Optional[Dict] = None):
+                             labels: Optional[Dict] = None,
+                             lifecycle: Optional[client.V1Lifecycle] = None
+                             ):
     # Configure Pod template container
     envs = [] if not envs else envs
 
@@ -209,7 +211,8 @@ def create_deployment_object(name: str,
         image_pull_policy="Always",
         ports=[client.V1ContainerPort(container_port=container_port)],
         volume_mounts=volume_mounts,
-        security_context=client.V1SecurityContext(privileged=True)
+        security_context=client.V1SecurityContext(privileged=True),
+        lifecycle=lifecycle
     )
 
     # Create and configure a spec section
