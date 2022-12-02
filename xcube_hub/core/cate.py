@@ -229,7 +229,8 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   limits=limits,
                                                   requests=requests,
                                                   labels=labels,
-                                                  lifecycle=lifecycle)
+                                                  lifecycle=lifecycle,
+                                                  restart_policy='Never')
 
         k8s.create_deployment_if_not_exists(namespace=cate_namespace, deployment=deployment)
 
