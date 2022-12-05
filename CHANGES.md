@@ -1,4 +1,4 @@
-## Changes in v2.1.12
+## Changes in v2.1.12 (in development)
 
 - Added lifecycle handlers for logging 
 
