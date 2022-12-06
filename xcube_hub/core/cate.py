@@ -32,10 +32,9 @@ from xcube_hub.util import maybe_raise_for_invalid_username
 
 
 def delete_cate(user_id: str, prune: bool = False, check_namespace=True) -> bool:
+    cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE",
+                                              default="cate")
     if check_namespace:
-        cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE",
-                                                  default="cate")
-
         user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
     deployment = k8s.get_deployment(name=user_id + '-cate', namespace=cate_namespace)
@@ -61,15 +60,15 @@ def launch_cate(user_id: str) -> JsonObject:
 
         user_id = maybe_raise_for_invalid_username(user_id)
 
-        cate_image = util.maybe_raise_for_env("CATE_IMG")
-        cate_tag = util.maybe_raise_for_env("CATE_TAG")
+        cate_image = util.maybe_raise_for_env("CATE_IMG", default='quay.io/ccitools/cate')
+        cate_tag = util.maybe_raise_for_env("CATE_TAG", default='2.1.5')
         cate_hash = os.getenv("CATE_HASH", default=None)
         cate_debug = os.getenv("CATE_DEBUG", default='0')
         cate_launch_grace = os.getenv("CATE_LAUNCH_GRACE_PERIOD", default=2)
 
         cate_mem_limit = util.maybe_raise_for_env("CATE_MEM_LIMIT", default='16Gi')
         cate_mem_request = util.maybe_raise_for_env("CATE_MEM_REQUEST", default='2Gi')
-        cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI")
+        cate_webapi_uri = util.maybe_raise_for_env("CATE_WEBAPI_URI", default='dev.catehub.climate.esa.int')
         cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", "cate")
         cate_stores_config_path = util.maybe_raise_for_env("CATE_STORES_CONFIG_PATH",
                                                            default="/etc/xcube-hub/stores.yaml")
