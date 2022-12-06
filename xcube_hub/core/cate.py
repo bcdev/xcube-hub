@@ -31,10 +31,12 @@ from xcube_hub.typedefs import JsonObject
 from xcube_hub.util import maybe_raise_for_invalid_username
 
 
-def delete_cate(user_id: str, prune: bool = False) -> bool:
-    cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE", default="cate")
+def delete_cate(user_id: str, prune: bool = False, check_namespace=True) -> bool:
+    if check_namespace:
+        cate_namespace = util.maybe_raise_for_env("WORKSPACE_NAMESPACE",
+                                                  default="cate")
 
-    user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
+        user_namespaces.create_if_not_exists(user_namespace=cate_namespace)
 
     deployment = k8s.get_deployment(name=user_id + '-cate', namespace=cate_namespace)
 
@@ -232,7 +234,7 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   lifecycle=lifecycle)
 
         # delete previous cate deployment to make sure pod is not restarted
-        delete_cate(user_id)
+        delete_cate(user_id, check_namespace=False)
 
         k8s.create_deployment(namespace=cate_namespace, deployment=deployment)
 
