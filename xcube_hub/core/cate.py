@@ -231,7 +231,10 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   labels=labels,
                                                   lifecycle=lifecycle)
 
-        k8s.create_deployment_if_not_exists(namespace=cate_namespace, deployment=deployment)
+        # delete previous cate deployment to make sure pod is not restarted
+        delete_cate(user_id)
+
+        k8s.create_deployment(namespace=cate_namespace, deployment=deployment)
 
         time.sleep(cate_launch_grace)
 
