@@ -71,11 +71,12 @@ class TestCubeGens(unittest.TestCase):
     @patch('xcube_hub.core.k8s.create_ingress')
     @patch('xcube_hub.core.k8s.get_ingress')
     @patch('xcube_hub.core.k8s.create_service_if_not_exists')
-    @patch('xcube_hub.core.k8s.create_deployment_if_not_exists')
+    @patch('xcube_hub.core.k8s.create_deployment')
     @patch('xcube_hub.core.k8s.create_deployment_object')
     @patch('xcube_hub.core.k8s.count_pods')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
-    def test_launch_cate(self, namespace_p, ct_p, deployment_p,
+    @patch('xcube_hub.core.k8s.get_deployment')
+    def test_launch_cate(self, get_p, namespace_p, ct_p, deployment_p,
                          deployment_create_p, service_create_p,
                          get_ingress_p, ingress_p, poll_p):
         with self.assertRaises(api.ApiError) as e:
@@ -94,6 +95,7 @@ class TestCubeGens(unittest.TestCase):
 
         ct_p.return_value = 10
 
+        get_p.return_value = None
         deployment_p.return_value = V1Deployment(metadata=V1ObjectMeta(name='drwho-cate'))
         res = cate.launch_cate('drwho')
 
