@@ -1,5 +1,9 @@
 ## Changes in v2.1.13 (in development)
 
+- Create new deployment everytime cate is launched
+- do not try to create namespaces that do not exist (otherwise an error is
+  raised) 
+
 ## Changes in v2.1.12
 
 - Added lifecycle handlers for logging 
@@ -8,7 +12,7 @@
 
 - Set version to 2.1.11.dev1
 - Added an env var CATE_STORAGE_MODE (local, pvc) which allows switching off 
-  the craetion of PVCs per user. This is useful for testing purposes
+  the creation of PVCs per user. This is useful for testing purposes
 - Avoid pulling images from dockerhub    
 
 ### Fixes
