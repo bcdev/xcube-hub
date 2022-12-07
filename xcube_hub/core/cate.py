@@ -231,7 +231,7 @@ def launch_cate(user_id: str) -> JsonObject:
                                                   lifecycle=lifecycle)
 
         # delete previous cate deployment to make sure pod is not restarted
-        delete_cate(user_id)
+        delete_cate(user_id, prune=True)
 
         while k8s.get_deployment(name=user_id + '-cate', namespace=cate_namespace):
             # do not create the new deployment while the old one is still there
