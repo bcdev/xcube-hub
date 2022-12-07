@@ -1,4 +1,4 @@
-## Changes in v2.1.13 (in development)
+## Changes in v2.1.13
 
 - Create new deployment everytime cate is launched
 - do not try to create namespaces that do not exist (otherwise an error is
