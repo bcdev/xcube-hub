@@ -76,8 +76,10 @@ class TestCubeGens(unittest.TestCase):
     @patch('xcube_hub.core.k8s.count_pods')
     @patch('xcube_hub.core.user_namespaces.create_if_not_exists')
     @patch('xcube_hub.core.k8s.get_deployment')
-    def test_launch_cate(self, get_p, namespace_p, ct_p, deployment_p,
-                         deployment_create_p, service_create_p,
+    @patch('xcube_hub.core.k8s.delete_service')
+    @patch('xcube_hub.core.k8s.list_services')
+    def test_launch_cate(self, list_s, delete_s, get_p, namespace_p, ct_p,
+                         deployment_p, deployment_create_p, service_create_p,
                          get_ingress_p, ingress_p, poll_p):
         with self.assertRaises(api.ApiError) as e:
             cate.launch_cate('drwho#######')
@@ -97,6 +99,8 @@ class TestCubeGens(unittest.TestCase):
 
         get_p.return_value = None
         deployment_p.return_value = V1Deployment(metadata=V1ObjectMeta(name='drwho-cate'))
+        delete_s.return_value = None
+        list_s.return_value = V1ServiceList(items=[])
         res = cate.launch_cate('drwho')
 
         self.assertDictEqual({'serverUrl': 'https://stage.catehub.climate.esa.int/drwho'}, res)
