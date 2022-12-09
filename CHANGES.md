@@ -1,5 +1,3 @@
-## Changes in v2.1.15 (in development)
-
 ## Changes in v2.1.14
 
 - Remove services along with deployment on cate launch
