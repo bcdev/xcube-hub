@@ -19,7 +19,8 @@ _ISS_TO_PROVIDER = {
     "https://xcube-gen.brockmann-consult.de/": 'xcube',
     "https://edc.eu.auth0.com/": 'auth0',
     "https://test/": 'mocker',
-    "https://192-171-139-82.sslip.io/auth/realms/cate": "jasmin"
+    "https://192-171-139-82.sslip.io/auth/realms/cate": "jasmin",
+    "https://192-171-169-159.sslip.io/auth/realms/cate": "jasmin"
 }
 
 

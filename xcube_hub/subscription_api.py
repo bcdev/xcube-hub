@@ -26,6 +26,7 @@ _ISS_TO_PROVIDER = {
     "https://edc.eu.auth0.com/": 'auth0',
     "https://test/": 'mocker',
     "https://192-171-139-82.sslip.io/auth/realms/cate": "keycloak",
+    "https://192-171-169-159.sslip.io/auth/realms/cate": "keycloak",
     "https://xcube-users.brockmann-consult.de/auth/realms/xcube": "keycloak",
     "https://cateusers.climate.esa.int/auth/realms/cate": "keycloak",
 }
