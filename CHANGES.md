@@ -1,4 +1,6 @@
-## Changes in v2.1.15 (in development)
+## Changes in v2.1.15
+
+- Consider new cate cloud
 
 ## Changes in v2.1.14
 
