@@ -1,14 +1,14 @@
 import unittest
 
 import boto3
-from moto import mock_s3
+from moto import mock_aws
 
 from xcube_hub.core.punits import add_punits, get_user_data, subtract_punits, override_punits
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
 
 
 class TestPunits(unittest.TestCase):
-    @mock_s3
+    @mock_aws
     def test_add_punits(self):
         s3 = boto3.client('s3')
         s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})

@@ -12,7 +12,7 @@ class TestKvDB(unittest.TestCase):
         self.assertEqual(str(type(inst._provider)), "<class 'xcube_hub.keyvaluedatabase._InMemoryKvDB'>")
 
         KeyValueDatabase._instance = None
-        inst = KeyValueDatabase.instance(provider='leveldb', name='/tmp/testinstance')
+        inst = KeyValueDatabase.instance(provider='leveldb', use_mocker=True, name='/tmp/testinstance')
         self.assertEqual(str(type(inst._provider)), "<class 'xcube_hub.keyvaluedatabase._LevelDBKvDB'>")
 
         KeyValueDatabase._instance = None

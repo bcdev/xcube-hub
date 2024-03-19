@@ -4,7 +4,7 @@ from unittest.mock import patch
 import boto3
 from dotenv import load_dotenv
 from jose import jwt
-from moto import mock_s3
+from moto import mock_aws
 
 from xcube_hub import api
 from xcube_hub.cfg import Cfg
@@ -126,7 +126,7 @@ class TestCallbacks(unittest.TestCase):
 
             self.assertEqual("Cache timout", str(e.exception))
 
-    @mock_s3
+    @mock_aws
     def test_put_callback(self):
         s3 = boto3.client('s3')
         s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})

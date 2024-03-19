@@ -24,14 +24,14 @@ dependencies:
   - python-kubernetes
   # needs 0.24 to avoid issue with urllib3 (https://github.com/marcospereirampj/python-keycloak/issues/196)
   - python-keycloak=0.24.0
+  - redis-py
   - requests-oauthlib
   - setuptools
-  - uwsgi
 
   - pip:
       # Required
       - connexion[swagger-ui]
       - plyvel
       - polling2
-      - redis
+      - uwsgi
 

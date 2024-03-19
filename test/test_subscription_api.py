@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 import boto3
 import requests_mock
 from dotenv import load_dotenv
-from moto import mock_s3
+from moto import mock_aws
 from werkzeug.exceptions import Unauthorized
 
 from test.controllers.utils import create_test_token
@@ -87,7 +87,7 @@ class TestAuth0Api(unittest.TestCase):
         res = auth_api.get_subscription(service_id=service_id, subscription_id=subscription_id, token=self._token)
         self.assertDictEqual(subscription.to_dict(), res.to_dict())
 
-    @mock_s3
+    @mock_aws
     def test_add_subscription(self, m):
         service_id = "xcube_gen"
 

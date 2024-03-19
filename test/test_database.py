@@ -1,7 +1,7 @@
 import unittest
 
 import boto3
-import moto
+from moto import mock_aws
 
 from xcube_hub.database import DEFAULT_DB_BUCKET_NAME
 from xcube_hub.database import Database
@@ -15,7 +15,7 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(DEFAULT_DB_BUCKET_NAME, database.bucket_name)
 
     def test_user_data_crud(self):
-        with moto.mock_s3():
+        with mock_aws():
             s3 = boto3.client('s3')
             s3.create_bucket(Bucket=DEFAULT_DB_BUCKET_NAME,
                              CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
